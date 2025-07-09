@@ -16,17 +16,30 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, studentData } from "@/lib/data";
-import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, Undo2, UploadCloud, XCircle } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 type SubmittedAssignment = (typeof studentData.submittedAssignments)[0];
 type Transaction = (typeof studentData.transactions)[0];
 
 export default function DashboardPage() {
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
+    
+    const currentTab = searchParams.get('tab') || 'overview';
+    
+    const handleTabChange = (value: string) => {
+        const params = new URLSearchParams(searchParams.toString());
+        params.set('tab', value);
+        router.replace(`${pathname}?${params.toString()}`);
+    };
+
     const completedAssignmentsCount = studentData.submittedAssignments.filter(a => a.status === 'Paid').length;
     const certificatesEarned = 1; 
 
@@ -49,7 +62,7 @@ export default function DashboardPage() {
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
 
     // State for courses filtering and pagination
-    const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All' });
+    const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All', status: 'All' });
     const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
     const coursesPerPage = 6;
 
@@ -64,7 +77,7 @@ export default function DashboardPage() {
         setCurrentTransactionPage(1);
     };
     
-    const handleCourseFilterChange = (key: 'search' | 'subject' | 'grade', value: string) => {
+    const handleCourseFilterChange = (key: 'search' | 'subject' | 'grade' | 'status', value: string) => {
         setCourseFilters(prev => ({ ...prev, [key]: value }));
         setCurrentCoursePage(1);
     };
@@ -114,6 +127,7 @@ export default function DashboardPage() {
     const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
     
     const allCourses = instructorData.courses;
+    const purchasedCourseIds = new Set(studentData.purchasedCourses.map(c => c.id));
 
     const filteredCourses = React.useMemo(() => {
         return allCourses.filter(course => {
@@ -123,10 +137,15 @@ export default function DashboardPage() {
             const subjectMatch = courseFilters.subject === 'All' || course.subject === courseFilters.subject;
             
             const gradeMatch = courseFilters.grade === 'All' || course.grade === courseFilters.grade;
+            
+            const purchased = purchasedCourseIds.has(course.id);
+            const statusMatch = courseFilters.status === 'All' ||
+                (courseFilters.status === 'Purchased' && purchased) ||
+                (courseFilters.status === 'Not Purchased' && !purchased);
 
-            return searchMatch && subjectMatch && gradeMatch;
+            return searchMatch && subjectMatch && gradeMatch && statusMatch;
         });
-    }, [allCourses, courseFilters]);
+    }, [allCourses, courseFilters, purchasedCourseIds]);
     
     const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
     const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
@@ -152,8 +171,6 @@ export default function DashboardPage() {
         }
     };
 
-    const purchasedCourseIds = new Set(studentData.purchasedCourses.map(c => c.id));
-
     return (
         <AppLayout>
             <div className="space-y-8">
@@ -162,10 +179,10 @@ export default function DashboardPage() {
                     <p className="text-muted-foreground">Let's continue your learning journey.</p>
                 </div>
 
-                <Tabs defaultValue="overview" className="w-full">
+                <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="grid w-full grid-cols-4 max-w-lg">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="courses">My Courses</TabsTrigger>
+                        <TabsTrigger value="courses">Course Catalog</TabsTrigger>
                         <TabsTrigger value="assignments">Assignments</TabsTrigger>
                         <TabsTrigger value="transactions">Transactions</TabsTrigger>
                     </TabsList>
@@ -223,7 +240,7 @@ export default function DashboardPage() {
                          <section>
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-2xl font-semibold">My Purchased Courses</h2>
-                                <Button variant="outline" onClick={() => document.querySelector('[data-radix-value="courses"]')?.click()}>View All</Button>
+                                <Button variant="outline" onClick={() => handleTabChange('courses')}>View All</Button>
                             </div>
                             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {studentData.purchasedCourses.map((course) => (
@@ -254,8 +271,8 @@ export default function DashboardPage() {
                                 <CardTitle>Course Catalog</CardTitle>
                                 <CardDescription>Browse our available courses and start your learning adventure.</CardDescription>
                             </CardHeader>
-                            <div className="flex items-center justify-between gap-2 p-4 border-y">
-                                <div className="relative flex-1">
+                            <div className="flex flex-wrap items-center justify-between gap-2 p-4 border-y">
+                                <div className="relative flex-1 min-w-[200px]">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         placeholder="Search by course title..."
@@ -264,7 +281,17 @@ export default function DashboardPage() {
                                         onChange={(e) => handleCourseFilterChange('search', e.target.value)}
                                     />
                                 </div>
-                                <div className="flex gap-2">
+                                <div className="flex gap-2 flex-wrap">
+                                    <Select value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder="Filter by Status" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="All">All Courses</SelectItem>
+                                            <SelectItem value="Purchased">My Courses</SelectItem>
+                                            <SelectItem value="Not Purchased">Not Purchased</SelectItem>
+                                        </SelectContent>
+                                    </Select>
                                     <Select value={courseFilters.subject} onValueChange={(value) => handleCourseFilterChange('subject', value)}>
                                         <SelectTrigger className="w-[180px]">
                                             <SelectValue placeholder="Filter by Subject" />
@@ -299,9 +326,16 @@ export default function DashboardPage() {
                                             </div>
                                         </CardHeader>
                                         <CardContent className="p-4 flex-grow">
-                                            <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
-                                            <h3 className="font-semibold text-lg">{course.title}</h3>
-                                            <p className="text-sm mt-1 text-muted-foreground line-clamp-2">{course.description}</p>
+                                            <div className="flex justify-between items-start">
+                                                <Badge variant="secondary">{course.subject}</Badge>
+                                                <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                                                    <Star className="w-4 h-4 fill-yellow-400 text-yellow-500"/>
+                                                    <span>4.8</span>
+                                                </div>
+                                            </div>
+                                            <h3 className="font-semibold text-lg mt-2">{course.title}</h3>
+                                            <p className="text-xs text-muted-foreground mt-1">By {instructorData.name}</p>
+                                            <p className="text-sm mt-2 text-muted-foreground line-clamp-2">{course.description}</p>
                                         </CardContent>
                                         <CardFooter className="flex-col items-stretch p-4 bg-muted/50">
                                             {purchasedCourseIds.has(course.id) ? (
@@ -615,5 +649,3 @@ export default function DashboardPage() {
         </AppLayout>
     );
 }
-
-    
