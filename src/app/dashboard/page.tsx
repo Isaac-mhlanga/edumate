@@ -20,6 +20,7 @@ import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, Chevro
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 type SubmittedAssignment = (typeof studentData.submittedAssignments)[0];
 type Transaction = (typeof studentData.transactions)[0];
@@ -47,6 +48,12 @@ export default function DashboardPage() {
     const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
 
+    // State for courses filtering and pagination
+    const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All' });
+    const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
+    const coursesPerPage = 6;
+
+
     const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
         setAssignmentFilters(prev => ({ ...prev, [key]: value }));
         setCurrentAssignmentPage(1);
@@ -55,6 +62,11 @@ export default function DashboardPage() {
      const handleTransactionFilterChange = (key: 'search' | 'type', value: string) => {
         setTransactionFilters(prev => ({ ...prev, [key]: value }));
         setCurrentTransactionPage(1);
+    };
+    
+    const handleCourseFilterChange = (key: 'search' | 'subject' | 'grade', value: string) => {
+        setCourseFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentCoursePage(1);
     };
 
     const handleRefundRequest = (transaction: Transaction) => {
@@ -100,6 +112,25 @@ export default function DashboardPage() {
 
     const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
     const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
+    
+    const allCourses = instructorData.courses;
+
+    const filteredCourses = React.useMemo(() => {
+        return allCourses.filter(course => {
+            const searchMatch = courseFilters.search.trim().toLowerCase() === '' ||
+                course.title.toLowerCase().includes(courseFilters.search.trim().toLowerCase());
+
+            const subjectMatch = courseFilters.subject === 'All' || course.subject === courseFilters.subject;
+            
+            const gradeMatch = courseFilters.grade === 'All' || course.grade === courseFilters.grade;
+
+            return searchMatch && subjectMatch && gradeMatch;
+        });
+    }, [allCourses, courseFilters]);
+    
+    const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
+    const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
+
 
     const getStatusIcon = (status: SubmittedAssignment['status']) => {
         switch (status) {
@@ -121,7 +152,6 @@ export default function DashboardPage() {
         }
     };
 
-    const allCourses = instructorData.courses;
     const purchasedCourseIds = new Set(studentData.purchasedCourses.map(c => c.id));
 
     return (
@@ -180,7 +210,7 @@ export default function DashboardPage() {
                                                 <Progress value={sub.progress} className="h-2"/>
                                             </div>
                                             <Button className="mt-4 w-full" asChild>
-                                                <Link href={`/instructor/courses/${allCourses.find(c => c.title.includes(sub.name.split(' - ')[1]))?.id || ''}`}>
+                                                <Link href={`/instructor/courses/${allCourses.find(c => c.title.includes(sub.name.split(' - ')[1]))?.id || ''}?from=dashboard`}>
                                                     Continue Learning <ArrowRight className="ml-2 h-4 w-4"/>
                                                 </Link>
                                             </Button>
@@ -207,7 +237,7 @@ export default function DashboardPage() {
                                             <Badge variant="secondary" className="mb-2">{course.category}</Badge>
                                             <h3 className="font-semibold text-lg">{course.name}</h3>
                                             <Button variant="link" className="p-0 h-auto mt-2 as-child">
-                                                <Link href={`/instructor/courses/${course.id}`}>
+                                                <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
                                                     Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
                                                 </Link>
                                             </Button>
@@ -224,9 +254,44 @@ export default function DashboardPage() {
                                 <CardTitle>Course Catalog</CardTitle>
                                 <CardDescription>Browse our available courses and start your learning adventure.</CardDescription>
                             </CardHeader>
-                            <CardContent>
+                            <div className="flex items-center justify-between gap-2 p-4 border-y">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search by course title..."
+                                        className="pl-8"
+                                        value={courseFilters.search}
+                                        onChange={(e) => handleCourseFilterChange('search', e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex gap-2">
+                                    <Select value={courseFilters.subject} onValueChange={(value) => handleCourseFilterChange('subject', value)}>
+                                        <SelectTrigger className="w-[180px]">
+                                            <SelectValue placeholder="Filter by Subject" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="All">All Subjects</SelectItem>
+                                            <SelectItem value="Maths">Maths</SelectItem>
+                                            <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                     <Select value={courseFilters.grade} onValueChange={(value) => handleCourseFilterChange('grade', value)}>
+                                        <SelectTrigger className="w-[160px]">
+                                            <SelectValue placeholder="Filter by Grade" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="All">All Grades</SelectItem>
+                                            <SelectItem value="10">Grade 10</SelectItem>
+                                            <SelectItem value="11">Grade 11</SelectItem>
+                                            <SelectItem value="12">Grade 12</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
+                            </div>
+                            <CardContent className="pt-6">
+                                {paginatedCourses.length > 0 ? (
                                 <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {allCourses.map((course) => (
+                                {paginatedCourses.map((course) => (
                                     <Card key={course.id} className="shadow-md rounded-xl overflow-hidden group flex flex-col">
                                         <CardHeader className="p-0">
                                             <div className="bg-primary/10 aspect-video flex items-center justify-center">
@@ -241,7 +306,7 @@ export default function DashboardPage() {
                                         <CardFooter className="flex-col items-stretch p-4 bg-muted/50">
                                             {purchasedCourseIds.has(course.id) ? (
                                                 <Button asChild>
-                                                    <Link href={`/instructor/courses/${course.id}`}>
+                                                    <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
                                                         Go to Course <ArrowRight className="ml-2 h-4 w-4"/>
                                                     </Link>
                                                 </Button>
@@ -261,7 +326,33 @@ export default function DashboardPage() {
                                     </Card>
                                 ))}
                                 </div>
+                                ) : (
+                                    <div className="text-center py-16 text-muted-foreground">
+                                        <h3 className="text-lg font-semibold">No Courses Found</h3>
+                                        <p>Try adjusting your search or filter criteria.</p>
+                                    </div>
+                                )}
                             </CardContent>
+                            <CardFooter className="flex items-center justify-between py-4">
+                                <div className="text-xs text-muted-foreground">
+                                    Showing{" "}
+                                    <strong>
+                                        {filteredCourses.length > 0 ? (currentCoursePage - 1) * coursesPerPage + 1 : 0}-
+                                        {Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}
+                                    </strong>{" "}
+                                    of <strong>{filteredCourses.length}</strong> courses.
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}>
+                                        <ChevronLeft className="h-4 w-4 mr-1" />
+                                        Prev
+                                    </Button>
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>
+                                        Next
+                                        <ChevronRight className="h-4 w-4 ml-1" />
+                                    </Button>
+                                </div>
+                            </CardFooter>
                         </Card>
                     </TabsContent>
 
@@ -524,3 +615,5 @@ export default function DashboardPage() {
         </AppLayout>
     );
 }
+
+    

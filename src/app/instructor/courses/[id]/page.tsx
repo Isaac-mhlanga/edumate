@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AppLayout } from "@/components/app-layout";
@@ -10,11 +11,12 @@ import { instructorData } from "@/lib/data";
 import { ArrowLeft, CheckCircle, Clapperboard, PlayCircle, Settings, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useSearchParams } from "next/navigation";
 import React from "react";
 
 export default function CoursePreviewPage() {
     const params = useParams();
+    const searchParams = useSearchParams();
     const courseId = params.id as string;
     const course = instructorData.courses.find(c => c.id === courseId);
     
@@ -33,12 +35,15 @@ export default function CoursePreviewPage() {
         notFound();
     }
 
+    const from = searchParams.get('from');
+    const backLink = from === 'dashboard' ? '/dashboard?tab=courses' : '/instructor?tab=courses';
+
     return (
         <AppLayout>
             <div className="space-y-6">
                  <div>
                     <Button variant="outline" asChild>
-                        <Link href="/instructor?tab=courses">
+                        <Link href={backLink}>
                             <ArrowLeft className="mr-2 h-4 w-4" />
                             Back to Courses
                         </Link>
@@ -194,3 +199,5 @@ export default function CoursePreviewPage() {
         </AppLayout>
     );
 }
+
+    
