@@ -5,7 +5,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { instructorData } from "@/lib/data";
 import { ArrowLeft, CheckCircle, Clapperboard, PlayCircle, Settings, Star } from "lucide-react";
 import Image from "next/image";
@@ -20,6 +20,14 @@ export default function CoursePreviewPage() {
     
     const [activeVideo, setActiveVideo] = React.useState(course?.videos[0]);
     const [quality, setQuality] = React.useState('720p');
+    const [playbackRate, setPlaybackRate] = React.useState('1');
+    const videoRef = React.useRef<HTMLVideoElement>(null);
+
+    React.useEffect(() => {
+        if (videoRef.current) {
+            videoRef.current.playbackRate = parseFloat(playbackRate);
+        }
+    }, [playbackRate]);
 
     if (!course) {
         notFound();
@@ -45,6 +53,7 @@ export default function CoursePreviewPage() {
                                     {activeVideo ? (
                                         <>
                                             <video
+                                                ref={videoRef}
                                                 key={activeVideo.id}
                                                 className="w-full h-full"
                                                 controls
@@ -67,6 +76,14 @@ export default function CoursePreviewPage() {
                                                             <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
                                                             <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
                                                             <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
+                                                        </DropdownMenuRadioGroup>
+                                                        <DropdownMenuSeparator />
+                                                        <DropdownMenuLabel>Playback Speed</DropdownMenuLabel>
+                                                        <DropdownMenuRadioGroup value={playbackRate} onValueChange={setPlaybackRate}>
+                                                            <DropdownMenuRadioItem value="0.5">0.5x</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="1">1x</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="1.5">1.5x</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="2">2x</DropdownMenuRadioItem>
                                                         </DropdownMenuRadioGroup>
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
