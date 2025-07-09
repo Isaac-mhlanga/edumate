@@ -201,7 +201,6 @@ export default function DashboardPage() {
                                 <TableRow>
                                     <TableHead>Assignment</TableHead>
                                     <TableHead>Course</TableHead>
-                                    <TableHead>Submitted On</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead>Price (R)</TableHead>
                                     <TableHead className="text-right">Action</TableHead>
@@ -212,7 +211,6 @@ export default function DashboardPage() {
                                     <TableRow key={assignment.id}>
                                         <TableCell className="font-medium">{assignment.title}</TableCell>
                                         <TableCell><Badge variant="outline">{assignment.course}</Badge></TableCell>
-                                        <TableCell>{assignment.submitted || '—'}</TableCell>
                                         <TableCell>
                                             <Badge variant={"outline"} className={getStatusBadgeVariant(assignment.status)}>
                                                 {getStatusIcon(assignment.status)}
@@ -284,5 +282,7 @@ export default function DashboardPage() {
         </AppLayout>
     );
 }
+
+    
 
     
