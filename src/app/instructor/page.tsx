@@ -7,9 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { instructorData } from "@/lib/data";
 import { ArrowUpRight, MoreHorizontal } from "lucide-react";
-import { Bar, BarChart, CartesianGrid, Rectangle, XAxis, YAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 
 const chartConfig = {
   engagement: {
@@ -31,119 +32,194 @@ export default function InstructorPage() {
           <p className="text-muted-foreground">Manage your students, lessons, and earnings.</p>
         </div>
 
-        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-          {instructorData.stats.map((stat) => (
-            <Card key={stat.title} className="shadow-md rounded-xl">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                <stat.icon className="h-5 w-5 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">{stat.value}</div>
-                <p className="text-xs text-muted-foreground flex items-center">
-                  <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span> vs last month
-                </p>
-              </CardContent>
-            </Card>
-          ))}
-        </section>
-
-        <section className="grid gap-8 lg:grid-cols-2">
-          <Card className="shadow-md rounded-xl">
-            <CardHeader>
-              <CardTitle>Engagement & Income</CardTitle>
-              <CardDescription>Monthly student engagement and income over the last 6 months.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ChartContainer config={chartConfig} className="h-64 w-full">
-                <BarChart accessibilityLayer data={instructorData.engagementData}>
-                  <CartesianGrid vertical={false} />
-                  <XAxis
-                    dataKey="month"
-                    tickLine={false}
-                    tickMargin={10}
-                    axisLine={false}
-                    tickFormatter={(value) => value.slice(0, 3)}
-                  />
-                   <YAxis />
-                  <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="dot" />}
-                  />
-                  <Bar dataKey="engagement" fill="var(--color-engagement)" radius={4} />
-                  <Bar dataKey="income" fill="var(--color-income)" radius={4} />
-                </BarChart>
-              </ChartContainer>
-            </CardContent>
-          </Card>
+        <Tabs defaultValue="overview" className="w-full">
+          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+            <TabsTrigger value="overview">Overview</TabsTrigger>
+            <TabsTrigger value="courses">Courses</TabsTrigger>
+            <TabsTrigger value="assignments">Assignments</TabsTrigger>
+            <TabsTrigger value="students">Students</TabsTrigger>
+            <TabsTrigger value="earnings">Earnings</TabsTrigger>
+          </TabsList>
           
-          <Card className="shadow-md rounded-xl">
-            <CardHeader>
-              <CardTitle>Pending Assignments</CardTitle>
-              <CardDescription>Assignments waiting for your review.</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <ul className="space-y-4">
-                {instructorData.pendingAssignments.map((assignment) => (
-                  <li key={assignment.id} className="flex items-center gap-4">
-                    <Avatar className="h-10 w-10">
-                      <AvatarFallback>{assignment.student.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex-1">
-                      <p className="font-medium">{assignment.title}</p>
-                      <p className="text-sm text-muted-foreground">From {assignment.student} - {assignment.received}</p>
+          <TabsContent value="overview" className="pt-6">
+            <div className="space-y-8">
+              <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                {instructorData.stats.map((stat) => (
+                  <Card key={stat.title} className="shadow-md rounded-xl">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                      <stat.icon className="h-5 w-5 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{stat.value}</div>
+                      <p className="text-xs text-muted-foreground flex items-center">
+                        <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span> vs last month
+                      </p>
+                    </CardContent>
+                  </Card>
+                ))}
+              </section>
+
+              <section className="grid gap-8 lg:grid-cols-2">
+                <Card className="shadow-md rounded-xl">
+                  <CardHeader>
+                    <CardTitle>Engagement & Income</CardTitle>
+                    <CardDescription>Monthly student engagement and income over the last 6 months.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ChartContainer config={chartConfig} className="h-64 w-full">
+                      <BarChart accessibilityLayer data={instructorData.engagementData}>
+                        <CartesianGrid vertical={false} />
+                        <XAxis
+                          dataKey="month"
+                          tickLine={false}
+                          tickMargin={10}
+                          axisLine={false}
+                          tickFormatter={(value) => value.slice(0, 3)}
+                        />
+                         <YAxis />
+                        <ChartTooltip
+                          cursor={false}
+                          content={<ChartTooltipContent indicator="dot" />}
+                        />
+                        <Bar dataKey="engagement" fill="var(--color-engagement)" radius={4} />
+                        <Bar dataKey="income" fill="var(--color-income)" radius={4} />
+                      </BarChart>
+                    </ChartContainer>
+                  </CardContent>
+                </Card>
+                
+                <Card className="shadow-md rounded-xl">
+                  <CardHeader>
+                    <CardTitle>Pending Assignments</CardTitle>
+                    <CardDescription>Assignments waiting for your review.</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ul className="space-y-4">
+                      {instructorData.pendingAssignments.map((assignment) => (
+                        <li key={assignment.id} className="flex items-center gap-4">
+                          <Avatar className="h-10 w-10">
+                            <AvatarFallback>{assignment.student.charAt(0)}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <p className="font-medium">{assignment.title}</p>
+                            <p className="text-sm text-muted-foreground">From {assignment.student} - {assignment.received}</p>
+                          </div>
+                          <Button variant="outline" size="sm">Review</Button>
+                        </li>
+                      ))}
+                    </ul>
+                  </CardContent>
+                </Card>
+              </section>
+
+              <section>
+                <h2 className="text-2xl font-semibold mb-4">Enrolled Students</h2>
+                <Card className="shadow-md rounded-xl">
+                   <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Student</TableHead>
+                        <TableHead>Course</TableHead>
+                        <TableHead>Joined Date</TableHead>
+                        <TableHead><span className="sr-only">Actions</span></TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {instructorData.enrolledStudents.map((student) => (
+                        <TableRow key={student.id}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center gap-3">
+                               <Avatar className="h-9 w-9">
+                                  <AvatarFallback>{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                               </Avatar>
+                               <div>
+                                  <p className="font-medium">{student.name}</p>
+                                  <p className="text-xs text-muted-foreground">{student.email}</p>
+                               </div>
+                            </div>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant="secondary">{student.course}</Badge>
+                          </TableCell>
+                          <TableCell>{student.joined}</TableCell>
+                          <TableCell>
+                              <Button variant="ghost" size="icon">
+                                  <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </Card>
+              </section>
+            </div>
+          </TabsContent>
+
+          <TabsContent value="courses" className="pt-6">
+            <Card>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Course Management</CardTitle>
+                        <CardDescription>Upload, edit, and manage your courses.</CardDescription>
                     </div>
-                    <Button variant="outline" size="sm">Review</Button>
-                  </li>
-                ))}
-              </ul>
-            </CardContent>
-          </Card>
+                    <Button>Add New Course</Button>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                      <h3 className="text-lg font-semibold">No Courses Yet</h3>
+                      <p className="text-muted-foreground mt-1">Start building your library by clicking "Add New Course".</p>
+                    </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
 
-        </section>
+          <TabsContent value="assignments" className="pt-6">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Assignment Management</CardTitle>
+                    <CardDescription>Review submitted assignments, upload solutions, and set pricing.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                      <h3 className="text-lg font-semibold">No Assignments to Review</h3>
+                      <p className="text-muted-foreground mt-1">New student submissions will appear here.</p>
+                    </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
 
-        <section>
-          <h2 className="text-2xl font-semibold mb-4">Enrolled Students</h2>
-          <Card className="shadow-md rounded-xl">
-             <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Student</TableHead>
-                  <TableHead>Course</TableHead>
-                  <TableHead>Joined Date</TableHead>
-                  <TableHead><span className="sr-only">Actions</span></TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {instructorData.enrolledStudents.map((student) => (
-                  <TableRow key={student.id}>
-                    <TableCell className="font-medium">
-                      <div className="flex items-center gap-3">
-                         <Avatar className="h-9 w-9">
-                            <AvatarFallback>{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                         </Avatar>
-                         <div>
-                            <p className="font-medium">{student.name}</p>
-                            <p className="text-xs text-muted-foreground">{student.email}</p>
-                         </div>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary">{student.course}</Badge>
-                    </TableCell>
-                    <TableCell>{student.joined}</TableCell>
-                    <TableCell>
-                        <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                        </Button>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </Card>
-        </section>
+          <TabsContent value="students" className="pt-6">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Student Management</CardTitle>
+                    <CardDescription>View enrolled students, track their progress, and manage access.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                      <h3 className="text-lg font-semibold">No Enrolled Students</h3>
+                      <p className="text-muted-foreground mt-1">Students who purchase your courses will be listed here.</p>
+                    </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
 
+          <TabsContent value="earnings" className="pt-6">
+             <Card>
+                <CardHeader>
+                    <CardTitle>Earnings & Transactions</CardTitle>
+                    <CardDescription>Track your revenue from courses and assignments.</CardDescription>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                      <h3 className="text-lg font-semibold">No Transactions Yet</h3>
+                      <p className="text-muted-foreground mt-1">Your sales and earnings will be displayed here.</p>
+                    </div>
+                </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </AppLayout>
   );
