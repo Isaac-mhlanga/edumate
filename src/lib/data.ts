@@ -8,9 +8,8 @@ export const studentData = {
         { id: 2, name: "Grade 12 - Physical Sciences Pro", expires: "2024-11-30", progress: 45 },
     ],
     purchasedCourses: [
-        { id: 1, name: "Advanced Calculus Masterclass", category: "Maths" },
-        { id: 2, name: "Quantum Mechanics Explained", category: "Physical Sciences" },
-        { id: 3, name: "Organic Chemistry Fundamentals", category: "Physical Sciences" },
+        { id: 'C001', name: "Calculus Fundamentals", category: "Maths" },
+        { id: 'C003', name: "Organic Chemistry Fundamentals", category: "Physical Sciences" },
     ],
     submittedAssignments: [
         { id: "A001", title: "Calculus Problem Set 5", course: "Grade 12 - Maths Pro", submitted: "2024-05-10", status: "Paid", price: 150, solutionUrl: "#" },
@@ -18,6 +17,14 @@ export const studentData = {
         { id: "A003", title: "Trigonometry Final Exam", course: "Grade 12 - Maths Pro", submitted: "2024-05-22", status: "Submitted", price: null, solutionUrl: null },
         { id: "A004", title: "Wave Optics Assignment", course: "Grade 12 - Physical Sciences Pro", submitted: null, status: "Pending Submission", price: null, solutionUrl: null },
         { id: "A005", title: "Organic Chemistry Practice", course: "Grade 12 - Physical Sciences Pro", submitted: null, status: "Pending Submission", price: null, solutionUrl: null },
+    ],
+    transactions: [
+        { id: 'TXN001', item: 'Grade 12 - Maths Pro', type: 'Subscription', status: 'Completed', amount: 350.00, date: '2024-05-01' },
+        { id: 'TXN002', item: 'Calculus Problem Set 5', type: 'Assignment', status: 'Completed', amount: 150.00, date: '2024-05-10' },
+        { id: 'TXN003', item: 'Calculus Fundamentals', type: 'Course', status: 'Completed', amount: 499.00, date: '2024-04-15' },
+        { id: 'TXN004', item: 'Grade 12 - Physical Sciences Pro', type: 'Subscription', status: 'Completed', amount: 350.00, date: '2024-04-01' },
+        { id: 'TXN005', item: 'Organic Chemistry Fundamentals', type: 'Course', status: 'Completed', amount: 299.00, date: '2024-03-20' },
+        { id: 'TXN006', item: 'Another Course', type: 'Course', status: 'Refunded', amount: 199.00, date: '2024-03-15' },
     ]
 };
 
@@ -75,14 +82,6 @@ export const instructorData = {
         { id: 'T007', studentName: 'Ben Carter', item: 'Thermodynamics Problem Set', type: 'Assignment Sale', status: 'Pending', amount: 75.00, date: '2024-05-22' },
         { id: 'T008', studentName: 'David Lee', item: 'Algebra Basics', type: 'Course Sale', status: 'Completed', amount: 250.00, date: '2024-05-05' },
     ],
-    engagementData: [
-        { month: "Jan", engagement: 186, income: 800 },
-        { month: "Feb", engagement: 305, income: 1200 },
-        { month: "Mar", engagement: 237, income: 1000 },
-        { month: "Apr", engagement: 273, income: 1500 },
-        { month: "May", engagement: 209, income: 1300 },
-        { month: "Jun", engagement: 250, income: 1750 },
-    ],
     courses: [
         {
             id: 'C001',
@@ -116,6 +115,39 @@ export const instructorData = {
                 { id: 'V003', title: 'First Law of Motion' },
                 { id: 'V004', title: 'Second & Third Laws' },
                 { id: 'V005', title: 'Universal Gravitation' },
+            ]
+        },
+        {
+            id: 'C003',
+            title: 'Organic Chemistry Fundamentals',
+            description: 'Learn the building blocks of organic chemistry, including nomenclature, structures, and basic reactions.',
+            subject: 'Physical Sciences',
+            grade: '12',
+            thumbnail: 'https://placehold.co/600x400.png',
+            pricing: {
+                type: 'purchase',
+                price: 299,
+            },
+            status: 'Published',
+            videos: [
+                { id: 'V006', title: 'Alkane Structures' },
+                { id: 'V007', title: 'Stereochemistry Basics' },
+            ]
+        },
+         {
+            id: 'C004',
+            title: 'Trigonometry Masterclass',
+            description: 'Master trigonometric functions, identities, and their applications in problem-solving.',
+            subject: 'Maths',
+            grade: '11',
+            thumbnail: 'https://placehold.co/600x400.png',
+            pricing: {
+                type: 'subscription',
+            },
+            status: 'Published',
+            videos: [
+                { id: 'V008', title: 'The Unit Circle' },
+                { id: 'V009', title: 'Solving Trig Equations' },
             ]
         }
     ]
