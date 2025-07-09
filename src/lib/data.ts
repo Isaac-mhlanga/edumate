@@ -153,4 +153,51 @@ export const instructorData = {
     ]
 };
 
+const allUsers = [
+    { id: 'I001', name: 'Dr. Evelyn Reed', email: 'evelyn.r@example.com', role: 'Instructor', joined: '2023-01-10', status: 'Active' },
+    ...instructorData.enrolledStudents.map(s => ({...s, role: 'Student', status: 'Active'})),
+    { id: 'I002', name: 'Dr. Alan Grant', email: 'alan.g@example.com', role: 'Instructor', joined: '2023-05-22', status: 'Suspended' },
+    { id: 'S006', name: 'Emily White', email: 'emily.w@example.com', role: 'Student', joined: '2024-04-12', status: 'Active' },
+    { id: 'S007', name: 'James Brown', email: 'james.b@example.com', role: 'Student', joined: '2024-04-18', status: 'Active' },
+];
+
+const allCourses = [
+    ...instructorData.courses,
+    {
+        id: 'C005', title: 'Quantum Physics Intro', description: 'Introduction to Quantum Mechanics.', subject: 'Physical Sciences', grade: '12', thumbnail: 'https://placehold.co/600x400.png', 
+        pricing: { type: 'purchase', price: 599 }, status: 'Published', videos: [], instructor: 'Dr. Alan Grant'
+    }
+].map(course => ({...course, instructor: course.instructor || instructorData.name}));
+
+const allAssignments = [
+    ...instructorData.submittedAssignments.map(a => ({...a, instructor: instructorData.name})),
+     { id: 'A020', studentName: 'Sarah Miller', assignmentTitle: 'Quantum Entanglement Paper', course: 'Quantum Physics Intro', submittedDate: '1 day ago', status: 'Pending Review', fileUrl: '#', instructor: 'Dr. Alan Grant' }
+];
+
+const allTransactions = [
+    ...instructorData.transactions,
+    { id: 'T009', studentName: null, item: 'Payout Request - Dr. Evelyn Reed', type: 'Payout Request', status: 'Pending', amount: -4820.00, date: '2024-05-23', instructor: 'Dr. Evelyn Reed' },
+    { id: 'T010', studentName: 'Sarah Miller', item: 'Quantum Physics Intro', type: 'Course Sale', status: 'Completed', amount: 599.00, date: '2024-05-19', instructor: 'Dr. Alan Grant' },
+    { id: 'T011', studentName: null, item: 'Payout Request - Dr. Alan Grant', type: 'Payout Request', status: 'Pending', amount: -599.00, date: '2024-05-24', instructor: 'Dr. Alan Grant' },
+];
+
+
+export const adminData = {
+    stats: [
+        { title: "Total Revenue", value: `R ${allTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0).toFixed(2)}`, icon: DollarSign, change: "+15% this month" },
+        { title: "Total Users", value: allUsers.length, icon: Users, change: "+5 new users" },
+        { title: "Instructors", value: allUsers.filter(u => u.role === 'Instructor').length, icon: Users, change: "+1 new instructor" },
+        { title: "Active Courses", value: allCourses.filter(c => c.status === 'Published').length, icon: Book, change: "+2 this month" },
+    ],
+    users: allUsers,
+    courses: allCourses,
+    assignments: allAssignments,
+    transactions: allTransactions,
+    payoutRequests: allTransactions.filter(t => t.type === 'Payout Request'),
+    recentActivity: [
+        { id: 1, type: 'New User', description: 'Sarah Miller signed up as a Student.', timestamp: '2 hours ago' },
+        { id: 2, type: 'New Course', description: 'Dr. Alan Grant published "Quantum Physics Intro".', timestamp: '1 day ago' },
+        { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
+    ]
+};
     

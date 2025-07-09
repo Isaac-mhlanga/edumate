@@ -21,14 +21,11 @@ import {
 import { Button } from '@/components/ui/button';
 import {
   LayoutDashboard,
-  BookOpen,
-  FileText,
   Users,
   Settings,
-  Sparkles,
   LogOut,
   Moon,
-  CreditCard,
+  Shield,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
@@ -47,14 +44,9 @@ const menuItems = [
     icon: Users,
   },
   {
-    href: '/summarize',
-    label: 'AI Summarizer',
-    icon: Sparkles,
-  },
-  {
-    href: '/payment',
-    label: 'Payments',
-    icon: CreditCard,
+    href: '/admin',
+    label: 'Admin Dashboard',
+    icon: Shield,
   },
 ];
 
@@ -78,7 +70,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <SidebarMenuItem key={item.label}>
                 <SidebarMenuButton
                   asChild
-                  isActive={pathname === item.href}
+                  isActive={pathname.startsWith(item.href)}
                   tooltip={{
                     children: item.label,
                     side: 'right',
@@ -100,8 +92,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <AvatarFallback>SP</AvatarFallback>
                 </Avatar>
                 <div className='flex flex-col overflow-hidden group-data-[collapsible=icon]:hidden'>
-                    <span className='font-medium text-sm truncate'>Student User</span>
-                    <span className='text-xs text-muted-foreground truncate'>student@edumate.pro</span>
+                    <span className='font-medium text-sm truncate'>Admin User</span>
+                    <span className='text-xs text-muted-foreground truncate'>admin@edumate.pro</span>
                 </div>
             </div>
             <SidebarMenu>
