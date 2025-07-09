@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, studentData } from "@/lib/data";
-import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -293,16 +293,25 @@ export default function DashboardPage() {
                                                 onChange={(e) => handlePurchasedCourseFilterChange('search', e.target.value)}
                                             />
                                         </div>
-                                        <Select value={purchasedCourseFilters.subject} onValueChange={(value) => handlePurchasedCourseFilterChange('subject', value)}>
-                                            <SelectTrigger className="w-full sm:w-[180px]">
-                                                <SelectValue placeholder="Filter by Subject" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                {purchasedSubjects.map(subject => (
-                                                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
-                                                ))}
-                                            </SelectContent>
-                                        </Select>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" className="gap-1">
+                                                    <Filter className="h-3.5 w-3.5" />
+                                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                                        Subject
+                                                    </span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Filter by Subject</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuRadioGroup value={purchasedCourseFilters.subject} onValueChange={(value) => handlePurchasedCourseFilterChange('subject', value)}>
+                                                    {purchasedSubjects.map(subject => (
+                                                        <DropdownMenuRadioItem key={subject} value={subject}>{subject}</DropdownMenuRadioItem>
+                                                    ))}
+                                                </DropdownMenuRadioGroup>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </div>
                                 </CardHeader>
                                 <CardContent>
