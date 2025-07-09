@@ -13,6 +13,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -21,7 +22,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download, Search, ListFilter } from "lucide-react";
+import { ArrowUpRight, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, ListFilter, MoreVertical, PlusCircle, Search, Trash2, UploadCloud, UserMinus, Video, Download } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -55,6 +56,8 @@ const courseFormSchema = z.object({
 type CourseFormValues = z.infer<typeof courseFormSchema>;
 type Course = (typeof instructorData.courses)[0];
 type SubmittedAssignment = (typeof instructorData.submittedAssignments)[0];
+type EnrolledStudent = (typeof instructorData.enrolledStudents)[0];
+
 
 export default function InstructorPage() {
   const router = useRouter();
@@ -66,16 +69,29 @@ export default function InstructorPage() {
 
   const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>(instructorData.submittedAssignments);
+  const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
+
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
   const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
+  const [selectedStudent, setSelectedStudent] = React.useState<EnrolledStudent | null>(null);
+  
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = React.useState(false);
+  const [isStudentDetailsDialogOpen, setIsStudentDetailsDialogOpen] = React.useState(false);
+  const [isUnenrollDialogOpen, setIsUnenrollDialogOpen] = React.useState(false);
+  const [isDeleteStudentDialogOpen, setIsDeleteStudentDialogOpen] = React.useState(false);
+
 
   // State for assignments filtering and pagination
-  const [filters, setFilters] = React.useState({ search: '', status: 'All' });
-  const [currentPage, setCurrentPage] = React.useState(1);
-  const itemsPerPage = 5;
+  const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', status: 'All' });
+  const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
+  const assignmentsPerPage = 5;
+
+  // State for students filtering and pagination
+  const [studentFilters, setStudentFilters] = React.useState({ search: '', course: 'All' });
+  const [currentStudentPage, setCurrentStudentPage] = React.useState(1);
+  const studentsPerPage = 5;
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
@@ -142,7 +158,7 @@ export default function InstructorPage() {
     setIsCourseDialogOpen(true);
   };
 
-  const handleDeleteCourse = (course: Course) => {
+  const handleDeleteCourseClick = (course: Course) => {
     setSelectedCourse(course);
     setIsDeleteDialogOpen(true);
   };
@@ -205,37 +221,72 @@ export default function InstructorPage() {
     handleReviewDialogOpenChange(false);
   }
 
-  const handleFilterChange = (key: 'search' | 'status', value: string) => {
-    setFilters(prev => ({ ...prev, [key]: value }));
-    setCurrentPage(1); // Reset to first page on any filter change
+  // Assignment filtering and pagination logic
+  const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
+    setAssignmentFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentAssignmentPage(1);
   };
 
   const filteredAssignments = React.useMemo(() => {
     return submittedAssignments.filter(assignment => {
-        const searchMatch = filters.search.trim().toLowerCase() === '' ||
-            assignment.studentName.toLowerCase().includes(filters.search.trim().toLowerCase()) ||
-            assignment.assignmentTitle.toLowerCase().includes(filters.search.trim().toLowerCase());
+        const searchMatch = assignmentFilters.search.trim().toLowerCase() === '' ||
+            assignment.studentName.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase()) ||
+            assignment.assignmentTitle.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase());
         
-        const statusMatch = filters.status === 'All' || assignment.status === filters.status;
+        const statusMatch = assignmentFilters.status === 'All' || assignment.status === assignmentFilters.status;
 
         return searchMatch && statusMatch;
     });
-  }, [submittedAssignments, filters]);
+  }, [submittedAssignments, assignmentFilters]);
 
-  const totalPages = Math.ceil(filteredAssignments.length / itemsPerPage);
-  const paginatedAssignments = filteredAssignments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const totalAssignmentPages = Math.ceil(filteredAssignments.length / assignmentsPerPage);
+  const paginatedAssignments = filteredAssignments.slice((currentAssignmentPage - 1) * assignmentsPerPage, currentAssignmentPage * assignmentsPerPage);
 
-  const handleNextPage = () => {
-    if (currentPage < totalPages) {
-        setCurrentPage(currentPage + 1);
-    }
+  // Student filtering and pagination logic
+  const handleStudentFilterChange = (key: 'search' | 'course', value: string) => {
+    setStudentFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentStudentPage(1);
+  };
+  
+  const handleStudentAction = (student: EnrolledStudent, action: 'view' | 'unenroll' | 'delete') => {
+    setSelectedStudent(student);
+    if (action === 'view') setIsStudentDetailsDialogOpen(true);
+    if (action === 'unenroll') setIsUnenrollDialogOpen(true);
+    if (action === 'delete') setIsDeleteStudentDialogOpen(true);
+  };
+  
+  const confirmUnenrollStudent = () => {
+    if (!selectedStudent) return;
+    setEnrolledStudents(enrolledStudents.filter(s => s.id !== selectedStudent.id));
+    toast({ title: "Student Unenrolled", description: `${selectedStudent.name} has been unenrolled.` });
+    setIsUnenrollDialogOpen(false);
+    setSelectedStudent(null);
+  };
+  
+  const confirmDeleteStudent = () => {
+    if (!selectedStudent) return;
+    setEnrolledStudents(enrolledStudents.filter(s => s.id !== selectedStudent.id));
+    toast({ title: "Student Deleted", description: `${selectedStudent.name}'s profile has been deleted.`, variant: "destructive" });
+    setIsDeleteStudentDialogOpen(false);
+    setSelectedStudent(null);
   };
 
-  const handlePreviousPage = () => {
-    if (currentPage > 1) {
-        setCurrentPage(currentPage - 1);
-    }
-  };
+  const filteredStudents = React.useMemo(() => {
+    return enrolledStudents.filter(student => {
+      const searchMatch = studentFilters.search.trim().toLowerCase() === '' ||
+        student.name.toLowerCase().includes(studentFilters.search.trim().toLowerCase()) ||
+        student.email.toLowerCase().includes(studentFilters.search.trim().toLowerCase());
+      
+      const courseMatch = studentFilters.course === 'All' || student.course.includes(studentFilters.course);
+
+      return searchMatch && courseMatch;
+    });
+  }, [enrolledStudents, studentFilters]);
+
+  const totalStudentPages = Math.ceil(filteredStudents.length / studentsPerPage);
+  const paginatedStudents = filteredStudents.slice((currentStudentPage - 1) * studentsPerPage, currentStudentPage * studentsPerPage);
+
+  const studentCourses = ['All', ...Array.from(new Set(instructorData.enrolledStudents.map(s => s.course)))];
   
   return (
     <AppLayout>
@@ -316,19 +367,19 @@ export default function InstructorPage() {
               </section>
 
               <section>
-                <h2 className="text-2xl font-semibold mb-4">Enrolled Students</h2>
+                <h2 className="text-2xl font-semibold mb-4">Recently Enrolled Students</h2>
                 <Card className="shadow-md rounded-xl">
                    <Table>
                     <TableHeader>
                       <TableRow>
                         <TableHead>Student</TableHead>
                         <TableHead>Course</TableHead>
+                        <TableHead>Progress</TableHead>
                         <TableHead>Joined Date</TableHead>
-                        <TableHead><span className="sr-only">Actions</span></TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {instructorData.enrolledStudents.map((student) => (
+                      {enrolledStudents.slice(0, 4).map((student) => (
                         <TableRow key={student.id}>
                           <TableCell className="font-medium">
                             <div className="flex items-center gap-3">
@@ -340,8 +391,13 @@ export default function InstructorPage() {
                             </div>
                           </TableCell>
                           <TableCell><Badge variant="secondary">{student.course}</Badge></TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-2">
+                              <Progress value={student.progress} className="w-24 h-2" />
+                              <span className="text-xs text-muted-foreground">{student.progress}%</span>
+                            </div>
+                          </TableCell>
                           <TableCell>{student.joined}</TableCell>
-                          <TableCell><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button></TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -384,7 +440,7 @@ export default function InstructorPage() {
                                           </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleEditCourse(course)}><Edit className="mr-2 h-4 w-4"/>Edit Course</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleDeleteCourse(course)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete Course</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleDeleteCourseClick(course)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete Course</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -424,8 +480,8 @@ export default function InstructorPage() {
                         <Input
                             placeholder="Search by student or assignment..."
                             className="pl-8"
-                            value={filters.search}
-                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                            value={assignmentFilters.search}
+                            onChange={(e) => handleAssignmentFilterChange('search', e.target.value)}
                         />
                     </div>
                     <DropdownMenu>
@@ -440,7 +496,7 @@ export default function InstructorPage() {
                         <DropdownMenuContent align="end">
                             <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
                             <DropdownMenuSeparator />
-                            <DropdownMenuRadioGroup value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+                            <DropdownMenuRadioGroup value={assignmentFilters.status} onValueChange={(value) => handleAssignmentFilterChange('status', value)}>
                                 <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Pending Review">Pending Review</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Awaiting Payment">Awaiting Payment</DropdownMenuRadioItem>
@@ -515,19 +571,19 @@ export default function InstructorPage() {
                     <div className="text-xs text-muted-foreground">
                         Showing{" "}
                         <strong>
-                            {filteredAssignments.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
-                            {Math.min(currentPage * itemsPerPage, filteredAssignments.length)}
+                            {filteredAssignments.length > 0 ? (currentAssignmentPage - 1) * assignmentsPerPage + 1 : 0}-
+                            {Math.min(currentAssignmentPage * assignmentsPerPage, filteredAssignments.length)}
                         </strong>{" "}
                         of <strong>{filteredAssignments.length}</strong> assignments.
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={currentPage === 1}>
-                            <ChevronLeft />
+                        <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p - 1)} disabled={currentAssignmentPage === 1}>
+                            <ChevronLeft className="h-4 w-4 mr-1" />
                             Prev
                         </Button>
-                        <Button variant="outline" size="sm" onClick={handleNextPage} disabled={currentPage >= totalPages}>
+                        <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p + 1)} disabled={currentAssignmentPage >= totalAssignmentPages}>
                             Next
-                            <ChevronRight />
+                            <ChevronRight className="h-4 w-4 ml-1" />
                         </Button>
                     </div>
                 </CardFooter>
@@ -540,12 +596,110 @@ export default function InstructorPage() {
                     <CardTitle>Student Management</CardTitle>
                     <CardDescription>View enrolled students, track their progress, and manage access.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                      <h3 className="text-lg font-semibold">No Enrolled Students</h3>
-                      <p className="text-muted-foreground mt-1">Students who purchase your courses will be listed here.</p>
+                <div className="flex items-center justify-between gap-2 p-4 border-y">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by student name or email..."
+                            className="pl-8"
+                            value={studentFilters.search}
+                            onChange={(e) => handleStudentFilterChange('search', e.target.value)}
+                        />
                     </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="gap-1">
+                                <ListFilter className="h-3.5 w-3.5" />
+                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Course</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Filter by Course</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={studentFilters.course} onValueChange={(value) => handleStudentFilterChange('course', value)}>
+                                {studentCourses.map(course => (
+                                  <DropdownMenuRadioItem key={course} value={course}>{course}</DropdownMenuRadioItem>
+                                ))}
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                 <CardContent className="p-0">
+                    {paginatedStudents.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Student</TableHead>
+                                    <TableHead>Course</TableHead>
+                                    <TableHead>Progress</TableHead>
+                                    <TableHead>Joined</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {paginatedStudents.map((student) => (
+                                    <TableRow key={student.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-9 w-9 hidden sm:flex"><AvatarFallback>{student.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
+                                                <div>
+                                                  <p className="font-medium">{student.name}</p>
+                                                  <p className="text-xs text-muted-foreground">{student.email}</p>
+                                                </div>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell><Badge variant="outline">{student.course}</Badge></TableCell>
+                                        <TableCell>
+                                          <div className="flex items-center gap-2">
+                                            <Progress value={student.progress} className="w-24 h-2"/>
+                                            <span className="text-xs text-muted-foreground">{student.progress}%</span>
+                                          </div>
+                                        </TableCell>
+                                        <TableCell>{student.joined}</TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleStudentAction(student, 'view')}><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
+                                                    <DropdownMenuItem onClick={() => handleStudentAction(student, 'unenroll')}><UserMinus className="mr-2 h-4 w-4"/>Unenroll</DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => handleStudentAction(student, 'delete')} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete Student</DropdownMenuItem>
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <div className="text-center py-16">
+                            <h3 className="text-lg font-semibold">No Students Found</h3>
+                            <p className="text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
+                        </div>
+                    )}
                 </CardContent>
+                 <CardFooter className="flex items-center justify-between py-4">
+                    <div className="text-xs text-muted-foreground">
+                        Showing{" "}
+                        <strong>
+                            {filteredStudents.length > 0 ? (currentStudentPage - 1) * studentsPerPage + 1 : 0}-
+                            {Math.min(currentStudentPage * studentsPerPage, filteredStudents.length)}
+                        </strong>{" "}
+                        of <strong>{filteredStudents.length}</strong> students.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setCurrentStudentPage(p => p - 1)} disabled={currentStudentPage === 1}>
+                            <ChevronLeft className="h-4 w-4 mr-1" />
+                            Prev
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setCurrentStudentPage(p => p + 1)} disabled={currentStudentPage >= totalStudentPages}>
+                            Next
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                    </div>
+                </CardFooter>
             </Card>
           </TabsContent>
 
@@ -735,6 +889,58 @@ export default function InstructorPage() {
               )}
           </DialogContent>
       </Dialog>
+      
+      {/* Student Action Dialogs */}
+      <Dialog open={isStudentDetailsDialogOpen} onOpenChange={setIsStudentDetailsDialogOpen}>
+          <DialogContent>
+              <DialogHeader>
+                  <DialogTitle>Student Details</DialogTitle>
+              </DialogHeader>
+              {selectedStudent && (
+                  <div className="space-y-4 py-4">
+                      <p><strong>Name:</strong> {selectedStudent.name}</p>
+                      <p><strong>Email:</strong> {selectedStudent.email}</p>
+                      <p><strong>Course:</strong> {selectedStudent.course}</p>
+                      <p><strong>Joined:</strong> {selectedStudent.joined}</p>
+                      <p><strong>Progress:</strong> {selectedStudent.progress}%</p>
+                  </div>
+              )}
+              <DialogFooter>
+                  <Button variant="outline" onClick={() => setIsStudentDetailsDialogOpen(false)}>Close</Button>
+              </DialogFooter>
+          </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={isUnenrollDialogOpen} onOpenChange={setIsUnenrollDialogOpen}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>Are you sure you want to unenroll this student?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      This will remove <strong>{selectedStudent?.name}</strong> from the course. They will lose access to the course content. This action can be reversed by having them enroll again.
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setSelectedStudent(null)}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmUnenrollStudent}>Unenroll</AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={isDeleteStudentDialogOpen} onOpenChange={setIsDeleteStudentDialogOpen}>
+          <AlertDialogContent>
+              <AlertDialogHeader>
+                  <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                      This action cannot be undone. This will permanently delete the student profile for <strong>{selectedStudent?.name}</strong> and remove all their associated data.
+                  </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                  <AlertDialogCancel onClick={() => setSelectedStudent(null)}>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={confirmDeleteStudent} className={buttonVariants({ variant: "destructive" })}>Delete Student</AlertDialogAction>
+              </AlertDialogFooter>
+          </AlertDialogContent>
+      </AlertDialog>
+
     </AppLayout>
   );
 }
