@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, CheckCircle, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download, Search, ListFilter } from "lucide-react";
+import { ArrowUpRight, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download, Search, ListFilter } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -521,8 +521,14 @@ export default function InstructorPage() {
                         of <strong>{filteredAssignments.length}</strong> assignments.
                     </div>
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={currentPage === 1}>Previous</Button>
-                        <Button variant="outline" size="sm" onClick={handleNextPage} disabled={currentPage >= totalPages}>Next</Button>
+                        <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={currentPage === 1}>
+                            <ChevronLeft />
+                            Prev
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={handleNextPage} disabled={currentPage >= totalPages}>
+                            Next
+                            <ChevronRight />
+                        </Button>
                     </div>
                 </CardFooter>
             </Card>
