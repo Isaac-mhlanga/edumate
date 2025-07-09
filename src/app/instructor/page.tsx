@@ -16,13 +16,14 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, ListFilter, MoreVertical, PlusCircle, Search, Trash2, UploadCloud, UserMinus, Video, Download } from "lucide-react";
+import { ArrowUpRight, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, ListFilter, MoreVertical, PlusCircle, Search, Trash2, UploadCloud, UserMinus, Video, Download, ShieldCheck, GraduationCap } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -892,22 +893,70 @@ export default function InstructorPage() {
       
       {/* Student Action Dialogs */}
       <Dialog open={isStudentDetailsDialogOpen} onOpenChange={setIsStudentDetailsDialogOpen}>
-          <DialogContent>
-              <DialogHeader>
-                  <DialogTitle>Student Details</DialogTitle>
-              </DialogHeader>
-              {selectedStudent && (
-                  <div className="space-y-4 py-4">
-                      <p><strong>Name:</strong> {selectedStudent.name}</p>
-                      <p><strong>Email:</strong> {selectedStudent.email}</p>
-                      <p><strong>Course:</strong> {selectedStudent.course}</p>
-                      <p><strong>Joined:</strong> {selectedStudent.joined}</p>
-                      <p><strong>Progress:</strong> {selectedStudent.progress}%</p>
-                  </div>
-              )}
-              <DialogFooter>
-                  <Button variant="outline" onClick={() => setIsStudentDetailsDialogOpen(false)}>Close</Button>
-              </DialogFooter>
+          <DialogContent className="sm:max-w-md">
+            {selectedStudent && (
+                <>
+                    <DialogHeader>
+                        <div className="flex items-center gap-4">
+                             <Avatar className="h-16 w-16 border">
+                                <AvatarFallback className="text-2xl">{selectedStudent.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                                <DialogTitle className="text-2xl">{selectedStudent.name}</DialogTitle>
+                                <DialogDescription>{selectedStudent.email}</DialogDescription>
+                            </div>
+                        </div>
+                    </DialogHeader>
+                    <div className="space-y-6 py-4">
+                        <div className="text-sm space-y-2">
+                            <p><strong>Enrolled In:</strong> <Badge variant="outline">{selectedStudent.course}</Badge></p>
+                            <p><strong>Joined:</strong> {selectedStudent.joined}</p>
+                            <div className="flex items-center gap-2">
+                                <strong>Progress:</strong>
+                                <Progress value={selectedStudent.progress} className="w-32 h-2" />
+                                <span>{selectedStudent.progress}%</span>
+                            </div>
+                        </div>
+                        
+                        <Separator />
+
+                        <div>
+                            <h4 className="font-semibold mb-3 text-base">Active Subscriptions</h4>
+                            {selectedStudent.activeSubscriptions && selectedStudent.activeSubscriptions.length > 0 ? (
+                                <div className="space-y-2">
+                                    {selectedStudent.activeSubscriptions.map(sub => (
+                                        <Card key={sub} className="p-3 bg-muted/50">
+                                            <div className="flex items-center gap-3">
+                                                <ShieldCheck className="h-5 w-5 text-primary"/>
+                                                <p className="font-medium text-sm">{sub}</p>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : <p className="text-sm text-muted-foreground">No active subscriptions.</p>}
+                        </div>
+
+                        <div>
+                            <h4 className="font-semibold mb-3 text-base">Purchased Courses</h4>
+                            {selectedStudent.purchasedCourses && selectedStudent.purchasedCourses.length > 0 ? (
+                                <div className="space-y-2">
+                                    {selectedStudent.purchasedCourses.map(course => (
+                                        <Card key={course} className="p-3 bg-muted/50">
+                                            <div className="flex items-center gap-3">
+                                                <GraduationCap className="h-5 w-5 text-secondary"/>
+                                                <p className="font-medium text-sm">{course}</p>
+                                            </div>
+                                        </Card>
+                                    ))}
+                                </div>
+                            ) : <p className="text-sm text-muted-foreground">No purchased courses.</p>}
+                        </div>
+                    </div>
+                     <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsStudentDetailsDialogOpen(false)}>Close</Button>
+                    </DialogFooter>
+                </>
+            )}
           </DialogContent>
       </Dialog>
 
