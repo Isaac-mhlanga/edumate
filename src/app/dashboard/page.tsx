@@ -16,12 +16,13 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, studentData } from "@/lib/data";
-import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 
 type SubmittedAssignment = (typeof studentData.submittedAssignments)[0];
 type Transaction = (typeof studentData.transactions)[0];
@@ -39,6 +40,14 @@ export default function DashboardPage() {
         params.set('tab', value);
         router.replace(`${pathname}?${params.toString()}`);
     };
+
+    React.useEffect(() => {
+        const tab = searchParams.get('tab');
+        if (tab) {
+          // You might need to add logic here if you want to perform actions when the tab changes,
+          // but for just setting the default value, the `defaultValue` prop on Tabs is sufficient.
+        }
+    }, [searchParams]);
 
     const completedAssignmentsCount = studentData.submittedAssignments.filter(a => a.status === 'Paid').length;
     const certificatesEarned = 1; 
@@ -179,7 +188,7 @@ export default function DashboardPage() {
                     <p className="text-muted-foreground">Let's continue your learning journey.</p>
                 </div>
 
-                <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full">
+                <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
                     <TabsList className="grid w-full grid-cols-4 max-w-lg">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="courses">Course Catalog</TabsTrigger>
@@ -271,8 +280,8 @@ export default function DashboardPage() {
                                 <CardTitle>Course Catalog</CardTitle>
                                 <CardDescription>Browse our available courses and start your learning adventure.</CardDescription>
                             </CardHeader>
-                            <div className="flex flex-wrap items-center justify-between gap-2 p-4 border-y">
-                                <div className="relative flex-1 min-w-[200px]">
+                            <div className="flex items-center justify-between gap-2 p-4 border-y">
+                                <div className="relative flex-1">
                                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                                     <Input
                                         placeholder="Search by course title..."
@@ -281,39 +290,61 @@ export default function DashboardPage() {
                                         onChange={(e) => handleCourseFilterChange('search', e.target.value)}
                                     />
                                 </div>
-                                <div className="flex gap-2 flex-wrap">
-                                    <Select value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
-                                        <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Filter by Status" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="All">All Courses</SelectItem>
-                                            <SelectItem value="Purchased">My Courses</SelectItem>
-                                            <SelectItem value="Not Purchased">Not Purchased</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                    <Select value={courseFilters.subject} onValueChange={(value) => handleCourseFilterChange('subject', value)}>
-                                        <SelectTrigger className="w-[180px]">
-                                            <SelectValue placeholder="Filter by Subject" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="All">All Subjects</SelectItem>
-                                            <SelectItem value="Maths">Maths</SelectItem>
-                                            <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                     <Select value={courseFilters.grade} onValueChange={(value) => handleCourseFilterChange('grade', value)}>
-                                        <SelectTrigger className="w-[160px]">
-                                            <SelectValue placeholder="Filter by Grade" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="All">All Grades</SelectItem>
-                                            <SelectItem value="10">Grade 10</SelectItem>
-                                            <SelectItem value="11">Grade 11</SelectItem>
-                                            <SelectItem value="12">Grade 12</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
+                                <Popover>
+                                    <PopoverTrigger asChild>
+                                        <Button variant="outline" className="gap-1">
+                                            <SlidersHorizontal className="h-3.5 w-3.5" />
+                                            <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                                Filter
+                                            </span>
+                                        </Button>
+                                    </PopoverTrigger>
+                                    <PopoverContent className="w-80" align="end">
+                                        <div className="space-y-4">
+                                            <h4 className="font-medium leading-none">Filter Courses</h4>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="status-filter">Status</Label>
+                                                <Select value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
+                                                    <SelectTrigger id="status-filter">
+                                                        <SelectValue placeholder="Filter by Status" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="All">All Courses</SelectItem>
+                                                        <SelectItem value="Purchased">My Courses</SelectItem>
+                                                        <SelectItem value="Not Purchased">Not Purchased</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="subject-filter">Subject</Label>
+                                                <Select value={courseFilters.subject} onValueChange={(value) => handleCourseFilterChange('subject', value)}>
+                                                    <SelectTrigger id="subject-filter">
+                                                        <SelectValue placeholder="Filter by Subject" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="All">All Subjects</SelectItem>
+                                                        <SelectItem value="Maths">Maths</SelectItem>
+                                                        <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                            <div className="space-y-2">
+                                                <Label htmlFor="grade-filter">Grade</Label>
+                                                <Select value={courseFilters.grade} onValueChange={(value) => handleCourseFilterChange('grade', value)}>
+                                                    <SelectTrigger id="grade-filter">
+                                                        <SelectValue placeholder="Filter by Grade" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="All">All Grades</SelectItem>
+                                                        <SelectItem value="10">Grade 10</SelectItem>
+                                                        <SelectItem value="11">Grade 11</SelectItem>
+                                                        <SelectItem value="12">Grade 12</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            </div>
+                                        </div>
+                                    </PopoverContent>
+                                </Popover>
                             </div>
                             <CardContent className="pt-6">
                                 {paginatedCourses.length > 0 ? (
