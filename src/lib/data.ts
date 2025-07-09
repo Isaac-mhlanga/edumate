@@ -44,5 +44,41 @@ export const instructorData = {
         { month: "Apr", engagement: 273, income: 1500 },
         { month: "May", engagement: 209, income: 1300 },
         { month: "Jun", engagement: 250, income: 1750 },
+    ],
+    courses: [
+        {
+            id: 'C001',
+            title: 'Calculus Fundamentals',
+            description: 'A deep dive into the fundamentals of calculus, from limits to derivatives.',
+            subject: 'Maths',
+            grade: '12',
+            thumbnail: 'https://placehold.co/600x400.png',
+            pricing: {
+                type: 'purchase',
+                price: 499,
+            },
+            status: 'Published',
+            videos: [
+                { id: 'V001', title: 'Introduction to Limits' },
+                { id: 'V002', title: 'Understanding Derivatives' },
+            ]
+        },
+        {
+            id: 'C002',
+            title: 'Newtonian Mechanics',
+            description: 'Explore the laws of motion and gravity as described by Sir Isaac Newton.',
+            subject: 'Physical Sciences',
+            grade: '11',
+            thumbnail: 'https://placehold.co/600x400.png',
+            pricing: {
+                type: 'subscription',
+            },
+            status: 'Draft',
+            videos: [
+                { id: 'V003', title: 'First Law of Motion' },
+                { id: 'V004', title: 'Second & Third Laws' },
+                { id: 'V005', title: 'Universal Gravitation' },
+            ]
+        }
     ]
 };
