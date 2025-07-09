@@ -6,11 +6,14 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,10 +22,8 @@ import { instructorData, studentData } from "@/lib/data";
 import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import React from "react";
 
 type SubmittedAssignment = (typeof studentData.submittedAssignments)[0];
 type Transaction = (typeof studentData.transactions)[0];
@@ -246,31 +247,52 @@ export default function DashboardPage() {
                             </div>
                         </section>
 
-                         <section>
+                        <section>
                             <div className="flex items-center justify-between mb-4">
                                 <h2 className="text-2xl font-semibold">My Purchased Courses</h2>
                                 <Button variant="outline" onClick={() => handleTabChange('courses')}>View All</Button>
                             </div>
-                            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {studentData.purchasedCourses.map((course) => (
-                                    <Card key={course.id} className="shadow-md rounded-xl overflow-hidden group">
-                                        <CardHeader className="p-0">
-                                            <div className="bg-primary/10 aspect-video flex items-center justify-center">
-                                            <Image src="https://placehold.co/600x400.png" alt={course.name} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
-                                            </div>
-                                        </CardHeader>
-                                        <CardContent className="p-4">
-                                            <Badge variant="secondary" className="mb-2">{course.category}</Badge>
-                                            <h3 className="font-semibold text-lg">{course.name}</h3>
-                                            <Button variant="link" className="p-0 h-auto mt-2 as-child">
-                                                <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
-                                                    Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
-                                                </Link>
-                                            </Button>
-                                        </CardContent>
-                                    </Card>
-                                ))}
-                            </div>
+                            {studentData.purchasedCourses.length > 0 ? (
+                                <Carousel
+                                    opts={{
+                                        align: "start",
+                                        loop: studentData.purchasedCourses.length > 2,
+                                    }}
+                                    className="w-full"
+                                >
+                                    <CarouselContent className="-ml-4">
+                                        {studentData.purchasedCourses.map((course) => (
+                                            <CarouselItem key={course.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
+                                                <Card className="shadow-md rounded-xl overflow-hidden group flex flex-col h-full">
+                                                    <CardHeader className="p-0">
+                                                        <div className="bg-primary/10 aspect-video flex items-center justify-center">
+                                                            <Image src="https://placehold.co/600x400.png" alt={course.name} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent className="p-4 flex-grow">
+                                                        <Badge variant="secondary" className="mb-2">{course.category}</Badge>
+                                                        <h3 className="font-semibold text-lg">{course.name}</h3>
+                                                    </CardContent>
+                                                    <CardFooter className="p-4 pt-0">
+                                                        <Button variant="link" className="p-0 h-auto as-child">
+                                                            <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
+                                                                Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
+                                                            </Link>
+                                                        </Button>
+                                                    </CardFooter>
+                                                </Card>
+                                            </CarouselItem>
+                                        ))}
+                                    </CarouselContent>
+                                    <CarouselPrevious className="hidden sm:flex" />
+                                    <CarouselNext className="hidden sm:flex" />
+                                </Carousel>
+                            ) : (
+                                <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                                    <h3 className="text-lg font-semibold">No Courses Purchased</h3>
+                                    <p>Browse the course catalog to start learning!</p>
+                                </div>
+                            )}
                         </section>
                     </TabsContent>
 
