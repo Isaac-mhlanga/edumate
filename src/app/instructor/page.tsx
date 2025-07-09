@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AppLayout } from "@/components/app-layout";
@@ -8,7 +9,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, CheckCircle, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download } from "lucide-react";
+import { ArrowUpRight, CheckCircle, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download, Search, ListFilter } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -70,6 +71,11 @@ export default function InstructorPage() {
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = React.useState(false);
+
+  // State for assignments filtering and pagination
+  const [filters, setFilters] = React.useState({ search: '', status: 'All' });
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 5;
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
@@ -198,6 +204,38 @@ export default function InstructorPage() {
     });
     handleReviewDialogOpenChange(false);
   }
+
+  const handleFilterChange = (key: 'search' | 'status', value: string) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentPage(1); // Reset to first page on any filter change
+  };
+
+  const filteredAssignments = React.useMemo(() => {
+    return submittedAssignments.filter(assignment => {
+        const searchMatch = filters.search.trim().toLowerCase() === '' ||
+            assignment.studentName.toLowerCase().includes(filters.search.trim().toLowerCase()) ||
+            assignment.assignmentTitle.toLowerCase().includes(filters.search.trim().toLowerCase());
+        
+        const statusMatch = filters.status === 'All' || assignment.status === filters.status;
+
+        return searchMatch && statusMatch;
+    });
+  }, [submittedAssignments, filters]);
+
+  const totalPages = Math.ceil(filteredAssignments.length / itemsPerPage);
+  const paginatedAssignments = filteredAssignments.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages) {
+        setCurrentPage(currentPage + 1);
+    }
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+        setCurrentPage(currentPage - 1);
+    }
+  };
   
   return (
     <AppLayout>
@@ -380,8 +418,39 @@ export default function InstructorPage() {
                     <CardTitle>Assignment Management</CardTitle>
                     <CardDescription>Review submitted assignments, upload solutions, and set pricing.</CardDescription>
                 </CardHeader>
-                <CardContent>
-                    {submittedAssignments.length > 0 ? (
+                 <div className="flex items-center justify-between gap-2 p-4 border-y">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by student or assignment..."
+                            className="pl-8"
+                            value={filters.search}
+                            onChange={(e) => handleFilterChange('search', e.target.value)}
+                        />
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="gap-1">
+                                <ListFilter className="h-3.5 w-3.5" />
+                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                    Filter by Status
+                                </span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={filters.status} onValueChange={(value) => handleFilterChange('status', value)}>
+                                <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Pending Review">Pending Review</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Awaiting Payment">Awaiting Payment</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Paid">Paid</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                </div>
+                <CardContent className="p-0">
+                    {paginatedAssignments.length > 0 ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -394,7 +463,7 @@ export default function InstructorPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {submittedAssignments.map((assignment) => (
+                                {paginatedAssignments.map((assignment) => (
                                     <TableRow key={assignment.id}>
                                         <TableCell>
                                             <div className="flex items-center gap-3">
@@ -436,12 +505,26 @@ export default function InstructorPage() {
                             </TableBody>
                         </Table>
                     ) : (
-                        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                            <h3 className="text-lg font-semibold">No Assignments to Review</h3>
-                            <p className="text-muted-foreground mt-1">New student submissions will appear here.</p>
+                        <div className="text-center py-16">
+                            <h3 className="text-lg font-semibold">No Assignments Found</h3>
+                            <p className="text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
                         </div>
                     )}
                 </CardContent>
+                <CardFooter className="flex items-center justify-between py-4">
+                    <div className="text-xs text-muted-foreground">
+                        Showing{" "}
+                        <strong>
+                            {filteredAssignments.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}-
+                            {Math.min(currentPage * itemsPerPage, filteredAssignments.length)}
+                        </strong>{" "}
+                        of <strong>{filteredAssignments.length}</strong> assignments.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={handlePreviousPage} disabled={currentPage === 1}>Previous</Button>
+                        <Button variant="outline" size="sm" onClick={handleNextPage} disabled={currentPage >= totalPages}>Next</Button>
+                    </div>
+                </CardFooter>
             </Card>
           </TabsContent>
 
