@@ -1,3 +1,4 @@
+
 import { BarChart, Book, CheckCircle, Clock, DollarSign, Users } from "lucide-react";
 
 export const studentData = {
@@ -12,9 +13,11 @@ export const studentData = {
         { id: 3, name: "Organic Chemistry Fundamentals", category: "Physical Sciences" },
     ],
     submittedAssignments: [
-        { id: "A001", title: "Calculus Problem Set 5", status: "Graded", grade: "A-", submitted: "2024-05-10" },
-        { id: "A002", title: "Newtonian Physics Lab Report", status: "Submitted", grade: null, submitted: "2024-05-20" },
-        { id: "A003", title: "Trigonometry Final Exam", status: "Pending", grade: null, submitted: "2024-05-22" },
+        { id: "A001", title: "Calculus Problem Set 5", course: "Grade 12 - Maths Pro", submitted: "2024-05-10", status: "Paid", price: 150, solutionUrl: "#" },
+        { id: "A002", title: "Newtonian Physics Lab Report", course: "Grade 12 - Physical Sciences Pro", submitted: "2024-05-20", status: "Awaiting Payment", price: 120, solutionUrl: null },
+        { id: "A003", title: "Trigonometry Final Exam", course: "Grade 12 - Maths Pro", submitted: "2024-05-22", status: "Submitted", price: null, solutionUrl: null },
+        { id: "A004", title: "Wave Optics Assignment", course: "Grade 12 - Physical Sciences Pro", submitted: null, status: "Pending Submission", price: null, solutionUrl: null },
+        { id: "A005", title: "Organic Chemistry Practice", course: "Grade 12 - Physical Sciences Pro", submitted: null, status: "Pending Submission", price: null, solutionUrl: null },
     ]
 };
 
@@ -23,7 +26,7 @@ export const instructorData = {
     stats: [
         { title: "Enrolled Students", value: "1,204", icon: Users, change: "+12%" },
         { title: "Uploaded Lessons", value: "82", icon: Book, change: "+5 this month" },
-        { title: "Monthly Earnings", value: "$4,820", icon: DollarSign, change: "+21%" },
+        { title: "Monthly Earnings", value: "R 4,820", icon: DollarSign, change: "+21%" },
         { title: "Pending Assignments", value: "14", icon: Clock, change: "3 new" },
     ],
     enrolledStudents: [
@@ -117,3 +120,5 @@ export const instructorData = {
         }
     ]
 };
+
+    
