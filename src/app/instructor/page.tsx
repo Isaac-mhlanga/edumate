@@ -1,14 +1,16 @@
+
 'use client';
 
 import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
@@ -49,10 +51,14 @@ const courseFormSchema = z.object({
 });
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
+type Course = (typeof instructorData.courses)[0];
 
 export default function InstructorPage() {
   const { toast } = useToast();
+  const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
+  const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
@@ -66,15 +72,93 @@ export default function InstructorPage() {
   });
 
   const pricingModel = form.watch("pricingModel");
+  
+  React.useEffect(() => {
+    if (selectedCourse) {
+      form.reset({
+        title: selectedCourse.title,
+        description: selectedCourse.description,
+        subject: selectedCourse.subject,
+        grade: selectedCourse.grade,
+        pricingModel: selectedCourse.pricing.type,
+        price: selectedCourse.pricing.price,
+      });
+    } else {
+      form.reset({
+        title: "",
+        description: "",
+        subject: "Maths",
+        grade: "12",
+        pricingModel: "free",
+        price: undefined,
+      });
+    }
+  }, [selectedCourse, form]);
+
+  const handleDialogOpenChange = (open: boolean) => {
+    setIsCourseDialogOpen(open);
+    if (!open) {
+      setSelectedCourse(null);
+    }
+  };
+
+  const handleAddNewCourse = () => {
+    setSelectedCourse(null);
+    setIsCourseDialogOpen(true);
+  };
+
+  const handleEditCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setIsCourseDialogOpen(true);
+  };
+
+  const handleDeleteCourse = (course: Course) => {
+    setSelectedCourse(course);
+    setIsDeleteDialogOpen(true);
+  };
+  
+  const confirmDeleteCourse = () => {
+    if (!selectedCourse) return;
+    setCourses(courses.filter(c => c.id !== selectedCourse.id));
+    toast({
+      title: "Course Deleted",
+      description: `The course "${selectedCourse.title}" has been successfully deleted.`,
+    });
+    setIsDeleteDialogOpen(false);
+    setSelectedCourse(null);
+  };
 
   function onCourseSubmit(data: CourseFormValues) {
-    console.log(data);
-    toast({
-      title: "Course Created!",
-      description: `The course "${data.title}" has been successfully created.`,
-    });
+    if (selectedCourse) {
+      setCourses(courses.map(c => c.id === selectedCourse.id ? { 
+        ...c, 
+        ...data, 
+        pricing: { type: data.pricingModel, price: data.price } 
+      } : c));
+      toast({
+        title: "Course Updated!",
+        description: `The course "${data.title}" has been successfully updated.`,
+      });
+    } else {
+      const newCourse: Course = {
+        id: `C${Date.now()}`,
+        ...data,
+        thumbnail: 'https://placehold.co/600x400.png',
+        status: 'Draft',
+        videos: [],
+        pricing: {
+          type: data.pricingModel,
+          price: data.price
+        }
+      };
+      setCourses([newCourse, ...courses]);
+      toast({
+        title: "Course Created!",
+        description: `The course "${data.title}" has been successfully created.`,
+      });
+    }
     setIsCourseDialogOpen(false);
-    form.reset();
+    setSelectedCourse(null);
   }
   
   return (
@@ -198,119 +282,12 @@ export default function InstructorPage() {
                         <CardTitle>Course Management</CardTitle>
                         <CardDescription>Upload, edit, and manage your courses.</CardDescription>
                     </div>
-                    <Dialog open={isCourseDialogOpen} onOpenChange={setIsCourseDialogOpen}>
-                        <DialogTrigger asChild>
-                            <Button><PlusCircle className="mr-2"/> Add New Course</Button>
-                        </DialogTrigger>
-                        <DialogContent className="sm:max-w-2xl">
-                            <DialogHeader>
-                                <DialogTitle>Create New Course</DialogTitle>
-                                <DialogDescription>Fill in the details below to create a new course.</DialogDescription>
-                            </DialogHeader>
-                            <Form {...form}>
-                                <form onSubmit={form.handleSubmit(onCourseSubmit)} className="space-y-6 py-4">
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <div className="space-y-4 col-span-1 md:col-span-2">
-                                            <Label>Thumbnail / Cover Image</Label>
-                                            <div className="flex items-center justify-center w-full">
-                                                <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
-                                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 800x400px)</p>
-                                                    </div>
-                                                    <Input id="dropzone-file" type="file" className="hidden" />
-                                                </label>
-                                            </div>
-                                        </div>
-
-                                        <FormField control={form.control} name="title" render={({ field }) => (
-                                            <FormItem className="col-span-1 md:col-span-2">
-                                                <FormLabel>Course Title</FormLabel>
-                                                <FormControl><Input placeholder="e.g. Advanced Calculus" {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-                                        
-                                        <FormField control={form.control} name="description" render={({ field }) => (
-                                            <FormItem className="col-span-1 md:col-span-2">
-                                                <FormLabel>Course Description</FormLabel>
-                                                <FormControl><Textarea placeholder="Describe your course..." rows={4} {...field} /></FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-
-                                        <FormField control={form.control} name="subject" render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Subject</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a subject" /></SelectTrigger></FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="Maths">Maths</SelectItem>
-                                                        <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-                                        
-                                        <FormField control={form.control} name="grade" render={({ field }) => (
-                                            <FormItem>
-                                                <FormLabel>Grade</FormLabel>
-                                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a grade" /></SelectTrigger></FormControl>
-                                                    <SelectContent>
-                                                        <SelectItem value="10">Grade 10</SelectItem>
-                                                        <SelectItem value="11">Grade 11</SelectItem>
-                                                        <SelectItem value="12">Grade 12</SelectItem>
-                                                    </SelectContent>
-                                                </Select>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-
-                                        <FormField control={form.control} name="pricingModel" render={({ field }) => (
-                                            <FormItem className="col-span-1 md:col-span-2">
-                                                <FormLabel>Pricing Model</FormLabel>
-                                                <FormControl>
-                                                    <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="grid grid-cols-3 gap-4">
-                                                        <Label className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary"><RadioGroupItem value="free" className="sr-only"/>Free</Label>
-                                                        <Label className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary"><RadioGroupItem value="purchase" className="sr-only"/>One-time Purchase</Label>
-                                                        <Label className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary"><RadioGroupItem value="subscription" className="sr-only"/>Subscription</Label>
-                                                    </RadioGroup>
-                                                </FormControl>
-                                                <FormMessage />
-                                            </FormItem>
-                                        )} />
-
-                                        {pricingModel === 'purchase' && (
-                                            <FormField control={form.control} name="price" render={({ field }) => (
-                                                <FormItem className="col-span-1 md:col-span-2">
-                                                    <FormLabel>Price (R)</FormLabel>
-                                                    <FormControl>
-                                                        <div className="relative">
-                                                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                                                            <Input type="number" placeholder="e.g. 499" className="pl-8" {...field} />
-                                                        </div>
-                                                    </FormControl>
-                                                    <FormMessage />
-                                                </FormItem>
-                                            )} />
-                                        )}
-                                    </div>
-                                    <DialogFooter>
-                                        <Button type="button" variant="ghost" onClick={() => setIsCourseDialogOpen(false)}>Cancel</Button>
-                                        <Button type="submit">Save Course</Button>
-                                    </DialogFooter>
-                                </form>
-                            </Form>
-                        </DialogContent>
-                    </Dialog>
+                    <Button onClick={handleAddNewCourse}><PlusCircle className="mr-2"/> Add New Course</Button>
                 </CardHeader>
                 <CardContent>
-                  {instructorData.courses.length > 0 ? (
+                  {courses.length > 0 ? (
                     <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {instructorData.courses.map((course) => (
+                      {courses.map((course) => (
                         <Card key={course.id} className="overflow-hidden shadow-md rounded-xl">
                           <CardHeader className="p-0 relative">
                             <Image src={course.thumbnail} alt={course.title} width={400} height={200} className="aspect-video object-cover" data-ai-hint="online course" />
@@ -325,8 +302,8 @@ export default function InstructorPage() {
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem><Edit className="mr-2"/>Edit Course</DropdownMenuItem>
-                                        <DropdownMenuItem className="text-destructive focus:text-destructive"><Trash2 className="mr-2"/>Delete Course</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleEditCourse(course)}><Edit className="mr-2"/>Edit Course</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleDeleteCourse(course)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2"/>Delete Course</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
@@ -400,6 +377,129 @@ export default function InstructorPage() {
           </TabsContent>
         </Tabs>
       </div>
+
+       <Dialog open={isCourseDialogOpen} onOpenChange={handleDialogOpenChange}>
+          <DialogContent className="sm:max-w-2xl">
+              <DialogHeader>
+                  <DialogTitle>{selectedCourse ? 'Edit' : 'Create New'} Course</DialogTitle>
+                  <DialogDescription>
+                    {selectedCourse ? 'Update the details for your course.' : 'Fill in the details below to create a new course.'}
+                  </DialogDescription>
+              </DialogHeader>
+              <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onCourseSubmit)} className="space-y-6 py-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="space-y-4 col-span-1 md:col-span-2">
+                              <Label>Thumbnail / Cover Image</Label>
+                              <div className="flex items-center justify-center w-full">
+                                  <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
+                                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                          <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                          <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                          <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 800x400px)</p>
+                                      </div>
+                                      <Input id="dropzone-file" type="file" className="hidden" />
+                                  </label>
+                              </div>
+                          </div>
+
+                          <FormField control={form.control} name="title" render={({ field }) => (
+                              <FormItem className="col-span-1 md:col-span-2">
+                                  <FormLabel>Course Title</FormLabel>
+                                  <FormControl><Input placeholder="e.g. Advanced Calculus" {...field} /></FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )} />
+                          
+                          <FormField control={form.control} name="description" render={({ field }) => (
+                              <FormItem className="col-span-1 md:col-span-2">
+                                  <FormLabel>Course Description</FormLabel>
+                                  <FormControl><Textarea placeholder="Describe your course..." rows={4} {...field} /></FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )} />
+
+                          <FormField control={form.control} name="subject" render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Subject</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                      <FormControl><SelectTrigger><SelectValue placeholder="Select a subject" /></SelectTrigger></FormControl>
+                                      <SelectContent>
+                                          <SelectItem value="Maths">Maths</SelectItem>
+                                          <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                      </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                              </FormItem>
+                          )} />
+                          
+                          <FormField control={form.control} name="grade" render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Grade</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                      <FormControl><SelectTrigger><SelectValue placeholder="Select a grade" /></SelectTrigger></FormControl>
+                                      <SelectContent>
+                                          <SelectItem value="10">Grade 10</SelectItem>
+                                          <SelectItem value="11">Grade 11</SelectItem>
+                                          <SelectItem value="12">Grade 12</SelectItem>
+                                      </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                              </FormItem>
+                          )} />
+
+                          <FormField control={form.control} name="pricingModel" render={({ field }) => (
+                              <FormItem className="col-span-1 md:col-span-2">
+                                  <FormLabel>Pricing Model</FormLabel>
+                                  <FormControl>
+                                      <RadioGroup onValueChange={field.onChange} value={field.value} className="grid grid-cols-3 gap-4">
+                                          <Label className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary"><RadioGroupItem value="free" className="sr-only"/>Free</Label>
+                                          <Label className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary"><RadioGroupItem value="purchase" className="sr-only"/>One-time Purchase</Label>
+                                          <Label className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-4 hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary"><RadioGroupItem value="subscription" className="sr-only"/>Subscription</Label>
+                                      </RadioGroup>
+                                  </FormControl>
+                                  <FormMessage />
+                              </FormItem>
+                          )} />
+
+                          {pricingModel === 'purchase' && (
+                              <FormField control={form.control} name="price" render={({ field }) => (
+                                  <FormItem className="col-span-1 md:col-span-2">
+                                      <FormLabel>Price (R)</FormLabel>
+                                      <FormControl>
+                                          <div className="relative">
+                                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                              <Input type="number" placeholder="e.g. 499" className="pl-8" {...field} value={field.value ?? ''} />
+                                          </div>
+                                      </FormControl>
+                                      <FormMessage />
+                                  </FormItem>
+                              )} />
+                          )}
+                      </div>
+                      <DialogFooter>
+                          <Button type="button" variant="ghost" onClick={() => handleDialogOpenChange(false)}>Cancel</Button>
+                          <Button type="submit">Save Course</Button>
+                      </DialogFooter>
+                  </form>
+              </Form>
+          </DialogContent>
+      </Dialog>
+      
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+            <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                    This action cannot be undone. This will permanently delete the course "{selectedCourse?.title}".
+                </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+                <AlertDialogCancel onClick={() => setSelectedCourse(null)}>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={confirmDeleteCourse} className={buttonVariants({ variant: "destructive" })}>Delete</AlertDialogAction>
+            </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AppLayout>
   );
 }
