@@ -1,4 +1,3 @@
-
 'use client';
 
 import { AppLayout } from "@/components/app-layout";
@@ -7,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "@/components/ui/chart";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,12 +20,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, DollarSign, Edit, MoreVertical, PlusCircle, Trash2, UploadCloud, Video } from "lucide-react";
+import { ArrowUpRight, DollarSign, Edit, Eye, MoreVertical, PlusCircle, Trash2, UploadCloud, Video } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { z } from "zod";
+import Link from "next/link";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const chartConfig = {
   engagement: { label: "Engagement", color: "hsl(var(--primary))" },
@@ -54,7 +55,13 @@ type CourseFormValues = z.infer<typeof courseFormSchema>;
 type Course = (typeof instructorData.courses)[0];
 
 export default function InstructorPage() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+  
+  const currentTab = searchParams.get('tab') || 'overview';
+
   const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
@@ -94,6 +101,12 @@ export default function InstructorPage() {
       });
     }
   }, [selectedCourse, form]);
+
+  const handleTabChange = (value: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('tab', value);
+    router.replace(`${pathname}?${params.toString()}`);
+  };
 
   const handleDialogOpenChange = (open: boolean) => {
     setIsCourseDialogOpen(open);
@@ -169,7 +182,7 @@ export default function InstructorPage() {
           <p className="text-muted-foreground">Manage your students, lessons, and earnings.</p>
         </div>
 
-        <Tabs defaultValue="courses" className="w-full">
+        <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full">
           <TabsList className="grid w-full grid-cols-5 max-w-2xl">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="courses">Courses</TabsTrigger>
@@ -302,8 +315,13 @@ export default function InstructorPage() {
                                 <DropdownMenu>
                                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
-                                        <DropdownMenuItem onClick={() => handleEditCourse(course)}><Edit className="mr-2"/>Edit Course</DropdownMenuItem>
-                                        <DropdownMenuItem onClick={() => handleDeleteCourse(course)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2"/>Delete Course</DropdownMenuItem>
+                                        <DropdownMenuItem asChild>
+                                          <Link href={`/instructor/courses/${course.id}`}>
+                                            <Eye className="mr-2 h-4 w-4"/>Preview Course
+                                          </Link>
+                                        </DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleEditCourse(course)}><Edit className="mr-2 h-4 w-4"/>Edit Course</DropdownMenuItem>
+                                        <DropdownMenuItem onClick={() => handleDeleteCourse(course)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete Course</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
                             </div>
