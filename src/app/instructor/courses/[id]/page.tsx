@@ -5,8 +5,9 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { instructorData } from "@/lib/data";
-import { ArrowLeft, CheckCircle, Clapperboard, PlayCircle, Star } from "lucide-react";
+import { ArrowLeft, CheckCircle, Clapperboard, PlayCircle, Settings, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
@@ -18,6 +19,7 @@ export default function CoursePreviewPage() {
     const course = instructorData.courses.find(c => c.id === courseId);
     
     const [activeVideo, setActiveVideo] = React.useState(course?.videos[0]);
+    const [quality, setQuality] = React.useState('720p');
 
     if (!course) {
         notFound();
@@ -39,17 +41,54 @@ export default function CoursePreviewPage() {
                     <div className="lg:col-span-2 space-y-6">
                         <Card className="overflow-hidden shadow-lg rounded-xl">
                             <CardHeader className="p-0">
-                                <div className="aspect-video bg-muted flex items-center justify-center">
-                                    <div className="w-full h-full bg-black flex flex-col items-center justify-center text-white">
-                                        <PlayCircle className="h-16 w-16 text-white/50" />
-                                        <p className="mt-2 text-lg font-semibold">{activeVideo?.title || 'Select a video to play'}</p>
-                                        <p className="text-sm text-muted-foreground">Video Player Placeholder</p>
-                                    </div>
+                                <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden">
+                                    {activeVideo ? (
+                                        <>
+                                            <video
+                                                key={activeVideo.id}
+                                                className="w-full h-full"
+                                                controls
+                                                src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                                            >
+                                                Your browser does not support the video tag.
+                                            </video>
+                                            <div className="absolute bottom-4 right-4 z-10">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="secondary" size="icon" className="text-white bg-black/50 hover:bg-black/80 border-white/20">
+                                                            <Settings className="h-5 w-5" />
+                                                            <span className="sr-only">Video Settings</span>
+                                                        </Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuLabel>Quality</DropdownMenuLabel>
+                                                        <DropdownMenuRadioGroup value={quality} onValueChange={setQuality}>
+                                                            <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
+                                                            <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
+                                                        </DropdownMenuRadioGroup>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </div>
+                                        </>
+                                    ) : (
+                                        <div className="w-full h-full bg-muted flex flex-col items-center justify-center text-center p-4">
+                                            <PlayCircle className="h-16 w-16 text-muted-foreground/50" />
+                                            <p className="mt-4 text-lg font-semibold">Select a video to play</p>
+                                            <p className="text-sm text-muted-foreground">Choose a lesson from the "Course Content" list.</p>
+                                        </div>
+                                    )}
                                 </div>
                             </CardHeader>
                             <CardContent className="p-6">
-                                <Badge variant="secondary" className="mb-2">{course.subject} - Grade {course.grade}</Badge>
-                                <CardTitle className="text-3xl">{course.title}</CardTitle>
+                                <div className="flex justify-between items-start">
+                                    <div>
+                                        <Badge variant="secondary" className="mb-2">{course.subject} - Grade {course.grade}</Badge>
+                                        <CardTitle className="text-3xl">{course.title}</CardTitle>
+                                    </div>
+                                    {activeVideo && <h2 className="text-xl font-semibold text-right flex-shrink-0 pl-4">{activeVideo.title}</h2>}
+                                </div>
                                 <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                     <div className="flex items-center gap-1">
                                         <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
