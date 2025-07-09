@@ -6,7 +6,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
@@ -75,6 +74,11 @@ export default function DashboardPage() {
     const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All', status: 'All' });
     const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
     const coursesPerPage = 6;
+    
+    // State for "My Purchased Courses" section on Overview tab
+    const [purchasedCourseFilters, setPurchasedCourseFilters] = React.useState({ search: '', subject: 'All' });
+    const [currentPurchasedCoursePage, setCurrentPurchasedCoursePage] = React.useState(1);
+    const purchasedCoursesPerPage = 3;
 
 
     const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
@@ -90,6 +94,11 @@ export default function DashboardPage() {
     const handleCourseFilterChange = (key: 'search' | 'subject' | 'grade' | 'status', value: string) => {
         setCourseFilters(prev => ({ ...prev, [key]: value }));
         setCurrentCoursePage(1);
+    };
+    
+    const handlePurchasedCourseFilterChange = (key: 'search' | 'subject', value: string) => {
+        setPurchasedCourseFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentPurchasedCoursePage(1);
     };
 
     const handleRefundRequest = (transaction: Transaction) => {
@@ -159,6 +168,23 @@ export default function DashboardPage() {
     
     const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
     const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
+
+    const purchasedCoursesWithDetails = React.useMemo(() => {
+        return instructorData.courses.filter(c => purchasedCourseIds.has(c.id));
+    }, [purchasedCourseIds]);
+
+    const filteredPurchasedCourses = React.useMemo(() => {
+        return purchasedCoursesWithDetails.filter(course => {
+            const searchMatch = purchasedCourseFilters.search.trim().toLowerCase() === '' ||
+                course.title.toLowerCase().includes(purchasedCourseFilters.search.trim().toLowerCase());
+            const subjectMatch = purchasedCourseFilters.subject === 'All' || course.subject === purchasedCourseFilters.subject;
+            return searchMatch && subjectMatch;
+        });
+    }, [purchasedCoursesWithDetails, purchasedCourseFilters]);
+
+    const totalPurchasedCoursePages = Math.ceil(filteredPurchasedCourses.length / purchasedCoursesPerPage);
+    const paginatedPurchasedCourses = filteredPurchasedCourses.slice((currentPurchasedCoursePage - 1) * purchasedCoursesPerPage, currentPurchasedCoursePage * purchasedCoursesPerPage);
+    const purchasedSubjects = ['All', ...Array.from(new Set(purchasedCoursesWithDetails.map(c => c.subject)))];
 
 
     const getStatusIcon = (status: SubmittedAssignment['status']) => {
@@ -248,30 +274,50 @@ export default function DashboardPage() {
                         </section>
 
                         <section>
-                            <div className="flex items-center justify-between mb-4">
-                                <h2 className="text-2xl font-semibold">My Purchased Courses</h2>
-                                <Button variant="outline" onClick={() => handleTabChange('courses')}>View All</Button>
-                            </div>
-                            {studentData.purchasedCourses.length > 0 ? (
-                                <Carousel
-                                    opts={{
-                                        align: "start",
-                                        loop: studentData.purchasedCourses.length > 2,
-                                    }}
-                                    className="w-full"
-                                >
-                                    <CarouselContent className="-ml-4">
-                                        {studentData.purchasedCourses.map((course) => (
-                                            <CarouselItem key={course.id} className="pl-4 md:basis-1/2 lg:basis-1/3">
-                                                <Card className="shadow-md rounded-xl overflow-hidden group flex flex-col h-full">
+                            <Card className="shadow-md rounded-xl">
+                                <CardHeader>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <div>
+                                            <CardTitle>My Purchased Courses</CardTitle>
+                                            <CardDescription>Courses you have enrolled in. Find all courses in the catalog.</CardDescription>
+                                        </div>
+                                        <Button variant="outline" onClick={() => handleTabChange('courses')}>View Full Catalog</Button>
+                                    </div>
+                                    <div className="flex items-center justify-between gap-2 pt-4">
+                                        <div className="relative flex-1">
+                                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="Search my courses..."
+                                                className="pl-8"
+                                                value={purchasedCourseFilters.search}
+                                                onChange={(e) => handlePurchasedCourseFilterChange('search', e.target.value)}
+                                            />
+                                        </div>
+                                        <Select value={purchasedCourseFilters.subject} onValueChange={(value) => handlePurchasedCourseFilterChange('subject', value)}>
+                                            <SelectTrigger className="w-full sm:w-[180px]">
+                                                <SelectValue placeholder="Filter by Subject" />
+                                            </SelectTrigger>
+                                            <SelectContent>
+                                                {purchasedSubjects.map(subject => (
+                                                  <SelectItem key={subject} value={subject}>{subject}</SelectItem>
+                                                ))}
+                                            </SelectContent>
+                                        </Select>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    {paginatedPurchasedCourses.length > 0 ? (
+                                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                            {paginatedPurchasedCourses.map((course) => (
+                                                <Card key={course.id} className="overflow-hidden group flex flex-col h-full">
                                                     <CardHeader className="p-0">
                                                         <div className="bg-primary/10 aspect-video flex items-center justify-center">
-                                                            <Image src="https://placehold.co/600x400.png" alt={course.name} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
+                                                            <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
                                                         </div>
                                                     </CardHeader>
                                                     <CardContent className="p-4 flex-grow">
-                                                        <Badge variant="secondary" className="mb-2">{course.category}</Badge>
-                                                        <h3 className="font-semibold text-lg">{course.name}</h3>
+                                                        <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
+                                                        <h3 className="font-semibold text-lg">{course.title}</h3>
                                                     </CardContent>
                                                     <CardFooter className="p-4 pt-0">
                                                         <Button variant="link" className="p-0 h-auto as-child">
@@ -281,18 +327,36 @@ export default function DashboardPage() {
                                                         </Button>
                                                     </CardFooter>
                                                 </Card>
-                                            </CarouselItem>
-                                        ))}
-                                    </CarouselContent>
-                                    <CarouselPrevious className="hidden sm:flex" />
-                                    <CarouselNext className="hidden sm:flex" />
-                                </Carousel>
-                            ) : (
-                                <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
-                                    <h3 className="text-lg font-semibold">No Courses Purchased</h3>
-                                    <p>Browse the course catalog to start learning!</p>
-                                </div>
-                            )}
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                                            <h3 className="text-lg font-semibold">No Courses Found</h3>
+                                            <p className="max-w-md mx-auto">{purchasedCourseFilters.search || purchasedCourseFilters.subject !== 'All' ? 'Try adjusting your search or filters.' : 'You haven\'t purchased any courses yet. Browse the catalog to start learning!'}</p>
+                                        </div>
+                                    )}
+                                </CardContent>
+                                <CardFooter className="flex items-center justify-between py-4">
+                                    <div className="text-xs text-muted-foreground">
+                                        Showing{" "}
+                                        <strong>
+                                            {filteredPurchasedCourses.length > 0 ? (currentPurchasedCoursePage - 1) * purchasedCoursesPerPage + 1 : 0}-
+                                            {Math.min(currentPurchasedCoursePage * purchasedCoursesPerPage, filteredPurchasedCourses.length)}
+                                        </strong>{" "}
+                                        of <strong>{filteredPurchasedCourses.length}</strong> courses.
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p - 1)} disabled={currentPurchasedCoursePage === 1}>
+                                            <ChevronLeft className="h-4 w-4 mr-1" />
+                                            Prev
+                                        </Button>
+                                        <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p + 1)} disabled={currentPurchasedCoursePage >= totalPurchasedCoursePages}>
+                                            Next
+                                            <ChevronRight className="h-4 w-4 ml-1" />
+                                        </Button>
+                                    </div>
+                                </CardFooter>
+                            </Card>
                         </section>
                     </TabsContent>
 
