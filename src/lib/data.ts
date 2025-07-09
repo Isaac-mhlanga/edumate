@@ -57,6 +57,8 @@ export const instructorData = {
         { id: 'A012', studentName: 'Emily White', assignmentTitle: 'Thermodynamics Problem Set', course: 'Physical Sciences G12', submittedDate: '2 hours ago', status: 'Pending Review', fileUrl: '#' },
         { id: 'A011', studentName: 'James Brown', assignmentTitle: 'Optics Lab Analysis', course: 'Physical Sciences G12', submittedDate: '1 day ago', status: 'Pending Review', fileUrl: '#' },
         { id: 'A010', studentName: 'Olivia Green', assignmentTitle: 'Algebra II Worksheet', course: 'Maths G11', submittedDate: '3 days ago', status: 'Pending Review', fileUrl: '#' },
+        { id: 'A013', studentName: 'Lucas Grey', assignmentTitle: 'Momentum Questions', course: 'Physical Sciences G11', submittedDate: '4 days ago', status: 'Pending Review', fileUrl: '#' },
+        { id: 'A014', studentName: 'Chloe Taylor', assignmentTitle: 'Stoichiometry Calculations', course: 'Physical Sciences G12', submittedDate: '4 days ago', status: 'Pending Review', fileUrl: '#' },
         { id: 'A009', studentName: 'Michael Chen', assignmentTitle: 'Calculus Derivatives Quiz', course: 'Maths G12', submittedDate: '5 days ago', status: 'Awaiting Payment', price: 150, fileUrl: '#' },
         { id: 'A008', studentName: 'Daniel Kim', assignmentTitle: 'Organic Chemistry Reactions', course: 'Physical Sciences G12', submittedDate: '1 week ago', status: 'Paid', price: 120, fileUrl: '#' },
     ],

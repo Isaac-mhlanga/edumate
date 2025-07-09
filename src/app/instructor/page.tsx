@@ -104,6 +104,10 @@ export default function InstructorPage() {
   const [currentTransactionPage, setCurrentTransactionPage] = React.useState(1);
   const transactionsPerPage = 7;
 
+  // State for overview pending assignments pagination
+  const [currentPendingAssignmentPage, setCurrentPendingAssignmentPage] = React.useState(1);
+  const pendingAssignmentsPerPage = 3;
+
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
@@ -342,6 +346,17 @@ export default function InstructorPage() {
   const totalRevenue = React.useMemo(() => transactions.filter(t => t.type !== 'Payout' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0), [transactions]);
   const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
 
+  // Overview Pending Assignments Pagination Logic
+  const pendingAssignments = React.useMemo(() => {
+    return submittedAssignments.filter(a => a.status === 'Pending Review');
+  }, [submittedAssignments]);
+  const totalPendingAssignmentPages = Math.ceil(pendingAssignments.length / pendingAssignmentsPerPage);
+  const paginatedPendingAssignments = pendingAssignments.slice(
+    (currentPendingAssignmentPage - 1) * pendingAssignmentsPerPage,
+    currentPendingAssignmentPage * pendingAssignmentsPerPage
+  );
+
+
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -398,25 +413,50 @@ export default function InstructorPage() {
                   </CardContent>
                 </Card>
                 
-                <Card className="shadow-md rounded-xl">
+                <Card className="shadow-md rounded-xl flex flex-col">
                   <CardHeader>
                     <CardTitle>Pending Assignments</CardTitle>
                     <CardDescription>Assignments waiting for your review.</CardDescription>
                   </CardHeader>
-                  <CardContent>
-                    <ul className="space-y-4">
-                      {submittedAssignments.filter(a => a.status === 'Pending Review').slice(0, 3).map((assignment) => (
-                        <li key={assignment.id} className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10"><AvatarFallback>{assignment.studentName.charAt(0)}</AvatarFallback></Avatar>
-                          <div className="flex-1">
-                            <p className="font-medium">{assignment.assignmentTitle}</p>
-                            <p className="text-sm text-muted-foreground">From {assignment.studentName} - {assignment.submittedDate}</p>
-                          </div>
-                          <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>Review</Button>
-                        </li>
-                      ))}
-                    </ul>
+                  <CardContent className="flex-grow">
+                    {paginatedPendingAssignments.length > 0 ? (
+                      <ul className="space-y-4">
+                        {paginatedPendingAssignments.map((assignment) => (
+                          <li key={assignment.id} className="flex items-center gap-4">
+                            <Avatar className="h-10 w-10"><AvatarFallback>{assignment.studentName.charAt(0)}</AvatarFallback></Avatar>
+                            <div className="flex-1">
+                              <p className="font-medium">{assignment.assignmentTitle}</p>
+                              <p className="text-sm text-muted-foreground">From {assignment.studentName} - {assignment.submittedDate}</p>
+                            </div>
+                            <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>Review</Button>
+                          </li>
+                        ))}
+                      </ul>
+                    ) : (
+                      <div className="text-center text-muted-foreground h-full flex flex-col justify-center items-center">
+                          <CheckCircle className="h-10 w-10 mb-2"/>
+                          <h3 className="font-semibold">All caught up!</h3>
+                          <p className="text-sm">No pending assignments to review.</p>
+                      </div>
+                    )}
                   </CardContent>
+                  {totalPendingAssignmentPages > 1 && (
+                    <CardFooter className="flex items-center justify-between border-t pt-4">
+                        <div className="text-xs text-muted-foreground">
+                            Page <strong>{currentPendingAssignmentPage}</strong> of <strong>{totalPendingAssignmentPages}</strong>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCurrentPendingAssignmentPage(p => p - 1)} disabled={currentPendingAssignmentPage === 1}>
+                                <ChevronLeft className="h-4 w-4" />
+                                <span className="sr-only">Previous</span>
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCurrentPendingAssignmentPage(p => p + 1)} disabled={currentPendingAssignmentPage >= totalPendingAssignmentPages}>
+                                <ChevronRight className="h-4 w-4" />
+                                <span className="sr-only">Next</span>
+                            </Button>
+                        </div>
+                    </CardFooter>
+                  )}
                 </Card>
               </section>
 
