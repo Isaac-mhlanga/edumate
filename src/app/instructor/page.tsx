@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, DollarSign, Edit, Eye, MoreVertical, PlusCircle, Trash2, UploadCloud, Video } from "lucide-react";
+import { ArrowUpRight, DollarSign, Edit, Eye, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -53,6 +53,7 @@ const courseFormSchema = z.object({
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
 type Course = (typeof instructorData.courses)[0];
+type SubmittedAssignment = (typeof instructorData.submittedAssignments)[0];
 
 export default function InstructorPage() {
   const router = useRouter();
@@ -63,9 +64,12 @@ export default function InstructorPage() {
   const currentTab = searchParams.get('tab') || 'overview';
 
   const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
+  const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>(instructorData.submittedAssignments);
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
+  const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
+  const [isReviewDialogOpen, setIsReviewDialogOpen] = React.useState(false);
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
@@ -108,12 +112,19 @@ export default function InstructorPage() {
     router.replace(`${pathname}?${params.toString()}`);
   };
 
-  const handleDialogOpenChange = (open: boolean) => {
+  const handleCourseDialogOpenChange = (open: boolean) => {
     setIsCourseDialogOpen(open);
     if (!open) {
       setSelectedCourse(null);
     }
   };
+
+  const handleReviewDialogOpenChange = (open: boolean) => {
+    setIsReviewDialogOpen(open);
+    if (!open) {
+      setSelectedAssignment(null);
+    }
+  }
 
   const handleAddNewCourse = () => {
     setSelectedCourse(null);
@@ -129,6 +140,11 @@ export default function InstructorPage() {
     setSelectedCourse(course);
     setIsDeleteDialogOpen(true);
   };
+
+  const handleReviewAssignment = (assignment: SubmittedAssignment) => {
+    setSelectedAssignment(assignment);
+    setIsReviewDialogOpen(true);
+  }
   
   const confirmDeleteCourse = () => {
     if (!selectedCourse) return;
@@ -172,6 +188,15 @@ export default function InstructorPage() {
     }
     setIsCourseDialogOpen(false);
     setSelectedCourse(null);
+  }
+
+  function handleSaveSolution(assignmentId: string, price: number) {
+    setSubmittedAssignments(assignments => assignments.map(a => a.id === assignmentId ? { ...a, status: 'Solution Provided', price: price } : a));
+    toast({
+        title: "Solution Uploaded!",
+        description: `The solution for the assignment has been uploaded and priced. The student will be notified.`
+    });
+    handleReviewDialogOpenChange(false);
   }
   
   return (
@@ -237,14 +262,14 @@ export default function InstructorPage() {
                   </CardHeader>
                   <CardContent>
                     <ul className="space-y-4">
-                      {instructorData.pendingAssignments.map((assignment) => (
+                      {submittedAssignments.filter(a => a.status === 'Pending Review').slice(0, 3).map((assignment) => (
                         <li key={assignment.id} className="flex items-center gap-4">
-                          <Avatar className="h-10 w-10"><AvatarFallback>{assignment.student.charAt(0)}</AvatarFallback></Avatar>
+                          <Avatar className="h-10 w-10"><AvatarFallback>{assignment.studentName.charAt(0)}</AvatarFallback></Avatar>
                           <div className="flex-1">
-                            <p className="font-medium">{assignment.title}</p>
-                            <p className="text-sm text-muted-foreground">From {assignment.student} - {assignment.received}</p>
+                            <p className="font-medium">{assignment.assignmentTitle}</p>
+                            <p className="text-sm text-muted-foreground">From {assignment.studentName} - {assignment.submittedDate}</p>
                           </div>
-                          <Button variant="outline" size="sm">Review</Button>
+                          <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>Review</Button>
                         </li>
                       ))}
                     </ul>
@@ -356,10 +381,48 @@ export default function InstructorPage() {
                     <CardDescription>Review submitted assignments, upload solutions, and set pricing.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                      <h3 className="text-lg font-semibold">No Assignments to Review</h3>
-                      <p className="text-muted-foreground mt-1">New student submissions will appear here.</p>
-                    </div>
+                    {submittedAssignments.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Student</TableHead>
+                                    <TableHead>Assignment</TableHead>
+                                    <TableHead>Course</TableHead>
+                                    <TableHead>Submitted</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {submittedAssignments.map((assignment) => (
+                                    <TableRow key={assignment.id}>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Avatar className="h-9 w-9 hidden sm:flex"><AvatarFallback>{assignment.studentName.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
+                                                <span className="font-medium">{assignment.studentName}</span>
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{assignment.assignmentTitle}</TableCell>
+                                        <TableCell><Badge variant="outline">{assignment.course}</Badge></TableCell>
+                                        <TableCell>{assignment.submittedDate}</TableCell>
+                                        <TableCell>
+                                            <Badge variant={assignment.status === 'Pending Review' ? 'destructive' : 'default'}>{assignment.status}</Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)} disabled={assignment.status !== 'Pending Review'}>
+                                                Review
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                            <h3 className="text-lg font-semibold">No Assignments to Review</h3>
+                            <p className="text-muted-foreground mt-1">New student submissions will appear here.</p>
+                        </div>
+                    )}
                 </CardContent>
             </Card>
           </TabsContent>
@@ -396,7 +459,7 @@ export default function InstructorPage() {
         </Tabs>
       </div>
 
-       <Dialog open={isCourseDialogOpen} onOpenChange={handleDialogOpenChange}>
+       <Dialog open={isCourseDialogOpen} onOpenChange={handleCourseDialogOpenChange}>
           <DialogContent className="sm:max-w-2xl">
               <DialogHeader>
                   <DialogTitle>{selectedCourse ? 'Edit' : 'Create New'} Course</DialogTitle>
@@ -410,13 +473,13 @@ export default function InstructorPage() {
                           <div className="space-y-4 col-span-1 md:col-span-2">
                               <Label>Thumbnail / Cover Image</Label>
                               <div className="flex items-center justify-center w-full">
-                                  <label htmlFor="dropzone-file" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
+                                  <label htmlFor="dropzone-file-course" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
                                       <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                           <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
                                           <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
                                           <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 800x400px)</p>
                                       </div>
-                                      <Input id="dropzone-file" type="file" className="hidden" />
+                                      <Input id="dropzone-file-course" type="file" className="hidden" />
                                   </label>
                               </div>
                           </div>
@@ -496,7 +559,7 @@ export default function InstructorPage() {
                           )}
                       </div>
                       <DialogFooter>
-                          <Button type="button" variant="ghost" onClick={() => handleDialogOpenChange(false)}>Cancel</Button>
+                          <Button type="button" variant="ghost" onClick={() => handleCourseDialogOpenChange(false)}>Cancel</Button>
                           <Button type="submit">Save Course</Button>
                       </DialogFooter>
                   </form>
@@ -518,6 +581,53 @@ export default function InstructorPage() {
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <Dialog open={isReviewDialogOpen} onOpenChange={handleReviewDialogOpenChange}>
+          <DialogContent className="sm:max-w-lg">
+              <DialogHeader>
+                  <DialogTitle>Review Assignment</DialogTitle>
+                  <DialogDescription>
+                      Review the student's submission, upload a solution, and set a price.
+                  </DialogDescription>
+              </DialogHeader>
+              {selectedAssignment && (
+                  <div className="space-y-6 py-4">
+                      <div className="space-y-2 p-4 rounded-lg bg-muted/50">
+                          <h4 className="font-semibold">Submission Details</h4>
+                          <p className="text-sm"><span className="text-muted-foreground">Student:</span> {selectedAssignment.studentName}</p>
+                          <p className="text-sm"><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.assignmentTitle}</p>
+                          <Button variant="outline" size="sm" asChild>
+                            <a href={selectedAssignment.fileUrl} download><Download className="mr-2 h-4 w-4"/>Download Submission</a>
+                          </Button>
+                      </div>
+                      <div className="space-y-2">
+                          <Label>Upload Solution</Label>
+                          <div className="flex items-center justify-center w-full">
+                              <label htmlFor="dropzone-file-solution" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
+                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                      <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                      <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                      <p className="text-xs text-muted-foreground">PDF, DOCX, or JPG</p>
+                                  </div>
+                                  <Input id="dropzone-file-solution" type="file" className="hidden" />
+                              </label>
+                          </div>
+                      </div>
+                       <div className="space-y-2">
+                          <Label>Set Price (R)</Label>
+                           <div className="relative">
+                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                <Input id="solution-price" type="number" placeholder="e.g. 150" className="pl-8"/>
+                           </div>
+                       </div>
+                      <DialogFooter>
+                          <Button type="button" variant="ghost" onClick={() => handleReviewDialogOpenChange(false)}>Cancel</Button>
+                          <Button type="button" onClick={() => handleSaveSolution(selectedAssignment.id, parseFloat((document.getElementById('solution-price') as HTMLInputElement).value || '0'))}>Save Solution</Button>
+                      </DialogFooter>
+                  </div>
+              )}
+          </DialogContent>
+      </Dialog>
     </AppLayout>
   );
 }

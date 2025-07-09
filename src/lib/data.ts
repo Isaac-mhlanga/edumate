@@ -32,10 +32,11 @@ export const instructorData = {
         { id: 'S003', name: 'David Lee', email: 'david.l@example.com', course: 'Grade 11 - Maths', joined: '2024-04-01' },
         { id: 'S004', name: 'Sarah Miller', email: 'sarah.m@example.com', course: 'Grade 12 - Maths', joined: '2024-04-05' },
     ],
-    pendingAssignments: [
-        { id: 'A012', student: 'Emily White', title: 'Thermodynamics Problem Set', received: '2 hours ago' },
-        { id: 'A011', student: 'James Brown', title: 'Optics Lab Analysis', received: '1 day ago' },
-        { id: 'A010', student: 'Olivia Green', title: 'Algebra II Worksheet', received: '3 days ago' },
+    submittedAssignments: [
+        { id: 'A012', studentName: 'Emily White', assignmentTitle: 'Thermodynamics Problem Set', course: 'Physical Sciences G12', submittedDate: '2 hours ago', status: 'Pending Review', fileUrl: '#' },
+        { id: 'A011', studentName: 'James Brown', assignmentTitle: 'Optics Lab Analysis', course: 'Physical Sciences G12', submittedDate: '1 day ago', status: 'Pending Review', fileUrl: '#' },
+        { id: 'A010', studentName: 'Olivia Green', assignmentTitle: 'Algebra II Worksheet', course: 'Maths G11', submittedDate: '3 days ago', status: 'Pending Review', fileUrl: '#' },
+        { id: 'A009', studentName: 'Michael Chen', assignmentTitle: 'Calculus Derivatives Quiz', course: 'Maths G12', submittedDate: '5 days ago', status: 'Solution Provided', price: 150, fileUrl: '#' },
     ],
     engagementData: [
         { month: "Jan", engagement: 186, income: 800 },
