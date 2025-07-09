@@ -60,6 +60,16 @@ export const instructorData = {
         { id: 'A009', studentName: 'Michael Chen', assignmentTitle: 'Calculus Derivatives Quiz', course: 'Maths G12', submittedDate: '5 days ago', status: 'Awaiting Payment', price: 150, fileUrl: '#' },
         { id: 'A008', studentName: 'Daniel Kim', assignmentTitle: 'Organic Chemistry Reactions', course: 'Physical Sciences G12', submittedDate: '1 week ago', status: 'Paid', price: 120, fileUrl: '#' },
     ],
+    transactions: [
+        { id: 'T001', studentName: 'Michael Chen', item: 'Calculus Fundamentals', type: 'Course Sale', status: 'Completed', amount: 499.00, date: '2024-05-20' },
+        { id: 'T002', studentName: 'Daniel Kim', item: 'Organic Chemistry Reactions', type: 'Assignment Sale', status: 'Completed', amount: 120.00, date: '2024-05-18' },
+        { id: 'T003', studentName: 'Jessica Rodriguez', item: 'Newtonian Mechanics', type: 'Subscription', status: 'Completed', amount: 150.00, date: '2024-05-15' },
+        { id: 'T004', studentName: 'Michael Chen', item: 'Calculus Fundamentals', type: 'Refund', status: 'Refunded', amount: -499.00, date: '2024-05-21' },
+        { id: 'T005', studentName: 'Sarah Miller', item: 'Grade 12 - All Subjects Bundle', type: 'Subscription', status: 'Completed', amount: 350.00, date: '2024-05-12' },
+        { id: 'T006', studentName: null, item: 'May 2024 Payout', type: 'Payout', status: 'Completed', amount: -2500.00, date: '2024-05-10' },
+        { id: 'T007', studentName: 'Ben Carter', item: 'Thermodynamics Problem Set', type: 'Assignment Sale', status: 'Pending', amount: 75.00, date: '2024-05-22' },
+        { id: 'T008', studentName: 'David Lee', item: 'Algebra Basics', type: 'Course Sale', status: 'Completed', amount: 250.00, date: '2024-05-05' },
+    ],
     engagementData: [
         { month: "Jan", engagement: 186, income: 800 },
         { month: "Feb", engagement: 305, income: 1200 },

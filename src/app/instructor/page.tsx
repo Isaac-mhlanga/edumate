@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, ListFilter, MoreVertical, PlusCircle, Search, Trash2, UploadCloud, UserMinus, Video, Download, ShieldCheck, GraduationCap } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -58,7 +58,7 @@ type CourseFormValues = z.infer<typeof courseFormSchema>;
 type Course = (typeof instructorData.courses)[0];
 type SubmittedAssignment = (typeof instructorData.submittedAssignments)[0];
 type EnrolledStudent = (typeof instructorData.enrolledStudents)[0];
-
+type Transaction = (typeof instructorData.transactions)[0];
 
 export default function InstructorPage() {
   const router = useRouter();
@@ -71,10 +71,12 @@ export default function InstructorPage() {
   const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>(instructorData.submittedAssignments);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
+  const [transactions, setTransactions] = React.useState<Transaction[]>(instructorData.transactions);
 
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
   const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
   const [selectedStudent, setSelectedStudent] = React.useState<EnrolledStudent | null>(null);
+  const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
   
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
@@ -82,6 +84,9 @@ export default function InstructorPage() {
   const [isStudentDetailsDialogOpen, setIsStudentDetailsDialogOpen] = React.useState(false);
   const [isUnenrollDialogOpen, setIsUnenrollDialogOpen] = React.useState(false);
   const [isDeleteStudentDialogOpen, setIsDeleteStudentDialogOpen] = React.useState(false);
+  const [isTransactionDetailsOpen, setIsTransactionDetailsOpen] = React.useState(false);
+  const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
+  const [isPayoutDialogOpen, setIsPayoutDialogOpen] = React.useState(false);
 
 
   // State for assignments filtering and pagination
@@ -93,6 +98,11 @@ export default function InstructorPage() {
   const [studentFilters, setStudentFilters] = React.useState({ search: '', course: 'All' });
   const [currentStudentPage, setCurrentStudentPage] = React.useState(1);
   const studentsPerPage = 5;
+
+  // State for transactions filtering and pagination
+  const [transactionFilters, setTransactionFilters] = React.useState({ search: '', type: 'All' });
+  const [currentTransactionPage, setCurrentTransactionPage] = React.useState(1);
+  const transactionsPerPage = 7;
 
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
@@ -288,7 +298,50 @@ export default function InstructorPage() {
   const paginatedStudents = filteredStudents.slice((currentStudentPage - 1) * studentsPerPage, currentStudentPage * studentsPerPage);
 
   const studentCourses = ['All', ...Array.from(new Set(instructorData.enrolledStudents.map(s => s.course)))];
+
+  // Transactions filtering and pagination logic
+  const handleTransactionFilterChange = (key: 'search' | 'type', value: string) => {
+    setTransactionFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentTransactionPage(1);
+  };
+
+  const handleTransactionAction = (transaction: Transaction, action: 'view' | 'refund') => {
+    setSelectedTransaction(transaction);
+    if (action === 'view') setIsTransactionDetailsOpen(true);
+    if (action === 'refund') setIsRefundDialogOpen(true);
+  };
+
+  const confirmRefundTransaction = () => {
+    if (!selectedTransaction) return;
+    setTransactions(transactions.map(t => t.id === selectedTransaction.id ? { ...t, status: 'Refunded' } : t));
+    toast({ title: "Refund Processed", description: `Transaction ${selectedTransaction.id} has been refunded.` });
+    setIsRefundDialogOpen(false);
+    setSelectedTransaction(null);
+  };
+
+  const handlePayoutRequest = (amount: number) => {
+    toast({ title: "Payout Requested", description: `Your request to withdraw R ${amount.toFixed(2)} has been submitted.` });
+    setIsPayoutDialogOpen(false);
+  };
+
+  const filteredTransactions = React.useMemo(() => {
+    return transactions.filter(transaction => {
+      const searchMatch = transactionFilters.search.trim().toLowerCase() === '' ||
+        transaction.item.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()) ||
+        (transaction.studentName && transaction.studentName.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()));
+      
+      const typeMatch = transactionFilters.type === 'All' || transaction.type === transactionFilters.type;
+
+      return searchMatch && typeMatch;
+    });
+  }, [transactions, transactionFilters]);
+
+  const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+  const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
   
+  const totalRevenue = React.useMemo(() => transactions.filter(t => t.type !== 'Payout' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0), [transactions]);
+  const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
+
   return (
     <AppLayout>
       <div className="space-y-8">
@@ -704,18 +757,188 @@ export default function InstructorPage() {
             </Card>
           </TabsContent>
 
-          <TabsContent value="earnings" className="pt-6">
+          <TabsContent value="earnings" className="pt-6 space-y-6">
+            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                        <DollarSign className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">R {totalRevenue.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground">All-time earnings from sales.</p>
+                    </CardContent>
+                </Card>
+                <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Available for Payout</CardTitle>
+                        <Banknote className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">R {availableForPayout.toFixed(2)}</div>
+                        <p className="text-xs text-muted-foreground">Current account balance.</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Course Sales</CardTitle>
+                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            +R {transactions.filter(t => t.type === 'Course Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                        </div>
+                        <p className="text-xs text-muted-foreground">From one-time purchases.</p>
+                    </CardContent>
+                </Card>
+                 <Card>
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                        <CardTitle className="text-sm font-medium">Assignment Sales</CardTitle>
+                        <ReceiptText className="h-4 w-4 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                        <div className="text-2xl font-bold">
+                            +R {transactions.filter(t => t.type === 'Assignment Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                        </div>
+                        <p className="text-xs text-muted-foreground">From paid solutions.</p>
+                    </CardContent>
+                </Card>
+            </div>
              <Card>
-                <CardHeader>
-                    <CardTitle>Earnings & Transactions</CardTitle>
-                    <CardDescription>Track your revenue from courses and assignments.</CardDescription>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                      <h3 className="text-lg font-semibold">No Transactions Yet</h3>
-                      <p className="text-muted-foreground mt-1">Your sales and earnings will be displayed here.</p>
+                <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                        <CardTitle>Transaction History</CardTitle>
+                        <CardDescription>A detailed log of all your financial activities.</CardDescription>
                     </div>
+                     <Button onClick={() => setIsPayoutDialogOpen(true)}>Request Payout</Button>
+                </CardHeader>
+                <div className="flex items-center justify-between gap-2 p-4 border-y">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by item or student..."
+                            className="pl-8"
+                            value={transactionFilters.search}
+                            onChange={(e) => handleTransactionFilterChange('search', e.target.value)}
+                        />
+                    </div>
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="gap-1">
+                                <ListFilter className="h-3.5 w-3.5" />
+                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Type</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={transactionFilters.type} onValueChange={(value) => handleTransactionFilterChange('type', value)}>
+                                <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Course Sale">Course Sale</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Assignment Sale">Assignment Sale</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Subscription">Subscription</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Refund">Refund</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Payout">Payout</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button variant="outline" className="gap-1.5">
+                        <CalendarDays className="h-4 w-4" />
+                        <span>Filter by Date</span>
+                    </Button>
+                </div>
+                 <CardContent className="p-0">
+                    {paginatedTransactions.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Item / Description</TableHead>
+                                    <TableHead>Student</TableHead>
+                                    <TableHead>Type</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead>Date</TableHead>
+                                    <TableHead className="text-right">Amount (R)</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {paginatedTransactions.map((transaction) => (
+                                    <TableRow key={transaction.id}>
+                                        <TableCell className="font-medium">{transaction.item}</TableCell>
+                                        <TableCell className="text-muted-foreground">{transaction.studentName || 'N/A'}</TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className="gap-1.5">
+                                                {transaction.type === 'Course Sale' && <GraduationCap className="h-3 w-3" />}
+                                                {transaction.type === 'Assignment Sale' && <ReceiptText className="h-3 w-3" />}
+                                                {transaction.type === 'Subscription' && <ShieldCheck className="h-3 w-3" />}
+                                                {transaction.type === 'Refund' && <Undo2 className="h-3 w-3" />}
+                                                {transaction.type === 'Payout' && <Banknote className="h-3 w-3" />}
+                                                {transaction.type}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                             <Badge
+                                                variant={transaction.status === 'Completed' ? 'default' : transaction.status === 'Refunded' ? 'destructive' : 'secondary'}
+                                                className={
+                                                    transaction.status === 'Completed' ? 'bg-green-500/20 text-green-700 border-green-500/30' 
+                                                    : transaction.status === 'Refunded' ? 'bg-red-500/20 text-red-700 border-red-500/30'
+                                                    : 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30'
+                                                }
+                                             >
+                                                {transaction.status === 'Completed' && <CheckCircle className="mr-1 h-3 w-3" />}
+                                                {transaction.status === 'Refunded' && <XCircle className="mr-1 h-3 w-3" />}
+                                                {transaction.status === 'Pending' && <Hourglass className="mr-1 h-3 w-3" />}
+                                                {transaction.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-muted-foreground">{transaction.date}</TableCell>
+                                        <TableCell className={`text-right font-semibold ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                            {transaction.amount > 0 ? `+${transaction.amount.toFixed(2)}` : transaction.amount.toFixed(2)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'view')}><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
+                                                    {transaction.type !== 'Payout' && transaction.status === 'Completed' && (
+                                                        <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'refund')} className="text-destructive focus:text-destructive"><Undo2 className="mr-2 h-4 w-4"/>Issue Refund</DropdownMenuItem>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                         <div className="text-center py-16">
+                            <h3 className="text-lg font-semibold">No Transactions Found</h3>
+                            <p className="text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
+                        </div>
+                    )}
                 </CardContent>
+                <CardFooter className="flex items-center justify-between py-4">
+                    <div className="text-xs text-muted-foreground">
+                        Showing{" "}
+                        <strong>
+                            {filteredTransactions.length > 0 ? (currentTransactionPage - 1) * transactionsPerPage + 1 : 0}-
+                            {Math.min(currentTransactionPage * transactionsPerPage, filteredTransactions.length)}
+                        </strong>{" "}
+                        of <strong>{filteredTransactions.length}</strong> transactions.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p - 1)} disabled={currentTransactionPage === 1}>
+                            <ChevronLeft className="h-4 w-4 mr-1" />
+                            Prev
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p + 1)} disabled={currentTransactionPage >= totalTransactionPages}>
+                            Next
+                            <ChevronRight className="h-4 w-4 ml-1" />
+                        </Button>
+                    </div>
+                </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>
@@ -990,6 +1213,92 @@ export default function InstructorPage() {
           </AlertDialogContent>
       </AlertDialog>
 
+        {/* Transaction Dialogs */}
+        <Dialog open={isTransactionDetailsOpen} onOpenChange={setIsTransactionDetailsOpen}>
+            <DialogContent>
+                {selectedTransaction && (
+                    <>
+                        <DialogHeader>
+                            <DialogTitle>Transaction Details</DialogTitle>
+                            <DialogDescription>Transaction ID: {selectedTransaction.id}</DialogDescription>
+                        </DialogHeader>
+                        <div className="space-y-4 py-4">
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Item</span>
+                                <span className="font-medium">{selectedTransaction.item}</span>
+                            </div>
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Student</span>
+                                <span className="font-medium">{selectedTransaction.studentName || 'N/A'}</span>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Date</span>
+                                <span className="font-medium">{selectedTransaction.date}</span>
+                            </div>
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Type</span>
+                                <span className="font-medium">{selectedTransaction.type}</span>
+                            </div>
+                             <div className="flex justify-between items-center">
+                                <span className="text-muted-foreground">Status</span>
+                                <span className="font-medium">{selectedTransaction.status}</span>
+                            </div>
+                            <Separator />
+                            <div className="flex justify-between items-center text-lg">
+                                <span className="text-muted-foreground">Amount</span>
+                                <span className="font-bold">R {selectedTransaction.amount.toFixed(2)}</span>
+                            </div>
+                        </div>
+                         <DialogFooter>
+                            <Button variant="outline" onClick={() => setIsTransactionDetailsOpen(false)}>Close</Button>
+                        </DialogFooter>
+                    </>
+                )}
+            </DialogContent>
+        </Dialog>
+        
+        <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        Are you sure you want to refund this transaction?
+                        <div className="p-2 mt-2 bg-muted rounded-md text-sm">
+                            <strong>{selectedTransaction?.item}</strong> for <strong>R {selectedTransaction?.amount.toFixed(2)}</strong>
+                        </div>
+                        This action cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel onClick={() => setSelectedTransaction(null)}>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={confirmRefundTransaction} className={buttonVariants({ variant: "destructive" })}>Confirm Refund</AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+
+        <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
+            <DialogContent>
+                <DialogHeader>
+                    <DialogTitle>Request Payout</DialogTitle>
+                    <DialogDescription>Withdraw funds to your linked bank account.</DialogDescription>
+                </DialogHeader>
+                 <div className="space-y-4 py-4">
+                    <div className="p-4 rounded-lg bg-muted/50">
+                        <p className="text-sm text-muted-foreground">Available Balance</p>
+                        <p className="text-3xl font-bold">R {availableForPayout.toFixed(2)}</p>
+                    </div>
+                    <div>
+                        <Label htmlFor="payout-amount">Amount to withdraw (R)</Label>
+                        <Input id="payout-amount" type="number" placeholder="e.g. 1000" defaultValue={availableForPayout > 0 ? availableForPayout.toFixed(2) : ''} />
+                    </div>
+                 </div>
+                <DialogFooter>
+                    <Button variant="ghost" onClick={() => setIsPayoutDialogOpen(false)}>Cancel</Button>
+                    <Button onClick={() => handlePayoutRequest(parseFloat((document.getElementById('payout-amount') as HTMLInputElement).value || '0'))}>Request Payout</Button>
+                </DialogFooter>
+            </DialogContent>
+        </Dialog>
     </AppLayout>
   );
 }
