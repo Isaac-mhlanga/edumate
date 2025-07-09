@@ -20,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, DollarSign, Edit, Eye, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download } from "lucide-react";
+import { ArrowUpRight, CheckCircle, CircleDollarSign, DollarSign, Edit, Eye, Hourglass, MoreVertical, PlusCircle, Trash2, UploadCloud, Video, Download } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -191,10 +191,10 @@ export default function InstructorPage() {
   }
 
   function handleSaveSolution(assignmentId: string, price: number) {
-    setSubmittedAssignments(assignments => assignments.map(a => a.id === assignmentId ? { ...a, status: 'Solution Provided', price: price } : a));
+    setSubmittedAssignments(assignments => assignments.map(a => a.id === assignmentId ? { ...a, status: 'Awaiting Payment', price: price } : a));
     toast({
         title: "Solution Uploaded!",
-        description: `The solution for the assignment has been uploaded and priced. The student will be notified.`
+        description: `The solution has been priced and is now awaiting student payment.`
     });
     handleReviewDialogOpenChange(false);
   }
@@ -406,11 +406,29 @@ export default function InstructorPage() {
                                         <TableCell><Badge variant="outline">{assignment.course}</Badge></TableCell>
                                         <TableCell>{assignment.submittedDate}</TableCell>
                                         <TableCell>
-                                            <Badge variant={assignment.status === 'Pending Review' ? 'destructive' : 'default'}>{assignment.status}</Badge>
+                                            <Badge
+                                                variant={
+                                                    assignment.status === 'Paid' ? 'default'
+                                                    : assignment.status === 'Awaiting Payment' ? 'secondary'
+                                                    : 'outline'
+                                                }
+                                                className={
+                                                    assignment.status === 'Paid'
+                                                    ? 'bg-green-500/20 text-green-700 border-green-500/30 dark:text-green-400'
+                                                    : assignment.status === 'Awaiting Payment'
+                                                    ? 'bg-blue-500/20 text-blue-700 border-blue-500/30 dark:text-blue-400'
+                                                    : 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:text-yellow-400'
+                                                }
+                                            >
+                                                {assignment.status === 'Paid' && <CheckCircle className="mr-1 h-3 w-3" />}
+                                                {assignment.status === 'Awaiting Payment' && <CircleDollarSign className="mr-1 h-3 w-3" />}
+                                                {assignment.status === 'Pending Review' && <Hourglass className="mr-1 h-3 w-3" />}
+                                                {assignment.status}
+                                            </Badge>
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)} disabled={assignment.status !== 'Pending Review'}>
-                                                Review
+                                            <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>
+                                                {assignment.status === 'Pending Review' ? 'Review' : 'View/Update'}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -617,7 +635,7 @@ export default function InstructorPage() {
                           <Label>Set Price (R)</Label>
                            <div className="relative">
                                 <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                                <Input id="solution-price" type="number" placeholder="e.g. 150" className="pl-8"/>
+                                <Input id="solution-price" type="number" placeholder="e.g. 150" className="pl-8" defaultValue={selectedAssignment.price ?? ''} />
                            </div>
                        </div>
                       <DialogFooter>
