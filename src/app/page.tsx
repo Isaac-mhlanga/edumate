@@ -35,21 +35,6 @@ export default function Home() {
     },
   ];
 
-  const handleTutorSearch = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    const formData = new FormData(e.currentTarget);
-    const subject = formData.get('subject');
-    const grade = formData.get('grade');
-    const location = formData.get('location');
-
-    const params = new URLSearchParams();
-    if (subject) params.append('subject', subject.toString());
-    if (grade) params.append('grade', grade.toString());
-    if (location) params.append('location', location.toString());
-
-    router.push(`/tutors?${params.toString()}`);
-  }
-
   return (
     <div className="flex flex-col min-h-screen bg-background">
       <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
@@ -60,7 +45,7 @@ export default function Home() {
           </Link>
           <nav className="hidden md:flex items-center gap-6">
             <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
-            <Link href="#tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
+            <Link href="/tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
             <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
           </nav>
           <div className="flex items-center gap-2">
@@ -134,57 +119,8 @@ export default function Home() {
             </div>
           </div>
         </section>
-
-        <section id="tutors" className="py-16 md:py-24">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-bold">Find Your Perfect Tutor</h2>
-                    <p className="text-lg text-muted-foreground mt-2">Get personalized help from our network of expert tutors.</p>
-                </div>
-                 <form onSubmit={handleTutorSearch}>
-                    <Card className="max-w-4xl mx-auto p-4 md:p-6 shadow-xl rounded-xl">
-                        <div className="grid grid-cols-1 md:grid-cols-4 items-end gap-4">
-                            <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div>
-                                    <label className="text-sm font-medium">Subject</label>
-                                    <Select name="subject">
-                                        <SelectTrigger><SelectValue placeholder="e.g. Maths" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="Maths">Maths</SelectItem>
-                                            <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                                <div>
-                                    <label className="text-sm font-medium">Grade</label>
-                                    <Select name="grade">
-                                        <SelectTrigger><SelectValue placeholder="e.g. Grade 12" /></SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="10">Grade 10</SelectItem>
-                                            <SelectItem value="11">Grade 11</SelectItem>
-                                            <SelectItem value="12">Grade 12</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-                            </div>
-                            <div>
-                                <label className="text-sm font-medium">Location</label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input name="location" placeholder="e.g. Cape Town" className="pl-10" />
-                                </div>
-                            </div>
-                            <Button type="submit" size="lg" className="h-14 md:h-auto">
-                                <Search className="mr-2 h-5 w-5" />
-                                Search
-                            </Button>
-                        </div>
-                    </Card>
-                </form>
-            </div>
-        </section>
         
-        <section className="bg-card py-16 md:py-24">
+        <section className="bg-background py-16 md:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="grid md:grid-cols-2 gap-12 items-center">
                     <div>
