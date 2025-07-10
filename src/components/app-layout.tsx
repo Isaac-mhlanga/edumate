@@ -36,7 +36,8 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { getAuth, onAuthStateChanged, signOut, type User } from 'firebase/auth';
-import { app } from '@/lib/firebase/config';
+import { initializeApp, getApps, getApp } from 'firebase/app';
+import { firebaseConfig } from '@/lib/firebase/config';
 import { useToast } from '@/hooks/use-toast';
 
 const menuItems = [
@@ -62,14 +63,18 @@ const menuItems = [
   },
 ];
 
+// Initialize Firebase on the client
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+
+
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { toast } = useToast();
   const [user, setUser] = React.useState<User | null>(null);
   const [loading, setLoading] = React.useState(true);
-  const auth = getAuth(app);
-
+  
   React.useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
@@ -81,7 +86,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     });
 
     return () => unsubscribe();
-  }, [auth]);
+  }, []);
 
   const handleLogout = async () => {
     try {
