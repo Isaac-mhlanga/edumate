@@ -107,10 +107,6 @@ function SettingsPage() {
   if (loading) {
     return (
       <div className="space-y-6">
-        <div className="space-y-2">
-            <Skeleton className="h-8 w-1/3" />
-            <Skeleton className="h-4 w-1/2" />
-        </div>
         <Card>
             <CardHeader><Skeleton className="h-6 w-1/4" /></CardHeader>
             <CardContent className="space-y-4">
@@ -126,14 +122,6 @@ function SettingsPage() {
 
   return (
     <div className="space-y-8">
-        <div>
-            <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                <UserCircle className="h-8 w-8 text-primary"/>
-                Account Settings
-            </h1>
-            <p className="text-muted-foreground">Manage your profile and account settings.</p>
-        </div>
-
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)}>
           <Card>

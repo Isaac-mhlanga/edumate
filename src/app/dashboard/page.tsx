@@ -194,12 +194,7 @@ function DashboardPage() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Welcome back, {studentData.name.split(' ')[0]}!</h1>
-                <p className="text-muted-foreground">Let's continue your learning journey.</p>
-            </div>
-
-            <div className="pt-6">
+            <div className="space-y-8">
                 {currentTab === 'overview' && (
                     <div className="space-y-8">
                         <section className="grid gap-6 md:grid-cols-3">

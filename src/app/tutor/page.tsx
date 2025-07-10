@@ -65,12 +65,7 @@ function TutorPage() {
 
     return (
         <div className="space-y-8">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Tutor Dashboard</h1>
-                <p className="text-muted-foreground">Manage your profile, bookings, and student interactions.</p>
-            </div>
-
-            <div className="pt-6">
+            <div className="space-y-8">
                 {currentTab === 'overview' && (
                     <div className="space-y-8">
                         <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">

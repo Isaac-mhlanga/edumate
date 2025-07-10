@@ -269,11 +269,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
-        <header className="flex h-16 items-center justify-between border-b bg-card px-6">
+        <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-card px-6">
             <SidebarTrigger />
             <ThemeToggle />
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-x-hidden">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
             {children}
         </main>
       </SidebarInset>
