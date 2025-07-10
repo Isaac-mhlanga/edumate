@@ -1,5 +1,6 @@
 
-import { BarChart, Book, CheckCircle, Clock, DollarSign, Users } from "lucide-react";
+
+import { BarChart, Book, CheckCircle, Clock, DollarSign, Users, MessageSquare, Calendar, UserCog } from "lucide-react";
 
 export const studentData = {
     name: "Alex Johnson",
@@ -188,10 +189,50 @@ export const instructorData = {
     ]
 };
 
+export const tutorData = {
+    name: "John Smith",
+    email: "john.smith.tutor@example.com",
+    avatar: "https://placehold.co/100x100.png",
+    bio: "Passionate and experienced Maths and Science tutor with over 10 years of experience helping students achieve their academic goals. I specialize in breaking down complex concepts into easy-to-understand lessons.",
+    hourlyRate: 250,
+    subjects: ["Maths", "Physical Sciences"],
+    grades: ["10", "11", "12"],
+    location: "Cape Town, Western Cape",
+    availability: [
+        { day: "Monday", slots: ["15:00 - 16:00", "16:00 - 17:00"] },
+        { day: "Tuesday", slots: [] },
+        { day: "Wednesday", slots: ["15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00"] },
+        { day: "Thursday", slots: [] },
+        { day: "Friday", slots: ["14:00 - 15:00"] },
+        { day: "Saturday", slots: ["10:00 - 11:00", "11:00 - 12:00"] },
+        { day: "Sunday", slots: [] },
+    ],
+    stats: [
+        { title: "Total Students", value: "24", icon: Users, change: "+2 this month" },
+        { title: "Upcoming Bookings", value: "8", icon: Calendar, change: "" },
+        { title: "Monthly Earnings", value: "R 7,500", icon: DollarSign, change: "+15%" },
+        { title: "Unread Messages", value: "3", icon: MessageSquare, change: "" },
+    ],
+    bookings: [
+        { id: 'B001', studentName: 'Alice Johnson', date: '2024-06-10', time: '15:00 - 16:00', subject: 'Maths G12', status: 'Confirmed' },
+        { id: 'B002', studentName: 'Bob Williams', date: '2024-06-12', time: '16:00 - 17:00', subject: 'Physics G11', status: 'Confirmed' },
+        { id: 'B003', studentName: 'Charlie Brown', date: '2024-06-08', time: '10:00 - 11:00', subject: 'Maths G10', status: 'Completed' },
+        { id: 'B004', studentName: 'Diana Prince', date: '2024-06-05', time: '17:00 - 18:00', subject: 'Chemistry G12', status: 'Completed' },
+        { id: 'B005', studentName: 'Eve Adams', date: '2024-06-15', time: '14:00 - 15:00', subject: 'Maths G12', status: 'Pending Confirmation' },
+    ],
+    messages: [
+        { id: 'M001', studentName: 'Alice Johnson', subject: 'Question about upcoming session', snippet: 'Hi John, just wanted to confirm if we can focus on...', timestamp: '2 hours ago', unread: true },
+        { id: 'M002', studentName: 'Frank Castle', subject: 'Booking Request', snippet: 'Hello, are you available for a session next week?', timestamp: '1 day ago', unread: true },
+        { id: 'M003', studentName: 'Grace Lee', subject: 'Thank you!', snippet: 'Thanks for the great session yesterday, it really helped!', timestamp: '2 days ago', unread: false },
+        { id: 'M004', studentName: 'Heidi Turner', subject: 'Reschedule request', snippet: 'Hi John, would it be possible to move our session...', timestamp: '3 days ago', unread: true },
+    ]
+};
+
 const allUsers = [
     { id: 'I001', name: 'Dr. Evelyn Reed', email: 'evelyn.r@example.com', role: 'Instructor', joined: '2023-01-10', status: 'Active' },
     ...instructorData.enrolledStudents.map(s => ({...s, role: 'Student', status: 'Active'})),
     { id: 'I002', name: 'Dr. Alan Grant', email: 'alan.g@example.com', role: 'Instructor', joined: '2023-05-22', status: 'Suspended' },
+    { id: 'T001', name: 'John Smith', email: 'john.smith.tutor@example.com', role: 'Tutor', joined: '2023-02-14', status: 'Active' },
     { id: 'S006', name: 'Emily White', email: 'emily.w@example.com', role: 'Student', joined: '2024-04-12', status: 'Active' },
     { id: 'S007', name: 'James Brown', email: 'james.b@example.com', role: 'Student', joined: '2024-04-18', status: 'Active' },
 ];
@@ -264,3 +305,5 @@ export const adminData = {
         { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
     ]
 };
+
+    

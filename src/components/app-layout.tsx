@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import {
@@ -27,6 +28,7 @@ import {
   Moon,
   Shield,
   BookOpen,
+  UserCircle,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
@@ -43,7 +45,12 @@ const menuItems = [
   {
     href: '/instructor',
     label: 'Instructor Dashboard',
-    icon: Users,
+    icon: BookOpen,
+  },
+  {
+    href: '/tutor',
+    label: 'Tutor Dashboard',
+    icon: UserCircle,
   },
   {
     href: '/admin',
@@ -136,3 +143,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    

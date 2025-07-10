@@ -1,9 +1,12 @@
 
+
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { CheckCircle2, GraduationCap, Laptop, Users } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { CheckCircle2, GraduationCap, Laptop, MapPin, Search, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -28,22 +31,25 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background">
-      <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2">
-          <Icons.logo className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold">Edumate Pro</span>
-        </Link>
-        <nav className="hidden md:flex items-center gap-6">
-          <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
-          <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
-        </nav>
-        <div className="flex items-center gap-2">
-            <Button variant="ghost" asChild>
-                <Link href="/login">Log In</Link>
-            </Button>
-            <Button asChild>
-                <Link href="/register">Get Started</Link>
-            </Button>
+      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2">
+            <Icons.logo className="h-8 w-8 text-primary" />
+            <span className="text-xl font-bold">Edumate Pro</span>
+          </Link>
+          <nav className="hidden md:flex items-center gap-6">
+            <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
+            <Link href="#tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
+            <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
+          </nav>
+          <div className="flex items-center gap-2">
+              <Button variant="ghost" asChild>
+                  <Link href="/login">Log In</Link>
+              </Button>
+              <Button asChild>
+                  <Link href="/register">Get Started</Link>
+              </Button>
+          </div>
         </div>
       </header>
 
@@ -56,7 +62,7 @@ export default function Home() {
             playsInline
             className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
           >
-            <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+            <source src="https://cdn.pixabay.com/video/2021/08/20/84993-590059345_large.mp4" type="video/mp4" />
             Your browser does not support the video tag.
           </video>
           <div className="absolute inset-0 bg-black/60 z-10"></div>
@@ -107,36 +113,85 @@ export default function Home() {
             </div>
           </div>
         </section>
-        
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-                <div>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Learn on Your Terms</h2>
-                    <p className="text-muted-foreground mb-6">Our platform is built to be flexible and accessible, so you can learn whenever and wherever you want.</p>
-                    <ul className="space-y-4">
-                        <li className="flex items-start gap-3">
-                            <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
-                            <span><span className="font-semibold">AI-Powered Summaries:</span> Quickly grasp key concepts from any lesson with intelligent, auto-generated summaries.</span>
-                        </li>
-                        <li className="flex items-start gap-3">
-                            <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
-                            <span><span className="font-semibold">Personalized Dashboards:</span> Track your progress, manage subscriptions, and view your entire learning history in one place.</span>
-                        </li>
-                         <li className="flex items-start gap-3">
-                            <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
-                            <span><span className="font-semibold">Seamless Payments:</span> Securely pay for courses, assignments, and tutoring sessions with our integrated payment system.</span>
-                        </li>
-                    </ul>
+
+        <section id="tutors" className="py-16 md:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-bold">Find Your Perfect Tutor</h2>
+                    <p className="text-lg text-muted-foreground mt-2">Get personalized help from our network of expert tutors.</p>
                 </div>
-                 <div>
-                    <Image 
-                        src="https://placehold.co/600x400.png"
-                        alt="Student learning online"
-                        width={600}
-                        height={400}
-                        className="rounded-xl shadow-2xl"
-                        data-ai-hint="student learning"
-                    />
+                <Card className="max-w-4xl mx-auto p-4 md:p-6 shadow-xl rounded-xl">
+                    <div className="grid grid-cols-1 md:grid-cols-4 items-end gap-4">
+                        <div className="md:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                             <div>
+                                <label className="text-sm font-medium">Subject</label>
+                                <Select>
+                                    <SelectTrigger><SelectValue placeholder="e.g. Maths" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="maths">Maths</SelectItem>
+                                        <SelectItem value="physics">Physical Sciences</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <label className="text-sm font-medium">Grade</label>
+                                <Select>
+                                    <SelectTrigger><SelectValue placeholder="e.g. Grade 12" /></SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="10">Grade 10</SelectItem>
+                                        <SelectItem value="11">Grade 11</SelectItem>
+                                        <SelectItem value="12">Grade 12</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                        </div>
+                        <div>
+                            <label className="text-sm font-medium">Location</label>
+                            <div className="relative">
+                                <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                <Input placeholder="e.g. Cape Town" className="pl-10" />
+                            </div>
+                        </div>
+                        <Button size="lg" className="h-14 md:h-auto">
+                            <Search className="mr-2 h-5 w-5" />
+                            Search
+                        </Button>
+                    </div>
+                </Card>
+            </div>
+        </section>
+        
+        <section className="bg-card py-16 md:py-24">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div className="grid md:grid-cols-2 gap-12 items-center">
+                    <div>
+                        <h2 className="text-3xl md:text-4xl font-bold mb-4">Learn on Your Terms</h2>
+                        <p className="text-muted-foreground mb-6">Our platform is built to be flexible and accessible, so you can learn whenever and wherever you want.</p>
+                        <ul className="space-y-4">
+                            <li className="flex items-start gap-3">
+                                <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
+                                <span><span className="font-semibold">AI-Powered Summaries:</span> Quickly grasp key concepts from any lesson with intelligent, auto-generated summaries.</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
+                                <span><span className="font-semibold">Personalized Dashboards:</span> Track your progress, manage subscriptions, and view your entire learning history in one place.</span>
+                            </li>
+                            <li className="flex items-start gap-3">
+                                <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
+                                <span><span className="font-semibold">Seamless Payments:</span> Securely pay for courses, assignments, and tutoring sessions with our integrated payment system.</span>
+                            </li>
+                        </ul>
+                    </div>
+                    <div>
+                        <Image 
+                            src="https://placehold.co/600x400.png"
+                            alt="Student learning online"
+                            width={600}
+                            height={400}
+                            className="rounded-xl shadow-2xl"
+                            data-ai-hint="student learning"
+                        />
+                    </div>
                 </div>
             </div>
         </section>
@@ -147,3 +202,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
