@@ -183,6 +183,23 @@ const allAssignments = [
      { id: 'A020', studentName: 'Sarah Miller', assignmentTitle: 'Quantum Entanglement Paper', course: 'Quantum Physics Intro', submittedDate: '1 day ago', status: 'Pending Review', fileUrl: '#', instructor: 'Dr. Alan Grant' }
 ];
 
+export type PayoutRequest = {
+    id: string;
+    instructor: string;
+    instructorId: string;
+    amount: number;
+    date: string;
+    status: 'Pending' | 'Completed' | 'Declined';
+}
+
+const payoutRequests: PayoutRequest[] = [
+     { id: 'T009', instructor: 'Dr. Evelyn Reed', instructorId: 'I001', status: 'Pending', amount: -4820.00, date: '2024-05-23' },
+     { id: 'T011', instructor: 'Dr. Alan Grant', instructorId: 'I002', status: 'Pending', amount: -599.00, date: '2024-05-24' },
+     { id: 'T006', instructor: 'Dr. Evelyn Reed', instructorId: 'I001', status: 'Completed', amount: -2500.00, date: '2024-05-10' },
+     { id: 'T012', instructor: 'Dr. Evelyn Reed', instructorId: 'I001', status: 'Declined', amount: -1500.00, date: '2024-04-15' },
+];
+
+
 const allTransactions = [
     ...instructorData.transactions,
     { id: 'T009', studentName: null, item: 'Payout Request - Dr. Evelyn Reed', type: 'Payout Request', status: 'Pending', amount: -4820.00, date: '2024-05-23', instructor: 'Dr. Evelyn Reed' },
@@ -202,12 +219,10 @@ export const adminData = {
     courses: allCourses,
     assignments: allAssignments,
     transactions: allTransactions,
-    payoutRequests: allTransactions.filter(t => t.type === 'Payout Request'),
+    payoutRequests: payoutRequests,
     recentActivity: [
         { id: 1, type: 'New User', description: 'Sarah Miller signed up as a Student.', timestamp: '2 hours ago' },
         { id: 2, type: 'New Course', description: 'Dr. Alan Grant published "Quantum Physics Intro".', timestamp: '1 day ago' },
         { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
     ]
 };
-
-    

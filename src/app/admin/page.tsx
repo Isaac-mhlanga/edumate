@@ -17,10 +17,12 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Download, Eye, FileText, Hourglass, ListFilter, MessageSquare, MoreVertical, Search, Shield, Trash2, Upload, UserCog, UserMinus, UserPlus, Users, X, XCircle, Clock, FileUp } from "lucide-react";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Download, Eye, FileText, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, Search, Shield, Trash2, Upload, UserCog, UserMinus, UserPlus, Users, X, XCircle, Clock, FileUp } from "lucide-react";
 import React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { PayoutReceipt } from "@/components/payout-receipt";
+import { useReactToPrint } from "react-to-print";
 
 type User = (typeof adminData.users)[0];
 type Course = (typeof adminData.courses)[0];
@@ -45,6 +47,7 @@ export default function AdminPage() {
     const [isPayoutActionDialogOpen, setIsPayoutActionDialogOpen] = React.useState(false);
     const [isCourseActionDialogOpen, setIsCourseActionDialogOpen] = React.useState(false);
     const [isAssignmentReviewDialogOpen, setIsAssignmentReviewDialogOpen] = React.useState(false);
+    const [isReceiptDialogOpen, setIsReceiptDialogOpen] = React.useState(false);
     
     const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
     const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
@@ -65,6 +68,17 @@ export default function AdminPage() {
     const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', instructor: 'All' });
     const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
     const assignmentsPerPage = 7;
+    
+    const [payoutFilters, setPayoutFilters] = React.useState({ search: '', status: 'All' });
+    const [currentPayoutPage, setCurrentPayoutPage] = React.useState(1);
+    const payoutsPerPage = 7;
+
+    // Receipt printing logic
+    const receiptComponentRef = React.useRef(null);
+    const handlePrint = useReactToPrint({
+        content: () => receiptComponentRef.current,
+        documentTitle: `Payout-Receipt-${selectedPayout?.id}`,
+    });
 
     const handleTabChange = (value: string) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -85,6 +99,11 @@ export default function AdminPage() {
     const handleAssignmentFilterChange = (key: keyof typeof assignmentFilters, value: string) => {
         setAssignmentFilters(prev => ({ ...prev, [key]: value }));
         setCurrentAssignmentPage(1);
+    };
+    
+    const handlePayoutFilterChange = (key: keyof typeof payoutFilters, value: string) => {
+        setPayoutFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentPayoutPage(1);
     };
     
     const handleOpenAssignmentReview = (assignment: Assignment) => {
@@ -136,6 +155,11 @@ export default function AdminPage() {
         setIsPayoutActionDialogOpen(true);
     };
 
+    const handleViewReceipt = (payout: PayoutRequest) => {
+        setSelectedPayout(payout);
+        setIsReceiptDialogOpen(true);
+    };
+
     const confirmPayoutAction = () => {
         if (!selectedPayout || !payoutAction) return;
         const newStatus = payoutAction === 'Approve' ? 'Completed' : 'Declined';
@@ -146,6 +170,7 @@ export default function AdminPage() {
         setPayoutAction(null);
     };
 
+    // Filtering and pagination logic
     const filteredUsers = React.useMemo(() => {
         return users.filter(user => {
             const searchMatch = userFilters.search.trim().toLowerCase() === '' ||
@@ -182,6 +207,17 @@ export default function AdminPage() {
     const totalAssignmentPages = Math.ceil(filteredAssignments.length / assignmentsPerPage);
     const paginatedAssignments = filteredAssignments.slice((currentAssignmentPage - 1) * assignmentsPerPage, currentAssignmentPage * assignmentsPerPage);
     const assignmentInstructors = ['All', ...Array.from(new Set(assignments.map(a => a.instructor)))];
+
+    const filteredPayouts = React.useMemo(() => {
+        return payoutRequests.filter(payout => {
+            const searchMatch = payoutFilters.search.trim().toLowerCase() === '' ||
+                payout.instructor.toLowerCase().includes(payoutFilters.search.trim().toLowerCase());
+            const statusMatch = payoutFilters.status === 'All' || payout.status === payoutFilters.status;
+            return searchMatch && statusMatch;
+        });
+    }, [payoutRequests, payoutFilters]);
+    const totalPayoutPages = Math.ceil(filteredPayouts.length / payoutsPerPage);
+    const paginatedPayouts = filteredPayouts.slice((currentPayoutPage - 1) * payoutsPerPage, currentPayoutPage * payoutsPerPage);
 
 
     return (
@@ -548,6 +584,35 @@ export default function AdminPage() {
                                 <CardTitle>Instructor Payouts</CardTitle>
                                 <CardDescription>Review and process pending payout requests from instructors.</CardDescription>
                             </CardHeader>
+                            <div className="flex items-center justify-between gap-2 p-4 border-y">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search by instructor..."
+                                        className="pl-8"
+                                        value={payoutFilters.search}
+                                        onChange={(e) => handlePayoutFilterChange('search', e.target.value)}
+                                    />
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="gap-1">
+                                            <ListFilter className="h-3.5 w-3.5" />
+                                            <span>Filter by Status</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuRadioGroup value={payoutFilters.status} onValueChange={(value) => handlePayoutFilterChange('status', value)}>
+                                            <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="Completed">Completed</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="Pending">Pending</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="Declined">Declined</DropdownMenuRadioItem>
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -559,7 +624,7 @@ export default function AdminPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {payoutRequests.map(payout => (
+                                    {paginatedPayouts.map(payout => (
                                         <TableRow key={payout.id}>
                                             <TableCell className="font-medium">{payout.instructor}</TableCell>
                                             <TableCell className="font-semibold text-red-600">{payout.amount.toFixed(2)}</TableCell>
@@ -579,17 +644,29 @@ export default function AdminPage() {
                                             <TableCell className="text-right">
                                                 {payout.status === 'Pending' ? (
                                                     <div className="flex gap-2 justify-end">
+                                                        <Button size="sm" variant="outline" onClick={() => handleViewReceipt(payout)}><ReceiptText className="mr-1 h-3 w-3"/>Receipt</Button>
                                                         <Button size="sm" variant="outline" className="text-red-600 border-red-600/50 hover:bg-red-50 hover:text-red-700" onClick={() => handlePayoutAction(payout, 'Decline')}>Decline</Button>
                                                         <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handlePayoutAction(payout, 'Approve')}>Approve</Button>
                                                     </div>
                                                 ) : (
-                                                    <span className="text-muted-foreground text-sm">Processed</span>
+                                                    <Button variant="outline" size="sm" onClick={() => handleViewReceipt(payout)}>
+                                                        <ReceiptText className="mr-2 h-4 w-4" /> View Receipt
+                                                    </Button>
                                                 )}
                                             </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
                             </Table>
+                             <CardFooter className="flex items-center justify-between py-4">
+                                <div className="text-xs text-muted-foreground">
+                                    Showing <strong>{(currentPayoutPage - 1) * payoutsPerPage + 1}-{Math.min(currentPayoutPage * payoutsPerPage, filteredPayouts.length)}</strong> of <strong>{filteredPayouts.length}</strong> payouts.
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentPayoutPage(p => p - 1)} disabled={currentPayoutPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentPayoutPage(p => p + 1)} disabled={currentPayoutPage >= totalPayoutPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                                </div>
+                            </CardFooter>
                         </Card>
                     </TabsContent>
 
@@ -739,8 +816,30 @@ export default function AdminPage() {
                 </DialogContent>
             </Dialog>
 
+            {/* Dialog for Payout Receipt */}
+            <Dialog open={isReceiptDialogOpen} onOpenChange={setIsReceiptDialogOpen}>
+                <DialogContent className="sm:max-w-2xl">
+                    <DialogHeader>
+                        <DialogTitle>Payout Receipt</DialogTitle>
+                        <DialogDescription>
+                            A detailed record of the payout transaction.
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedPayout && (
+                        <div className="py-4">
+                           <PayoutReceipt ref={receiptComponentRef} payout={selectedPayout} />
+                        </div>
+                    )}
+                    <DialogFooter>
+                         <Button variant="outline" onClick={() => setIsReceiptDialogOpen(false)}>Close</Button>
+                         <Button onClick={handlePrint}>
+                            <Printer className="mr-2 h-4 w-4"/>
+                            Print / Save PDF
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
         </AppLayout>
     );
 }
-
-    
