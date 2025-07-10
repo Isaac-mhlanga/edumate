@@ -36,7 +36,13 @@ export default function CoursePreviewPage() {
     }
 
     const from = searchParams.get('from');
-    const backLink = from === 'dashboard' ? '/dashboard?tab=courses' : '/instructor?tab=courses';
+    let backLink = '/instructor?tab=courses';
+    if (from === 'dashboard') {
+        backLink = '/dashboard?tab=courses';
+    } else if (from === 'admin') {
+        backLink = '/admin?tab=courses';
+    }
+
 
     return (
         <AppLayout>

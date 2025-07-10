@@ -13,9 +13,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Eye, FileText, Hourglass, ListFilter, MoreVertical, Search, Shield, Trash2, UserCog, UserMinus, UserPlus, Users, XCircle } from "lucide-react";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Eye, FileText, Hourglass, ListFilter, MoreVertical, Search, Shield, Trash2, UserCog, UserMinus, UserPlus, Users, X, XCircle, Clock } from "lucide-react";
 import React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 
 type User = (typeof adminData.users)[0];
 type Course = (typeof adminData.courses)[0];
@@ -30,13 +31,17 @@ export default function AdminPage() {
     const currentTab = searchParams.get('tab') || 'overview';
 
     const [users, setUsers] = React.useState(adminData.users);
+    const [courses, setCourses] = React.useState(adminData.courses);
     const [payoutRequests, setPayoutRequests] = React.useState(adminData.payoutRequests);
     
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
     const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = React.useState(false);
     const [isPayoutActionDialogOpen, setIsPayoutActionDialogOpen] = React.useState(false);
+    const [isCourseActionDialogOpen, setIsCourseActionDialogOpen] = React.useState(false);
     
     const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
+    const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
+    const [courseAction, setCourseAction] = React.useState<'Approve' | 'Reject' | null>(null);
     const [selectedPayout, setSelectedPayout] = React.useState<PayoutRequest | null>(null);
     const [payoutAction, setPayoutAction] = React.useState<'Approve' | 'Decline' | null>(null);
 
@@ -45,7 +50,7 @@ export default function AdminPage() {
     const [currentUserPage, setCurrentUserPage] = React.useState(1);
     const usersPerPage = 7;
 
-    const [courseFilters, setCourseFilters] = React.useState({ search: '' });
+    const [courseFilters, setCourseFilters] = React.useState({ search: '', status: 'All' });
     const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
     const coursesPerPage = 7;
     
@@ -62,6 +67,11 @@ export default function AdminPage() {
     const handleUserFilterChange = (key: keyof typeof userFilters, value: string) => {
         setUserFilters(prev => ({ ...prev, [key]: value }));
         setCurrentUserPage(1);
+    };
+    
+    const handleCourseFilterChange = (key: keyof typeof courseFilters, value: string) => {
+        setCourseFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentCoursePage(1);
     };
 
     const handleUserAction = (user: User, action: 'suspend' | 'delete') => {
@@ -85,6 +95,22 @@ export default function AdminPage() {
         setIsDeleteUserDialogOpen(false);
         setSelectedUser(null);
     }
+    
+    const handleCourseAction = (course: Course, action: 'Approve' | 'Reject') => {
+        setSelectedCourse(course);
+        setCourseAction(action);
+        setIsCourseActionDialogOpen(true);
+    };
+
+    const confirmCourseAction = () => {
+        if (!selectedCourse || !courseAction) return;
+        const newStatus = courseAction === 'Approve' ? 'Published' : 'Rejected';
+        setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, status: newStatus } : c));
+        toast({ title: `Course ${courseAction}d`, description: `The course "${selectedCourse.title}" has been ${newStatus.toLowerCase()}.` });
+        setIsCourseActionDialogOpen(false);
+        setSelectedCourse(null);
+        setCourseAction(null);
+    };
 
     const handlePayoutAction = (payout: PayoutRequest, action: 'Approve' | 'Decline') => {
         setSelectedPayout(payout);
@@ -113,6 +139,18 @@ export default function AdminPage() {
     }, [users, userFilters]);
     const totalUserPages = Math.ceil(filteredUsers.length / usersPerPage);
     const paginatedUsers = filteredUsers.slice((currentUserPage - 1) * usersPerPage, currentUserPage * usersPerPage);
+    
+    const filteredCourses = React.useMemo(() => {
+        return courses.filter(course => {
+            const searchMatch = courseFilters.search.trim().toLowerCase() === '' ||
+                course.title.toLowerCase().includes(courseFilters.search.trim().toLowerCase()) ||
+                course.instructor.toLowerCase().includes(courseFilters.search.trim().toLowerCase());
+            const statusMatch = courseFilters.status === 'All' || course.status === courseFilters.status;
+            return searchMatch && statusMatch;
+        });
+    }, [courses, courseFilters]);
+    const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
+    const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
 
     return (
         <AppLayout>
@@ -272,6 +310,110 @@ export default function AdminPage() {
                         </Card>
                     </TabsContent>
                     
+                    <TabsContent value="courses" className="pt-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Course Review & Management</CardTitle>
+                                <CardDescription>Approve, reject, and manage all courses on the platform.</CardDescription>
+                            </CardHeader>
+                            <div className="flex items-center justify-between gap-2 p-4 border-y">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search by title or instructor..."
+                                        className="pl-8"
+                                        value={courseFilters.search}
+                                        onChange={(e) => handleCourseFilterChange('search', e.target.value)}
+                                    />
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="gap-1">
+                                            <ListFilter className="h-3.5 w-3.5" />
+                                            <span>Filter by Status</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuRadioGroup value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
+                                            <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="Published">Published</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="Pending Approval">Pending Approval</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="Rejected">Rejected</DropdownMenuRadioItem>
+                                            <DropdownMenuRadioItem value="Draft">Draft</DropdownMenuRadioItem>
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Course</TableHead>
+                                        <TableHead>Instructor</TableHead>
+                                        <TableHead>Pricing (R)</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {paginatedCourses.map(course => (
+                                        <TableRow key={course.id}>
+                                            <TableCell>
+                                                <div className="font-medium">{course.title}</div>
+                                                <div className="text-xs text-muted-foreground">{course.subject} - Grade {course.grade}</div>
+                                            </TableCell>
+                                            <TableCell>{course.instructor}</TableCell>
+                                            <TableCell>{course.pricing.type === 'purchase' ? course.pricing.price?.toFixed(2) : 'Subscription'}</TableCell>
+                                            <TableCell>
+                                                <Badge variant={"outline"} className={
+                                                    course.status === 'Published' ? 'bg-green-500/20 text-green-700 border-green-500/30'
+                                                    : course.status === 'Rejected' ? 'bg-red-500/20 text-red-700 border-red-500/30'
+                                                    : course.status === 'Pending Approval' ? 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30'
+                                                    : ''
+                                                }>
+                                                    {course.status === 'Published' && <CheckCircle className="mr-1 h-3 w-3"/>}
+                                                    {course.status === 'Rejected' && <XCircle className="mr-1 h-3 w-3"/>}
+                                                    {course.status === 'Pending Approval' && <Clock className="mr-1 h-3 w-3"/>}
+                                                    {course.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                {course.status === 'Pending Approval' ? (
+                                                     <div className="flex gap-2 justify-end">
+                                                        <Button size="sm" variant="outline" className="text-red-600 border-red-600/50 hover:bg-red-50 hover:text-red-700" onClick={() => handleCourseAction(course, 'Reject')}><X className="mr-1 h-3 w-3"/>Reject</Button>
+                                                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleCourseAction(course, 'Approve')}><Check className="mr-1 h-3 w-3"/>Approve</Button>
+                                                    </div>
+                                                ) : (
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuItem asChild>
+                                                                <Link href={`/instructor/courses/${course.id}?from=admin`}>
+                                                                    <Eye className="mr-2 h-4 w-4"/>Preview Course
+                                                                </Link>
+                                                            </DropdownMenuItem>
+                                                            <DropdownMenuItem><Trash2 className="mr-2 h-4 w-4 text-destructive"/>Delete Course</DropdownMenuItem>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                             <CardFooter className="flex items-center justify-between py-4">
+                                <div className="text-xs text-muted-foreground">
+                                    Showing <strong>{(currentCoursePage - 1) * coursesPerPage + 1}-{Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}</strong> of <strong>{filteredCourses.length}</strong> courses.
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    </TabsContent>
+
                     <TabsContent value="payouts" className="pt-6">
                         <Card>
                              <CardHeader>
@@ -373,6 +515,26 @@ export default function AdminPage() {
                     </AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
+
+            {/* Dialog for Course Actions */}
+            <AlertDialog open={isCourseActionDialogOpen} onOpenChange={setIsCourseActionDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirm Course {courseAction}</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to <strong>{courseAction?.toLowerCase()}</strong> the course <strong>"{selectedCourse?.title}"</strong>?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => { setSelectedCourse(null); setCourseAction(null); }}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmCourseAction} className={courseAction === 'Reject' ? buttonVariants({ variant: "destructive" }) : ''}>
+                            {courseAction} Course
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </AppLayout>
     );
 }
+
+    

@@ -12,11 +12,11 @@ export const studentData = {
         { id: 'C003', name: "Organic Chemistry Fundamentals", category: "Physical Sciences" },
     ],
     submittedAssignments: [
-        { id: "A001", title: "Calculus Problem Set 5", course: "Grade 12 - Maths Pro", submitted: "2024-05-10", status: "Paid", price: 150, solutionUrl: "#" },
-        { id: "A002", title: "Newtonian Physics Lab Report", course: "Grade 12 - Physical Sciences Pro", submitted: "2024-05-20", status: "Awaiting Payment", price: 120, solutionUrl: null },
-        { id: "A003", title: "Trigonometry Final Exam", course: "Grade 12 - Maths Pro", submitted: "2024-05-22", status: "Submitted", price: null, solutionUrl: null },
-        { id: "A004", title: "Wave Optics Assignment", course: "Grade 12 - Physical Sciences Pro", submitted: null, status: "Pending Submission", price: null, solutionUrl: null },
-        { id: "A005", title: "Organic Chemistry Practice", course: "Grade 12 - Physical Sciences Pro", submitted: null, status: "Pending Submission", price: null, solutionUrl: null },
+        { id: "A001", title: "Calculus Problem Set 5", course: "Grade 12 - Maths Pro", status: "Paid", price: 150, solutionUrl: "#" },
+        { id: "A002", title: "Newtonian Physics Lab Report", course: "Grade 12 - Physical Sciences Pro", status: "Awaiting Payment", price: 120, solutionUrl: null },
+        { id: "A003", title: "Trigonometry Final Exam", course: "Grade 12 - Maths Pro", status: "Submitted", price: null, solutionUrl: null },
+        { id: "A004", title: "Wave Optics Assignment", course: "Grade 12 - Physical Sciences Pro", status: "Pending Submission", price: null, solutionUrl: null },
+        { id: "A005", title: "Organic Chemistry Practice", course: "Grade 12 - Physical Sciences Pro", status: "Pending Submission", price: null, solutionUrl: null },
     ],
     transactions: [
         { id: 'TXN001', item: 'Grade 12 - Maths Pro', type: 'Subscription', status: 'Completed', amount: 350.00, date: '2024-05-01' },
@@ -165,7 +165,11 @@ const allCourses = [
     ...instructorData.courses,
     {
         id: 'C005', title: 'Quantum Physics Intro', description: 'Introduction to Quantum Mechanics.', subject: 'Physical Sciences', grade: '12', thumbnail: 'https://placehold.co/600x400.png', 
-        pricing: { type: 'purchase', price: 599 }, status: 'Published', videos: [], instructor: 'Dr. Alan Grant'
+        pricing: { type: 'purchase', price: 599 }, status: 'Pending Approval', videos: [], instructor: 'Dr. Alan Grant'
+    },
+    {
+        id: 'C006', title: 'Advanced Thermodynamics', description: 'Deep dive into thermodynamics.', subject: 'Physical Sciences', grade: '12', thumbnail: 'https://placehold.co/600x400.png', 
+        pricing: { type: 'subscription' }, status: 'Rejected', videos: [], instructor: 'Dr. Alan Grant'
     }
 ].map(course => ({...course, instructor: course.instructor || instructorData.name}));
 
@@ -200,4 +204,5 @@ export const adminData = {
         { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
     ]
 };
+
     
