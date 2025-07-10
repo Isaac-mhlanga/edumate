@@ -8,12 +8,14 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { registerUser } from "./actions";
 
 
 const registerFormSchema = z.object({
@@ -32,6 +34,8 @@ type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 export default function RegisterPage() {
     const router = useRouter();
+    const { toast } = useToast();
+    const [isLoading, setIsLoading] = React.useState(false);
 
     const form = useForm<RegisterFormValues>({
         resolver: zodResolver(registerFormSchema),
@@ -43,10 +47,32 @@ export default function RegisterPage() {
         }
     });
 
-    const handleRegister = (data: RegisterFormValues) => {
-        console.log("Registration successful with:", data);
-        // Mock registration and redirect
-        router.push('/dashboard');
+    const handleRegister = async (data: RegisterFormValues) => {
+        setIsLoading(true);
+        try {
+            const result = await registerUser(data);
+            if (result.success) {
+                toast({
+                    title: "Registration Successful!",
+                    description: "Welcome to Edumate Pro. Redirecting you to the dashboard...",
+                });
+                router.push('/dashboard');
+            } else {
+                 toast({
+                    variant: "destructive",
+                    title: "Registration Failed",
+                    description: result.error || "An unknown error occurred.",
+                });
+            }
+        } catch (error) {
+             toast({
+                variant: "destructive",
+                title: "Uh oh! Something went wrong.",
+                description: "There was a problem with your request.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }
 
     return (
@@ -141,7 +167,9 @@ export default function RegisterPage() {
                                 />
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4">
-                                <Button type="submit" className="w-full">Create Account</Button>
+                                <Button type="submit" className="w-full" disabled={isLoading}>
+                                    {isLoading ? 'Creating Account...' : 'Create Account'}
+                                </Button>
                                 <div className="text-center text-sm text-muted-foreground">
                                     Already have an account?{' '}
                                     <Link href="/login" className="font-medium text-primary hover:underline">
