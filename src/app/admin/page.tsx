@@ -381,6 +381,11 @@ export default function AdminPage() {
                                             <TableCell className="text-right">
                                                 {course.status === 'Pending Approval' ? (
                                                      <div className="flex gap-2 justify-end">
+                                                        <Button variant="ghost" size="icon" asChild>
+                                                            <Link href={`/instructor/courses/${course.id}?from=admin`}>
+                                                                <Eye className="h-4 w-4"/>
+                                                            </Link>
+                                                        </Button>
                                                         <Button size="sm" variant="outline" className="text-red-600 border-red-600/50 hover:bg-red-50 hover:text-red-700" onClick={() => handleCourseAction(course, 'Reject')}><X className="mr-1 h-3 w-3"/>Reject</Button>
                                                         <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleCourseAction(course, 'Approve')}><Check className="mr-1 h-3 w-3"/>Approve</Button>
                                                     </div>
