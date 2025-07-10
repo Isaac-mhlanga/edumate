@@ -386,6 +386,21 @@ function InstructorPage() {
   const totalRevenue = React.useMemo(() => transactions.filter(t => t.type !== 'Payout' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0), [transactions]);
   const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
 
+  const filteredTransactions = React.useMemo(() => {
+    return transactions.filter(transaction => {
+      const searchMatch = transactionFilters.search.trim().toLowerCase() === '' ||
+        transaction.item.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()) ||
+        (transaction.studentName && transaction.studentName.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()));
+      
+      const typeMatch = transactionFilters.type === 'All' || transaction.type === transactionFilters.type;
+
+      return searchMatch && typeMatch;
+    });
+  }, [transactions, transactionFilters]);
+
+  const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
+  const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
+
   // Overview Pending Assignments Pagination Logic
   const pendingAssignments = React.useMemo(() => {
     return submittedAssignments.filter(a => a.status === 'Pending Review');
@@ -1426,3 +1441,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
