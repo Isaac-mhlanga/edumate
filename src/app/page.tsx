@@ -1,3 +1,5 @@
+
+import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -35,9 +37,14 @@ export default function Home() {
           <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
           <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
         </nav>
-        <Button asChild>
-          <Link href="/dashboard">Get Started</Link>
-        </Button>
+        <div className="flex items-center gap-2">
+            <Button variant="ghost" asChild>
+                <Link href="/login">Log In</Link>
+            </Button>
+            <Button asChild>
+                <Link href="/register">Get Started</Link>
+            </Button>
+        </div>
       </header>
 
       <main className="flex-grow">
@@ -51,7 +58,7 @@ export default function Home() {
               Edumate Pro provides a modern, engaging platform for students to excel in Maths and Physical Sciences.
             </p>
             <Button size="lg" asChild>
-              <Link href="/dashboard">Explore Courses</Link>
+              <Link href="/register">Explore Courses</Link>
             </Button>
           </div>
         </section>
@@ -115,17 +122,7 @@ export default function Home() {
 
       </main>
 
-      <footer className="bg-card border-t">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between">
-          <div className="flex items-center gap-2">
-            <Icons.logo className="h-6 w-6 text-primary" />
-            <span className="text-md font-semibold">Edumate Pro</span>
-          </div>
-          <p className="text-sm text-muted-foreground mt-4 sm:mt-0">
-            &copy; {new Date().getFullYear()} Edumate Pro. All rights reserved.
-          </p>
-        </div>
-      </footer>
+      <Footer />
     </div>
   );
 }

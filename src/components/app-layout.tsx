@@ -115,7 +115,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         asChild
                         tooltip={{ children: 'Logout', side: 'right' }}
                         >
-                        <Link href="#">
+                        <Link href="/">
                             <LogOut />
                             <span>Logout</span>
                         </Link>
@@ -129,7 +129,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger />
             <ThemeToggle />
         </header>
-        <main className="flex-1 p-6 md:p-8">
+        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-x-hidden">
             {children}
         </main>
       </SidebarInset>

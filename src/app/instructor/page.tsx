@@ -391,21 +391,6 @@ export default function InstructorPage() {
     setIsPayoutDialogOpen(false);
   };
 
-  const filteredTransactions = React.useMemo(() => {
-    return transactions.filter(transaction => {
-      const searchMatch = transactionFilters.search.trim().toLowerCase() === '' ||
-        transaction.item.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()) ||
-        (transaction.studentName && transaction.studentName.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()));
-      
-      const typeMatch = transactionFilters.type === 'All' || transaction.type === transactionFilters.type;
-
-      return searchMatch && typeMatch;
-    });
-  }, [transactions, transactionFilters]);
-
-  const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
-  const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
-  
   const totalRevenue = React.useMemo(() => transactions.filter(t => t.type !== 'Payout' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0), [transactions]);
   const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
 
@@ -421,7 +406,6 @@ export default function InstructorPage() {
 
 
   return (
-    <AppLayout>
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Instructor Dashboard</h1>
@@ -429,13 +413,15 @@ export default function InstructorPage() {
         </div>
 
         <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-5 max-w-2xl">
-            <TabsTrigger value="overview">Overview</TabsTrigger>
-            <TabsTrigger value="courses">Courses</TabsTrigger>
-            <TabsTrigger value="assignments">Assignments</TabsTrigger>
-            <TabsTrigger value="students">Students</TabsTrigger>
-            <TabsTrigger value="earnings">Earnings</TabsTrigger>
-          </TabsList>
+          <div className="overflow-x-auto pb-1">
+            <TabsList className="grid w-full grid-cols-5 min-w-[600px] max-w-2xl">
+              <TabsTrigger value="overview">Overview</TabsTrigger>
+              <TabsTrigger value="courses">Courses</TabsTrigger>
+              <TabsTrigger value="assignments">Assignments</TabsTrigger>
+              <TabsTrigger value="students">Students</TabsTrigger>
+              <TabsTrigger value="earnings">Earnings</TabsTrigger>
+            </TabsList>
+          </div>
           
           <TabsContent value="overview" className="pt-6">
             <div className="space-y-8">
@@ -530,9 +516,9 @@ export default function InstructorPage() {
                     <TableHeader>
                       <TableRow>
                         <TableHead>Student</TableHead>
-                        <TableHead>Course</TableHead>
-                        <TableHead>Progress</TableHead>
-                        <TableHead>Joined Date</TableHead>
+                        <TableHead className="hidden sm:table-cell">Course</TableHead>
+                        <TableHead className="hidden md:table-cell">Progress</TableHead>
+                        <TableHead className="hidden lg:table-cell">Joined Date</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -547,14 +533,14 @@ export default function InstructorPage() {
                                </div>
                             </div>
                           </TableCell>
-                          <TableCell><Badge variant="secondary">{student.course}</Badge></TableCell>
-                          <TableCell>
+                          <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{student.course}</Badge></TableCell>
+                          <TableCell className="hidden md:table-cell">
                             <div className="flex items-center gap-2">
                               <Progress value={student.progress} className="w-24 h-2" />
                               <span className="text-xs text-muted-foreground">{student.progress}%</span>
                             </div>
                           </TableCell>
-                          <TableCell>{student.joined}</TableCell>
+                          <TableCell className="hidden lg:table-cell">{student.joined}</TableCell>
                         </TableRow>
                       ))}
                     </TableBody>
@@ -574,8 +560,8 @@ export default function InstructorPage() {
                         </div>
                         <Button onClick={handleAddNewCourse}><PlusCircle className="mr-2"/> Add New Course</Button>
                     </div>
-                    <div className="flex items-center justify-between gap-2 pt-4 border-t mt-4">
-                        <div className="relative flex-1">
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 pt-4 border-t mt-4">
+                        <div className="relative flex-1 w-full">
                             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                             <Input
                                 placeholder="Search courses..."
@@ -586,7 +572,7 @@ export default function InstructorPage() {
                         </div>
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="gap-1">
+                                <Button variant="outline" className="gap-1 w-full md:w-auto">
                                     <ListFilter className="h-3.5 w-3.5" />
                                     <span>Filter</span>
                                 </Button>
@@ -654,7 +640,7 @@ export default function InstructorPage() {
                     </div>
                   )}
                 </CardContent>
-                <CardFooter className="flex items-center justify-between py-4">
+                <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
                     <div className="text-xs text-muted-foreground">
                         Showing <strong>{(currentCoursePage - 1) * coursesPerPage + 1}-{Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}</strong> of <strong>{filteredCourses.length}</strong> courses.
                     </div>
@@ -672,8 +658,8 @@ export default function InstructorPage() {
                     <CardTitle>Assignment Management</CardTitle>
                     <CardDescription>Review submitted assignments, upload solutions, and set pricing.</CardDescription>
                 </CardHeader>
-                 <div className="flex items-center justify-between gap-2 p-4 border-y">
-                    <div className="relative flex-1">
+                 <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                    <div className="relative flex-1 w-full">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search by student or assignment..."
@@ -684,7 +670,7 @@ export default function InstructorPage() {
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="gap-1">
+                            <Button variant="outline" className="gap-1 w-full md:w-auto">
                                 <ListFilter className="h-3.5 w-3.5" />
                                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
                                     Filter by Status
@@ -709,9 +695,7 @@ export default function InstructorPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Student</TableHead>
-                                    <TableHead>Assignment</TableHead>
-                                    <TableHead>Course</TableHead>
-                                    <TableHead>Submitted</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Assignment</TableHead>
                                     <TableHead>Status</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
@@ -720,27 +704,17 @@ export default function InstructorPage() {
                                 {paginatedAssignments.map((assignment) => (
                                     <TableRow key={assignment.id}>
                                         <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-9 w-9 hidden sm:flex"><AvatarFallback>{assignment.studentName.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
-                                                <span className="font-medium">{assignment.studentName}</span>
-                                            </div>
+                                            <div className="font-medium">{assignment.studentName}</div>
+                                            <div className="text-xs text-muted-foreground sm:hidden">{assignment.assignmentTitle}</div>
                                         </TableCell>
-                                        <TableCell>{assignment.assignmentTitle}</TableCell>
-                                        <TableCell><Badge variant="outline">{assignment.course}</Badge></TableCell>
-                                        <TableCell>{assignment.submittedDate}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{assignment.assignmentTitle}</TableCell>
                                         <TableCell>
                                             <Badge
-                                                variant={
-                                                    assignment.status === 'Paid' ? 'default'
-                                                    : assignment.status === 'Awaiting Payment' ? 'secondary'
-                                                    : 'outline'
-                                                }
+                                                variant={"outline"}
                                                 className={
-                                                    assignment.status === 'Paid'
-                                                    ? 'bg-green-500/20 text-green-700 border-green-500/30 dark:text-green-400'
-                                                    : assignment.status === 'Awaiting Payment'
-                                                    ? 'bg-blue-500/20 text-blue-700 border-blue-500/30 dark:text-blue-400'
-                                                    : 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:text-yellow-400'
+                                                    assignment.status === 'Paid' ? 'bg-green-500/20 text-green-700'
+                                                    : assignment.status === 'Awaiting Payment' ? 'bg-blue-500/20 text-blue-700'
+                                                    : 'bg-yellow-500/20 text-yellow-700'
                                                 }
                                             >
                                                 {assignment.status === 'Paid' && <CheckCircle className="mr-1 h-3 w-3" />}
@@ -751,7 +725,7 @@ export default function InstructorPage() {
                                         </TableCell>
                                         <TableCell className="text-right">
                                             <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>
-                                                {assignment.status === 'Pending Review' ? 'Review' : 'View/Update'}
+                                                {assignment.status === 'Pending Review' ? 'Review' : 'View'}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -765,7 +739,7 @@ export default function InstructorPage() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="flex items-center justify-between py-4">
+                <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
                     <div className="text-xs text-muted-foreground">
                         Showing{" "}
                         <strong>
@@ -794,8 +768,8 @@ export default function InstructorPage() {
                     <CardTitle>Student Management</CardTitle>
                     <CardDescription>View enrolled students, track their progress, and manage access.</CardDescription>
                 </CardHeader>
-                <div className="flex items-center justify-between gap-2 p-4 border-y">
-                    <div className="relative flex-1">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                    <div className="relative flex-1 w-full">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search by student name or email..."
@@ -806,7 +780,7 @@ export default function InstructorPage() {
                     </div>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="gap-1">
+                            <Button variant="outline" className="gap-1 w-full md:w-auto">
                                 <ListFilter className="h-3.5 w-3.5" />
                                 <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Course</span>
                             </Button>
@@ -828,9 +802,8 @@ export default function InstructorPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Student</TableHead>
-                                    <TableHead>Course</TableHead>
-                                    <TableHead>Progress</TableHead>
-                                    <TableHead>Joined</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Course</TableHead>
+                                    <TableHead className="hidden md:table-cell">Progress</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -838,22 +811,16 @@ export default function InstructorPage() {
                                 {paginatedStudents.map((student) => (
                                     <TableRow key={student.id}>
                                         <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-9 w-9 hidden sm:flex"><AvatarFallback>{student.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
-                                                <div>
-                                                  <p className="font-medium">{student.name}</p>
-                                                  <p className="text-xs text-muted-foreground">{student.email}</p>
-                                                </div>
-                                            </div>
+                                            <div className="font-medium">{student.name}</div>
+                                            <div className="text-xs text-muted-foreground md:hidden">{student.email}</div>
                                         </TableCell>
-                                        <TableCell><Badge variant="outline">{student.course}</Badge></TableCell>
-                                        <TableCell>
+                                        <TableCell className="hidden sm:table-cell"><Badge variant="outline">{student.course}</Badge></TableCell>
+                                        <TableCell className="hidden md:table-cell">
                                           <div className="flex items-center gap-2">
                                             <Progress value={student.progress} className="w-24 h-2"/>
                                             <span className="text-xs text-muted-foreground">{student.progress}%</span>
                                           </div>
                                         </TableCell>
-                                        <TableCell>{student.joined}</TableCell>
                                         <TableCell className="text-right">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
@@ -878,7 +845,7 @@ export default function InstructorPage() {
                         </div>
                     )}
                 </CardContent>
-                 <CardFooter className="flex items-center justify-between py-4">
+                 <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
                     <div className="text-xs text-muted-foreground">
                         Showing{" "}
                         <strong>
@@ -949,15 +916,15 @@ export default function InstructorPage() {
                 </Card>
             </div>
              <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
+                <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-2">
                     <div>
                         <CardTitle>Transaction History</CardTitle>
                         <CardDescription>A detailed log of all your financial activities.</CardDescription>
                     </div>
                      <Button onClick={() => setIsPayoutDialogOpen(true)}>Request Payout</Button>
                 </CardHeader>
-                <div className="flex items-center justify-between gap-2 p-4 border-y">
-                    <div className="relative flex-1">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                    <div className="relative flex-1 w-full">
                         <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                         <Input
                             placeholder="Search by item or student..."
@@ -966,30 +933,32 @@ export default function InstructorPage() {
                             onChange={(e) => handleTransactionFilterChange('search', e.target.value)}
                         />
                     </div>
-                    <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                            <Button variant="outline" className="gap-1">
-                                <ListFilter className="h-3.5 w-3.5" />
-                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Type</span>
-                            </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuRadioGroup value={transactionFilters.type} onValueChange={(value) => handleTransactionFilterChange('type', value)}>
-                                <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="Course Sale">Course Sale</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="Assignment Sale">Assignment Sale</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="Subscription">Subscription</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="Refund">Refund</DropdownMenuRadioItem>
-                                <DropdownMenuRadioItem value="Payout">Payout</DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
-                    <Button variant="outline" className="gap-1.5">
-                        <CalendarDays className="h-4 w-4" />
-                        <span>Filter by Date</span>
-                    </Button>
+                    <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Type</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={transactionFilters.type} onValueChange={(value) => handleTransactionFilterChange('type', value)}>
+                                    <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Course Sale">Course Sale</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Assignment Sale">Assignment Sale</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Subscription">Subscription</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Refund">Refund</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Payout">Payout</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                        <Button variant="outline" className="gap-1.5 w-full">
+                            <CalendarDays className="h-4 w-4" />
+                            <span>Filter by Date</span>
+                        </Button>
+                    </div>
                 </div>
                  <CardContent className="p-0">
                     {paginatedTransactions.length > 0 ? (
@@ -997,36 +966,24 @@ export default function InstructorPage() {
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Item / Description</TableHead>
-                                    <TableHead>Student</TableHead>
-                                    <TableHead>Type</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead>Date</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Student</TableHead>
+                                    <TableHead className="hidden md:table-cell">Status</TableHead>
                                     <TableHead className="text-right">Amount (R)</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                    <TableHead className="text-right hidden md:table-cell">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {paginatedTransactions.map((transaction) => (
                                     <TableRow key={transaction.id}>
                                         <TableCell className="font-medium">{transaction.item}</TableCell>
-                                        <TableCell className="text-muted-foreground">{transaction.studentName || 'N/A'}</TableCell>
-                                        <TableCell>
-                                            <Badge variant="outline" className="gap-1.5">
-                                                {transaction.type === 'Course Sale' && <GraduationCap className="h-3 w-3" />}
-                                                {transaction.type === 'Assignment Sale' && <ReceiptText className="h-3 w-3" />}
-                                                {transaction.type === 'Subscription' && <ShieldCheck className="h-3 w-3" />}
-                                                {transaction.type === 'Refund' && <Undo2 className="h-3 w-3" />}
-                                                {transaction.type === 'Payout' && <Banknote className="h-3 w-3" />}
-                                                {transaction.type}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell>
+                                        <TableCell className="text-muted-foreground hidden sm:table-cell">{transaction.studentName || 'N/A'}</TableCell>
+                                        <TableCell className="hidden md:table-cell">
                                              <Badge
                                                 variant={transaction.status === 'Completed' ? 'default' : transaction.status === 'Refunded' ? 'destructive' : 'secondary'}
                                                 className={
-                                                    transaction.status === 'Completed' ? 'bg-green-500/20 text-green-700 border-green-500/30' 
-                                                    : transaction.status === 'Refunded' ? 'bg-red-500/20 text-red-700 border-red-500/30'
-                                                    : 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30'
+                                                    transaction.status === 'Completed' ? 'bg-green-500/20 text-green-700' 
+                                                    : transaction.status === 'Refunded' ? 'bg-red-500/20 text-red-700'
+                                                    : 'bg-yellow-500/20 text-yellow-700'
                                                 }
                                              >
                                                 {transaction.status === 'Completed' && <CheckCircle className="mr-1 h-3 w-3" />}
@@ -1035,11 +992,10 @@ export default function InstructorPage() {
                                                 {transaction.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="text-muted-foreground">{transaction.date}</TableCell>
                                         <TableCell className={`text-right font-semibold ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
                                             {transaction.amount > 0 ? `+${transaction.amount.toFixed(2)}` : transaction.amount.toFixed(2)}
                                         </TableCell>
-                                        <TableCell className="text-right">
+                                        <TableCell className="text-right hidden md:table-cell">
                                             <DropdownMenu>
                                                 <DropdownMenuTrigger asChild>
                                                     <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
@@ -1063,7 +1019,7 @@ export default function InstructorPage() {
                         </div>
                     )}
                 </CardContent>
-                <CardFooter className="flex items-center justify-between py-4">
+                <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
                     <div className="text-xs text-muted-foreground">
                         Showing{" "}
                         <strong>
@@ -1086,7 +1042,6 @@ export default function InstructorPage() {
             </Card>
           </TabsContent>
         </Tabs>
-      </div>
 
        <Dialog open={isCourseDialogOpen} onOpenChange={handleCourseDialogOpenChange}>
           <DialogContent className="sm:max-w-2xl">
@@ -1489,8 +1444,6 @@ export default function InstructorPage() {
                 </DialogFooter>
             </DialogContent>
         </Dialog>
-    </AppLayout>
+    </div>
   );
 }
-
-    
