@@ -13,11 +13,12 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { tutorData } from "@/lib/data";
-import { Calendar, CheckCircle, Clock, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, UserCog, Users, XCircle } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle } from "lucide-react";
 import React from "react";
 
 type Booking = (typeof tutorData.bookings)[0];
 type Message = (typeof tutorData.messages)[0];
+type Mode = "Online" | "In-person";
 
 export default function TutorPage() {
     const [bookings, setBookings] = React.useState<Booking[]>(tutorData.bookings);
@@ -25,6 +26,7 @@ export default function TutorPage() {
 
     const [isEditingAvailability, setIsEditingAvailability] = React.useState(false);
     const [availability, setAvailability] = React.useState(tutorData.availability);
+    const [tutoringModes, setTutoringModes] = React.useState<Mode[]>(tutorData.modes as Mode[]);
 
     const handleSlotToggle = (dayIndex: number, slot: string) => {
         const newAvailability = [...availability];
@@ -37,6 +39,15 @@ export default function TutorPage() {
             day.slots.push(slot);
         }
         setAvailability(newAvailability);
+    };
+    
+    const handleModeToggle = (mode: Mode) => {
+        setTutoringModes(prev => {
+            if (prev.includes(mode)) {
+                return prev.filter(m => m !== mode);
+            }
+            return [...prev, mode];
+        });
     };
 
     const getStatusIcon = (status: Booking['status']) => {
@@ -168,11 +179,11 @@ export default function TutorPage() {
 
                     <Card>
                         <CardHeader>
-                            <CardTitle>Expertise & Rates</CardTitle>
-                            <CardDescription>Define the subjects you teach and your hourly rate.</CardDescription>
+                            <CardTitle>Expertise, Rates & Mode</CardTitle>
+                            <CardDescription>Define subjects, rates, and how you conduct sessions.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="space-y-4">
                                     <Label>Subjects</Label>
                                     <div className="flex items-center space-x-2">
@@ -199,6 +210,17 @@ export default function TutorPage() {
                                         <label htmlFor="grade12" className="text-sm font-medium leading-none">Grade 12</label>
                                     </div>
                                 </div>
+                                <div className="space-y-4">
+                                    <Label>Tutoring Mode</Label>
+                                    <div className="flex items-center space-x-2">
+                                        <Checkbox id="mode-online" checked={tutoringModes.includes("Online")} onCheckedChange={() => handleModeToggle("Online")}/>
+                                        <label htmlFor="mode-online" className="text-sm font-medium leading-none flex items-center gap-1.5"><Computer className="h-4 w-4"/>Online</label>
+                                    </div>
+                                     <div className="flex items-center space-x-2">
+                                        <Checkbox id="mode-inperson" checked={tutoringModes.includes("In-person")} onCheckedChange={() => handleModeToggle("In-person")}/>
+                                        <label htmlFor="mode-inperson" className="text-sm font-medium leading-none flex items-center gap-1.5"><Users className="h-4 w-4"/>In-person</label>
+                                    </div>
+                                </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
@@ -209,7 +231,7 @@ export default function TutorPage() {
                                     </div>
                                 </div>
                                 <div className="space-y-1">
-                                    <Label htmlFor="tutor-location">Location</Label>
+                                    <Label htmlFor="tutor-location">Location (for in-person)</Label>
                                     <div className="relative">
                                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
                                         <Input id="tutor-location" className="pl-8" defaultValue={tutorData.location} />
@@ -342,5 +364,3 @@ export default function TutorPage() {
         </div>
     );
 }
-
-    

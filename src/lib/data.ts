@@ -190,6 +190,7 @@ export const instructorData = {
 };
 
 export const tutorData = {
+    id: "T001",
     name: "John Smith",
     email: "john.smith.tutor@example.com",
     avatar: "https://placehold.co/100x100.png",
@@ -198,6 +199,7 @@ export const tutorData = {
     subjects: ["Maths", "Physical Sciences"],
     grades: ["10", "11", "12"],
     location: "Cape Town, Western Cape",
+    modes: ["Online", "In-person"],
     availability: [
         { day: "Monday", slots: ["15:00 - 16:00", "16:00 - 17:00"] },
         { day: "Tuesday", slots: [] },
@@ -305,5 +307,3 @@ export const adminData = {
         { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
     ]
 };
-
-    
