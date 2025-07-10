@@ -31,6 +31,7 @@ import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { z } from "zod";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import withAuth from "@/components/with-auth";
 
 const chartConfig = {
   engagement: { label: "Engagement", color: "hsl(var(--primary))" },
@@ -66,7 +67,7 @@ type VideoUpload = {
     fileName: string;
 };
 
-export default function InstructorPage() {
+function InstructorPage() {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -1420,7 +1421,7 @@ export default function InstructorPage() {
                     <AlertDialogAction onClick={confirmRefundTransaction} className={buttonVariants({ variant: "destructive" })}>Confirm Refund</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </AlertDialog>
+        </Dialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
@@ -1447,3 +1448,5 @@ export default function InstructorPage() {
     </div>
   );
 }
+
+export default withAuth(InstructorPage, ['instructor']);

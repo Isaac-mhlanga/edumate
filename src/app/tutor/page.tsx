@@ -15,12 +15,13 @@ import { Textarea } from "@/components/ui/textarea";
 import { tutorData } from "@/lib/data";
 import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle } from "lucide-react";
 import React from "react";
+import withAuth from "@/components/with-auth";
 
 type Booking = (typeof tutorData.bookings)[0];
 type Message = (typeof tutorData.messages)[0];
 type Mode = "Online" | "In-person";
 
-export default function TutorPage() {
+function TutorPage() {
     const [bookings, setBookings] = React.useState<Booking[]>(tutorData.bookings);
     const [messages, setMessages] = React.useState<Message[]>(tutorData.messages);
 
@@ -364,3 +365,5 @@ export default function TutorPage() {
         </div>
     );
 }
+
+export default withAuth(TutorPage, ['tutor']);

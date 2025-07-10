@@ -33,7 +33,7 @@ const registerFormSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(6, "Password must be at least 6 characters long."),
     confirmPassword: z.string(),
-    role: z.enum(["student", "instructor", "tutor"], { required_error: "Please select a role." }),
+    role: z.enum(["student", "instructor", "tutor", "admin"], { required_error: "Please select a role." }),
 }).refine(data => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
     path: ["confirmPassword"],
@@ -86,9 +86,9 @@ export default function RegisterPage() {
 
             toast({
                 title: "Registration Successful!",
-                description: "Welcome to Edumate Pro. Redirecting you to the dashboard...",
+                description: "Welcome to Edumate Pro. Please log in to continue.",
             });
-            router.push('/dashboard');
+            router.push('/login');
 
         } catch (error) {
              let errorMessage = "An unknown error occurred.";
@@ -198,6 +198,7 @@ export default function RegisterPage() {
                                                     <SelectItem value="student">Student</SelectItem>
                                                     <SelectItem value="instructor">Instructor</SelectItem>
                                                     <SelectItem value="tutor">Tutor</SelectItem>
+                                                    <SelectItem value="admin">Admin</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />

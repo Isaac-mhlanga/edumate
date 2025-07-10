@@ -23,6 +23,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PayoutReceipt } from "@/components/payout-receipt";
 import { useReactToPrint } from "react-to-print";
+import withAuth from "@/components/with-auth";
 
 type User = (typeof adminData.users)[0];
 type Course = (typeof adminData.courses)[0];
@@ -30,7 +31,7 @@ type PayoutRequest = (typeof adminData.payoutRequests)[0];
 type Assignment = (typeof adminData.assignments)[0];
 type Subscription = (typeof adminData.subscriptions)[0];
 
-export default function AdminPage() {
+function AdminPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -985,3 +986,5 @@ export default function AdminPage() {
         </div>
     );
 }
+
+export default withAuth(AdminPage, ['admin']);

@@ -23,11 +23,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
+import withAuth from "@/components/with-auth";
 
 type SubmittedAssignment = (typeof studentData.submittedAssignments)[0];
 type Transaction = (typeof studentData.transactions)[0];
 
-export default function DashboardPage() {
+function DashboardPage() {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -827,3 +828,5 @@ export default function DashboardPage() {
         </div>
     );
 }
+
+export default withAuth(DashboardPage, ['student']);
