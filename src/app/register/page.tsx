@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -15,7 +14,19 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { registerUser } from "./actions";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, type Auth } from "firebase/auth";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { FirebaseError } from "firebase/app";
+
+// Define the configuration directly for client-side use.
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 
 const registerFormSchema = z.object({
@@ -36,6 +47,13 @@ export default function RegisterPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = React.useState(false);
+    const [auth, setAuth] = React.useState<Auth | null>(null);
+
+    React.useEffect(() => {
+        // Initialize Firebase on the client
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+        setAuth(getAuth(app));
+    }, []);
 
     const form = useForm<RegisterFormValues>({
         resolver: zodResolver(registerFormSchema),
@@ -48,27 +66,44 @@ export default function RegisterPage() {
     });
 
     const handleRegister = async (data: RegisterFormValues) => {
+        if (!auth) {
+            toast({
+                variant: "destructive",
+                title: "Registration Failed",
+                description: "Authentication service is not available.",
+            });
+            return;
+        }
+
         setIsLoading(true);
         try {
-            const result = await registerUser(data);
-            if (result.success) {
-                toast({
-                    title: "Registration Successful!",
-                    description: "Welcome to Edumate Pro. Redirecting you to the dashboard...",
-                });
-                router.push('/dashboard');
-            } else {
-                 toast({
-                    variant: "destructive",
-                    title: "Registration Failed",
-                    description: result.error || "An unknown error occurred.",
-                });
-            }
+            const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
+            const user = userCredential.user;
+            await updateProfile(user, { displayName: data.fullName });
+
+            console.log(`User created successfully: ${user.uid}, Role: ${data.role}`);
+
+            toast({
+                title: "Registration Successful!",
+                description: "Welcome to Edumate Pro. Redirecting you to the dashboard...",
+            });
+            router.push('/dashboard');
+
         } catch (error) {
-             toast({
+             let errorMessage = "An unknown error occurred.";
+             if (error instanceof FirebaseError) {
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'This email address is already in use.';
+                } else {
+                    errorMessage = `An error occurred: ${error.message}`;
+                }
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            toast({
                 variant: "destructive",
-                title: "Uh oh! Something went wrong.",
-                description: "There was a problem with your request.",
+                title: "Registration Failed",
+                description: errorMessage,
             });
         } finally {
             setIsLoading(false);
@@ -167,7 +202,7 @@ export default function RegisterPage() {
                                 />
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4">
-                                <Button type="submit" className="w-full" disabled={isLoading}>
+                                <Button type="submit" className="w-full" disabled={isLoading || !auth}>
                                     {isLoading ? 'Creating Account...' : 'Create Account'}
                                 </Button>
                                 <div className="text-center text-sm text-muted-foreground">
