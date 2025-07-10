@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
 import { getAuth, signInWithEmailAndPassword, type Auth } from "firebase/auth";
 import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
@@ -45,14 +46,23 @@ export default function LoginPage() {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
 
-            // Retrieve role from localStorage
-            const role = localStorage.getItem(`userRole-${user.uid}`) || 'student';
+            // Fetch user role from Firestore
+            const db = getFirestore(auth.app);
+            const userDocRef = doc(db, "users", user.uid);
+            const userDoc = await getDoc(userDocRef);
+
+            if (!userDoc.exists()) {
+                throw new Error("User profile not found. Please contact support.");
+            }
+            
+            const role = userDoc.data().role || 'student';
             
             toast({
                 title: "Login Successful",
                 description: "Welcome back! Redirecting you...",
             });
 
+            // Redirect based on role from Firestore
             switch (role) {
                 case 'instructor':
                     router.push('/instructor');
@@ -81,7 +91,10 @@ export default function LoginPage() {
                         errorMessage = 'An error occurred during login.';
                         break;
                 }
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
             }
+
             toast({
                 variant: "destructive",
                 title: "Login Failed",

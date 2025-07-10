@@ -15,6 +15,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getAuth, createUserWithEmailAndPassword, updateProfile, type Auth } from "firebase/auth";
+import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
 
 // Define the configuration directly for client-side use.
@@ -79,8 +80,15 @@ export default function RegisterPage() {
             const user = userCredential.user;
             await updateProfile(user, { displayName: data.fullName });
 
-            // Store role in localStorage
-            localStorage.setItem(`userRole-${user.uid}`, data.role);
+            // Create user document in Firestore
+            const db = getFirestore(auth.app);
+            await setDoc(doc(db, "users", user.uid), {
+                uid: user.uid,
+                fullName: data.fullName,
+                email: data.email,
+                role: data.role,
+                createdAt: new Date(),
+            });
 
             toast({
                 title: "Registration Successful!",

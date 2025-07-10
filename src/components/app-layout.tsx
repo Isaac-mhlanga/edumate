@@ -45,6 +45,7 @@ import React from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { getAuth, onAuthStateChanged, signOut, type User, type Auth } from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase/app';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 // Define the configuration directly for client-side use.
@@ -59,19 +60,21 @@ const firebaseConfig: FirebaseOptions = {
 
 type Role = 'student' | 'instructor' | 'admin' | 'tutor';
 
-// This is a mock function. In a real app, you'd get this from Firestore or a custom claim.
-const getUserRole = (user: User | null): Role | null => {
-    if (!user || !user.email) return null;
-    
-    // Check localStorage first
-    const storedRole = localStorage.getItem(`userRole-${user.uid}`);
-    if (storedRole) return storedRole as Role;
-
-    // Fallback to email check if not in localStorage
-    if (user.email.includes('admin')) return 'admin';
-    if (user.email.includes('instructor')) return 'instructor';
-    if (user.email.includes('tutor')) return 'tutor';
-    return 'student';
+// Fetches user role from Firestore.
+const getUserRole = async (user: User): Promise<Role | null> => {
+    try {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            return userDoc.data().role as Role;
+        }
+        return null;
+    } catch (error) {
+        console.error("Error fetching user role:", error);
+        return null;
+    }
 };
 
 type MenuItem = {
@@ -131,9 +134,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     const authInstance = getAuth(app);
     setAuth(authInstance);
 
-    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
+    const unsubscribe = onAuthStateChanged(authInstance, async (currentUser) => {
       setUser(currentUser);
-      setUserRole(getUserRole(currentUser));
+      if (currentUser) {
+        const role = await getUserRole(currentUser);
+        setUserRole(role);
+      } else {
+        setUserRole(null);
+      }
       setLoading(false);
     });
 
@@ -185,23 +193,31 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </Link>
           </SidebarHeader>
           <SidebarMenu>
-            {menuItems.map((item) => (
-              <SidebarMenuItem key={item.label}>
-                <SidebarMenuButton
-                  asChild
-                  isActive={pathname.startsWith(item.basePath) && currentTab === item.tab}
-                  tooltip={{
-                    children: item.label,
-                    side: 'right',
-                  }}
-                >
-                  <Link href={item.href}>
-                    <item.icon />
-                    <span>{item.label}</span>
-                  </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            ))}
+            {loading ? (
+              <>
+                <SidebarMenuSkeleton showIcon={true} />
+                <SidebarMenuSkeleton showIcon={true} />
+                <SidebarMenuSkeleton showIcon={true} />
+              </>
+            ) : menuItems.length > 0 ? (
+                menuItems.map((item) => (
+                <SidebarMenuItem key={item.label}>
+                    <SidebarMenuButton
+                    asChild
+                    isActive={pathname.startsWith(item.basePath) && currentTab === item.tab}
+                    tooltip={{
+                        children: item.label,
+                        side: 'right',
+                    }}
+                    >
+                    <Link href={item.href}>
+                        <item.icon />
+                        <span>{item.label}</span>
+                    </Link>
+                    </SidebarMenuButton>
+                </SidebarMenuItem>
+                ))
+            ) : null}
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>

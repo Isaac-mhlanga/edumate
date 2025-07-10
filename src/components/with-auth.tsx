@@ -5,6 +5,7 @@ import React, { useEffect, useState, ComponentType } from 'react';
 import { useRouter } from 'next/navigation';
 import { getAuth, onAuthStateChanged, User } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { Skeleton } from './ui/skeleton';
 
 const firebaseConfig = {
@@ -18,19 +19,24 @@ const firebaseConfig = {
 
 type Role = 'student' | 'instructor' | 'admin' | 'tutor';
 
-// Get user role from localStorage with a fallback to email check
-const getUserRole = (user: User | null): Role | null => {
-    if (!user || !user.email) return null;
-    
-    // Check localStorage first
-    const storedRole = localStorage.getItem(`userRole-${user.uid}`);
-    if (storedRole) return storedRole as Role;
-
-    // Fallback to email check
-    if (user.email.includes('admin')) return 'admin';
-    if (user.email.includes('instructor')) return 'instructor';
-    if (user.email.includes('tutor')) return 'tutor';
-    return 'student';
+// Get user role from Firestore
+const getUserRole = async (user: User | null): Promise<Role | null> => {
+    if (!user) return null;
+    try {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        
+        if (userDoc.exists()) {
+            return userDoc.data().role as Role;
+        }
+        console.warn("User document not found in Firestore for UID:", user.uid);
+        return 'student'; // Default role if not found
+    } catch (error) {
+        console.error("Error fetching user role from Firestore:", error);
+        return null;
+    }
 };
 
 
@@ -47,10 +53,11 @@ const withAuth = <P extends object>(
     useEffect(() => {
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
         const auth = getAuth(app);
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
             if (currentUser) {
-              setUserRole(getUserRole(currentUser));
+              const role = await getUserRole(currentUser);
+              setUserRole(role);
             } else {
               setUserRole(null);
             }

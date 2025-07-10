@@ -4,13 +4,13 @@
 import React, { useEffect, useState } from 'react';
 import { getAuth, onAuthStateChanged, updateProfile, type User, type Auth } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getFirestore, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { useToast } from '@/hooks/use-toast';
@@ -42,7 +42,6 @@ function SettingsPage() {
   const [user, setUser] = useState<User | null>(null);
   const [auth, setAuth] = useState<Auth | null>(null);
   const [loading, setLoading] = useState(true);
-  const [userRole, setUserRole] = useState<Role | null>(null);
 
   const form = useForm<SettingsFormValues>({
     resolver: zodResolver(settingsFormSchema),
@@ -53,16 +52,21 @@ function SettingsPage() {
     const authInstance = getAuth(app);
     setAuth(authInstance);
 
-    const unsubscribe = onAuthStateChanged(authInstance, (currentUser) => {
-      setUser(currentUser);
+    const unsubscribe = onAuthStateChanged(authInstance, async (currentUser) => {
       if (currentUser) {
-        const role = (localStorage.getItem(`userRole-${currentUser.uid}`) as Role) || 'student';
-        setUserRole(role);
-        form.reset({
-          fullName: currentUser.displayName || '',
-          email: currentUser.email || '',
-          role: role,
-        });
+        setUser(currentUser);
+        const db = getFirestore(app);
+        const userDocRef = doc(db, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+
+        if (userDoc.exists()) {
+            const userData = userDoc.data();
+            form.reset({
+                fullName: currentUser.displayName || userData.fullName || '',
+                email: currentUser.email || '',
+                role: userData.role || 'student',
+            });
+        }
       }
       setLoading(false);
     });
@@ -74,14 +78,18 @@ function SettingsPage() {
     if (!user || !auth) return;
 
     try {
-      // Update display name
+      // Update display name in Firebase Auth
       if (data.fullName !== user.displayName) {
         await updateProfile(user, { displayName: data.fullName });
       }
-
-      // Update role in localStorage
-      localStorage.setItem(`userRole-${user.uid}`, data.role);
-      setUserRole(data.role);
+      
+      // Update user document in Firestore
+      const db = getFirestore(auth.app);
+      const userDocRef = doc(db, "users", user.uid);
+      await updateDoc(userDocRef, {
+        fullName: data.fullName,
+        role: data.role,
+      });
 
       toast({
         title: 'Settings Saved',
@@ -183,7 +191,7 @@ function SettingsPage() {
                         </SelectContent>
                     </Select>
                      <FormDescription>
-                        Changing your role will change your dashboard view.
+                        Changing your role will change your dashboard view upon next login.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
