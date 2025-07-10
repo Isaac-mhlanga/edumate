@@ -98,6 +98,11 @@ export const instructorData = {
             videos: [
                 { id: 'V001', title: 'Introduction to Limits' },
                 { id: 'V002', title: 'Understanding Derivatives' },
+                { id: 'V003', title: 'The Chain Rule' },
+                { id: 'V004', title: 'Product and Quotient Rules' },
+                { id: 'V005', title: 'Introduction to Integrals' },
+                { id: 'V006', title: 'The Fundamental Theorem of Calculus' },
+                { id: 'V007', title: 'Advanced Integration Techniques' },
             ]
         },
         {
@@ -112,9 +117,9 @@ export const instructorData = {
             },
             status: 'Draft',
             videos: [
-                { id: 'V003', title: 'First Law of Motion' },
-                { id: 'V004', title: 'Second & Third Laws' },
-                { id: 'V005', title: 'Universal Gravitation' },
+                { id: 'V008', title: 'First Law of Motion' },
+                { id: 'V009', title: 'Second & Third Laws' },
+                { id: 'V010', title: 'Universal Gravitation' },
             ]
         },
         {
@@ -130,8 +135,8 @@ export const instructorData = {
             },
             status: 'Published',
             videos: [
-                { id: 'V006', title: 'Alkane Structures' },
-                { id: 'V007', title: 'Stereochemistry Basics' },
+                { id: 'V011', title: 'Alkane Structures' },
+                { id: 'V012', title: 'Stereochemistry Basics' },
             ]
         },
          {
@@ -146,8 +151,8 @@ export const instructorData = {
             },
             status: 'Published',
             videos: [
-                { id: 'V008', title: 'The Unit Circle' },
-                { id: 'V009', title: 'Solving Trig Equations' },
+                { id: 'V013', title: 'The Unit Circle' },
+                { id: 'V014', title: 'Solving Trig Equations' },
             ]
         }
     ]

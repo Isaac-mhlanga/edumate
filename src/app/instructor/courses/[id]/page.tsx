@@ -5,10 +5,10 @@ import { AppLayout } from "@/components/app-layout";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { instructorData } from "@/lib/data";
-import { ArrowLeft, CheckCircle, Clapperboard, PlayCircle, Settings, Star } from "lucide-react";
+import { ArrowLeft, CheckCircle, ChevronLeft, ChevronRight, Clapperboard, PlayCircle, Settings, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
@@ -24,6 +24,15 @@ export default function CoursePreviewPage() {
     const [quality, setQuality] = React.useState('720p');
     const [playbackRate, setPlaybackRate] = React.useState('1');
     const videoRef = React.useRef<HTMLVideoElement>(null);
+
+    // Pagination for video list
+    const [currentVideoPage, setCurrentVideoPage] = React.useState(1);
+    const videosPerPage = 5;
+    const totalVideoPages = course ? Math.ceil(course.videos.length / videosPerPage) : 0;
+    const paginatedVideos = course?.videos.slice(
+        (currentVideoPage - 1) * videosPerPage,
+        currentVideoPage * videosPerPage
+    );
 
     React.useEffect(() => {
         if (videoRef.current) {
@@ -178,15 +187,18 @@ export default function CoursePreviewPage() {
                         <Card className="shadow-lg rounded-xl">
                             <CardHeader>
                                 <CardTitle>Course Content</CardTitle>
+                                <CardDescription>
+                                    {course.videos.length} lessons
+                                </CardDescription>
                             </CardHeader>
                             <CardContent className="p-0">
                                 <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
-                                    {course.videos.map((video, index) => (
+                                    {paginatedVideos?.map((video, index) => (
                                         <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
                                             <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
                                                 <div className="flex items-center gap-3">
                                                     <Clapperboard className="h-5 w-5 text-muted-foreground"/>
-                                                    <span>{index + 1}. {video.title}</span>
+                                                    <span>{(currentVideoPage - 1) * videosPerPage + index + 1}. {video.title}</span>
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent>
@@ -198,6 +210,23 @@ export default function CoursePreviewPage() {
                                     ))}
                                 </Accordion>
                             </CardContent>
+                            {totalVideoPages > 1 && (
+                                <CardFooter className="flex items-center justify-between py-4">
+                                    <div className="text-xs text-muted-foreground">
+                                        Page <strong>{currentVideoPage}</strong> of <strong>{totalVideoPages}</strong>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCurrentVideoPage(p => p - 1)} disabled={currentVideoPage === 1}>
+                                            <ChevronLeft className="h-4 w-4" />
+                                            <span className="sr-only">Previous Page</span>
+                                        </Button>
+                                        <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCurrentVideoPage(p => p + 1)} disabled={currentVideoPage >= totalVideoPages}>
+                                            <ChevronRight className="h-4 w-4" />
+                                            <span className="sr-only">Next Page</span>
+                                        </Button>
+                                    </div>
+                                </CardFooter>
+                            )}
                         </Card>
                     </div>
                 </div>
@@ -205,5 +234,3 @@ export default function CoursePreviewPage() {
         </AppLayout>
     );
 }
-
-    
