@@ -18,7 +18,6 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
@@ -30,7 +29,7 @@ import { useForm } from "react-hook-form";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { z } from "zod";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import withAuth from "@/components/with-auth";
 
 const chartConfig = {
@@ -69,7 +68,6 @@ type VideoUpload = {
 
 function InstructorPage() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const { toast } = useToast();
   
@@ -181,12 +179,6 @@ function InstructorPage() {
       setVideoUploads([]);
     }
   }, [selectedCourse, form]);
-
-  const handleTabChange = (value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set('tab', value);
-    router.replace(`${pathname}?${params.toString()}`);
-  };
 
   const handleCourseDialogOpenChange = (open: boolean) => {
     setIsCourseDialogOpen(open);
@@ -413,19 +405,9 @@ function InstructorPage() {
           <h1 className="text-3xl font-bold tracking-tight">Instructor Dashboard</h1>
           <p className="text-muted-foreground">Manage your students, lessons, and earnings.</p>
         </div>
-
-        <Tabs defaultValue={currentTab} onValueChange={handleTabChange} className="w-full">
-          <div className="overflow-x-auto pb-1">
-            <TabsList className="grid w-full grid-cols-5 min-w-[600px] max-w-2xl">
-              <TabsTrigger value="overview">Overview</TabsTrigger>
-              <TabsTrigger value="courses">Courses</TabsTrigger>
-              <TabsTrigger value="assignments">Assignments</TabsTrigger>
-              <TabsTrigger value="students">Students</TabsTrigger>
-              <TabsTrigger value="earnings">Earnings</TabsTrigger>
-            </TabsList>
-          </div>
-          
-          <TabsContent value="overview" className="pt-6">
+        
+        <div className="pt-6">
+          {currentTab === 'overview' && (
             <div className="space-y-8">
               <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                 {instructorData.stats.map((stat) => (
@@ -550,9 +532,9 @@ function InstructorPage() {
                 </Card>
               </section>
             </div>
-          </TabsContent>
+          )}
 
-          <TabsContent value="courses" className="pt-6">
+          {currentTab === 'courses' && (
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -652,9 +634,9 @@ function InstructorPage() {
                     </div>
                 </CardFooter>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="assignments" className="pt-6">
+          {currentTab === 'assignments' && (
              <Card>
                 <CardHeader>
                     <CardTitle>Assignment Management</CardTitle>
@@ -762,9 +744,9 @@ function InstructorPage() {
                     </div>
                 </CardFooter>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="students" className="pt-6">
+          {currentTab === 'students' && (
              <Card>
                 <CardHeader>
                     <CardTitle>Student Management</CardTitle>
@@ -868,182 +850,184 @@ function InstructorPage() {
                     </div>
                 </CardFooter>
             </Card>
-          </TabsContent>
+          )}
 
-          <TabsContent value="earnings" className="pt-6 space-y-6">
-            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+          {currentTab === 'earnings' && (
+            <div className="space-y-6">
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                            <DollarSign className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">R {totalRevenue.toFixed(2)}</div>
+                            <p className="text-xs text-muted-foreground">All-time earnings from sales.</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Available for Payout</CardTitle>
+                            <Banknote className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">R {availableForPayout.toFixed(2)}</div>
+                            <p className="text-xs text-muted-foreground">Current account balance.</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Course Sales</CardTitle>
+                            <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                +R {transactions.filter(t => t.type === 'Course Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                            </div>
+                            <p className="text-xs text-muted-foreground">From one-time purchases.</p>
+                        </CardContent>
+                    </Card>
+                    <Card>
+                        <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                            <CardTitle className="text-sm font-medium">Assignment Sales</CardTitle>
+                            <ReceiptText className="h-4 w-4 text-muted-foreground" />
+                        </CardHeader>
+                        <CardContent>
+                            <div className="text-2xl font-bold">
+                                +R {transactions.filter(t => t.type === 'Assignment Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                            </div>
+                            <p className="text-xs text-muted-foreground">From paid solutions.</p>
+                        </CardContent>
+                    </Card>
+                </div>
                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
-                        <DollarSign className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">R {totalRevenue.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">All-time earnings from sales.</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Available for Payout</CardTitle>
-                        <Banknote className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">R {availableForPayout.toFixed(2)}</div>
-                        <p className="text-xs text-muted-foreground">Current account balance.</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Course Sales</CardTitle>
-                        <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            +R {transactions.filter(t => t.type === 'Course Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                    <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-2">
+                        <div>
+                            <CardTitle>Transaction History</CardTitle>
+                            <CardDescription>A detailed log of all your financial activities.</CardDescription>
                         </div>
-                        <p className="text-xs text-muted-foreground">From one-time purchases.</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Assignment Sales</CardTitle>
-                        <ReceiptText className="h-4 w-4 text-muted-foreground" />
+                        <Button onClick={() => setIsPayoutDialogOpen(true)}>Request Payout</Button>
                     </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">
-                            +R {transactions.filter(t => t.type === 'Assignment Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by item or student..."
+                                className="pl-8"
+                                value={transactionFilters.search}
+                                onChange={(e) => handleTransactionFilterChange('search', e.target.value)}
+                            />
                         </div>
-                        <p className="text-xs text-muted-foreground">From paid solutions.</p>
+                        <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
+                            <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                    <Button variant="outline" className="gap-1 w-full">
+                                        <ListFilter className="h-3.5 w-3.5" />
+                                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Type</span>
+                                    </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                    <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
+                                    <DropdownMenuSeparator />
+                                    <DropdownMenuRadioGroup value={transactionFilters.type} onValueChange={(value) => handleTransactionFilterChange('type', value)}>
+                                        <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Course Sale">Course Sale</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Assignment Sale">Assignment Sale</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Subscription">Subscription</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Refund">Refund</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Payout">Payout</DropdownMenuRadioItem>
+                                    </DropdownMenuRadioGroup>
+                                </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Button variant="outline" className="gap-1.5 w-full">
+                                <CalendarDays className="h-4 w-4" />
+                                <span>Filter by Date</span>
+                            </Button>
+                        </div>
+                    </div>
+                    <CardContent className="p-0">
+                        {paginatedTransactions.length > 0 ? (
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Item / Description</TableHead>
+                                        <TableHead className="hidden sm:table-cell">Student</TableHead>
+                                        <TableHead className="hidden md:table-cell">Status</TableHead>
+                                        <TableHead className="text-right">Amount (R)</TableHead>
+                                        <TableHead className="text-right hidden md:table-cell">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {paginatedTransactions.map((transaction) => (
+                                        <TableRow key={transaction.id}>
+                                            <TableCell className="font-medium">{transaction.item}</TableCell>
+                                            <TableCell className="text-muted-foreground hidden sm:table-cell">{transaction.studentName || 'N/A'}</TableCell>
+                                            <TableCell className="hidden md:table-cell">
+                                                <Badge
+                                                    variant={transaction.status === 'Completed' ? 'default' : transaction.status === 'Refunded' ? 'destructive' : 'secondary'}
+                                                    className={
+                                                        transaction.status === 'Completed' ? 'bg-green-500/20 text-green-700' 
+                                                        : transaction.status === 'Refunded' ? 'bg-red-500/20 text-red-700'
+                                                        : 'bg-yellow-500/20 text-yellow-700'
+                                                    }
+                                                >
+                                                    {transaction.status === 'Completed' && <CheckCircle className="mr-1 h-3 w-3" />}
+                                                    {transaction.status === 'Refunded' && <XCircle className="mr-1 h-3 w-3" />}
+                                                    {transaction.status === 'Pending' && <Hourglass className="mr-1 h-3 w-3" />}
+                                                    {transaction.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className={`text-right font-semibold ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                                {transaction.amount > 0 ? `+${transaction.amount.toFixed(2)}` : transaction.amount.toFixed(2)}
+                                            </TableCell>
+                                            <TableCell className="text-right hidden md:table-cell">
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'view')}><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
+                                                        {transaction.type !== 'Payout' && transaction.status === 'Completed' && (
+                                                            <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'refund')} className="text-destructive focus:text-destructive"><Undo2 className="mr-2 h-4 w-4"/>Issue Refund</DropdownMenuItem>
+                                                        )}
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : (
+                            <div className="text-center py-16">
+                                <h3 className="text-lg font-semibold">No Transactions Found</h3>
+                                <p className="text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
+                            </div>
+                        )}
                     </CardContent>
+                    <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                        <div className="text-xs text-muted-foreground">
+                            Showing{" "}
+                            <strong>
+                                {filteredTransactions.length > 0 ? (currentTransactionPage - 1) * transactionsPerPage + 1 : 0}-
+                                {Math.min(currentTransactionPage * transactionsPerPage, filteredTransactions.length)}
+                            </strong>{" "}
+                            of <strong>{filteredTransactions.length}</strong> transactions.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p - 1)} disabled={currentTransactionPage === 1}>
+                                <ChevronLeft className="h-4 w-4 mr-1" />
+                                Prev
+                            </Button>
+                            <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p + 1)} disabled={currentTransactionPage >= totalTransactionPages}>
+                                Next
+                                <ChevronRight className="h-4 w-4 ml-1" />
+                            </Button>
+                        </div>
+                    </CardFooter>
                 </Card>
             </div>
-             <Card>
-                <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-2">
-                    <div>
-                        <CardTitle>Transaction History</CardTitle>
-                        <CardDescription>A detailed log of all your financial activities.</CardDescription>
-                    </div>
-                     <Button onClick={() => setIsPayoutDialogOpen(true)}>Request Payout</Button>
-                </CardHeader>
-                <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                    <div className="relative flex-1 w-full">
-                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                        <Input
-                            placeholder="Search by item or student..."
-                            className="pl-8"
-                            value={transactionFilters.search}
-                            onChange={(e) => handleTransactionFilterChange('search', e.target.value)}
-                        />
-                    </div>
-                    <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto">
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="gap-1 w-full">
-                                    <ListFilter className="h-3.5 w-3.5" />
-                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Type</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuRadioGroup value={transactionFilters.type} onValueChange={(value) => handleTransactionFilterChange('type', value)}>
-                                    <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Course Sale">Course Sale</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Assignment Sale">Assignment Sale</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Subscription">Subscription</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Refund">Refund</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Payout">Payout</DropdownMenuRadioItem>
-                                </DropdownMenuRadioGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                        <Button variant="outline" className="gap-1.5 w-full">
-                            <CalendarDays className="h-4 w-4" />
-                            <span>Filter by Date</span>
-                        </Button>
-                    </div>
-                </div>
-                 <CardContent className="p-0">
-                    {paginatedTransactions.length > 0 ? (
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Item / Description</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Student</TableHead>
-                                    <TableHead className="hidden md:table-cell">Status</TableHead>
-                                    <TableHead className="text-right">Amount (R)</TableHead>
-                                    <TableHead className="text-right hidden md:table-cell">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paginatedTransactions.map((transaction) => (
-                                    <TableRow key={transaction.id}>
-                                        <TableCell className="font-medium">{transaction.item}</TableCell>
-                                        <TableCell className="text-muted-foreground hidden sm:table-cell">{transaction.studentName || 'N/A'}</TableCell>
-                                        <TableCell className="hidden md:table-cell">
-                                             <Badge
-                                                variant={transaction.status === 'Completed' ? 'default' : transaction.status === 'Refunded' ? 'destructive' : 'secondary'}
-                                                className={
-                                                    transaction.status === 'Completed' ? 'bg-green-500/20 text-green-700' 
-                                                    : transaction.status === 'Refunded' ? 'bg-red-500/20 text-red-700'
-                                                    : 'bg-yellow-500/20 text-yellow-700'
-                                                }
-                                             >
-                                                {transaction.status === 'Completed' && <CheckCircle className="mr-1 h-3 w-3" />}
-                                                {transaction.status === 'Refunded' && <XCircle className="mr-1 h-3 w-3" />}
-                                                {transaction.status === 'Pending' && <Hourglass className="mr-1 h-3 w-3" />}
-                                                {transaction.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className={`text-right font-semibold ${transaction.amount > 0 ? 'text-green-600' : 'text-red-600'}`}>
-                                            {transaction.amount > 0 ? `+${transaction.amount.toFixed(2)}` : transaction.amount.toFixed(2)}
-                                        </TableCell>
-                                        <TableCell className="text-right hidden md:table-cell">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'view')}><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
-                                                    {transaction.type !== 'Payout' && transaction.status === 'Completed' && (
-                                                        <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'refund')} className="text-destructive focus:text-destructive"><Undo2 className="mr-2 h-4 w-4"/>Issue Refund</DropdownMenuItem>
-                                                    )}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    ) : (
-                         <div className="text-center py-16">
-                            <h3 className="text-lg font-semibold">No Transactions Found</h3>
-                            <p className="text-muted-foreground mt-1">Try adjusting your search or filter criteria.</p>
-                        </div>
-                    )}
-                </CardContent>
-                <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                    <div className="text-xs text-muted-foreground">
-                        Showing{" "}
-                        <strong>
-                            {filteredTransactions.length > 0 ? (currentTransactionPage - 1) * transactionsPerPage + 1 : 0}-
-                            {Math.min(currentTransactionPage * transactionsPerPage, filteredTransactions.length)}
-                        </strong>{" "}
-                        of <strong>{filteredTransactions.length}</strong> transactions.
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p - 1)} disabled={currentTransactionPage === 1}>
-                            <ChevronLeft className="h-4 w-4 mr-1" />
-                            Prev
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p + 1)} disabled={currentTransactionPage >= totalTransactionPages}>
-                            Next
-                            <ChevronRight className="h-4 w-4 ml-1" />
-                        </Button>
-                    </div>
-                </CardFooter>
-            </Card>
-          </TabsContent>
-        </Tabs>
+          )}
+        </div>
 
        <Dialog open={isCourseDialogOpen} onOpenChange={handleCourseDialogOpenChange}>
           <DialogContent className="sm:max-w-2xl">
@@ -1452,5 +1436,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    

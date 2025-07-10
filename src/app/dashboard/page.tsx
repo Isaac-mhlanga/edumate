@@ -14,14 +14,13 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, studentData } from "@/lib/data";
 import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import withAuth from "@/components/with-auth";
 
@@ -30,25 +29,10 @@ type Transaction = (typeof studentData.transactions)[0];
 
 function DashboardPage() {
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
     const { toast } = useToast();
     
     const currentTab = searchParams.get('tab') || 'overview';
-    
-    const handleTabChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('tab', value);
-        router.replace(`${pathname}?${params.toString()}`);
-    };
-
-    React.useEffect(() => {
-        const tab = searchParams.get('tab');
-        if (tab) {
-          // You might need to add logic here if you want to perform actions when the tab changes,
-          // but for just setting the default value, the `defaultValue` prop on Tabs is sufficient.
-        }
-    }, [searchParams]);
 
     const completedAssignmentsCount = studentData.submittedAssignments.filter(a => a.status === 'Paid').length;
     const certificatesEarned = 1; 
@@ -215,164 +199,156 @@ function DashboardPage() {
                 <p className="text-muted-foreground">Let's continue your learning journey.</p>
             </div>
 
-            <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-                <div className="overflow-x-auto pb-1">
-                    <TabsList className="grid w-full grid-cols-5 min-w-[500px] max-w-xl">
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="courses">Course Catalog</TabsTrigger>
-                        <TabsTrigger value="assignments">Assignments</TabsTrigger>
-                        <TabsTrigger value="transactions">Transactions</TabsTrigger>
-                        <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-                    </TabsList>
-                </div>
-                
-                <TabsContent value="overview" className="pt-6 space-y-8">
-                    <section className="grid gap-6 md:grid-cols-3">
-                        {stats.map((stat) => (
-                            <Card key={stat.title} className="shadow-md rounded-xl">
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                                    <stat.icon className="h-5 w-5 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{stat.value}</div>
-                                    <p className="text-xs text-muted-foreground">Keep up the great work!</p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </section>
-                    
-                    <section>
-                        <h2 className="text-2xl font-semibold mb-4">Continue Learning</h2>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {studentData.activeSubscriptions.map((sub) => (
-                                <Card key={sub.id} className="shadow-md rounded-xl flex flex-col">
-                                    <CardHeader>
-                                        <div className="flex justify-between items-start">
-                                            <CardTitle>{sub.name}</CardTitle>
-                                            <Badge>Subscribed</Badge>
-                                        </div>
-                                        <CardDescription>Expires on: {sub.expires}</CardDescription>
+            <div className="pt-6">
+                {currentTab === 'overview' && (
+                    <div className="space-y-8">
+                        <section className="grid gap-6 md:grid-cols-3">
+                            {stats.map((stat) => (
+                                <Card key={stat.title} className="shadow-md rounded-xl">
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                                        <stat.icon className="h-5 w-5 text-muted-foreground" />
                                     </CardHeader>
-                                    <CardContent className="flex-grow">
-                                    <p className="text-sm text-muted-foreground">You're making great progress. Keep going to master the material and achieve your goals.</p>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{stat.value}</div>
+                                        <p className="text-xs text-muted-foreground">Keep up the great work!</p>
                                     </CardContent>
-                                    <CardFooter className="flex-col items-start pt-4 border-t">
-                                        <div className="w-full">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-medium">Progress</span>
-                                                <span className="text-sm font-bold text-primary">{sub.progress}%</span>
-                                            </div>
-                                            <Progress value={sub.progress} className="h-2"/>
-                                        </div>
-                                        <Button className="mt-4 w-full" asChild>
-                                            <Link href={`/instructor/courses/${allCourses.find(c => c.title.includes(sub.name.split(' - ')[1]))?.id || ''}?from=dashboard`}>
-                                                Continue Learning <ArrowRight className="ml-2 h-4 w-4"/>
-                                            </Link>
-                                        </Button>
-                                    </CardFooter>
                                 </Card>
                             ))}
-                        </div>
-                    </section>
-
-                    <section>
-                        <Card className="shadow-md rounded-xl">
-                            <CardHeader>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                    <div>
-                                        <CardTitle>My Purchased Courses</CardTitle>
-                                        <CardDescription>Courses you have enrolled in. Find all courses in the catalog.</CardDescription>
-                                    </div>
-                                    <Button variant="outline" onClick={() => handleTabChange('courses')}>View Full Catalog</Button>
-                                </div>
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4">
-                                    <div className="relative flex-1 w-full">
-                                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search my courses..."
-                                            className="pl-8"
-                                            value={purchasedCourseFilters.search}
-                                            onChange={(e) => handlePurchasedCourseFilterChange('search', e.target.value)}
-                                        />
-                                    </div>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" className="gap-1 w-full sm:w-auto">
-                                                <Filter className="h-3.5 w-3.5" />
-                                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                                    Subject
-                                                </span>
+                        </section>
+                        
+                        <section>
+                            <h2 className="text-2xl font-semibold mb-4">Continue Learning</h2>
+                            <div className="grid md:grid-cols-2 gap-6">
+                                {studentData.activeSubscriptions.map((sub) => (
+                                    <Card key={sub.id} className="shadow-md rounded-xl flex flex-col">
+                                        <CardHeader>
+                                            <div className="flex justify-between items-start">
+                                                <CardTitle>{sub.name}</CardTitle>
+                                                <Badge>Subscribed</Badge>
+                                            </div>
+                                            <CardDescription>Expires on: {sub.expires}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="flex-grow">
+                                        <p className="text-sm text-muted-foreground">You're making great progress. Keep going to master the material and achieve your goals.</p>
+                                        </CardContent>
+                                        <CardFooter className="flex-col items-start pt-4 border-t">
+                                            <div className="w-full">
+                                                <div className="flex items-center justify-between mb-2">
+                                                    <span className="text-sm font-medium">Progress</span>
+                                                    <span className="text-sm font-bold text-primary">{sub.progress}%</span>
+                                                </div>
+                                                <Progress value={sub.progress} className="h-2"/>
+                                            </div>
+                                            <Button className="mt-4 w-full" asChild>
+                                                <Link href={`/instructor/courses/${allCourses.find(c => c.title.includes(sub.name.split(' - ')[1]))?.id || ''}?from=dashboard`}>
+                                                    Continue Learning <ArrowRight className="ml-2 h-4 w-4"/>
+                                                </Link>
                                             </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuLabel>Filter by Subject</DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuRadioGroup value={purchasedCourseFilters.subject} onValueChange={(value) => handlePurchasedCourseFilterChange('subject', value)}>
-                                                {purchasedSubjects.map(subject => (
-                                                    <DropdownMenuRadioItem key={subject} value={subject}>{subject}</DropdownMenuRadioItem>
-                                                ))}
-                                            </DropdownMenuRadioGroup>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {paginatedPurchasedCourses.length > 0 ? (
-                                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                        {paginatedPurchasedCourses.map((course) => (
-                                            <Card key={course.id} className="overflow-hidden group flex flex-col h-full">
-                                                <CardHeader className="p-0">
-                                                    <div className="bg-primary/10 aspect-video flex items-center justify-center">
-                                                        <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
-                                                    </div>
-                                                </CardHeader>
-                                                <CardContent className="p-4 flex-grow">
-                                                    <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
-                                                    <h3 className="font-semibold text-lg">{course.title}</h3>
-                                                </CardContent>
-                                                <CardFooter className="p-4 pt-0">
-                                                    <Button variant="link" className="p-0 h-auto as-child">
-                                                        <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
-                                                            Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
-                                                        </Link>
-                                                    </Button>
-                                                </CardFooter>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
-                                        <h3 className="text-lg font-semibold">No Courses Found</h3>
-                                        <p className="max-w-md mx-auto">{purchasedCourseFilters.search || purchasedCourseFilters.subject !== 'All' ? 'Try adjusting your search or filters.' : 'You haven\'t purchased any courses yet. Browse the catalog to start learning!'}</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                            <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                                <div className="text-xs text-muted-foreground">
-                                    Showing{" "}
-                                    <strong>
-                                        {filteredPurchasedCourses.length > 0 ? (currentPurchasedCoursePage - 1) * purchasedCoursesPerPage + 1 : 0}-
-                                        {Math.min(currentPurchasedCoursePage * purchasedCoursesPerPage, filteredPurchasedCourses.length)}
-                                    </strong>{" "}
-                                    of <strong>{filteredPurchasedCourses.length}</strong> courses.
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p - 1)} disabled={currentPurchasedCoursePage === 1}>
-                                        <ChevronLeft className="h-4 w-4 mr-1" />
-                                        Prev
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p + 1)} disabled={currentPurchasedCoursePage >= totalPurchasedCoursePages}>
-                                        Next
-                                        <ChevronRight className="h-4 w-4 ml-1" />
-                                    </Button>
-                                </div>
-                            </CardFooter>
-                        </Card>
-                    </section>
-                </TabsContent>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
+                            </div>
+                        </section>
 
-                <TabsContent value="courses" className="pt-6">
+                        <section>
+                            <Card className="shadow-md rounded-xl">
+                                <CardHeader>
+                                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                        <div>
+                                            <CardTitle>My Purchased Courses</CardTitle>
+                                            <CardDescription>Courses you have enrolled in. Find all courses in the catalog.</CardDescription>
+                                        </div>
+                                        <Button variant="outline" asChild><Link href="/dashboard?tab=courses">View Full Catalog</Link></Button>
+                                    </div>
+                                    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4">
+                                        <div className="relative flex-1 w-full">
+                                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                            <Input
+                                                placeholder="Search my courses..."
+                                                className="pl-8"
+                                                value={purchasedCourseFilters.search}
+                                                onChange={(e) => handlePurchasedCourseFilterChange('search', e.target.value)}
+                                            />
+                                        </div>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="outline" className="gap-1 w-full sm:w-auto">
+                                                    <Filter className="h-3.5 w-3.5" />
+                                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
+                                                        Subject
+                                                    </span>
+                                                </Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuLabel>Filter by Subject</DropdownMenuLabel>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuRadioGroup value={purchasedCourseFilters.subject} onValueChange={(value) => handlePurchasedCourseFilterChange('subject', value)}>
+                                                    {purchasedSubjects.map(subject => (
+                                                        <DropdownMenuRadioItem key={subject} value={subject}>{subject}</DropdownMenuRadioItem>
+                                                    ))}
+                                                </DropdownMenuRadioGroup>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </div>
+                                </CardHeader>
+                                <CardContent>
+                                    {paginatedPurchasedCourses.length > 0 ? (
+                                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                            {paginatedPurchasedCourses.map((course) => (
+                                                <Card key={course.id} className="overflow-hidden group flex flex-col h-full">
+                                                    <CardHeader className="p-0">
+                                                        <div className="bg-primary/10 aspect-video flex items-center justify-center">
+                                                            <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
+                                                        </div>
+                                                    </CardHeader>
+                                                    <CardContent className="p-4 flex-grow">
+                                                        <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
+                                                        <h3 className="font-semibold text-lg">{course.title}</h3>
+                                                    </CardContent>
+                                                    <CardFooter className="p-4 pt-0">
+                                                        <Button variant="link" className="p-0 h-auto as-child">
+                                                            <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
+                                                                Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
+                                                            </Link>
+                                                        </Button>
+                                                    </CardFooter>
+                                                </Card>
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                                            <h3 className="text-lg font-semibold">No Courses Found</h3>
+                                            <p className="max-w-md mx-auto">{purchasedCourseFilters.search || purchasedCourseFilters.subject !== 'All' ? 'Try adjusting your search or filters.' : 'You haven\'t purchased any courses yet. Browse the catalog to start learning!'}</p>
+                                        </div>
+                                    )}
+                                </CardContent>
+                                <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                                    <div className="text-xs text-muted-foreground">
+                                        Showing{" "}
+                                        <strong>
+                                            {filteredPurchasedCourses.length > 0 ? (currentPurchasedCoursePage - 1) * purchasedCoursesPerPage + 1 : 0}-
+                                            {Math.min(currentPurchasedCoursePage * purchasedCoursesPerPage, filteredPurchasedCourses.length)}
+                                        </strong>{" "}
+                                        of <strong>{filteredPurchasedCourses.length}</strong> courses.
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p - 1)} disabled={currentPurchasedCoursePage === 1}>
+                                            <ChevronLeft className="h-4 w-4 mr-1" />
+                                            Prev
+                                        </Button>
+                                        <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p + 1)} disabled={currentPurchasedCoursePage >= totalPurchasedCoursePages}>
+                                            Next
+                                            <ChevronRight className="h-4 w-4 ml-1" />
+                                        </Button>
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        </section>
+                    </div>
+                )}
+
+                {currentTab === 'courses' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Course Catalog</CardTitle>
@@ -517,9 +493,9 @@ function DashboardPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
+                )}
 
-                <TabsContent value="assignments" className="pt-6">
+                {currentTab === 'assignments' && (
                      <Card className="shadow-md rounded-xl">
                         <CardHeader>
                             <CardTitle>My Assignments</CardTitle>
@@ -641,9 +617,9 @@ function DashboardPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
+                )}
 
-                <TabsContent value="transactions" className="pt-6">
+                {currentTab === 'transactions' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Transaction History</CardTitle>
@@ -746,67 +722,69 @@ function DashboardPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
+                )}
                 
-                <TabsContent value="subscriptions" className="pt-6 space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>My Current Plan</CardTitle>
-                            <CardDescription>Your primary subscription for accessing course content.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Card className="bg-primary/5 border-primary">
-                                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
-                                    <div>
-                                        <CardTitle className="text-2xl">{studentData.currentSubscription.planName}</CardTitle>
-                                        <CardDescription>Next payment on {studentData.currentSubscription.nextBillingDate}</CardDescription>
-                                    </div>
-                                    <div className="text-right mt-4 sm:mt-0">
-                                        <p className="text-3xl font-bold">R{studentData.currentSubscription.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                                    </div>
-                                </CardHeader>
-                                <CardFooter className="flex justify-end gap-2">
-                                    <Button variant="destructive">Cancel Subscription</Button>
-                                </CardFooter>
-                            </Card>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                         <CardHeader>
-                            <CardTitle>Available Plans</CardTitle>
-                            <CardDescription>Choose a plan that best fits your learning needs.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid md:grid-cols-2 gap-6">
-                            {studentData.availablePlans.map(plan => (
-                                <Card key={plan.id} className="flex flex-col">
-                                    <CardHeader>
-                                        <div className="flex justify-between items-center">
-                                            <CardTitle>{plan.name}</CardTitle>
-                                            <ShieldCheck className="w-6 h-6 text-secondary"/>
+                {currentTab === 'subscriptions' && (
+                    <div className="space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>My Current Plan</CardTitle>
+                                <CardDescription>Your primary subscription for accessing course content.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Card className="bg-primary/5 border-primary">
+                                    <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
+                                        <div>
+                                            <CardTitle className="text-2xl">{studentData.currentSubscription.planName}</CardTitle>
+                                            <CardDescription>Next payment on {studentData.currentSubscription.nextBillingDate}</CardDescription>
                                         </div>
-                                        <p className="text-3xl font-bold pt-4">R{plan.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                                        <div className="text-right mt-4 sm:mt-0">
+                                            <p className="text-3xl font-bold">R{studentData.currentSubscription.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                                        </div>
                                     </CardHeader>
-                                    <CardContent className="flex-grow">
-                                        <ul className="space-y-2 text-sm text-muted-foreground">
-                                            {plan.features.map((feature, i) => (
-                                                <li key={i} className="flex items-center gap-2">
-                                                    <CheckCircle className="h-4 w-4 text-green-500"/>
-                                                    <span>{feature}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button className="w-full" disabled={plan.id === studentData.currentSubscription.planId}>
-                                            {plan.id === studentData.currentSubscription.planId ? 'Current Plan' : 'Change Plan'}
-                                        </Button>
+                                    <CardFooter className="flex justify-end gap-2">
+                                        <Button variant="destructive">Cancel Subscription</Button>
                                     </CardFooter>
                                 </Card>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                             <CardHeader>
+                                <CardTitle>Available Plans</CardTitle>
+                                <CardDescription>Choose a plan that best fits your learning needs.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid md:grid-cols-2 gap-6">
+                                {studentData.availablePlans.map(plan => (
+                                    <Card key={plan.id} className="flex flex-col">
+                                        <CardHeader>
+                                            <div className="flex justify-between items-center">
+                                                <CardTitle>{plan.name}</CardTitle>
+                                                <ShieldCheck className="w-6 h-6 text-secondary"/>
+                                            </div>
+                                            <p className="text-3xl font-bold pt-4">R{plan.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                                        </CardHeader>
+                                        <CardContent className="flex-grow">
+                                            <ul className="space-y-2 text-sm text-muted-foreground">
+                                                {plan.features.map((feature, i) => (
+                                                    <li key={i} className="flex items-center gap-2">
+                                                        <CheckCircle className="h-4 w-4 text-green-500"/>
+                                                        <span>{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </CardContent>
+                                        <CardFooter>
+                                            <Button className="w-full" disabled={plan.id === studentData.currentSubscription.planId}>
+                                                {plan.id === studentData.currentSubscription.planId ? 'Current Plan' : 'Change Plan'}
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </div>
+                )}
+            </div>
 
             <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
                 <AlertDialogContent>

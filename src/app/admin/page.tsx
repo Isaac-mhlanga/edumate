@@ -13,13 +13,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { adminData } from "@/lib/data";
 import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Download, Eye, FileText, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, Search, Shield, ShieldCheck, Trash2, Upload, UserCog, UserMinus, UserPlus, Users, X, XCircle, Clock, FileUp } from "lucide-react";
 import React from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PayoutReceipt } from "@/components/payout-receipt";
 import { useReactToPrint } from "react-to-print";
@@ -33,7 +32,6 @@ type Subscription = (typeof adminData.subscriptions)[0];
 
 function AdminPage() {
     const router = useRouter();
-    const pathname = usePathname();
     const searchParams = useSearchParams();
     const { toast } = useToast();
 
@@ -89,12 +87,6 @@ function AdminPage() {
         content: () => receiptComponentRef.current,
         documentTitle: `Payout-Receipt-${selectedPayout?.id}`,
     });
-
-    const handleTabChange = (value: string) => {
-        const params = new URLSearchParams(searchParams.toString());
-        params.set('tab', value);
-        router.replace(`${pathname}?${params.toString()}`);
-    };
 
     const handleUserFilterChange = (key: keyof typeof userFilters, value: string) => {
         setUserFilters(prev => ({ ...prev, [key]: value }));
@@ -271,63 +263,54 @@ function AdminPage() {
                 <p className="text-muted-foreground">Platform-wide management and oversight.</p>
             </div>
             
-            <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-                <div className="overflow-x-auto">
-                    <TabsList className="grid w-full grid-cols-6 min-w-[600px] max-w-3xl">
-                        <TabsTrigger value="overview">Overview</TabsTrigger>
-                        <TabsTrigger value="users">Users</TabsTrigger>
-                        <TabsTrigger value="courses">Courses</TabsTrigger>
-                        <TabsTrigger value="assignments">Assignments</TabsTrigger>
-                        <TabsTrigger value="payouts">Payouts</TabsTrigger>
-                        <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
-                    </TabsList>
-                </div>
-
-                <TabsContent value="overview" className="pt-6 space-y-8">
-                    <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        {adminData.stats.map((stat) => (
-                            <Card key={stat.title}>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                                    <stat.icon className="h-5 w-5 text-muted-foreground" />
+            <div className="pt-6">
+                {currentTab === 'overview' && (
+                    <div className="space-y-8">
+                        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                            {adminData.stats.map((stat) => (
+                                <Card key={stat.title}>
+                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                        <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                                        <stat.icon className="h-5 w-5 text-muted-foreground" />
+                                    </CardHeader>
+                                    <CardContent>
+                                        <div className="text-2xl font-bold">{stat.value}</div>
+                                        <p className="text-xs text-muted-foreground flex items-center">
+                                            <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span>
+                                        </p>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                        </section>
+                        <section>
+                            <Card>
+                                <CardHeader>
+                                    <CardTitle>Recent Platform Activity</CardTitle>
+                                    <CardDescription>A log of recent important events across the platform.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{stat.value}</div>
-                                    <p className="text-xs text-muted-foreground flex items-center">
-                                        <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span>
-                                    </p>
+                                    <ul className="space-y-4">
+                                        {adminData.recentActivity.map(activity => (
+                                            <li key={activity.id} className="flex items-start gap-4">
+                                                <div className="bg-muted p-2 rounded-full mt-1">
+                                                    {activity.type === 'New User' && <UserPlus className="h-5 w-5 text-muted-foreground"/>}
+                                                    {activity.type === 'New Course' && <BookOpen className="h-5 w-5 text-muted-foreground"/>}
+                                                    {activity.type === 'Payout' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{activity.description}</p>
+                                                    <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
                                 </CardContent>
                             </Card>
-                        ))}
-                    </section>
-                    <section>
-                        <Card>
-                            <CardHeader>
-                                <CardTitle>Recent Platform Activity</CardTitle>
-                                <CardDescription>A log of recent important events across the platform.</CardDescription>
-                            </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-4">
-                                    {adminData.recentActivity.map(activity => (
-                                        <li key={activity.id} className="flex items-start gap-4">
-                                            <div className="bg-muted p-2 rounded-full mt-1">
-                                                {activity.type === 'New User' && <UserPlus className="h-5 w-5 text-muted-foreground"/>}
-                                                {activity.type === 'New Course' && <BookOpen className="h-5 w-5 text-muted-foreground"/>}
-                                                {activity.type === 'Payout' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="font-medium">{activity.description}</p>
-                                                <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </CardContent>
-                        </Card>
-                    </section>
-                </TabsContent>
+                        </section>
+                    </div>
+                )}
 
-                <TabsContent value="users" className="pt-6">
+                {currentTab === 'users' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>User Management</CardTitle>
@@ -419,9 +402,9 @@ function AdminPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
+                )}
                 
-                <TabsContent value="courses" className="pt-6">
+                {currentTab === 'courses' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Course Review & Management</CardTitle>
@@ -528,9 +511,9 @@ function AdminPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
+                )}
 
-                <TabsContent value="assignments" className="pt-6">
+                {currentTab === 'assignments' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Assignments Oversight</CardTitle>
@@ -619,9 +602,9 @@ function AdminPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
+                )}
 
-                <TabsContent value="payouts" className="pt-6">
+                {currentTab === 'payouts' && (
                     <Card>
                          <CardHeader>
                             <CardTitle>Instructor Payouts</CardTitle>
@@ -711,9 +694,9 @@ function AdminPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
+                )}
                 
-                <TabsContent value="subscriptions" className="pt-6">
+                {currentTab === 'subscriptions' && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Subscription Management</CardTitle>
@@ -794,9 +777,8 @@ function AdminPage() {
                             </div>
                         </CardFooter>
                     </Card>
-                </TabsContent>
-
-            </Tabs>
+                )}
+            </div>
 
             {/* Dialogs for User Actions */}
             <AlertDialog open={isSuspendUserDialogOpen} onOpenChange={setIsSuspendUserDialogOpen}>
