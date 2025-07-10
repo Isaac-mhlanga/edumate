@@ -7,8 +7,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getAuth, signInWithEmailAndPassword, type Auth, FirebaseError } from "firebase/auth";
-import { getApp, getApps, initializeApp } from "firebase/app";
+import { getAuth, signInWithEmailAndPassword, type Auth } from "firebase/auth";
+import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
