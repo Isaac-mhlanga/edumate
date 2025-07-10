@@ -21,6 +21,7 @@ import Link from "next/link";
 type User = (typeof adminData.users)[0];
 type Course = (typeof adminData.courses)[0];
 type PayoutRequest = (typeof adminData.payoutRequests)[0];
+type Assignment = (typeof adminData.assignments)[0];
 
 export default function AdminPage() {
     const router = useRouter();
@@ -32,6 +33,7 @@ export default function AdminPage() {
 
     const [users, setUsers] = React.useState(adminData.users);
     const [courses, setCourses] = React.useState(adminData.courses);
+    const [assignments, setAssignments] = React.useState(adminData.assignments);
     const [payoutRequests, setPayoutRequests] = React.useState(adminData.payoutRequests);
     
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
@@ -54,7 +56,7 @@ export default function AdminPage() {
     const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
     const coursesPerPage = 7;
     
-    const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '' });
+    const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', instructor: 'All' });
     const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
     const assignmentsPerPage = 7;
 
@@ -72,6 +74,11 @@ export default function AdminPage() {
     const handleCourseFilterChange = (key: keyof typeof courseFilters, value: string) => {
         setCourseFilters(prev => ({ ...prev, [key]: value }));
         setCurrentCoursePage(1);
+    };
+
+    const handleAssignmentFilterChange = (key: keyof typeof assignmentFilters, value: string) => {
+        setAssignmentFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentAssignmentPage(1);
     };
 
     const handleUserAction = (user: User, action: 'suspend' | 'delete') => {
@@ -151,6 +158,20 @@ export default function AdminPage() {
     }, [courses, courseFilters]);
     const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
     const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
+
+    const filteredAssignments = React.useMemo(() => {
+        return assignments.filter(assignment => {
+            const searchMatch = assignmentFilters.search.trim().toLowerCase() === '' ||
+                assignment.assignmentTitle.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase()) ||
+                assignment.studentName.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase());
+            const instructorMatch = assignmentFilters.instructor === 'All' || assignment.instructor === assignmentFilters.instructor;
+            return searchMatch && instructorMatch;
+        });
+    }, [assignments, assignmentFilters]);
+    const totalAssignmentPages = Math.ceil(filteredAssignments.length / assignmentsPerPage);
+    const paginatedAssignments = filteredAssignments.slice((currentAssignmentPage - 1) * assignmentsPerPage, currentAssignmentPage * assignmentsPerPage);
+    const assignmentInstructors = ['All', ...Array.from(new Set(assignments.map(a => a.instructor)))];
+
 
     return (
         <AppLayout>
@@ -414,6 +435,97 @@ export default function AdminPage() {
                                 <div className="flex items-center gap-2">
                                     <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
                                     <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    </TabsContent>
+
+                    <TabsContent value="assignments" className="pt-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Assignments Oversight</CardTitle>
+                                <CardDescription>Monitor all submitted assignments for quality and pricing fairness.</CardDescription>
+                            </CardHeader>
+                            <div className="flex items-center justify-between gap-2 p-4 border-y">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search by assignment or student..."
+                                        className="pl-8"
+                                        value={assignmentFilters.search}
+                                        onChange={(e) => handleAssignmentFilterChange('search', e.target.value)}
+                                    />
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="gap-1">
+                                            <ListFilter className="h-3.5 w-3.5" />
+                                            <span>Filter by Instructor</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Filter by Instructor</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuRadioGroup value={assignmentFilters.instructor} onValueChange={(value) => handleAssignmentFilterChange('instructor', value)}>
+                                            {assignmentInstructors.map(instructor => (
+                                                <DropdownMenuRadioItem key={instructor} value={instructor}>{instructor}</DropdownMenuRadioItem>
+                                            ))}
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Assignment</TableHead>
+                                        <TableHead>Student</TableHead>
+                                        <TableHead>Instructor</TableHead>
+                                        <TableHead>Price (R)</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {paginatedAssignments.map(assignment => (
+                                        <TableRow key={assignment.id}>
+                                            <TableCell>
+                                                <div className="font-medium">{assignment.assignmentTitle}</div>
+                                                <div className="text-xs text-muted-foreground">{assignment.course}</div>
+                                            </TableCell>
+                                            <TableCell>{assignment.studentName}</TableCell>
+                                            <TableCell>{assignment.instructor}</TableCell>
+                                            <TableCell className="font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
+                                            <TableCell>
+                                                <Badge
+                                                    variant={"outline"}
+                                                    className={
+                                                        assignment.status === 'Paid' ? 'bg-green-500/20 text-green-700'
+                                                        : assignment.status === 'Awaiting Payment' ? 'bg-blue-500/20 text-blue-700'
+                                                        : 'bg-yellow-500/20 text-yellow-700'
+                                                    }
+                                                >
+                                                    {assignment.status === 'Paid' && <CheckCircle className="mr-1 h-3 w-3" />}
+                                                    {assignment.status === 'Awaiting Payment' && <DollarSign className="mr-1 h-3 w-3" />}
+                                                    {assignment.status === 'Pending Review' && <Hourglass className="mr-1 h-3 w-3" />}
+                                                    {assignment.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="outline" size="sm">
+                                                    <Eye className="mr-2 h-4 w-4" /> View
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                             <CardFooter className="flex items-center justify-between py-4">
+                                <div className="text-xs text-muted-foreground">
+                                    Showing <strong>{(currentAssignmentPage - 1) * assignmentsPerPage + 1}-{Math.min(currentAssignmentPage * assignmentsPerPage, filteredAssignments.length)}</strong> of <strong>{filteredAssignments.length}</strong> assignments.
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p - 1)} disabled={currentAssignmentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p + 1)} disabled={currentAssignmentPage >= totalAssignmentPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
                                 </div>
                             </CardFooter>
                         </Card>
