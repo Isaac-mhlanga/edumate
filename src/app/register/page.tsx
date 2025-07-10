@@ -15,7 +15,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getAuth, createUserWithEmailAndPassword, updateProfile, type Auth } from "firebase/auth";
-import { FirebaseError } from "firebase/app";
+import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
 
 // Define the configuration directly for client-side use.
 const firebaseConfig = {
