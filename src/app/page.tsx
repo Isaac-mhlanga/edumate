@@ -48,20 +48,43 @@ export default function Home() {
       </header>
 
       <main className="flex-grow">
-        <section className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24 text-center">
-          <div className="max-w-3xl mx-auto">
-            <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
-              Unlock Your Potential.
-              <span className="block text-primary">Future-Proof Your Skills.</span>
-            </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-8">
-              Edumate Pro provides a modern, engaging platform for students to excel in Maths and Physical Sciences.
-            </p>
-            <Button size="lg" asChild>
-              <Link href="/register">Explore Courses</Link>
-            </Button>
+        <section className="relative overflow-hidden">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
+            <div className="grid md:grid-cols-2 gap-12 items-center">
+              <div className="space-y-6 text-center md:text-left">
+                <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
+                  <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
+                    Unlock Your Potential.
+                    <span className="block text-primary">Future-Proof Your Skills.</span>
+                  </h1>
+                  <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto md:mx-0">
+                    Edumate Pro provides a modern, engaging platform for students to excel in Maths and Physical Sciences.
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000">
+                    <Button size="lg" asChild>
+                      <Link href="/register">Explore Courses</Link>
+                    </Button>
+                    <Button size="lg" variant="outline" asChild>
+                        <Link href="#features">Learn More</Link>
+                    </Button>
+                </div>
+              </div>
+              <div className="relative animate-in fade-in zoom-in-50 duration-1000">
+                <div className="absolute -inset-2 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20"></div>
+                <Image 
+                    src="https://placehold.co/600x600.png"
+                    alt="Student learning with technology"
+                    width={600}
+                    height={600}
+                    className="rounded-full shadow-2xl mx-auto"
+                    data-ai-hint="student learning technology"
+                />
+              </div>
+            </div>
           </div>
         </section>
+
 
         <section id="features" className="bg-card py-16 md:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
@@ -70,18 +93,20 @@ export default function Home() {
               <p className="text-lg text-muted-foreground mt-2">Our platform is designed to support your learning journey.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8">
-              {features.map((feature) => (
-                <Card key={feature.title} className="text-center shadow-lg rounded-xl border-t-4 border-t-primary">
-                  <CardHeader className="items-center">
-                    <div className="bg-primary/10 p-4 rounded-full">
-                      {feature.icon}
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                    <p className="text-muted-foreground">{feature.description}</p>
-                  </CardContent>
-                </Card>
+              {features.map((feature, i) => (
+                <div key={feature.title} className="animate-in fade-in slide-in-from-bottom-12" style={{animationDelay: `${i * 150}ms`, animationFillMode: 'backwards'}}>
+                    <Card className="text-center shadow-lg rounded-xl border-t-4 border-t-primary h-full">
+                    <CardHeader className="items-center">
+                        <div className="bg-primary/10 p-4 rounded-full">
+                        {feature.icon}
+                        </div>
+                    </CardHeader>
+                    <CardContent>
+                        <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
+                        <p className="text-muted-foreground">{feature.description}</p>
+                    </CardContent>
+                    </Card>
+                </div>
               ))}
             </div>
           </div>
