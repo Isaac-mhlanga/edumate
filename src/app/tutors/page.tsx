@@ -274,9 +274,21 @@ export default function TutorsPage() {
                                 <DialogTitle>Send a Message to {selectedTutor?.name}</DialogTitle>
                                 <DialogDescription>Ask a question about their services or availability.</DialogDescription>
                             </DialogHeader>
-                            <div className="py-4 space-y-2">
-                                <Label htmlFor="message-text">Your Message</Label>
-                                <Textarea id="message-text" placeholder="Type your message here..." rows={6}/>
+                            <div className="py-4 space-y-4">
+                                <div className="grid grid-cols-2 gap-4">
+                                    <div className="space-y-2">
+                                        <Label htmlFor="sender-name">Full Name</Label>
+                                        <Input id="sender-name" placeholder="John Doe" />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="sender-email">Email Address</Label>
+                                        <Input id="sender-email" type="email" placeholder="you@example.com" />
+                                    </div>
+                                </div>
+                                <div className="space-y-2">
+                                    <Label htmlFor="message-text">Your Message</Label>
+                                    <Textarea id="message-text" placeholder="Type your message here..." rows={4}/>
+                                </div>
                             </div>
                             <DialogFooter>
                                 <Button variant="ghost" onClick={() => setIsMessageDialogOpen(false)}>Cancel</Button>
