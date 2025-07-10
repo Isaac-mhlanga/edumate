@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import {
@@ -13,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarFooter,
   SidebarInset,
+  SidebarMenuSkeleton,
 } from '@/components/ui/sidebar';
 import {
   Avatar,
@@ -32,9 +32,12 @@ import {
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { ThemeToggle } from './theme-toggle';
+import { getAuth, onAuthStateChanged, signOut, type User } from 'firebase/auth';
+import { app } from '@/lib/firebase/config';
+import { useToast } from '@/hooks/use-toast';
 
 const menuItems = [
   {
@@ -61,6 +64,41 @@ const menuItems = [
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const { toast } = useToast();
+  const [user, setUser] = React.useState<User | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const auth = getAuth(app);
+
+  React.useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [auth]);
+
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      toast({
+        title: "Logged Out",
+        description: "You have been successfully logged out.",
+      });
+      router.push('/login');
+    } catch (error) {
+      toast({
+        variant: "destructive",
+        title: "Logout Failed",
+        description: "An error occurred while logging out.",
+      });
+    }
+  };
 
   return (
     <SidebarProvider>
@@ -95,16 +133,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </SidebarMenu>
         </SidebarContent>
         <SidebarFooter>
+          {loading ? (
+             <div className='flex items-center gap-3 w-full p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'>
+                 <SidebarMenuSkeleton showIcon={true} />
+             </div>
+          ) : user ? (
             <div className='flex items-center gap-3 w-full p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'>
                 <Avatar className="h-9 w-9">
-                    <AvatarImage src="https://placehold.co/100x100.png" alt="@student" />
-                    <AvatarFallback>SP</AvatarFallback>
+                    <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
+                    <AvatarFallback>{user.displayName?.charAt(0) ?? user.email?.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div className='flex flex-col overflow-hidden group-data-[collapsible=icon]:hidden'>
-                    <span className='font-medium text-sm truncate'>Admin User</span>
-                    <span className='text-xs text-muted-foreground truncate'>admin@edumate.pro</span>
+                    <span className='font-medium text-sm truncate'>{user.displayName ?? 'User'}</span>
+                    <span className='text-xs text-muted-foreground truncate'>{user.email}</span>
                 </div>
             </div>
+          ) : (
+             <div className='flex items-center gap-3 w-full p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'>
+                <Button asChild className="w-full group-data-[collapsible=icon]:w-auto">
+                  <Link href="/login">Login</Link>
+                </Button>
+            </div>
+          )}
             <SidebarMenu>
                  <SidebarMenuItem>
                     <SidebarMenuButton
@@ -119,13 +169,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </SidebarMenuItem>
                 <SidebarMenuItem>
                     <SidebarMenuButton
-                        asChild
+                        onClick={handleLogout}
                         tooltip={{ children: 'Logout', side: 'right' }}
                         >
-                        <Link href="/">
-                            <LogOut />
-                            <span>Logout</span>
-                        </Link>
+                        <LogOut />
+                        <span>Logout</span>
                     </SidebarMenuButton>
                 </SidebarMenuItem>
             </SidebarMenu>
@@ -143,5 +191,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    

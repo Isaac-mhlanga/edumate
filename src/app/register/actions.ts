@@ -2,9 +2,11 @@
 'use server';
 
 import { z } from 'zod';
-import { auth } from '@/lib/firebase/config';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import { getAuth, createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
+import { app } from '@/lib/firebase/config';
+
+const auth = getAuth(app);
 
 const registerFormSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),
