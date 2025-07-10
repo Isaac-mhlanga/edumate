@@ -9,18 +9,61 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
+import React from "react";
+import { getAuth, sendPasswordResetEmail, type Auth } from "firebase/auth";
+import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 export default function ForgotPasswordPage() {
     const router = useRouter();
     const { toast } = useToast();
+    const [auth, setAuth] = React.useState<Auth | null>(null);
+    const [isLoading, setIsLoading] = React.useState(false);
 
-    const handleSendLink = (e: React.FormEvent) => {
+    React.useEffect(() => {
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+        setAuth(getAuth(app));
+    }, []);
+
+    const handleSendLink = async (e: React.FormEvent) => {
         e.preventDefault();
-        toast({
-            title: "Password Reset Link Sent",
-            description: "If an account with that email exists, a reset link has been sent.",
-        });
-        router.push('/login');
+        if (!auth) return;
+
+        setIsLoading(true);
+        const email = (e.currentTarget.querySelector('#email') as HTMLInputElement).value;
+
+        try {
+            await sendPasswordResetEmail(auth, email);
+            toast({
+                title: "Password Reset Link Sent",
+                description: "If an account with that email exists, a reset link has been sent.",
+            });
+            router.push('/login');
+        } catch (error) {
+             let errorMessage = "An unknown error occurred.";
+            if (error instanceof FirebaseError) {
+                // We don't want to reveal if an email exists or not for security reasons.
+                // So we show a generic message for most errors.
+                errorMessage = "Could not send reset link. Please try again later.";
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: errorMessage,
+            });
+        } finally {
+            setIsLoading(false);
+        }
     }
     
     return (
@@ -44,7 +87,9 @@ export default function ForgotPasswordPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
-                            <Button type="submit" className="w-full">Send Reset Link</Button>
+                            <Button type="submit" className="w-full" disabled={isLoading || !auth}>
+                                {isLoading ? 'Sending...' : 'Send Reset Link'}
+                            </Button>
                             <div className="text-center text-sm text-muted-foreground">
                                 <Link href="/login" className="font-medium text-primary hover:underline">
                                     Back to Login

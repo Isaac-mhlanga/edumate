@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { getAuth, createUserWithEmailAndPassword, updateProfile, type Auth } from "firebase/auth";
+import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, type Auth } from "firebase/auth";
 import { getFirestore, doc, setDoc } from "firebase/firestore";
 import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
 
@@ -80,6 +80,9 @@ export default function RegisterPage() {
             const user = userCredential.user;
             await updateProfile(user, { displayName: data.fullName });
 
+            // Send verification email
+            await sendEmailVerification(user);
+
             // Create user document in Firestore
             const db = getFirestore(auth.app);
             await setDoc(doc(db, "users", user.uid), {
@@ -92,7 +95,7 @@ export default function RegisterPage() {
 
             toast({
                 title: "Registration Successful!",
-                description: "Welcome to Edumate Pro. Please log in to continue.",
+                description: "A verification email has been sent. Please check your inbox.",
             });
             router.push('/login');
 

@@ -7,12 +7,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getAuth, signInWithEmailAndPassword, type Auth } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, sendEmailVerification, type Auth } from "firebase/auth";
 import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { Terminal } from "lucide-react";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,23 +30,61 @@ export default function LoginPage() {
     const { toast } = useToast();
     const [auth, setAuth] = React.useState<Auth | null>(null);
     const [isLoading, setIsLoading] = React.useState(false);
+    const [emailNotVerified, setEmailNotVerified] = React.useState(false);
+    const [currentUser, setCurrentUser] = React.useState<any>(null);
+
 
     React.useEffect(() => {
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
         setAuth(getAuth(app));
     }, []);
+    
+    const handleResendVerification = async () => {
+        if (!currentUser) return;
+        setIsLoading(true);
+        try {
+            await sendEmailVerification(currentUser);
+            toast({
+                title: "Verification Email Sent",
+                description: "A new verification link has been sent to your email address.",
+            });
+        } catch (error) {
+             toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Failed to send verification email. Please try again later.",
+            });
+        } finally {
+            setIsLoading(false);
+        }
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!auth) return;
 
         setIsLoading(true);
+        setEmailNotVerified(false);
+        setCurrentUser(null);
+        
         const email = (e.currentTarget.querySelector('#email') as HTMLInputElement).value;
         const password = (e.currentTarget.querySelector('#password') as HTMLInputElement).value;
 
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+
+            if (!user.emailVerified) {
+                setEmailNotVerified(true);
+                setCurrentUser(user);
+                setIsLoading(false);
+                toast({
+                    variant: "destructive",
+                    title: "Email Not Verified",
+                    description: "Please check your inbox and verify your email address to continue.",
+                });
+                return;
+            }
 
             // Fetch user role from Firestore
             const db = getFirestore(auth.app);
@@ -101,7 +141,9 @@ export default function LoginPage() {
                 description: errorMessage,
             });
         } finally {
-            setIsLoading(false);
+            if (!emailNotVerified) {
+                setIsLoading(false);
+            }
         }
     }
     
@@ -120,13 +162,25 @@ export default function LoginPage() {
                             <CardDescription>Enter your credentials to access your account.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
+                            {emailNotVerified && (
+                                <Alert variant="destructive">
+                                    <Terminal className="h-4 w-4" />
+                                    <AlertTitle>Email Not Verified</AlertTitle>
+                                    <AlertDescription className="flex flex-col gap-2">
+                                        You must verify your email address before you can log in.
+                                        <Button type="button" variant="secondary" size="sm" onClick={handleResendVerification} disabled={isLoading}>
+                                            {isLoading ? 'Sending...' : 'Resend Verification Email'}
+                                        </Button>
+                                    </AlertDescription>
+                                </Alert>
+                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" placeholder="name@example.com" required />
+                                <Input id="email" type="email" placeholder="name@example.com" required disabled={emailNotVerified} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input id="password" type="password" required />
+                                <Input id="password" type="password" required disabled={emailNotVerified} />
                             </div>
                             <div className="flex items-center justify-between">
                                 <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
@@ -135,7 +189,7 @@ export default function LoginPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
-                            <Button type="submit" className="w-full" disabled={isLoading || !auth}>
+                            <Button type="submit" className="w-full" disabled={isLoading || !auth || emailNotVerified}>
                                 {isLoading ? 'Signing in...' : 'Sign In'}
                             </Button>
                             <div className="text-center text-sm text-muted-foreground">
