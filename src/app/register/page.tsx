@@ -15,7 +15,6 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getAuth, createUserWithEmailAndPassword, updateProfile, type Auth } from "firebase/auth";
-import { getApp, getApps, initializeApp } from "firebase/app";
 import { FirebaseError } from "firebase/app";
 
 // Define the configuration directly for client-side use.
@@ -50,7 +49,9 @@ export default function RegisterPage() {
     const [auth, setAuth] = React.useState<Auth | null>(null);
 
     React.useEffect(() => {
-        // Initialize Firebase on the client
+        // Since getAuth() is now managed in AppLayout and passed down,
+        // we might not need to initialize it here anymore if we pass it as a prop.
+        // For now, let's keep it to ensure this page can work standalone.
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
         setAuth(getAuth(app));
     }, []);
@@ -94,7 +95,10 @@ export default function RegisterPage() {
              if (error instanceof FirebaseError) {
                 if (error.code === 'auth/email-already-in-use') {
                     errorMessage = 'This email address is already in use.';
-                } else {
+                } else if (error.code === 'auth/invalid-api-key') {
+                    errorMessage = 'Firebase API Key is invalid. Please check your configuration.';
+                }
+                else {
                     errorMessage = `An error occurred: ${error.message}`;
                 }
             } else if (error instanceof Error) {
