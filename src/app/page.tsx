@@ -1,5 +1,6 @@
 
 import { Footer } from "@/components/footer";
+import { HeroBackground } from "@/components/hero-background";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -70,16 +71,9 @@ export default function Home() {
                     </Button>
                 </div>
               </div>
-              <div className="relative animate-in fade-in zoom-in-50 duration-1000">
-                <div className="absolute -inset-2 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20"></div>
-                <Image 
-                    src="https://placehold.co/600x600.png"
-                    alt="Student learning with technology"
-                    width={600}
-                    height={600}
-                    className="rounded-full shadow-2xl mx-auto"
-                    data-ai-hint="student learning technology"
-                />
+              <div className="relative animate-in fade-in zoom-in-50 duration-1000 h-[400px] md:h-auto">
+                <div className="absolute -inset-12 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20 dark:opacity-30"></div>
+                <HeroBackground className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] md:w-full md:h-full"/>
               </div>
             </div>
           </div>
