@@ -96,6 +96,11 @@ export default function InstructorPage() {
   const [isPayoutDialogOpen, setIsPayoutDialogOpen] = React.useState(false);
 
 
+  // State for courses filtering and pagination
+  const [courseFilters, setCourseFilters] = React.useState({ search: '', status: 'All' });
+  const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
+  const coursesPerPage = 6;
+  
   // State for assignments filtering and pagination
   const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', status: 'All' });
   const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
@@ -272,6 +277,27 @@ export default function InstructorPage() {
     });
     handleReviewDialogOpenChange(false);
   }
+
+  // Course filtering and pagination logic
+  const handleCourseFilterChange = (key: 'search' | 'status', value: string) => {
+    setCourseFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentCoursePage(1);
+  };
+
+  const filteredCourses = React.useMemo(() => {
+    return courses.filter(course => {
+        const searchMatch = courseFilters.search.trim().toLowerCase() === '' ||
+            course.title.toLowerCase().includes(courseFilters.search.trim().toLowerCase()) ||
+            course.description.toLowerCase().includes(courseFilters.search.trim().toLowerCase());
+        
+        const statusMatch = courseFilters.status === 'All' || course.status === courseFilters.status;
+
+        return searchMatch && statusMatch;
+    });
+  }, [courses, courseFilters]);
+
+  const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
+  const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
 
   // Assignment filtering and pagination logic
   const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
@@ -540,17 +566,49 @@ export default function InstructorPage() {
 
           <TabsContent value="courses" className="pt-6">
             <Card>
-                <CardHeader className="flex flex-row items-center justify-between">
-                    <div>
-                        <CardTitle>Course Management</CardTitle>
-                        <CardDescription>Upload, edit, and manage your courses.</CardDescription>
+                <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <CardTitle>Course Management</CardTitle>
+                            <CardDescription>Upload, edit, and manage your courses.</CardDescription>
+                        </div>
+                        <Button onClick={handleAddNewCourse}><PlusCircle className="mr-2"/> Add New Course</Button>
                     </div>
-                    <Button onClick={handleAddNewCourse}><PlusCircle className="mr-2"/> Add New Course</Button>
+                    <div className="flex items-center justify-between gap-2 pt-4 border-t mt-4">
+                        <div className="relative flex-1">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search courses..."
+                                className="pl-8"
+                                value={courseFilters.search}
+                                onChange={(e) => handleCourseFilterChange('search', e.target.value)}
+                            />
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Filter</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
+                                    <DropdownMenuRadioItem value="All">All Statuses</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Published">Published</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Draft">Draft</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Pending Approval">Pending Approval</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Rejected">Rejected</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </CardHeader>
                 <CardContent>
-                  {courses.length > 0 ? (
+                  {paginatedCourses.length > 0 ? (
                     <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {courses.map((course) => (
+                      {paginatedCourses.map((course) => (
                         <Card key={course.id} className="overflow-hidden shadow-md rounded-xl">
                           <CardHeader className="p-0 relative">
                             <Image src={course.thumbnail} alt={course.title} width={400} height={200} className="aspect-video object-cover" data-ai-hint="online course" />
@@ -591,11 +649,20 @@ export default function InstructorPage() {
                     </div>
                   ) : (
                     <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                      <h3 className="text-lg font-semibold">No Courses Yet</h3>
-                      <p className="text-muted-foreground mt-1">Start building your library by clicking "Add New Course".</p>
+                      <h3 className="text-lg font-semibold">No Courses Found</h3>
+                      <p className="text-muted-foreground mt-1">{courseFilters.search || courseFilters.status !== 'All' ? 'Try adjusting your search or filters.' : 'Start building your library by clicking "Add New Course".'}</p>
                     </div>
                   )}
                 </CardContent>
+                <CardFooter className="flex items-center justify-between py-4">
+                    <div className="text-xs text-muted-foreground">
+                        Showing <strong>{(currentCoursePage - 1) * coursesPerPage + 1}-{Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}</strong> of <strong>{filteredCourses.length}</strong> courses.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                        <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                    </div>
+                </CardFooter>
             </Card>
           </TabsContent>
 
