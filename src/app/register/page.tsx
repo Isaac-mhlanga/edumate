@@ -21,7 +21,7 @@ const registerFormSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(6, "Password must be at least 6 characters long."),
     confirmPassword: z.string(),
-    role: z.enum(["student", "instructor"], { required_error: "Please select a role." }),
+    role: z.enum(["student", "instructor", "tutor"], { required_error: "Please select a role." }),
 }).refine(data => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
     path: ["confirmPassword"],
@@ -132,6 +132,7 @@ export default function RegisterPage() {
                                                 <SelectContent>
                                                     <SelectItem value="student">Student</SelectItem>
                                                     <SelectItem value="instructor">Instructor</SelectItem>
+                                                    <SelectItem value="tutor">Tutor</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
