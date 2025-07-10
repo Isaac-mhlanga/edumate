@@ -43,9 +43,9 @@ const firebaseConfig = {
 
 const assignmentFormSchema = z.object({
   title: z.string().min(1, "Assignment title is required."),
-  course: z.string().min(1, "Please select a course."),
+  course: z.string().min(1, "Course name is required."),
   instructions: z.string().optional(),
-  file: z.instanceof(File).refine(file => file.size > 0, 'A file is required.').refine(file => file.type === 'application/zip', 'File must be a ZIP archive.'),
+  file: z.instanceof(File).refine(file => file.size > 0, 'A file is required.').refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.'),
 });
 type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
 
@@ -215,8 +215,6 @@ function DashboardPage() {
     
     const allCourses = instructorData.courses;
     const purchasedCourseIds = new Set(studentData.purchasedCourses.map(c => c.id));
-    const studentCourses = [...new Set([...studentData.activeSubscriptions.map(s => s.name), ...studentData.purchasedCourses.map(c => c.name)])];
-
 
     const filteredCourses = React.useMemo(() => {
         return allCourses.filter(course => {
@@ -639,19 +637,10 @@ function DashboardPage() {
                                                 name="course"
                                                 render={({ field }) => (
                                                     <FormItem>
-                                                        <FormLabel>Course</FormLabel>
-                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                            <FormControl>
-                                                                <SelectTrigger>
-                                                                    <SelectValue placeholder="Select the relevant course" />
-                                                                </SelectTrigger>
-                                                            </FormControl>
-                                                            <SelectContent>
-                                                                {studentCourses.map(course => (
-                                                                    <SelectItem key={course} value={course}>{course}</SelectItem>
-                                                                ))}
-                                                            </SelectContent>
-                                                        </Select>
+                                                        <FormLabel>Course Name</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g. Grade 12 Maths" {...field} />
+                                                        </FormControl>
                                                         <FormMessage />
                                                     </FormItem>
                                                 )}
@@ -942,3 +931,5 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
