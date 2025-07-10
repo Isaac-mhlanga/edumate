@@ -67,6 +67,14 @@ export const instructorData = {
         { title: "Monthly Earnings", value: "R 4,820", icon: DollarSign, change: "+21%" },
         { title: "Pending Assignments", value: "14", icon: Clock, change: "3 new" },
     ],
+    engagementData: [
+        { month: 'Jan', engagement: 65, income: 3200 },
+        { month: 'Feb', engagement: 72, income: 3500 },
+        { month: 'Mar', engagement: 81, income: 4100 },
+        { month: 'Apr', engagement: 75, income: 3800 },
+        { month: 'May', engagement: 88, income: 4820 },
+        { month: 'Jun', engagement: 92, income: 5100 },
+    ],
     enrolledStudents: [
         { 
             id: 'S001', name: 'Michael Chen', email: 'michael.c@example.com', course: 'Grade 12 - Maths', joined: '2024-03-15', progress: 80,

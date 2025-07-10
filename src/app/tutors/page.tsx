@@ -5,7 +5,7 @@ import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { tutorData } from "@/lib/data";
-import { ArrowLeft, BookOpen, Calendar, Computer, DollarSign, GraduationCap, MapPin, MessageSquare, Search, Star, Users } from "lucide-react";
+import { ArrowLeft, BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, DollarSign, GraduationCap, MapPin, MessageSquare, Search, Star, Users } from "lucide-react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import React from "react";
@@ -24,7 +24,14 @@ import { Footer } from "@/components/footer";
 type Tutor = typeof tutorData;
 type Day = (typeof tutorData.availability)[0];
 
-const allTutors = [tutorData, { ...tutorData, id: "T002", name: "Dr. Evelyn Reed", avatar: "https://placehold.co/100x100.png", hourlyRate: 300, subjects: ["Maths"], location: "Johannesburg, Gauteng" }];
+const allTutors = [
+    tutorData, 
+    { ...tutorData, id: "T002", name: "Dr. Evelyn Reed", avatar: "https://placehold.co/100x100.png", hourlyRate: 300, subjects: ["Maths"], location: "Johannesburg, Gauteng" },
+    { ...tutorData, id: "T003", name: "Ben Carter", avatar: "https://placehold.co/100x100.png", hourlyRate: 220, subjects: ["Physical Sciences"], grades: ["11", "12"], location: "Durban, KZN" },
+    { ...tutorData, id: "T004", name: "Chloe Taylor", avatar: "https://placehold.co/100x100.png", hourlyRate: 275, subjects: ["Maths"], grades: ["10"], location: "Pretoria, Gauteng" },
+    { ...tutorData, id: "T005", name: "David Lee", avatar: "https://placehold.co/100x100.png", hourlyRate: 250, subjects: ["Maths", "Physical Sciences"], grades: ["12"], location: "Cape Town, Western Cape" },
+    { ...tutorData, id: "T006", name: "Sarah Miller", avatar: "https://placehold.co/100x100.png", hourlyRate: 280, subjects: ["Physical Sciences"], grades: ["10", "11"], location: "Johannesburg, Gauteng" },
+];
 
 export default function TutorsPage() {
     const searchParams = useSearchParams();
@@ -39,6 +46,11 @@ export default function TutorsPage() {
     const [isBookingDialogOpen, setIsBookingDialogOpen] = React.useState(false);
     const [isMessageDialogOpen, setIsMessageDialogOpen] = React.useState(false);
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const tutorsPerPage = 6;
+
+
     const filteredTutors = React.useMemo(() => {
         return allTutors.filter(tutor => {
             const subjectMatch = subject === 'All' || tutor.subjects.includes(subject);
@@ -48,6 +60,10 @@ export default function TutorsPage() {
         });
     }, [subject, grade, location]);
     
+    // Pagination logic
+    const totalPages = Math.ceil(filteredTutors.length / tutorsPerPage);
+    const paginatedTutors = filteredTutors.slice((currentPage - 1) * tutorsPerPage, currentPage * tutorsPerPage);
+
     const handleBookTutor = (tutor: Tutor) => {
         setSelectedTutor(tutor);
         setIsBookingDialogOpen(true);
@@ -85,7 +101,7 @@ export default function TutorsPage() {
                 </Link>
                 <nav className="hidden md:flex items-center gap-6">
                     <Link href="/#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
-                    <Link href="/#tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
+                    <Link href="/tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
                     <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
                 </nav>
                 <div className="flex items-center gap-2">
@@ -100,15 +116,6 @@ export default function TutorsPage() {
             </header>
             <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
                 <div className="space-y-6">
-                    <div>
-                        <Button variant="outline" asChild>
-                            <Link href="/#tutors">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to Search
-                            </Link>
-                        </Button>
-                    </div>
-
                     <Card>
                         <CardHeader>
                             <CardTitle>Find a Tutor</CardTitle>
@@ -155,13 +162,13 @@ export default function TutorsPage() {
                             <div className="text-sm text-muted-foreground mb-4">
                                 Showing {filteredTutors.length} tutor(s) matching your criteria.
                             </div>
-                            {filteredTutors.length > 0 ? (
+                            {paginatedTutors.length > 0 ? (
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {filteredTutors.map(tutor => (
+                                {paginatedTutors.map(tutor => (
                                     <Card key={tutor.id} className="flex flex-col">
                                         <CardHeader className="flex-row gap-4 items-center">
                                             <Avatar className="w-16 h-16 border">
-                                                <AvatarImage src={tutor.avatar} alt={tutor.name} />
+                                                <AvatarImage src={tutor.avatar} alt={tutor.name} data-ai-hint="person profile" />
                                                 <AvatarFallback>{tutor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                             </Avatar>
                                             <div>
@@ -190,10 +197,10 @@ export default function TutorsPage() {
                                             </div>
                                             <div className="text-2xl font-bold">R{tutor.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hour</span></div>
                                         </CardContent>
-                                        <CardContent className="flex gap-2">
+                                        <CardFooter className="flex gap-2">
                                             <Button className="w-full" onClick={() => handleBookTutor(tutor as Tutor)}><Calendar className="mr-2" /> Book Session</Button>
                                             <Button variant="outline" className="w-full" onClick={() => handleMessageTutor(tutor as Tutor)}><MessageSquare className="mr-2" /> Message</Button>
-                                        </CardContent>
+                                        </CardFooter>
                                     </Card>
                                 ))}
                             </div>
@@ -204,6 +211,17 @@ export default function TutorsPage() {
                                 </div>
                             )}
                         </CardContent>
+                         {totalPages > 1 && (
+                            <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                                <div className="text-xs text-muted-foreground">
+                                    Showing <strong>{(currentPage - 1) * tutorsPerPage + 1}-{Math.min(currentPage * tutorsPerPage, filteredTutors.length)}</strong> of <strong>{filteredTutors.length}</strong> tutors.
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                                </div>
+                            </CardFooter>
+                        )}
                     </Card>
 
                     {/* Booking Dialog */}
