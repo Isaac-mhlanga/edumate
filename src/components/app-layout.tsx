@@ -26,11 +26,13 @@ import {
   LogOut,
   Moon,
   Shield,
+  BookOpen,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import React from 'react';
+import { ThemeToggle } from './theme-toggle';
 
 const menuItems = [
   {
@@ -125,9 +127,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <header className="flex h-16 items-center justify-between border-b bg-card px-6">
             <SidebarTrigger />
-            <Button variant="ghost" size="icon" aria-label="Toggle dark mode">
-                <Moon className="h-5 w-5" />
-            </Button>
+            <ThemeToggle />
         </header>
         <main className="flex-1 p-6 md:p-8">
             {children}

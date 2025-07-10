@@ -25,7 +25,7 @@ export default function Home() {
   ];
 
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen bg-background">
       <header className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-2">
           <Icons.logo className="h-8 w-8 text-primary" />
@@ -56,7 +56,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="bg-white py-16 md:py-24">
+        <section id="features" className="bg-card py-16 md:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-bold">Everything You Need to Succeed</h2>
@@ -115,7 +115,7 @@ export default function Home() {
 
       </main>
 
-      <footer className="bg-white border-t">
+      <footer className="bg-card border-t">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8 flex flex-col sm:flex-row items-center justify-between">
           <div className="flex items-center gap-2">
             <Icons.logo className="h-6 w-6 text-primary" />
