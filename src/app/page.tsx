@@ -1,6 +1,5 @@
 
 import { Footer } from "@/components/footer";
-import { HeroBackground } from "@/components/hero-background";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -49,33 +48,36 @@ export default function Home() {
       </header>
 
       <main className="flex-grow">
-        <section className="relative overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-16 md:py-24">
-            <div className="grid md:grid-cols-2 gap-12 items-center">
-              <div className="space-y-6 text-center md:text-left">
-                <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                  <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
-                    Unlock Your Potential.
-                    <span className="block text-primary">Future-Proof Your Skills.</span>
-                  </h1>
-                  <p className="text-lg md:text-xl text-muted-foreground mb-8 max-w-xl mx-auto md:mx-0">
-                    Edumate Pro provides a modern, engaging platform for students to excel in Maths and Physical Sciences.
-                  </p>
-                </div>
-                <div className="flex flex-col sm:flex-row items-center justify-center md:justify-start gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000">
-                    <Button size="lg" asChild>
-                      <Link href="/register">Explore Courses</Link>
-                    </Button>
-                    <Button size="lg" variant="outline" asChild>
-                        <Link href="#features">Learn More</Link>
-                    </Button>
-                </div>
+        <section className="relative flex items-center justify-center h-[60vh] md:h-[80vh] overflow-hidden text-white">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
+          >
+            <source src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4" type="video/mp4" />
+            Your browser does not support the video tag.
+          </video>
+          <div className="absolute inset-0 bg-black/60 z-10"></div>
+          <div className="relative z-20 text-center p-4">
+              <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
+                <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
+                  Unlock Your Potential.
+                  <span className="block text-primary">Future-Proof Your Skills.</span>
+                </h1>
+                <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
+                  Edumate Pro provides a modern, engaging platform for students to excel in Maths and Physical Sciences.
+                </p>
               </div>
-              <div className="relative animate-in fade-in zoom-in-50 duration-1000 h-[400px] md:h-auto">
-                <div className="absolute -inset-12 bg-gradient-to-r from-primary to-secondary rounded-full blur-3xl opacity-20 dark:opacity-30"></div>
-                <HeroBackground className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150%] h-[150%] md:w-full md:h-full"/>
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000">
+                  <Button size="lg" asChild>
+                    <Link href="/register">Explore Courses</Link>
+                  </Button>
+                  <Button size="lg" variant="secondary" asChild>
+                      <Link href="#features">Learn More</Link>
+                  </Button>
               </div>
-            </div>
           </div>
         </section>
 
