@@ -13,16 +13,41 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, studentData } from "@/lib/data";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import withAuth from "@/components/with-auth";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { getAuth } from 'firebase/auth';
+import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+const assignmentFormSchema = z.object({
+  title: z.string().min(1, "Assignment title is required."),
+  course: z.string().min(1, "Please select a course."),
+  instructions: z.string().optional(),
+  file: z.instanceof(File).refine(file => file.size > 0, 'A file is required.').refine(file => file.type === 'application/zip', 'File must be a ZIP archive.'),
+});
+type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
 
 type SubmittedAssignment = (typeof studentData.submittedAssignments)[0];
 type Transaction = (typeof studentData.transactions)[0];
@@ -54,6 +79,8 @@ function DashboardPage() {
     const transactionsPerPage = 5;
     const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
+    const [isAssignmentDialogOpen, setIsAssignmentDialogOpen] = React.useState(false);
+    const [isSubmitting, setIsSubmitting] = React.useState(false);
 
     // State for courses filtering and pagination
     const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All', status: 'All' });
@@ -64,6 +91,62 @@ function DashboardPage() {
     const [purchasedCourseFilters, setPurchasedCourseFilters] = React.useState({ search: '', subject: 'All' });
     const [currentPurchasedCoursePage, setCurrentPurchasedCoursePage] = React.useState(1);
     const purchasedCoursesPerPage = 3;
+
+    const assignmentForm = useForm<AssignmentFormValues>({
+      resolver: zodResolver(assignmentFormSchema),
+      defaultValues: {
+        title: '',
+        course: '',
+        instructions: '',
+        file: undefined,
+      },
+    });
+
+    const handleAssignmentSubmit = async (data: AssignmentFormValues) => {
+        setIsSubmitting(true);
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
+        const storage = getStorage(app);
+        
+        const user = auth.currentUser;
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to submit an assignment.' });
+            setIsSubmitting(false);
+            return;
+        }
+
+        try {
+            // Upload file to Firebase Storage
+            const storageRef = ref(storage, `assignments/${user.uid}/${Date.now()}-${data.file.name}`);
+            const uploadResult = await uploadBytes(storageRef, data.file);
+            const downloadURL = await getDownloadURL(uploadResult.ref);
+
+            // Add metadata to Firestore
+            await addDoc(collection(firestore, 'assignments'), {
+                studentId: user.uid,
+                studentName: user.displayName,
+                studentEmail: user.email,
+                title: data.title,
+                course: data.course,
+                instructions: data.instructions,
+                fileUrl: downloadURL,
+                status: 'Pending Review',
+                price: null,
+                solutionUrl: null,
+                submittedAt: serverTimestamp(),
+            });
+
+            toast({ title: 'Success', description: 'Your assignment has been submitted successfully.' });
+            setIsAssignmentDialogOpen(false);
+            assignmentForm.reset();
+        } catch (error) {
+            console.error("Error submitting assignment: ", error);
+            toast({ variant: 'destructive', title: 'Submission Failed', description: 'There was an error submitting your assignment. Please try again.' });
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
 
     const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
@@ -132,6 +215,8 @@ function DashboardPage() {
     
     const allCourses = instructorData.courses;
     const purchasedCourseIds = new Set(studentData.purchasedCourses.map(c => c.id));
+    const studentCourses = [...new Set([...studentData.activeSubscriptions.map(s => s.name), ...studentData.purchasedCourses.map(c => c.name)])];
+
 
     const filteredCourses = React.useMemo(() => {
         return allCourses.filter(course => {
@@ -525,35 +610,91 @@ function DashboardPage() {
                                     </DropdownMenuRadioGroup>
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                            <Dialog>
+                            <Dialog open={isAssignmentDialogOpen} onOpenChange={setIsAssignmentDialogOpen}>
                                 <DialogTrigger asChild>
                                     <Button className="w-full"><UploadCloud className="mr-2"/>Upload</Button>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader>
                                         <DialogTitle>Upload New Assignment</DialogTitle>
-                                        <DialogDescription>Select the course and upload your assignment file.</DialogDescription>
+                                        <DialogDescription>Fill in the details and upload your assignment file (must be a .zip).</DialogDescription>
                                     </DialogHeader>
-                                    <div className="space-y-4 py-4">
-                                        <div className="space-y-2">
-                                            <Label>Assignment Title</Label>
-                                            <Input placeholder="e.g. Chapter 5 Problem Set" />
-                                        </div>
-                                        <div className="flex items-center justify-center w-full">
-                                            <label htmlFor="dropzone-file-student" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
-                                                <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                                    <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                                    <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                                    <p className="text-xs text-muted-foreground">PDF, DOCX, or JPG</p>
-                                                </div>
-                                                <Input id="dropzone-file-student" type="file" className="hidden" />
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <DialogFooter>
-                                        <Button variant="ghost">Cancel</Button>
-                                        <Button>Submit Assignment</Button>
-                                    </DialogFooter>
+                                    <Form {...assignmentForm}>
+                                        <form onSubmit={assignmentForm.handleSubmit(handleAssignmentSubmit)} className="space-y-4 py-4">
+                                            <FormField
+                                                control={assignmentForm.control}
+                                                name="title"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Assignment Title</FormLabel>
+                                                        <FormControl>
+                                                            <Input placeholder="e.g. Chapter 5 Problem Set" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={assignmentForm.control}
+                                                name="course"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Course</FormLabel>
+                                                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                            <FormControl>
+                                                                <SelectTrigger>
+                                                                    <SelectValue placeholder="Select the relevant course" />
+                                                                </SelectTrigger>
+                                                            </FormControl>
+                                                            <SelectContent>
+                                                                {studentCourses.map(course => (
+                                                                    <SelectItem key={course} value={course}>{course}</SelectItem>
+                                                                ))}
+                                                            </SelectContent>
+                                                        </Select>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={assignmentForm.control}
+                                                name="instructions"
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Extra Instructions</FormLabel>
+                                                        <FormControl>
+                                                            <Textarea placeholder="Any specific notes for the instructor?" {...field} />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={assignmentForm.control}
+                                                name="file"
+                                                render={({ field: { onChange, value, ...rest } }) => (
+                                                    <FormItem>
+                                                        <FormLabel>Assignment File (.zip)</FormLabel>
+                                                        <FormControl>
+                                                            <Input 
+                                                                type="file" 
+                                                                accept=".zip" 
+                                                                onChange={(e) => onChange(e.target.files?.[0])} 
+                                                                {...rest} 
+                                                            />
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
+                                            <DialogFooter>
+                                                <Button type="button" variant="ghost" onClick={() => setIsAssignmentDialogOpen(false)}>Cancel</Button>
+                                                <Button type="submit" disabled={isSubmitting}>
+                                                    {isSubmitting ? 'Submitting...' : 'Submit Assignment'}
+                                                </Button>
+                                            </DialogFooter>
+                                        </form>
+                                    </Form>
                                 </DialogContent>
                             </Dialog>
                         </div>
