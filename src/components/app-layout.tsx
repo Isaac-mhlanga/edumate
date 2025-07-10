@@ -62,6 +62,12 @@ type Role = 'student' | 'instructor' | 'admin' | 'tutor';
 // This is a mock function. In a real app, you'd get this from Firestore or a custom claim.
 const getUserRole = (user: User | null): Role | null => {
     if (!user || !user.email) return null;
+    
+    // Check localStorage first
+    const storedRole = localStorage.getItem(`userRole-${user.uid}`);
+    if (storedRole) return storedRole as Role;
+
+    // Fallback to email check if not in localStorage
     if (user.email.includes('admin')) return 'admin';
     if (user.email.includes('instructor')) return 'instructor';
     if (user.email.includes('tutor')) return 'tutor';
@@ -164,6 +170,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = getMenuItems();
   const currentTab = searchParams.get('tab') || 'overview';
+  const isSettingsPage = pathname === '/settings';
 
   return (
     <SidebarProvider>
@@ -224,9 +231,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                  <SidebarMenuItem>
                     <SidebarMenuButton
                         asChild
+                        isActive={isSettingsPage}
                         tooltip={{ children: 'Settings', side: 'right' }}
                         >
-                        <Link href="#">
+                        <Link href="/settings">
                             <Settings />
                             <span>Settings</span>
                         </Link>

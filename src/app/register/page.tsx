@@ -49,9 +49,6 @@ export default function RegisterPage() {
     const [auth, setAuth] = React.useState<Auth | null>(null);
 
     React.useEffect(() => {
-        // Since getAuth() is now managed in AppLayout and passed down,
-        // we might not need to initialize it here anymore if we pass it as a prop.
-        // For now, let's keep it to ensure this page can work standalone.
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
         setAuth(getAuth(app));
     }, []);
@@ -82,7 +79,8 @@ export default function RegisterPage() {
             const user = userCredential.user;
             await updateProfile(user, { displayName: data.fullName });
 
-            console.log(`User created successfully: ${user.uid}, Role: ${data.role}`);
+            // Store role in localStorage
+            localStorage.setItem(`userRole-${user.uid}`, data.role);
 
             toast({
                 title: "Registration Successful!",

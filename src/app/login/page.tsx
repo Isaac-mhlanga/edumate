@@ -41,14 +41,12 @@ export default function LoginPage() {
         const email = (e.currentTarget.querySelector('#email') as HTMLInputElement).value;
         const password = (e.currentTarget.querySelector('#password') as HTMLInputElement).value;
 
-        // This is a mock role check. In a real app, you'd get this from Firestore or a custom claim.
-        let role = 'student';
-        if (email.includes('instructor')) role = 'instructor';
-        if (email.includes('admin')) role = 'admin';
-        if (email.includes('tutor')) role = 'tutor';
-
         try {
-            await signInWithEmailAndPassword(auth, email, password);
+            const userCredential = await signInWithEmailAndPassword(auth, email, password);
+            const user = userCredential.user;
+
+            // Retrieve role from localStorage
+            const role = localStorage.getItem(`userRole-${user.uid}`) || 'student';
             
             toast({
                 title: "Login Successful",

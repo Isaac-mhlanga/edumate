@@ -18,9 +18,15 @@ const firebaseConfig = {
 
 type Role = 'student' | 'instructor' | 'admin' | 'tutor';
 
-// This is a mock function. In a real app, you'd get this from Firestore or a custom claim.
+// Get user role from localStorage with a fallback to email check
 const getUserRole = (user: User | null): Role | null => {
     if (!user || !user.email) return null;
+    
+    // Check localStorage first
+    const storedRole = localStorage.getItem(`userRole-${user.uid}`);
+    if (storedRole) return storedRole as Role;
+
+    // Fallback to email check
     if (user.email.includes('admin')) return 'admin';
     if (user.email.includes('instructor')) return 'instructor';
     if (user.email.includes('tutor')) return 'tutor';
@@ -43,7 +49,11 @@ const withAuth = <P extends object>(
         const auth = getAuth(app);
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
-            setUserRole(getUserRole(currentUser));
+            if (currentUser) {
+              setUserRole(getUserRole(currentUser));
+            } else {
+              setUserRole(null);
+            }
             setLoading(false);
         });
 
@@ -72,7 +82,7 @@ const withAuth = <P extends object>(
             }
         }
       }
-    }, [loading, user, userRole, router]);
+    }, [loading, user, userRole, router, allowedRoles]);
 
     if (loading || !user || (userRole && !allowedRoles.includes(userRole))) {
         return (
