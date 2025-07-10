@@ -23,7 +23,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -60,6 +60,12 @@ type SubmittedAssignment = (typeof instructorData.submittedAssignments)[0];
 type EnrolledStudent = (typeof instructorData.enrolledStudents)[0];
 type Transaction = (typeof instructorData.transactions)[0];
 
+type VideoUpload = {
+    title: string;
+    file: File | null;
+    fileName: string;
+};
+
 export default function InstructorPage() {
   const router = useRouter();
   const pathname = usePathname();
@@ -72,6 +78,7 @@ export default function InstructorPage() {
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>(instructorData.submittedAssignments);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
   const [transactions, setTransactions] = React.useState<Transaction[]>(instructorData.transactions);
+  const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
 
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
   const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
@@ -120,6 +127,30 @@ export default function InstructorPage() {
   });
 
   const pricingModel = form.watch("pricingModel");
+
+  const handleAddNewVideo = () => {
+    setVideoUploads([...videoUploads, { title: '', file: null, fileName: '' }]);
+  };
+
+  const handleVideoTitleChange = (index: number, title: string) => {
+    const newUploads = [...videoUploads];
+    newUploads[index].title = title;
+    setVideoUploads(newUploads);
+  };
+
+  const handleVideoFileChange = (index: number, file: File | null) => {
+    const newUploads = [...videoUploads];
+    newUploads[index].file = file;
+    newUploads[index].fileName = file?.name || '';
+    setVideoUploads(newUploads);
+  };
+
+  const handleRemoveVideo = (index: number) => {
+    const newUploads = [...videoUploads];
+    newUploads.splice(index, 1);
+    setVideoUploads(newUploads);
+  };
+
   
   React.useEffect(() => {
     if (selectedCourse) {
@@ -131,6 +162,7 @@ export default function InstructorPage() {
         pricingModel: selectedCourse.pricing.type,
         price: selectedCourse.pricing.price,
       });
+      setVideoUploads([]); // Reset video uploads for now. Could be extended to edit existing videos.
     } else {
       form.reset({
         title: "",
@@ -140,6 +172,7 @@ export default function InstructorPage() {
         pricingModel: "free",
         price: undefined,
       });
+      setVideoUploads([]);
     }
   }, [selectedCourse, form]);
 
@@ -195,15 +228,18 @@ export default function InstructorPage() {
   };
 
   function onCourseSubmit(data: CourseFormValues) {
+    const newVideos = videoUploads.map((v, i) => ({ id: `V${Date.now() + i}`, title: v.title }));
+
     if (selectedCourse) {
       setCourses(courses.map(c => c.id === selectedCourse.id ? { 
         ...c, 
         ...data, 
-        pricing: { type: data.pricingModel, price: data.price } 
+        pricing: { type: data.pricingModel, price: data.price },
+        videos: [...c.videos, ...newVideos]
       } : c));
       toast({
         title: "Course Updated!",
-        description: `The course "${data.title}" has been successfully updated.`,
+        description: `The course "${data.title}" has been updated with ${newVideos.length} new video(s).`,
       });
     } else {
       const newCourse: Course = {
@@ -211,7 +247,7 @@ export default function InstructorPage() {
         ...data,
         thumbnail: 'https://placehold.co/600x400.png',
         status: 'Draft',
-        videos: [],
+        videos: newVideos,
         pricing: {
           type: data.pricingModel,
           price: data.price
@@ -220,11 +256,12 @@ export default function InstructorPage() {
       setCourses([newCourse, ...courses]);
       toast({
         title: "Course Created!",
-        description: `The course "${data.title}" has been successfully created.`,
+        description: `The course "${data.title}" has been successfully created with ${newVideos.length} video(s).`,
       });
     }
     setIsCourseDialogOpen(false);
     setSelectedCourse(null);
+    setVideoUploads([]);
   }
 
   function handleSaveSolution(assignmentId: string, price: number) {
@@ -993,7 +1030,7 @@ export default function InstructorPage() {
                   </DialogDescription>
               </DialogHeader>
               <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onCourseSubmit)} className="space-y-6 py-4">
+                  <form onSubmit={form.handleSubmit(onCourseSubmit)} className="space-y-6 py-4 max-h-[70vh] overflow-y-auto pr-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div className="space-y-4 col-span-1 md:col-span-2">
                               <Label>Thumbnail / Cover Image</Label>
@@ -1082,8 +1119,54 @@ export default function InstructorPage() {
                                   </FormItem>
                               )} />
                           )}
+
+                        <div className="col-span-1 md:col-span-2 space-y-4">
+                            <Separator />
+                            <div className="flex items-center justify-between">
+                                <Label>Course Videos</Label>
+                                <Button type="button" variant="outline" size="sm" onClick={handleAddNewVideo}>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Add Video
+                                </Button>
+                            </div>
+                            {selectedCourse && selectedCourse.videos.length > 0 && (
+                                <div className="space-y-2 text-sm text-muted-foreground">
+                                    <p>This course already has {selectedCourse.videos.length} video(s). You can add more below.</p>
+                                    <ul className="list-disc pl-5">
+                                        {selectedCourse.videos.slice(0, 3).map(v => <li key={v.id}>{v.title}</li>)}
+                                        {selectedCourse.videos.length > 3 && <li>...and {selectedCourse.videos.length - 3} more.</li>}
+                                    </ul>
+                                </div>
+                            )}
+                            <div className="space-y-4">
+                            {videoUploads.map((upload, index) => (
+                                <Card key={index} className="p-4 bg-muted/50">
+                                    <div className="flex items-start gap-4">
+                                        <Video className="h-5 w-5 text-muted-foreground mt-2" />
+                                        <div className="flex-grow space-y-2">
+                                            <Input
+                                                placeholder={`Video ${index + 1} Title`}
+                                                value={upload.title}
+                                                onChange={(e) => handleVideoTitleChange(index, e.target.value)}
+                                            />
+                                            <label htmlFor={`video-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
+                                                <FileUp className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                <span className="text-sm text-muted-foreground truncate">
+                                                    {upload.fileName || 'Choose a video file'}
+                                                </span>
+                                                <Input id={`video-upload-${index}`} type="file" accept="video/*" className="sr-only" onChange={(e) => handleVideoFileChange(index, e.target.files ? e.target.files[0] : null)} />
+                                            </label>
+                                        </div>
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveVideo(index)}>
+                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                        </Button>
+                                    </div>
+                                </Card>
+                            ))}
+                            </div>
+                        </div>
+
                       </div>
-                      <DialogFooter>
+                      <DialogFooter className="pt-4 border-t sticky bottom-0 bg-background/95 pb-0 -mx-4 px-4">
                           <Button type="button" variant="ghost" onClick={() => handleCourseDialogOpenChange(false)}>Cancel</Button>
                           <Button type="submit">Save Course</Button>
                       </DialogFooter>
@@ -1342,3 +1425,5 @@ export default function InstructorPage() {
     </AppLayout>
   );
 }
+
+    
