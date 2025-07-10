@@ -36,7 +36,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import React from 'react';
 import { ThemeToggle } from './theme-toggle';
 import { getAuth, onAuthStateChanged, signOut, type User, type Auth } from 'firebase/auth';
-import { initializeApp, getApps, getApp, type FirebaseOptions } from 'firebase/app';
+import { getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 
 const menuItems = [
