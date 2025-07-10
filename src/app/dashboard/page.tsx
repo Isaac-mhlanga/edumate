@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, studentData } from "@/lib/data";
-import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -216,11 +216,12 @@ export default function DashboardPage() {
                 </div>
 
                 <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-                    <TabsList className="grid w-full grid-cols-4 max-w-lg">
+                    <TabsList className="grid w-full grid-cols-5 max-w-xl">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="courses">Course Catalog</TabsTrigger>
                         <TabsTrigger value="assignments">Assignments</TabsTrigger>
                         <TabsTrigger value="transactions">Transactions</TabsTrigger>
+                        <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
                     </TabsList>
                     
                     <TabsContent value="overview" className="pt-6 space-y-8">
@@ -750,6 +751,65 @@ export default function DashboardPage() {
                                     </Button>
                                 </div>
                             </CardFooter>
+                        </Card>
+                    </TabsContent>
+                    
+                    <TabsContent value="subscriptions" className="pt-6 space-y-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>My Current Plan</CardTitle>
+                                <CardDescription>Your primary subscription for accessing course content.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <Card className="bg-primary/5 border-primary">
+                                    <CardHeader className="flex flex-row items-center justify-between">
+                                        <div>
+                                            <CardTitle className="text-2xl">{studentData.currentSubscription.planName}</CardTitle>
+                                            <CardDescription>Next payment on {studentData.currentSubscription.nextBillingDate}</CardDescription>
+                                        </div>
+                                        <div className="text-right">
+                                            <p className="text-3xl font-bold">R{studentData.currentSubscription.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                                        </div>
+                                    </CardHeader>
+                                    <CardFooter className="flex justify-end gap-2">
+                                        <Button variant="destructive">Cancel Subscription</Button>
+                                    </CardFooter>
+                                </Card>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                             <CardHeader>
+                                <CardTitle>Available Plans</CardTitle>
+                                <CardDescription>Choose a plan that best fits your learning needs.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="grid md:grid-cols-2 gap-6">
+                                {studentData.availablePlans.map(plan => (
+                                    <Card key={plan.id} className="flex flex-col">
+                                        <CardHeader>
+                                            <div className="flex justify-between items-center">
+                                                <CardTitle>{plan.name}</CardTitle>
+                                                <ShieldCheck className="w-6 h-6 text-secondary"/>
+                                            </div>
+                                            <p className="text-3xl font-bold pt-4">R{plan.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                                        </CardHeader>
+                                        <CardContent className="flex-grow">
+                                            <ul className="space-y-2 text-sm text-muted-foreground">
+                                                {plan.features.map((feature, i) => (
+                                                    <li key={i} className="flex items-center gap-2">
+                                                        <CheckCircle className="h-4 w-4 text-green-500"/>
+                                                        <span>{feature}</span>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </CardContent>
+                                        <CardFooter>
+                                            <Button className="w-full" disabled={plan.id === studentData.currentSubscription.planId}>
+                                                {plan.id === studentData.currentSubscription.planId ? 'Current Plan' : 'Change Plan'}
+                                            </Button>
+                                        </CardFooter>
+                                    </Card>
+                                ))}
+                            </CardContent>
                         </Card>
                     </TabsContent>
                 </Tabs>

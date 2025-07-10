@@ -25,6 +25,36 @@ export const studentData = {
         { id: 'TXN004', item: 'Grade 12 - Physical Sciences Pro', type: 'Subscription', status: 'Completed', amount: 350.00, date: '2024-04-01' },
         { id: 'TXN005', item: 'Organic Chemistry Fundamentals', type: 'Course', status: 'Completed', amount: 299.00, date: '2024-03-20' },
         { id: 'TXN006', item: 'Another Course', type: 'Course', status: 'Refunded', amount: 199.00, date: '2024-03-15' },
+    ],
+    currentSubscription: {
+        planId: 'pro_maths',
+        planName: "Maths Pro",
+        price: 350,
+        nextBillingDate: 'June 30, 2024',
+    },
+    availablePlans: [
+        {
+            id: 'pro_maths',
+            name: 'Maths Pro',
+            price: 350,
+            features: [
+                'Access to all Maths courses',
+                'Priority tutor support',
+                'Exclusive webinars',
+                'Downloadable resources'
+            ],
+        },
+        {
+            id: 'pro_all',
+            name: 'All Subjects Pro',
+            price: 600,
+            features: [
+                'Access to all Maths & Science courses',
+                'Priority tutor support',
+                'Exclusive webinars',
+                'All downloadable resources'
+            ],
+        }
     ]
 };
 
@@ -207,12 +237,19 @@ const allTransactions = [
     { id: 'T011', studentName: null, item: 'Payout Request - Dr. Alan Grant', type: 'Payout Request', status: 'Pending', amount: -599.00, date: '2024-05-24', instructor: 'Dr. Alan Grant' },
 ];
 
+const allSubscriptions = [
+    { id: 'SUB001', studentId: 'S001', studentName: 'Michael Chen', studentEmail: 'michael.c@example.com', planName: 'Maths Pro', status: 'Active', nextBillingDate: '2024-06-15' },
+    { id: 'SUB002', studentId: 'S002', studentName: 'Jessica Rodriguez', studentEmail: 'jess.r@example.com', planName: 'Physical Sciences Pro', status: 'Active', nextBillingDate: '2024-06-20' },
+    { id: 'SUB003', studentId: 'S004', studentName: 'Sarah Miller', studentEmail: 'sarah.m@example.com', planName: 'All Subjects Pro', status: 'Active', nextBillingDate: '2024-06-05' },
+    { id: 'SUB004', studentId: 'S007', studentName: 'James Brown', studentEmail: 'james.b@example.com', planName: 'Maths Pro', status: 'Canceled', nextBillingDate: '2024-05-18' },
+];
+
 
 export const adminData = {
     stats: [
         { title: "Total Revenue", value: `R ${allTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0).toFixed(2)}`, icon: DollarSign, change: "+15% this month" },
         { title: "Total Users", value: allUsers.length, icon: Users, change: "+5 new users" },
-        { title: "Instructors", value: allUsers.filter(u => u.role === 'Instructor').length, icon: Users, change: "+1 new instructor" },
+        { title: "Active Subscriptions", value: allSubscriptions.filter(s => s.status === 'Active').length, icon: Users, change: "+2 this month" },
         { title: "Active Courses", value: allCourses.filter(c => c.status === 'Published').length, icon: Book, change: "+2 this month" },
     ],
     users: allUsers,
@@ -220,6 +257,7 @@ export const adminData = {
     assignments: allAssignments,
     transactions: allTransactions,
     payoutRequests: payoutRequests,
+    subscriptions: allSubscriptions,
     recentActivity: [
         { id: 1, type: 'New User', description: 'Sarah Miller signed up as a Student.', timestamp: '2 hours ago' },
         { id: 2, type: 'New Course', description: 'Dr. Alan Grant published "Quantum Physics Intro".', timestamp: '1 day ago' },

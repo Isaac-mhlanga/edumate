@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Download, Eye, FileText, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, Search, Shield, Trash2, Upload, UserCog, UserMinus, UserPlus, Users, X, XCircle, Clock, FileUp } from "lucide-react";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Download, Eye, FileText, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, Search, Shield, ShieldCheck, Trash2, Upload, UserCog, UserMinus, UserPlus, Users, X, XCircle, Clock, FileUp } from "lucide-react";
 import React from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -28,6 +28,7 @@ type User = (typeof adminData.users)[0];
 type Course = (typeof adminData.courses)[0];
 type PayoutRequest = (typeof adminData.payoutRequests)[0];
 type Assignment = (typeof adminData.assignments)[0];
+type Subscription = (typeof adminData.subscriptions)[0];
 
 export default function AdminPage() {
     const router = useRouter();
@@ -41,20 +42,24 @@ export default function AdminPage() {
     const [courses, setCourses] = React.useState(adminData.courses);
     const [assignments, setAssignments] = React.useState(adminData.assignments);
     const [payoutRequests, setPayoutRequests] = React.useState(adminData.payoutRequests);
-    
+    const [subscriptions, setSubscriptions] = React.useState(adminData.subscriptions);
+
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
     const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = React.useState(false);
     const [isPayoutActionDialogOpen, setIsPayoutActionDialogOpen] = React.useState(false);
     const [isCourseActionDialogOpen, setIsCourseActionDialogOpen] = React.useState(false);
     const [isAssignmentReviewDialogOpen, setIsAssignmentReviewDialogOpen] = React.useState(false);
     const [isReceiptDialogOpen, setIsReceiptDialogOpen] = React.useState(false);
-    
+    const [isCancelSubscriptionDialogOpen, setIsCancelSubscriptionDialogOpen] = React.useState(false);
+
     const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
     const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
     const [courseAction, setCourseAction] = React.useState<'Approve' | 'Reject' | null>(null);
     const [selectedPayout, setSelectedPayout] = React.useState<PayoutRequest | null>(null);
     const [payoutAction, setPayoutAction] = React.useState<'Approve' | 'Decline' | null>(null);
     const [selectedAssignment, setSelectedAssignment] = React.useState<Assignment | null>(null);
+    const [selectedSubscription, setSelectedSubscription] = React.useState<Subscription | null>(null);
+
 
     // Filters and Pagination State
     const [userFilters, setUserFilters] = React.useState({ search: '', role: 'All' });
@@ -64,14 +69,18 @@ export default function AdminPage() {
     const [courseFilters, setCourseFilters] = React.useState({ search: '', status: 'All' });
     const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
     const coursesPerPage = 7;
-    
+
     const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', instructor: 'All' });
     const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
     const assignmentsPerPage = 7;
-    
+
     const [payoutFilters, setPayoutFilters] = React.useState({ search: '', status: 'All' });
     const [currentPayoutPage, setCurrentPayoutPage] = React.useState(1);
     const payoutsPerPage = 7;
+    
+    const [subscriptionFilters, setSubscriptionFilters] = React.useState({ search: '', plan: 'All' });
+    const [currentSubscriptionPage, setCurrentSubscriptionPage] = React.useState(1);
+    const subscriptionsPerPage = 7;
 
     // Receipt printing logic
     const receiptComponentRef = React.useRef(null);
@@ -90,7 +99,7 @@ export default function AdminPage() {
         setUserFilters(prev => ({ ...prev, [key]: value }));
         setCurrentUserPage(1);
     };
-    
+
     const handleCourseFilterChange = (key: keyof typeof courseFilters, value: string) => {
         setCourseFilters(prev => ({ ...prev, [key]: value }));
         setCurrentCoursePage(1);
@@ -100,12 +109,17 @@ export default function AdminPage() {
         setAssignmentFilters(prev => ({ ...prev, [key]: value }));
         setCurrentAssignmentPage(1);
     };
-    
+
     const handlePayoutFilterChange = (key: keyof typeof payoutFilters, value: string) => {
         setPayoutFilters(prev => ({ ...prev, [key]: value }));
         setCurrentPayoutPage(1);
     };
-    
+
+    const handleSubscriptionFilterChange = (key: keyof typeof subscriptionFilters, value: string) => {
+        setSubscriptionFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentSubscriptionPage(1);
+    };
+
     const handleOpenAssignmentReview = (assignment: Assignment) => {
         setSelectedAssignment(assignment);
         setIsAssignmentReviewDialogOpen(true);
@@ -124,7 +138,7 @@ export default function AdminPage() {
         setIsSuspendUserDialogOpen(false);
         setSelectedUser(null);
     }
-    
+
     const confirmDeleteUser = () => {
         if (!selectedUser) return;
         setUsers(users.filter(u => u.id !== selectedUser.id));
@@ -132,7 +146,7 @@ export default function AdminPage() {
         setIsDeleteUserDialogOpen(false);
         setSelectedUser(null);
     }
-    
+
     const handleCourseAction = (course: Course, action: 'Approve' | 'Reject') => {
         setSelectedCourse(course);
         setCourseAction(action);
@@ -170,6 +184,19 @@ export default function AdminPage() {
         setPayoutAction(null);
     };
 
+    const handleCancelSubscription = (subscription: Subscription) => {
+        setSelectedSubscription(subscription);
+        setIsCancelSubscriptionDialogOpen(true);
+    };
+    
+    const confirmCancelSubscription = () => {
+        if (!selectedSubscription) return;
+        setSubscriptions(subs => subs.map(s => s.id === selectedSubscription.id ? { ...s, status: 'Canceled' } : s));
+        toast({ title: "Subscription Canceled", description: `The subscription for ${selectedSubscription.studentName} has been canceled.` });
+        setIsCancelSubscriptionDialogOpen(false);
+        setSelectedSubscription(null);
+    };
+
     // Filtering and pagination logic
     const filteredUsers = React.useMemo(() => {
         return users.filter(user => {
@@ -182,7 +209,7 @@ export default function AdminPage() {
     }, [users, userFilters]);
     const totalUserPages = Math.ceil(filteredUsers.length / usersPerPage);
     const paginatedUsers = filteredUsers.slice((currentUserPage - 1) * usersPerPage, currentUserPage * usersPerPage);
-    
+
     const filteredCourses = React.useMemo(() => {
         return courses.filter(course => {
             const searchMatch = courseFilters.search.trim().toLowerCase() === '' ||
@@ -218,6 +245,19 @@ export default function AdminPage() {
     }, [payoutRequests, payoutFilters]);
     const totalPayoutPages = Math.ceil(filteredPayouts.length / payoutsPerPage);
     const paginatedPayouts = filteredPayouts.slice((currentPayoutPage - 1) * payoutsPerPage, currentPayoutPage * payoutsPerPage);
+    
+    const filteredSubscriptions = React.useMemo(() => {
+        return subscriptions.filter(sub => {
+            const searchMatch = subscriptionFilters.search.trim().toLowerCase() === '' ||
+                sub.studentName.toLowerCase().includes(subscriptionFilters.search.trim().toLowerCase()) ||
+                sub.studentEmail.toLowerCase().includes(subscriptionFilters.search.trim().toLowerCase());
+            const planMatch = subscriptionFilters.plan === 'All' || sub.planName === subscriptionFilters.plan;
+            return searchMatch && planMatch;
+        });
+    }, [subscriptions, subscriptionFilters]);
+    const totalSubscriptionPages = Math.ceil(filteredSubscriptions.length / subscriptionsPerPage);
+    const paginatedSubscriptions = filteredSubscriptions.slice((currentSubscriptionPage - 1) * subscriptionsPerPage, currentSubscriptionPage * subscriptionsPerPage);
+    const subscriptionPlans = ['All', ...Array.from(new Set(subscriptions.map(s => s.planName)))];
 
 
     return (
@@ -232,12 +272,13 @@ export default function AdminPage() {
                 </div>
                 
                 <Tabs value={currentTab} onValueChange={handleTabChange} className="w-full">
-                    <TabsList className="grid w-full grid-cols-5 max-w-2xl">
+                    <TabsList className="grid w-full grid-cols-6 max-w-3xl">
                         <TabsTrigger value="overview">Overview</TabsTrigger>
                         <TabsTrigger value="users">Users</TabsTrigger>
                         <TabsTrigger value="courses">Courses</TabsTrigger>
                         <TabsTrigger value="assignments">Assignments</TabsTrigger>
                         <TabsTrigger value="payouts">Payouts</TabsTrigger>
+                        <TabsTrigger value="subscriptions">Subscriptions</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="overview" className="pt-6 space-y-8">
@@ -669,6 +710,89 @@ export default function AdminPage() {
                             </CardFooter>
                         </Card>
                     </TabsContent>
+                    
+                    <TabsContent value="subscriptions" className="pt-6">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Subscription Management</CardTitle>
+                                <CardDescription>Oversee all active and canceled student subscriptions.</CardDescription>
+                            </CardHeader>
+                            <div className="flex items-center justify-between gap-2 p-4 border-y">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder="Search by student name or email..."
+                                        className="pl-8"
+                                        value={subscriptionFilters.search}
+                                        onChange={(e) => handleSubscriptionFilterChange('search', e.target.value)}
+                                    />
+                                </div>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="outline" className="gap-1">
+                                            <ListFilter className="h-3.5 w-3.5" />
+                                            <span>Filter by Plan</span>
+                                        </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuLabel>Filter by Plan</DropdownMenuLabel>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuRadioGroup value={subscriptionFilters.plan} onValueChange={(value) => handleSubscriptionFilterChange('plan', value)}>
+                                            {subscriptionPlans.map(plan => (
+                                                <DropdownMenuRadioItem key={plan} value={plan}>{plan}</DropdownMenuRadioItem>
+                                            ))}
+                                        </DropdownMenuRadioGroup>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
+                            </div>
+                            <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Student</TableHead>
+                                        <TableHead>Plan</TableHead>
+                                        <TableHead>Status</TableHead>
+                                        <TableHead>Next Billing Date</TableHead>
+                                        <TableHead className="text-right">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {paginatedSubscriptions.map(sub => (
+                                        <TableRow key={sub.id}>
+                                            <TableCell>
+                                                <div className="font-medium">{sub.studentName}</div>
+                                                <div className="text-xs text-muted-foreground">{sub.studentEmail}</div>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant="secondary">{sub.planName}</Badge>
+                                            </TableCell>
+                                            <TableCell>
+                                                <Badge variant={sub.status === 'Active' ? 'default' : 'destructive'} className={sub.status === 'Active' ? 'bg-green-500/20 text-green-700' : 'bg-red-500/20 text-red-700'}>
+                                                    {sub.status}
+                                                </Badge>
+                                            </TableCell>
+                                            <TableCell>{sub.nextBillingDate}</TableCell>
+                                            <TableCell className="text-right">
+                                                {sub.status === 'Active' && (
+                                                     <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10" onClick={() => handleCancelSubscription(sub)}>
+                                                        Cancel Subscription
+                                                     </Button>
+                                                )}
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                             <CardFooter className="flex items-center justify-between py-4">
+                                <div className="text-xs text-muted-foreground">
+                                    Showing <strong>{(currentSubscriptionPage - 1) * subscriptionsPerPage + 1}-{Math.min(currentSubscriptionPage * subscriptionsPerPage, filteredSubscriptions.length)}</strong> of <strong>{filteredSubscriptions.length}</strong> subscriptions.
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentSubscriptionPage(p => p - 1)} disabled={currentSubscriptionPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                                    <Button variant="outline" size="sm" onClick={() => setCurrentSubscriptionPage(p => p + 1)} disabled={currentSubscriptionPage >= totalSubscriptionPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    </TabsContent>
 
                 </Tabs>
             </div>
@@ -734,6 +858,24 @@ export default function AdminPage() {
                         <AlertDialogCancel onClick={() => { setSelectedCourse(null); setCourseAction(null); }}>Cancel</AlertDialogCancel>
                         <AlertDialogAction onClick={confirmCourseAction} className={courseAction === 'Reject' ? buttonVariants({ variant: "destructive" }) : ''}>
                             {courseAction} Course
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+            
+             {/* Dialog for Subscription Actions */}
+            <AlertDialog open={isCancelSubscriptionDialogOpen} onOpenChange={setIsCancelSubscriptionDialogOpen}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Cancel Subscription?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Are you sure you want to cancel the <strong>{selectedSubscription?.planName}</strong> plan for <strong>{selectedSubscription?.studentName}</strong>? Their access will be revoked at the end of the current billing cycle.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => { setSelectedSubscription(null); }}>Cancel</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmCancelSubscription} className={buttonVariants({ variant: "destructive" })}>
+                            Confirm Cancellation
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>
