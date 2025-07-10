@@ -407,6 +407,7 @@ function InstructorPage() {
 
 
   return (
+    <AppLayout>
       <div className="space-y-8">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Instructor Dashboard</h1>
@@ -1421,7 +1422,7 @@ function InstructorPage() {
                     <AlertDialogAction onClick={confirmRefundTransaction} className={buttonVariants({ variant: "destructive" })}>Confirm Refund</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </Dialog>
+        </AlertDialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
@@ -1446,7 +1447,10 @@ function InstructorPage() {
             </DialogContent>
         </Dialog>
     </div>
+    </AppLayout>
   );
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
