@@ -1,7 +1,6 @@
 
 'use client';
 
-import { AppLayout } from "@/components/app-layout";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
@@ -399,9 +398,7 @@ function InstructorPage() {
 
 
   return (
-    <AppLayout>
       <div className="space-y-8">
-        <div className="space-y-8">
           {currentTab === 'overview' && (
             <div className="space-y-8">
               <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -1022,7 +1019,6 @@ function InstructorPage() {
                 </Card>
             </div>
           )}
-        </div>
 
        <Dialog open={isCourseDialogOpen} onOpenChange={handleCourseDialogOpenChange}>
           <DialogContent className="sm:max-w-2xl">
@@ -1426,7 +1422,6 @@ function InstructorPage() {
             </DialogContent>
         </Dialog>
     </div>
-    </AppLayout>
   );
 }
 

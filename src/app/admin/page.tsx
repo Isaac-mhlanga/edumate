@@ -255,522 +255,520 @@ function AdminPage() {
 
     return (
         <div className="space-y-8">
-            <div className="space-y-8">
-                {currentTab === 'overview' && (
-                    <div className="space-y-8">
-                        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                            {adminData.stats.map((stat) => (
-                                <Card key={stat.title}>
-                                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                        <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                                        <stat.icon className="h-5 w-5 text-muted-foreground" />
-                                    </CardHeader>
-                                    <CardContent>
-                                        <div className="text-2xl font-bold">{stat.value}</div>
-                                        <p className="text-xs text-muted-foreground flex items-center">
-                                            <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span>
-                                        </p>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </section>
-                        <section>
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Recent Platform Activity</CardTitle>
-                                    <CardDescription>A log of recent important events across the platform.</CardDescription>
+            {currentTab === 'overview' && (
+                <div className="space-y-8">
+                    <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+                        {adminData.stats.map((stat) => (
+                            <Card key={stat.title}>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
+                                    <stat.icon className="h-5 w-5 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <ul className="space-y-4">
-                                        {adminData.recentActivity.map(activity => (
-                                            <li key={activity.id} className="flex items-start gap-4">
-                                                <div className="bg-muted p-2 rounded-full mt-1">
-                                                    {activity.type === 'New User' && <UserPlus className="h-5 w-5 text-muted-foreground"/>}
-                                                    {activity.type === 'New Course' && <BookOpen className="h-5 w-5 text-muted-foreground"/>}
-                                                    {activity.type === 'Payout' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
-                                                </div>
-                                                <div className="flex-1">
-                                                    <p className="font-medium">{activity.description}</p>
-                                                    <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
-                                                </div>
-                                            </li>
-                                        ))}
-                                    </ul>
+                                    <div className="text-2xl font-bold">{stat.value}</div>
+                                    <p className="text-xs text-muted-foreground flex items-center">
+                                        <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span>
+                                    </p>
                                 </CardContent>
                             </Card>
-                        </section>
-                    </div>
-                )}
-
-                {currentTab === 'users' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>User Management</CardTitle>
-                            <CardDescription>Manage all students and instructors on the platform.</CardDescription>
-                        </CardHeader>
-                         <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                            <div className="relative flex-1 w-full">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search by name or email..."
-                                    className="pl-8"
-                                    value={userFilters.search}
-                                    onChange={(e) => handleUserFilterChange('search', e.target.value)}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="gap-1 w-full md:w-auto">
-                                        <ListFilter className="h-3.5 w-3.5" />
-                                        <span>Filter by Role</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by Role</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup value={userFilters.role} onValueChange={(value) => handleUserFilterChange('role', value)}>
-                                        <DropdownMenuRadioItem value="All">All Roles</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Student">Student</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Instructor">Instructor</DropdownMenuRadioItem>
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>User</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Role</TableHead>
-                                    <TableHead className="hidden md:table-cell">Joined Date</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
-                                </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paginatedUsers.map(user => (
-                                    <TableRow key={user.id}>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <Avatar className="h-9 w-9"><AvatarFallback>{user.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
-                                                <div>
-                                                    <p className="font-medium">{user.name}</p>
-                                                    <p className="text-xs text-muted-foreground">{user.email}</p>
-                                                </div>
+                        ))}
+                    </section>
+                    <section>
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>Recent Platform Activity</CardTitle>
+                                <CardDescription>A log of recent important events across the platform.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <ul className="space-y-4">
+                                    {adminData.recentActivity.map(activity => (
+                                        <li key={activity.id} className="flex items-start gap-4">
+                                            <div className="bg-muted p-2 rounded-full mt-1">
+                                                {activity.type === 'New User' && <UserPlus className="h-5 w-5 text-muted-foreground"/>}
+                                                {activity.type === 'New Course' && <BookOpen className="h-5 w-5 text-muted-foreground"/>}
+                                                {activity.type === 'Payout' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
                                             </div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge variant={user.role === 'Instructor' ? 'secondary' : 'outline'}>
-                                                {user.role}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="hidden md:table-cell">{user.joined}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={user.status === 'Active' ? 'default' : 'destructive'} className={user.status === 'Active' ? 'bg-green-500/20 text-green-700' : 'bg-red-500/20 text-red-700'}>
-                                                {user.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                             <DropdownMenu>
+                                            <div className="flex-1">
+                                                <p className="font-medium">{activity.description}</p>
+                                                <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
+                                            </div>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                        </Card>
+                    </section>
+                </div>
+            )}
+
+            {currentTab === 'users' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>User Management</CardTitle>
+                        <CardDescription>Manage all students and instructors on the platform.</CardDescription>
+                    </CardHeader>
+                     <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by name or email..."
+                                className="pl-8"
+                                value={userFilters.search}
+                                onChange={(e) => handleUserFilterChange('search', e.target.value)}
+                            />
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full md:w-auto">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Filter by Role</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Role</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={userFilters.role} onValueChange={(value) => handleUserFilterChange('role', value)}>
+                                    <DropdownMenuRadioItem value="All">All Roles</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Student">Student</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Instructor">Instructor</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>User</TableHead>
+                                <TableHead className="hidden sm:table-cell">Role</TableHead>
+                                <TableHead className="hidden md:table-cell">Joined Date</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedUsers.map(user => (
+                                <TableRow key={user.id}>
+                                    <TableCell>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-9 w-9"><AvatarFallback>{user.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
+                                            <div>
+                                                <p className="font-medium">{user.name}</p>
+                                                <p className="text-xs text-muted-foreground">{user.email}</p>
+                                            </div>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="hidden sm:table-cell">
+                                        <Badge variant={user.role === 'Instructor' ? 'secondary' : 'outline'}>
+                                            {user.role}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="hidden md:table-cell">{user.joined}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={user.status === 'Active' ? 'default' : 'destructive'} className={user.status === 'Active' ? 'bg-green-500/20 text-green-700' : 'bg-red-500/20 text-red-700'}>
+                                            {user.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                         <DropdownMenu>
+                                            <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => handleUserAction(user, 'suspend')}><UserMinus className="mr-2 h-4 w-4"/>{user.status === 'Active' ? 'Suspend' : 'Unsuspend'}</DropdownMenuItem>
+                                                <DropdownMenuSeparator />
+                                                <DropdownMenuItem onClick={() => handleUserAction(user, 'delete')} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete User</DropdownMenuItem>
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                        <div className="text-xs text-muted-foreground">
+                            Showing <strong>{(currentUserPage - 1) * usersPerPage + 1}-{Math.min(currentUserPage * usersPerPage, filteredUsers.length)}</strong> of <strong>{filteredUsers.length}</strong> users.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setCurrentUserPage(p => p - 1)} disabled={currentUserPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                            <Button variant="outline" size="sm" onClick={() => setCurrentUserPage(p => p + 1)} disabled={currentUserPage >= totalUserPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                        </div>
+                    </CardFooter>
+                </Card>
+            )}
+            
+            {currentTab === 'courses' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Course Review & Management</CardTitle>
+                        <CardDescription>Approve, reject, and manage all courses on the platform.</CardDescription>
+                    </CardHeader>
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by title or instructor..."
+                                className="pl-8"
+                                value={courseFilters.search}
+                                onChange={(e) => handleCourseFilterChange('search', e.target.value)}
+                            />
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full md:w-auto">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Filter by Status</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
+                                    <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Published">Published</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Pending Approval">Pending Approval</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Rejected">Rejected</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Draft">Draft</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Course</TableHead>
+                                <TableHead className="hidden sm:table-cell">Instructor</TableHead>
+                                <TableHead className="hidden md:table-cell">Pricing (R)</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedCourses.map(course => (
+                                <TableRow key={course.id}>
+                                    <TableCell>
+                                        <div className="font-medium">{course.title}</div>
+                                        <div className="text-xs text-muted-foreground">{course.subject} - Grade {course.grade}</div>
+                                    </TableCell>
+                                    <TableCell className="hidden sm:table-cell">{course.instructor}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{course.pricing.type === 'purchase' ? course.pricing.price?.toFixed(2) : 'Subscription'}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={"outline"} className={
+                                            course.status === 'Published' ? 'bg-green-500/20 text-green-700 border-green-500/30'
+                                            : course.status === 'Rejected' ? 'bg-red-500/20 text-red-700 border-red-500/30'
+                                            : course.status === 'Pending Approval' ? 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30'
+                                            : ''
+                                        }>
+                                            {course.status === 'Published' && <CheckCircle className="mr-1 h-3 w-3"/>}
+                                            {course.status === 'Rejected' && <XCircle className="mr-1 h-3 w-3"/>}
+                                            {course.status === 'Pending Approval' && <Clock className="mr-1 h-3 w-3"/>}
+                                            {course.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {course.status === 'Pending Approval' ? (
+                                             <div className="flex gap-2 justify-end">
+                                                <Button variant="ghost" size="icon" asChild>
+                                                    <Link href={`/instructor/courses/${course.id}?from=admin`}>
+                                                        <Eye className="h-4 w-4"/>
+                                                    </Link>
+                                                </Button>
+                                                <Button size="sm" variant="outline" className="text-red-600 border-red-600/50 hover:bg-red-50 hover:text-red-700" onClick={() => handleCourseAction(course, 'Reject')}><X className="mr-1 h-3 w-3"/>Reject</Button>
+                                                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleCourseAction(course, 'Approve')}><Check className="mr-1 h-3 w-3"/>Approve</Button>
+                                            </div>
+                                        ) : (
+                                            <DropdownMenu>
                                                 <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleUserAction(user, 'suspend')}><UserMinus className="mr-2 h-4 w-4"/>{user.status === 'Active' ? 'Suspend' : 'Unsuspend'}</DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuItem onClick={() => handleUserAction(user, 'delete')} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete User</DropdownMenuItem>
+                                                    <DropdownMenuItem asChild>
+                                                        <Link href={`/instructor/courses/${course.id}?from=admin`}>
+                                                            <Eye className="mr-2 h-4 w-4"/>Preview Course
+                                                        </Link>
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuItem><Trash2 className="mr-2 h-4 w-4 text-destructive"/>Delete Course</DropdownMenuItem>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                        <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                            <div className="text-xs text-muted-foreground">
-                                Showing <strong>{(currentUserPage - 1) * usersPerPage + 1}-{Math.min(currentUserPage * usersPerPage, filteredUsers.length)}</strong> of <strong>{filteredUsers.length}</strong> users.
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" onClick={() => setCurrentUserPage(p => p - 1)} disabled={currentUserPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                                <Button variant="outline" size="sm" onClick={() => setCurrentUserPage(p => p + 1)} disabled={currentUserPage >= totalUserPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                )}
-                
-                {currentTab === 'courses' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Course Review & Management</CardTitle>
-                            <CardDescription>Approve, reject, and manage all courses on the platform.</CardDescription>
-                        </CardHeader>
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                            <div className="relative flex-1 w-full">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search by title or instructor..."
-                                    className="pl-8"
-                                    value={courseFilters.search}
-                                    onChange={(e) => handleCourseFilterChange('search', e.target.value)}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="gap-1 w-full md:w-auto">
-                                        <ListFilter className="h-3.5 w-3.5" />
-                                        <span>Filter by Status</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
-                                        <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Published">Published</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Pending Approval">Pending Approval</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Rejected">Rejected</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Draft">Draft</DropdownMenuRadioItem>
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Course</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Instructor</TableHead>
-                                    <TableHead className="hidden md:table-cell">Pricing (R)</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                        )}
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paginatedCourses.map(course => (
-                                    <TableRow key={course.id}>
-                                        <TableCell>
-                                            <div className="font-medium">{course.title}</div>
-                                            <div className="text-xs text-muted-foreground">{course.subject} - Grade {course.grade}</div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{course.instructor}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{course.pricing.type === 'purchase' ? course.pricing.price?.toFixed(2) : 'Subscription'}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={"outline"} className={
-                                                course.status === 'Published' ? 'bg-green-500/20 text-green-700 border-green-500/30'
-                                                : course.status === 'Rejected' ? 'bg-red-500/20 text-red-700 border-red-500/30'
-                                                : course.status === 'Pending Approval' ? 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30'
-                                                : ''
-                                            }>
-                                                {course.status === 'Published' && <CheckCircle className="mr-1 h-3 w-3"/>}
-                                                {course.status === 'Rejected' && <XCircle className="mr-1 h-3 w-3"/>}
-                                                {course.status === 'Pending Approval' && <Clock className="mr-1 h-3 w-3"/>}
-                                                {course.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {course.status === 'Pending Approval' ? (
-                                                 <div className="flex gap-2 justify-end">
-                                                    <Button variant="ghost" size="icon" asChild>
-                                                        <Link href={`/instructor/courses/${course.id}?from=admin`}>
-                                                            <Eye className="h-4 w-4"/>
-                                                        </Link>
-                                                    </Button>
-                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-600/50 hover:bg-red-50 hover:text-red-700" onClick={() => handleCourseAction(course, 'Reject')}><X className="mr-1 h-3 w-3"/>Reject</Button>
-                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleCourseAction(course, 'Approve')}><Check className="mr-1 h-3 w-3"/>Approve</Button>
-                                                </div>
-                                            ) : (
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem asChild>
-                                                            <Link href={`/instructor/courses/${course.id}?from=admin`}>
-                                                                <Eye className="mr-2 h-4 w-4"/>Preview Course
-                                                            </Link>
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem><Trash2 className="mr-2 h-4 w-4 text-destructive"/>Delete Course</DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                         <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                            <div className="text-xs text-muted-foreground">
-                                Showing <strong>{(currentCoursePage - 1) * coursesPerPage + 1}-{Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}</strong> of <strong>{filteredCourses.length}</strong> courses.
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                                <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                )}
+                            ))}
+                        </TableBody>
+                    </Table>
+                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                        <div className="text-xs text-muted-foreground">
+                            Showing <strong>{(currentCoursePage - 1) * coursesPerPage + 1}-{Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}</strong> of <strong>{filteredCourses.length}</strong> courses.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                            <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                        </div>
+                    </CardFooter>
+                </Card>
+            )}
 
-                {currentTab === 'assignments' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Assignments Oversight</CardTitle>
-                            <CardDescription>Monitor all submitted assignments for quality and pricing fairness.</CardDescription>
-                        </CardHeader>
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                            <div className="relative flex-1 w-full">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search by assignment or student..."
-                                    className="pl-8"
-                                    value={assignmentFilters.search}
-                                    onChange={(e) => handleAssignmentFilterChange('search', e.target.value)}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="gap-1 w-full md:w-auto">
-                                        <ListFilter className="h-3.5 w-3.5" />
-                                        <span>Filter by Instructor</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by Instructor</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup value={assignmentFilters.instructor} onValueChange={(value) => handleAssignmentFilterChange('instructor', value)}>
-                                        {assignmentInstructors.map(instructor => (
-                                            <DropdownMenuRadioItem key={instructor} value={instructor}>{instructor}</DropdownMenuRadioItem>
-                                        ))}
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+            {currentTab === 'assignments' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Assignments Oversight</CardTitle>
+                        <CardDescription>Monitor all submitted assignments for quality and pricing fairness.</CardDescription>
+                    </CardHeader>
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by assignment or student..."
+                                className="pl-8"
+                                value={assignmentFilters.search}
+                                onChange={(e) => handleAssignmentFilterChange('search', e.target.value)}
+                            />
                         </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Assignment</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Student</TableHead>
-                                    <TableHead className="hidden md:table-cell">Instructor</TableHead>
-                                    <TableHead>Price (R)</TableHead>
-                                    <TableHead className="hidden lg:table-cell">Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full md:w-auto">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Filter by Instructor</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Instructor</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={assignmentFilters.instructor} onValueChange={(value) => handleAssignmentFilterChange('instructor', value)}>
+                                    {assignmentInstructors.map(instructor => (
+                                        <DropdownMenuRadioItem key={instructor} value={instructor}>{instructor}</DropdownMenuRadioItem>
+                                    ))}
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Assignment</TableHead>
+                                <TableHead className="hidden sm:table-cell">Student</TableHead>
+                                <TableHead className="hidden md:table-cell">Instructor</TableHead>
+                                <TableHead>Price (R)</TableHead>
+                                <TableHead className="hidden lg:table-cell">Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedAssignments.map(assignment => (
+                                <TableRow key={assignment.id}>
+                                    <TableCell>
+                                        <div className="font-medium">{assignment.assignmentTitle}</div>
+                                        <div className="text-xs text-muted-foreground">{assignment.course}</div>
+                                    </TableCell>
+                                    <TableCell className="hidden sm:table-cell">{assignment.studentName}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{assignment.instructor}</TableCell>
+                                    <TableCell className="font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
+                                    <TableCell className="hidden lg:table-cell">
+                                        <Badge
+                                            variant={"outline"}
+                                            className={
+                                                assignment.status === 'Paid' ? 'bg-green-500/20 text-green-700'
+                                                : assignment.status === 'Awaiting Payment' ? 'bg-blue-500/20 text-blue-700'
+                                                : 'bg-yellow-500/20 text-yellow-700'
+                                            }
+                                        >
+                                            {assignment.status === 'Paid' && <CheckCircle className="mr-1 h-3 w-3" />}
+                                            {assignment.status === 'Awaiting Payment' && <DollarSign className="mr-1 h-3 w-3" />}
+                                            {assignment.status === 'Pending Review' && <Hourglass className="mr-1 h-3 w-3" />}
+                                            {assignment.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        <Button variant="outline" size="sm" onClick={() => handleOpenAssignmentReview(assignment)}>
+                                            <Eye className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">View</span>
+                                        </Button>
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paginatedAssignments.map(assignment => (
-                                    <TableRow key={assignment.id}>
-                                        <TableCell>
-                                            <div className="font-medium">{assignment.assignmentTitle}</div>
-                                            <div className="text-xs text-muted-foreground">{assignment.course}</div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{assignment.studentName}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{assignment.instructor}</TableCell>
-                                        <TableCell className="font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
-                                        <TableCell className="hidden lg:table-cell">
-                                            <Badge
-                                                variant={"outline"}
-                                                className={
-                                                    assignment.status === 'Paid' ? 'bg-green-500/20 text-green-700'
-                                                    : assignment.status === 'Awaiting Payment' ? 'bg-blue-500/20 text-blue-700'
-                                                    : 'bg-yellow-500/20 text-yellow-700'
-                                                }
-                                            >
-                                                {assignment.status === 'Paid' && <CheckCircle className="mr-1 h-3 w-3" />}
-                                                {assignment.status === 'Awaiting Payment' && <DollarSign className="mr-1 h-3 w-3" />}
-                                                {assignment.status === 'Pending Review' && <Hourglass className="mr-1 h-3 w-3" />}
-                                                {assignment.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="outline" size="sm" onClick={() => handleOpenAssignmentReview(assignment)}>
-                                                <Eye className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">View</span>
+                            ))}
+                        </TableBody>
+                    </Table>
+                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                        <div className="text-xs text-muted-foreground">
+                            Showing <strong>{(currentAssignmentPage - 1) * assignmentsPerPage + 1}-{Math.min(currentAssignmentPage * assignmentsPerPage, filteredAssignments.length)}</strong> of <strong>{filteredAssignments.length}</strong> assignments.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p - 1)} disabled={currentAssignmentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                            <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p + 1)} disabled={currentAssignmentPage >= totalAssignmentPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                        </div>
+                    </CardFooter>
+                </Card>
+            )}
+
+            {currentTab === 'payouts' && (
+                <Card>
+                     <CardHeader>
+                        <CardTitle>Instructor Payouts</CardTitle>
+                        <CardDescription>Review and process pending payout requests from instructors.</CardDescription>
+                    </CardHeader>
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by instructor..."
+                                className="pl-8"
+                                value={payoutFilters.search}
+                                onChange={(e) => handlePayoutFilterChange('search', e.target.value)}
+                            />
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full md:w-auto">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Filter by Status</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={payoutFilters.status} onValueChange={(value) => handlePayoutFilterChange('status', value)}>
+                                    <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Completed">Completed</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Pending">Pending</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Declined">Declined</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Instructor</TableHead>
+                                <TableHead>Amount (R)</TableHead>
+                                <TableHead className="hidden md:table-cell">Request Date</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedPayouts.map(payout => (
+                                <TableRow key={payout.id}>
+                                    <TableCell className="font-medium">{payout.instructor}</TableCell>
+                                    <TableCell className="font-semibold text-red-600">{payout.amount.toFixed(2)}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{payout.date}</TableCell>
+                                    <TableCell>
+                                        <Badge variant={"outline"} className={
+                                            payout.status === 'Completed' ? 'bg-green-500/20 text-green-700 border-green-500/30'
+                                            : payout.status === 'Declined' ? 'bg-red-500/20 text-red-700 border-red-500/30'
+                                            : 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30'
+                                        }>
+                                            {payout.status === 'Completed' && <CheckCircle className="mr-1 h-3 w-3"/>}
+                                            {payout.status === 'Declined' && <XCircle className="mr-1 h-3 w-3"/>}
+                                            {payout.status === 'Pending' && <Hourglass className="mr-1 h-3 w-3"/>}
+                                            {payout.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {payout.status === 'Pending' ? (
+                                            <div className="flex gap-2 justify-end">
+                                                <Button size="sm" variant="outline" onClick={() => handleViewReceipt(payout)}><ReceiptText className="mr-1 h-3 w-3"/>Receipt</Button>
+                                                <Button size="sm" variant="outline" className="text-red-600 border-red-600/50 hover:bg-red-50 hover:text-red-700" onClick={() => handlePayoutAction(payout, 'Decline')}>Decline</Button>
+                                                <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handlePayoutAction(payout, 'Approve')}>Approve</Button>
+                                            </div>
+                                        ) : (
+                                            <Button variant="outline" size="sm" onClick={() => handleViewReceipt(payout)}>
+                                                <ReceiptText className="mr-2 h-4 w-4" /> View Receipt
                                             </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                         <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                            <div className="text-xs text-muted-foreground">
-                                Showing <strong>{(currentAssignmentPage - 1) * assignmentsPerPage + 1}-{Math.min(currentAssignmentPage * assignmentsPerPage, filteredAssignments.length)}</strong> of <strong>{filteredAssignments.length}</strong> assignments.
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p - 1)} disabled={currentAssignmentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                                <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p + 1)} disabled={currentAssignmentPage >= totalAssignmentPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                )}
-
-                {currentTab === 'payouts' && (
-                    <Card>
-                         <CardHeader>
-                            <CardTitle>Instructor Payouts</CardTitle>
-                            <CardDescription>Review and process pending payout requests from instructors.</CardDescription>
-                        </CardHeader>
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                            <div className="relative flex-1 w-full">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search by instructor..."
-                                    className="pl-8"
-                                    value={payoutFilters.search}
-                                    onChange={(e) => handlePayoutFilterChange('search', e.target.value)}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="gap-1 w-full md:w-auto">
-                                        <ListFilter className="h-3.5 w-3.5" />
-                                        <span>Filter by Status</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup value={payoutFilters.status} onValueChange={(value) => handlePayoutFilterChange('status', value)}>
-                                        <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Completed">Completed</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Pending">Pending</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Declined">Declined</DropdownMenuRadioItem>
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                        </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Instructor</TableHead>
-                                    <TableHead>Amount (R)</TableHead>
-                                    <TableHead className="hidden md:table-cell">Request Date</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                                        )}
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paginatedPayouts.map(payout => (
-                                    <TableRow key={payout.id}>
-                                        <TableCell className="font-medium">{payout.instructor}</TableCell>
-                                        <TableCell className="font-semibold text-red-600">{payout.amount.toFixed(2)}</TableCell>
-                                        <TableCell className="hidden md:table-cell">{payout.date}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={"outline"} className={
-                                                payout.status === 'Completed' ? 'bg-green-500/20 text-green-700 border-green-500/30'
-                                                : payout.status === 'Declined' ? 'bg-red-500/20 text-red-700 border-red-500/30'
-                                                : 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30'
-                                            }>
-                                                {payout.status === 'Completed' && <CheckCircle className="mr-1 h-3 w-3"/>}
-                                                {payout.status === 'Declined' && <XCircle className="mr-1 h-3 w-3"/>}
-                                                {payout.status === 'Pending' && <Hourglass className="mr-1 h-3 w-3"/>}
-                                                {payout.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {payout.status === 'Pending' ? (
-                                                <div className="flex gap-2 justify-end">
-                                                    <Button size="sm" variant="outline" onClick={() => handleViewReceipt(payout)}><ReceiptText className="mr-1 h-3 w-3"/>Receipt</Button>
-                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-600/50 hover:bg-red-50 hover:text-red-700" onClick={() => handlePayoutAction(payout, 'Decline')}>Decline</Button>
-                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handlePayoutAction(payout, 'Approve')}>Approve</Button>
-                                                </div>
-                                            ) : (
-                                                <Button variant="outline" size="sm" onClick={() => handleViewReceipt(payout)}>
-                                                    <ReceiptText className="mr-2 h-4 w-4" /> View Receipt
-                                                </Button>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                         <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                            <div className="text-xs text-muted-foreground">
-                                Showing <strong>{(currentPayoutPage - 1) * payoutsPerPage + 1}-{Math.min(currentPayoutPage * payoutsPerPage, filteredPayouts.length)}</strong> of <strong>{filteredPayouts.length}</strong> payouts.
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" onClick={() => setCurrentPayoutPage(p => p - 1)} disabled={currentPayoutPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                                <Button variant="outline" size="sm" onClick={() => setCurrentPayoutPage(p => p + 1)} disabled={currentPayoutPage >= totalPayoutPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                )}
-                
-                {currentTab === 'subscriptions' && (
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Subscription Management</CardTitle>
-                            <CardDescription>Oversee all active and canceled student subscriptions.</CardDescription>
-                        </CardHeader>
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                            <div className="relative flex-1 w-full">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search by student name or email..."
-                                    className="pl-8"
-                                    value={subscriptionFilters.search}
-                                    onChange={(e) => handleSubscriptionFilterChange('search', e.target.value)}
-                                />
-                            </div>
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="gap-1 w-full md:w-auto">
-                                        <ListFilter className="h-3.5 w-3.5" />
-                                        <span>Filter by Plan</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by Plan</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup value={subscriptionFilters.plan} onValueChange={(value) => handleSubscriptionFilterChange('plan', value)}>
-                                        {subscriptionPlans.map(plan => (
-                                            <DropdownMenuRadioItem key={plan} value={plan}>{plan}</DropdownMenuRadioItem>
-                                        ))}
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
+                            ))}
+                        </TableBody>
+                    </Table>
+                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                        <div className="text-xs text-muted-foreground">
+                            Showing <strong>{(currentPayoutPage - 1) * payoutsPerPage + 1}-{Math.min(currentPayoutPage * payoutsPerPage, filteredPayouts.length)}</strong> of <strong>{filteredPayouts.length}</strong> payouts.
                         </div>
-                        <Table>
-                            <TableHeader>
-                                <TableRow>
-                                    <TableHead>Student</TableHead>
-                                    <TableHead className="hidden sm:table-cell">Plan</TableHead>
-                                    <TableHead>Status</TableHead>
-                                    <TableHead className="hidden md:table-cell">Next Billing Date</TableHead>
-                                    <TableHead className="text-right">Actions</TableHead>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setCurrentPayoutPage(p => p - 1)} disabled={currentPayoutPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                            <Button variant="outline" size="sm" onClick={() => setCurrentPayoutPage(p => p + 1)} disabled={currentPayoutPage >= totalPayoutPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                        </div>
+                    </CardFooter>
+                </Card>
+            )}
+            
+            {currentTab === 'subscriptions' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Subscription Management</CardTitle>
+                        <CardDescription>Oversee all active and canceled student subscriptions.</CardDescription>
+                    </CardHeader>
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by student name or email..."
+                                className="pl-8"
+                                value={subscriptionFilters.search}
+                                onChange={(e) => handleSubscriptionFilterChange('search', e.target.value)}
+                            />
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full md:w-auto">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Filter by Plan</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Plan</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={subscriptionFilters.plan} onValueChange={(value) => handleSubscriptionFilterChange('plan', value)}>
+                                    {subscriptionPlans.map(plan => (
+                                        <DropdownMenuRadioItem key={plan} value={plan}>{plan}</DropdownMenuRadioItem>
+                                    ))}
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Student</TableHead>
+                                <TableHead className="hidden sm:table-cell">Plan</TableHead>
+                                <TableHead>Status</TableHead>
+                                <TableHead className="hidden md:table-cell">Next Billing Date</TableHead>
+                                <TableHead className="text-right">Actions</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedSubscriptions.map(sub => (
+                                <TableRow key={sub.id}>
+                                    <TableCell>
+                                        <div className="font-medium">{sub.studentName}</div>
+                                        <div className="text-xs text-muted-foreground">{sub.studentEmail}</div>
+                                    </TableCell>
+                                    <TableCell className="hidden sm:table-cell">
+                                        <Badge variant="secondary">{sub.planName}</Badge>
+                                    </TableCell>
+                                    <TableCell>
+                                        <Badge variant={sub.status === 'Active' ? 'default' : 'destructive'} className={sub.status === 'Active' ? 'bg-green-500/20 text-green-700' : 'bg-red-500/20 text-red-700'}>
+                                            {sub.status}
+                                        </Badge>
+                                    </TableCell>
+                                    <TableCell className="hidden md:table-cell">{sub.nextBillingDate}</TableCell>
+                                    <TableCell className="text-right">
+                                        {sub.status === 'Active' && (
+                                             <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10" onClick={() => handleCancelSubscription(sub)}>
+                                                Cancel Subscription
+                                             </Button>
+                                        )}
+                                    </TableCell>
                                 </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                                {paginatedSubscriptions.map(sub => (
-                                    <TableRow key={sub.id}>
-                                        <TableCell>
-                                            <div className="font-medium">{sub.studentName}</div>
-                                            <div className="text-xs text-muted-foreground">{sub.studentEmail}</div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge variant="secondary">{sub.planName}</Badge>
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={sub.status === 'Active' ? 'default' : 'destructive'} className={sub.status === 'Active' ? 'bg-green-500/20 text-green-700' : 'bg-red-500/20 text-red-700'}>
-                                                {sub.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="hidden md:table-cell">{sub.nextBillingDate}</TableCell>
-                                        <TableCell className="text-right">
-                                            {sub.status === 'Active' && (
-                                                 <Button variant="outline" size="sm" className="text-destructive border-destructive/50 hover:bg-destructive/10" onClick={() => handleCancelSubscription(sub)}>
-                                                    Cancel Subscription
-                                                 </Button>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                         <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                            <div className="text-xs text-muted-foreground">
-                                Showing <strong>{(currentSubscriptionPage - 1) * subscriptionsPerPage + 1}-{Math.min(currentSubscriptionPage * subscriptionsPerPage, filteredSubscriptions.length)}</strong> of <strong>{filteredSubscriptions.length}</strong> subscriptions.
-                            </div>
-                            <div className="flex items-center gap-2">
-                                <Button variant="outline" size="sm" onClick={() => setCurrentSubscriptionPage(p => p - 1)} disabled={currentSubscriptionPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                                <Button variant="outline" size="sm" onClick={() => setCurrentSubscriptionPage(p => p + 1)} disabled={currentSubscriptionPage >= totalSubscriptionPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                )}
-            </div>
+                            ))}
+                        </TableBody>
+                    </Table>
+                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                        <div className="text-xs text-muted-foreground">
+                            Showing <strong>{(currentSubscriptionPage - 1) * subscriptionsPerPage + 1}-{Math.min(currentSubscriptionPage * subscriptionsPerPage, filteredSubscriptions.length)}</strong> of <strong>{filteredSubscriptions.length}</strong> subscriptions.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setCurrentSubscriptionPage(p => p - 1)} disabled={currentSubscriptionPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                            <Button variant="outline" size="sm" onClick={() => setCurrentSubscriptionPage(p => p + 1)} disabled={currentSubscriptionPage >= totalSubscriptionPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                        </div>
+                    </CardFooter>
+                </Card>
+            )}
 
             {/* Dialogs for User Actions */}
             <AlertDialog open={isSuspendUserDialogOpen} onOpenChange={setIsSuspendUserDialogOpen}>
@@ -956,7 +954,6 @@ function AdminPage() {
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
-
         </div>
     );
 }
