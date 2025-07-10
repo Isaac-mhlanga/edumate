@@ -12,7 +12,7 @@ import React from 'react';
 //   description: 'A futuristic, professional, and student-focused multi-tenant educational web app offering video lessons, tutoring services, and paid assignments.',
 // };
 
-const noLayoutRoutes = ['/', '/login', '/register', '/tutors'];
+const noLayoutRoutes = ['/', '/login', '/register', '/tutors', '/forgot-password'];
 
 export default function RootLayout({
   children,
