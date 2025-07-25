@@ -30,6 +30,19 @@ import { z } from "zod";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import withAuth from "@/components/with-auth";
+import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
+import { Skeleton } from "@/components/ui/skeleton";
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
 
 const chartConfig = {
   engagement: { label: "Engagement", color: "hsl(var(--primary))" },
@@ -55,7 +68,23 @@ const courseFormSchema = z.object({
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
 type Course = (typeof instructorData.courses)[0];
-type SubmittedAssignment = (typeof instructorData.submittedAssignments)[0];
+
+type SubmittedAssignment = {
+    id: string;
+    studentId: string;
+    studentName: string;
+    studentEmail: string;
+    assignmentTitle: string;
+    course: string;
+    status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'Submitted';
+    price: number | null;
+    solutionUrl: string | null;
+    fileUrl: string;
+    instructions?: string;
+    submittedAt: Timestamp;
+    dueDate?: Timestamp;
+};
+
 type EnrolledStudent = (typeof instructorData.enrolledStudents)[0];
 type Transaction = (typeof instructorData.transactions)[0];
 
@@ -73,7 +102,8 @@ function InstructorPage() {
   const currentTab = searchParams.get('tab') || 'overview';
 
   const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
-  const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>(instructorData.submittedAssignments);
+  const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
+  const [loadingAssignments, setLoadingAssignments] = React.useState(true);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
   const [transactions, setTransactions] = React.useState<Transaction[]>(instructorData.transactions);
   const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
@@ -128,6 +158,34 @@ function InstructorPage() {
       pricingModel: "free",
     },
   });
+  
+  React.useEffect(() => {
+    const fetchAssignments = async () => {
+        setLoadingAssignments(true);
+        try {
+            const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+            const firestore = getFirestore(app);
+            const q = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
+            const querySnapshot = await getDocs(q);
+            const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
+            setSubmittedAssignments(assignments);
+        } catch (error) {
+            console.error("Error fetching assignments: ", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not fetch assignments."
+            });
+        } finally {
+            setLoadingAssignments(false);
+        }
+    };
+
+    if (currentTab === 'assignments' || currentTab === 'overview') {
+        fetchAssignments();
+    }
+}, [currentTab, toast]);
+
 
   const pricingModel = form.watch("pricingModel");
 
@@ -399,7 +457,7 @@ function InstructorPage() {
   }, [transactions, transactionFilters]);
 
   const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
-  const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
+  const paginatedTransactionsData = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
 
   // Overview Pending Assignments Pagination Logic
   const pendingAssignments = React.useMemo(() => {
@@ -459,14 +517,20 @@ function InstructorPage() {
                     <CardDescription>Assignments waiting for your review.</CardDescription>
                   </CardHeader>
                   <CardContent className="flex-grow">
-                    {paginatedPendingAssignments.length > 0 ? (
+                    {loadingAssignments ? (
+                       <div className="space-y-4">
+                          <Skeleton className="h-12 w-full" />
+                          <Skeleton className="h-12 w-full" />
+                          <Skeleton className="h-12 w-full" />
+                       </div>
+                    ) : paginatedPendingAssignments.length > 0 ? (
                       <ul className="space-y-4">
                         {paginatedPendingAssignments.map((assignment) => (
                           <li key={assignment.id} className="flex items-center gap-4">
                             <Avatar className="h-10 w-10"><AvatarFallback>{assignment.studentName.charAt(0)}</AvatarFallback></Avatar>
                             <div className="flex-1">
                               <p className="font-medium">{assignment.assignmentTitle}</p>
-                              <p className="text-sm text-muted-foreground">From {assignment.studentName} - {assignment.submittedDate}</p>
+                              <p className="text-sm text-muted-foreground">From {assignment.studentName}</p>
                             </div>
                             <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>Review</Button>
                           </li>
@@ -681,7 +745,28 @@ function InstructorPage() {
                     </DropdownMenu>
                 </div>
                 <CardContent className="p-0">
-                    {paginatedAssignments.length > 0 ? (
+                    {loadingAssignments ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Student</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Assignment</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                                        <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-48" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : paginatedAssignments.length > 0 ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
@@ -953,7 +1038,7 @@ function InstructorPage() {
                         </div>
                     </div>
                     <CardContent className="p-0">
-                        {paginatedTransactions.length > 0 ? (
+                        {paginatedTransactionsData.length > 0 ? (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -965,7 +1050,7 @@ function InstructorPage() {
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {paginatedTransactions.map((transaction) => (
+                                    {paginatedTransactionsData.map((transaction) => (
                                         <TableRow key={transaction.id}>
                                             <TableCell className="font-medium">{transaction.item}</TableCell>
                                             <TableCell className="text-muted-foreground hidden sm:table-cell">{transaction.studentName || 'N/A'}</TableCell>
