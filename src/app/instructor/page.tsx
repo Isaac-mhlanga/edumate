@@ -46,7 +46,7 @@ const firebaseConfig = {
 
 const chartConfig = {
   engagement: { label: "Engagement", color: "hsl(var(--primary))" },
-  income: { label: "Income ($)", color: "hsl(var(--secondary))" }
+  income: { label: "Income (R)", color: "hsl(var(--secondary))" }
 } satisfies ChartConfig;
 
 const courseFormSchema = z.object({
@@ -781,9 +781,12 @@ function InstructorPage() {
                                     <TableRow key={assignment.id}>
                                         <TableCell>
                                             <div className="font-medium">{assignment.studentName}</div>
-                                            <div className="text-xs text-muted-foreground sm:hidden">{assignment.assignmentTitle}</div>
+                                            <div className="text-xs text-muted-foreground md:hidden">{assignment.assignmentTitle}</div>
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{assignment.assignmentTitle}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">
+                                            <div className="font-medium">{assignment.assignmentTitle}</div>
+                                            <div className="text-xs text-muted-foreground">{assignment.course}</div>
+                                        </TableCell>
                                         <TableCell>
                                             <Badge
                                                 variant={"outline"}
@@ -1210,7 +1213,7 @@ function InstructorPage() {
                                       <FormLabel>Price (R)</FormLabel>
                                       <FormControl>
                                           <div className="relative">
-                                              <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R</span>
                                               <Input type="number" placeholder="e.g. 499" className="pl-8" {...field} value={field.value ?? ''} />
                                           </div>
                                       </FormControl>
@@ -1299,10 +1302,14 @@ function InstructorPage() {
               </DialogHeader>
               {selectedAssignment && (
                   <div className="space-y-6 py-4">
-                      <div className="space-y-2 p-4 rounded-lg bg-muted/50">
+                      <div className="space-y-4 p-4 rounded-lg bg-muted/50">
                           <h4 className="font-semibold">Submission Details</h4>
-                          <p className="text-sm"><span className="text-muted-foreground">Student:</span> {selectedAssignment.studentName}</p>
-                          <p className="text-sm"><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.assignmentTitle}</p>
+                          <div className="text-sm space-y-2">
+                            <p><span className="text-muted-foreground">Student:</span> {selectedAssignment.studentName}</p>
+                            <p><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.assignmentTitle}</p>
+                            <p><span className="text-muted-foreground">Course:</span> {selectedAssignment.course}</p>
+                            {selectedAssignment.instructions && <p><span className="text-muted-foreground">Instructions:</span> {selectedAssignment.instructions}</p>}
+                          </div>
                           <Button variant="outline" size="sm" asChild>
                             <a href={selectedAssignment.fileUrl} download><Download className="mr-2 h-4 w-4"/>Download Submission</a>
                           </Button>
@@ -1323,8 +1330,8 @@ function InstructorPage() {
                        <div className="space-y-2">
                           <Label>Set Price (R)</Label>
                            <div className="relative">
-                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                                <Input id="solution-price" type="number" placeholder="e.g. 150" className="pl-8" defaultValue={selectedAssignment.price ?? ''} />
+                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R</span>
+                               <Input id="solution-price" type="number" placeholder="e.g. 150" className="pl-8" defaultValue={selectedAssignment.price ?? ''} />
                            </div>
                        </div>
                       <DialogFooter>
