@@ -27,10 +27,11 @@ import React from "react";
 import withAuth from "@/components/with-auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { getAuth } from 'firebase/auth';
-import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
+import { Skeleton } from "@/components/ui/skeleton";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -49,7 +50,15 @@ const assignmentFormSchema = z.object({
 });
 type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
 
-type SubmittedAssignment = (typeof studentData.submittedAssignments)[0];
+type SubmittedAssignment = {
+    id: string;
+    title: string;
+    course: string;
+    status: 'Paid' | 'Awaiting Payment' | 'Submitted' | 'Pending Submission' | 'Pending Review';
+    price: number | null;
+    solutionUrl: string | null;
+    submittedAt: Timestamp;
+};
 type Transaction = (typeof studentData.transactions)[0];
 
 function DashboardPage() {
@@ -59,7 +68,10 @@ function DashboardPage() {
     
     const currentTab = searchParams.get('tab') || 'overview';
 
-    const completedAssignmentsCount = studentData.submittedAssignments.filter(a => a.status === 'Paid').length;
+    const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
+    const [loadingAssignments, setLoadingAssignments] = React.useState(true);
+
+    const completedAssignmentsCount = submittedAssignments.filter(a => a.status === 'Paid').length;
     const certificatesEarned = 1; 
 
     const stats = [
@@ -102,6 +114,29 @@ function DashboardPage() {
       },
     });
 
+    React.useEffect(() => {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
+
+        const unsubscribe = onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                setLoadingAssignments(true);
+                const q = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
+                setSubmittedAssignments(assignments);
+                setLoadingAssignments(false);
+            } else {
+                setSubmittedAssignments([]);
+                setLoadingAssignments(false);
+            }
+        });
+
+        return () => unsubscribe();
+    }, []);
+
+
     const handleAssignmentSubmit = async (data: AssignmentFormValues) => {
         setIsSubmitting(true);
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -123,7 +158,7 @@ function DashboardPage() {
             const downloadURL = await getDownloadURL(uploadResult.ref);
 
             // Add metadata to Firestore
-            await addDoc(collection(firestore, 'assignments'), {
+            const newAssignmentRef = await addDoc(collection(firestore, 'assignments'), {
                 studentId: user.uid,
                 studentName: user.displayName,
                 studentEmail: user.email,
@@ -136,6 +171,17 @@ function DashboardPage() {
                 solutionUrl: null,
                 submittedAt: serverTimestamp(),
             });
+            
+            // Add new assignment to local state
+            setSubmittedAssignments(prev => [{
+                id: newAssignmentRef.id,
+                title: data.title,
+                course: data.course,
+                status: 'Pending Review',
+                price: null,
+                solutionUrl: null,
+                submittedAt: Timestamp.now(),
+            },...prev]);
 
             toast({ title: 'Success', description: 'Your assignment has been submitted successfully.' });
             setIsAssignmentDialogOpen(false);
@@ -185,7 +231,7 @@ function DashboardPage() {
     };
 
     const filteredAssignments = React.useMemo(() => {
-        return studentData.submittedAssignments.filter(assignment => {
+        return submittedAssignments.filter(assignment => {
             const searchMatch = assignmentFilters.search.trim().toLowerCase() === '' ||
                 assignment.title.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase()) ||
                 assignment.course.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase());
@@ -194,7 +240,7 @@ function DashboardPage() {
 
             return searchMatch && statusMatch;
         });
-    }, [assignmentFilters]);
+    }, [submittedAssignments, assignmentFilters]);
 
     const totalAssignmentPages = Math.ceil(filteredAssignments.length / assignmentsPerPage);
     const paginatedAssignments = filteredAssignments.slice((currentAssignmentPage - 1) * assignmentsPerPage, currentAssignmentPage * assignmentsPerPage);
@@ -259,6 +305,7 @@ function DashboardPage() {
         switch (status) {
             case 'Paid': return <CheckCircle className="mr-1 h-3 w-3" />;
             case 'Awaiting Payment': return <CircleDollarSign className="mr-1 h-3 w-3" />;
+            case 'Pending Review': return <Hourglass className="mr-1 h-3 w-3" />;
             case 'Submitted': return <Hourglass className="mr-1 h-3 w-3" />;
             case 'Pending Submission': return <FilePenLine className="mr-1 h-3 w-3" />;
             default: return null;
@@ -269,6 +316,7 @@ function DashboardPage() {
         switch (status) {
             case 'Paid': return 'bg-green-500/20 text-green-700 border-green-500/30 dark:text-green-400';
             case 'Awaiting Payment': return 'bg-blue-500/20 text-blue-700 border-blue-500/30 dark:text-blue-400';
+            case 'Pending Review': return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:text-yellow-400';
             case 'Submitted': return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:text-yellow-400';
             case 'Pending Submission': return 'bg-slate-500/20 text-slate-700 border-slate-500/30 dark:text-slate-400';
             default: return 'outline';
@@ -699,25 +747,43 @@ function DashboardPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedAssignments.map((assignment) => (
-                                <TableRow key={assignment.id}>
-                                    <TableCell className="font-medium">{assignment.title}</TableCell>
-                                    <TableCell className="hidden sm:table-cell"><Badge variant="outline">{assignment.course}</Badge></TableCell>
-                                    <TableCell>
-                                        <Badge variant={"outline"} className={getStatusBadgeVariant(assignment.status)}>
-                                            {getStatusIcon(assignment.status)}
-                                            {assignment.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
-                                    <TableCell className="text-right">
-                                        {assignment.status === 'Pending Submission' && <Button variant="secondary" size="sm"><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5"/><span className="hidden sm:inline">Submit Now</span></Button>}
-                                        {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
-                                        {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href="/payment"><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
-                                        {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
+                            {loadingAssignments ? (
+                                Array.from({ length: 3 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
+                                        <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                                        <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : paginatedAssignments.length > 0 ? (
+                                paginatedAssignments.map((assignment) => (
+                                    <TableRow key={assignment.id}>
+                                        <TableCell className="font-medium">{assignment.title}</TableCell>
+                                        <TableCell className="hidden sm:table-cell"><Badge variant="outline">{assignment.course}</Badge></TableCell>
+                                        <TableCell>
+                                            <Badge variant={"outline"} className={getStatusBadgeVariant(assignment.status)}>
+                                                {getStatusIcon(assignment.status)}
+                                                {assignment.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
+                                        <TableCell className="text-right">
+                                            {assignment.status === 'Pending Submission' && <Button variant="secondary" size="sm"><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5"/><span className="hidden sm:inline">Submit Now</span></Button>}
+                                            {(assignment.status === 'Submitted' || assignment.status === 'Pending Review') && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
+                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href="/payment"><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
+                                            {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl!} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                        You haven't submitted any assignments yet.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
@@ -931,5 +997,7 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
 
     
