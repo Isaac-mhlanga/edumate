@@ -13,13 +13,13 @@ import { Label } from "@/components/ui/label";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, studentData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Award, Banknote, BookOpen, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, CalendarIcon, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -32,6 +32,9 @@ import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDoc
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Calendar } from "@/components/ui/calendar";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -45,6 +48,7 @@ const firebaseConfig = {
 const assignmentFormSchema = z.object({
   title: z.string().min(1, "Assignment title is required."),
   course: z.string().min(1, "Course name is required."),
+  dueDate: z.date({ required_error: "A due date is required." }),
   instructions: z.string().optional(),
   file: z.instanceof(File).refine(file => file.size > 0, 'A file is required.').refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.').optional(),
 });
@@ -60,6 +64,7 @@ type SubmittedAssignment = {
     fileUrl: string;
     instructions?: string;
     submittedAt: Timestamp;
+    dueDate: Timestamp;
 };
 type Transaction = (typeof studentData.transactions)[0];
 
@@ -177,14 +182,15 @@ function DashboardPage() {
                  downloadURL = await getDownloadURL(uploadResult.ref);
             }
 
-            const assignmentData = {
+            const assignmentData: Omit<SubmittedAssignment, 'id' | 'submittedAt'> & { submittedAt: any } = {
                 studentId: user.uid,
-                studentName: user.displayName,
-                studentEmail: user.email,
+                studentName: user.displayName || 'Anonymous',
+                studentEmail: user.email || '',
                 title: data.title,
                 course: data.course,
                 instructions: data.instructions,
-                fileUrl: downloadURL,
+                dueDate: Timestamp.fromDate(data.dueDate),
+                fileUrl: downloadURL!,
                 status: 'Pending Review',
                 price: selectedAssignment ? selectedAssignment.price : null,
                 solutionUrl: selectedAssignment ? selectedAssignment.solutionUrl : null,
@@ -193,10 +199,12 @@ function DashboardPage() {
 
             if (selectedAssignment) { // Update existing assignment
                 const assignmentRef = doc(firestore, 'assignments', selectedAssignment.id);
-                await updateDoc(assignmentRef, assignmentData);
+                // Don't update submittedAt on edit
+                const { submittedAt, ...updateData } = assignmentData;
+                await updateDoc(assignmentRef, updateData);
 
                 // Update local state
-                setSubmittedAssignments(prev => prev.map(a => a.id === selectedAssignment.id ? { ...a, ...assignmentData, submittedAt: a.submittedAt } : a));
+                setSubmittedAssignments(prev => prev.map(a => a.id === selectedAssignment.id ? { ...a, ...updateData, dueDate: Timestamp.fromDate(data.dueDate), submittedAt: a.submittedAt } : a));
                 toast({ title: 'Success', description: 'Your assignment has been updated.' });
 
             } else { // Add new assignment
@@ -206,6 +214,7 @@ function DashboardPage() {
                     id: newAssignmentRef.id,
                     ...assignmentData,
                     submittedAt: Timestamp.now(),
+                    dueDate: Timestamp.fromDate(data.dueDate),
                 }, ...prev]);
                 toast({ title: 'Success', description: 'Your assignment has been submitted successfully.' });
             }
@@ -227,6 +236,7 @@ function DashboardPage() {
             assignmentForm.reset({
                 title: assignment.title,
                 course: assignment.course,
+                dueDate: assignment.dueDate.toDate(),
                 instructions: assignment.instructions || '',
                 file: undefined, // Don't pre-fill file input
             });
@@ -235,6 +245,7 @@ function DashboardPage() {
             assignmentForm.reset({
                 title: '',
                 course: '',
+                dueDate: undefined,
                 instructions: '',
                 file: undefined,
             });
@@ -698,7 +709,7 @@ function DashboardPage() {
                                     <DropdownMenuRadioGroup value={assignmentFilters.status} onValueChange={(value) => handleAssignmentFilterChange('status', value)}>
                                         <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
                                         <DropdownMenuRadioItem value="Pending Submission">Pending Submission</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Submitted">Submitted</DropdownMenuRadioItem>
+                                        <DropdownMenuRadioItem value="Pending Review">Pending Review</DropdownMenuRadioItem>
                                         <DropdownMenuRadioItem value="Awaiting Payment">Awaiting Payment</DropdownMenuRadioItem>
                                         <DropdownMenuRadioItem value="Paid">Paid</DropdownMenuRadioItem>
                                     </DropdownMenuRadioGroup>
@@ -713,7 +724,7 @@ function DashboardPage() {
                         <TableHeader>
                             <TableRow>
                                 <TableHead>Assignment</TableHead>
-                                <TableHead className="hidden sm:table-cell">Course</TableHead>
+                                <TableHead className="hidden sm:table-cell">Due Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="hidden md:table-cell">Price (R)</TableHead>
                                 <TableHead className="text-right">Action</TableHead>
@@ -733,15 +744,18 @@ function DashboardPage() {
                             ) : paginatedAssignments.length > 0 ? (
                                 paginatedAssignments.map((assignment) => (
                                     <TableRow key={assignment.id}>
-                                        <TableCell className="font-medium">{assignment.title}</TableCell>
-                                        <TableCell className="hidden sm:table-cell"><Badge variant="outline">{assignment.course}</Badge></TableCell>
+                                        <TableCell>
+                                            <div className="font-medium">{assignment.title}</div>
+                                            <div className="text-xs text-muted-foreground">{assignment.course}</div>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell">{format(assignment.dueDate.toDate(), 'PPP')}</TableCell>
                                         <TableCell>
                                             <Badge variant={"outline"} className={getStatusBadgeVariant(assignment.status)}>
                                                 {getStatusIcon(assignment.status)}
                                                 {assignment.status}
                                             </Badge>
                                         </TableCell>
-                                        <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
+                                        <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? `R ${assignment.price.toFixed(2)}` : 'N/A'}</TableCell>
                                         <TableCell className="text-right">
                                             {assignment.status === 'Pending Review' && <Button variant="secondary" size="sm" onClick={() => handleOpenAssignmentDialog(assignment)}><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Edit</span></Button>}
                                             {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
@@ -990,6 +1004,45 @@ function DashboardPage() {
                             />
                             <FormField
                                 control={assignmentForm.control}
+                                name="dueDate"
+                                render={({ field }) => (
+                                    <FormItem className="flex flex-col">
+                                        <FormLabel>Due Date</FormLabel>
+                                        <Popover>
+                                            <PopoverTrigger asChild>
+                                                <FormControl>
+                                                    <Button
+                                                        variant={"outline"}
+                                                        className={cn(
+                                                            "w-full pl-3 text-left font-normal",
+                                                            !field.value && "text-muted-foreground"
+                                                        )}
+                                                    >
+                                                        {field.value ? (
+                                                            format(field.value, "PPP")
+                                                        ) : (
+                                                            <span>Pick a date</span>
+                                                        )}
+                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                    </Button>
+                                                </FormControl>
+                                            </PopoverTrigger>
+                                            <PopoverContent className="w-auto p-0" align="start">
+                                                <Calendar
+                                                    mode="single"
+                                                    selected={field.value}
+                                                    onSelect={field.onChange}
+                                                    disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
+                                                    initialFocus
+                                                />
+                                            </PopoverContent>
+                                        </Popover>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={assignmentForm.control}
                                 name="instructions"
                                 render={({ field }) => (
                                     <FormItem>
@@ -1052,13 +1105,3 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
-
-    
-
-    
-
-    
-
-    
-
-    
