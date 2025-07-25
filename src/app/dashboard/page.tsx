@@ -30,7 +30,7 @@ import { z } from "zod";
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getApp, getApps, initializeApp } from 'firebase/app';
+import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 
 const firebaseConfig = {
@@ -125,9 +125,13 @@ function DashboardPage() {
                 const querySnapshot = await getDocs(q);
                 const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
                 setSubmittedAssignments(assignments);
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Error fetching assignments: ", error);
-                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your assignments.' });
+                let errorMessage = 'Could not fetch your assignments.';
+                if (error instanceof FirebaseError) {
+                    errorMessage = error.message;
+                }
+                toast({ variant: 'destructive', title: 'Error', description: errorMessage });
             } finally {
                 setLoadingAssignments(false);
             }
@@ -1006,6 +1010,8 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
 
     
 
