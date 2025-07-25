@@ -64,7 +64,7 @@ type SubmittedAssignment = {
     fileUrl: string;
     instructions?: string;
     submittedAt: Timestamp;
-    dueDate: Timestamp;
+    dueDate?: Timestamp;
 };
 type Transaction = (typeof studentData.transactions)[0];
 
@@ -236,7 +236,7 @@ function DashboardPage() {
             assignmentForm.reset({
                 title: assignment.title,
                 course: assignment.course,
-                dueDate: assignment.dueDate.toDate(),
+                dueDate: assignment.dueDate?.toDate(),
                 instructions: assignment.instructions || '',
                 file: undefined, // Don't pre-fill file input
             });
@@ -350,7 +350,7 @@ function DashboardPage() {
         return purchasedCoursesWithDetails.filter(course => {
             const searchMatch = purchasedCourseFilters.search.trim().toLowerCase() === '' ||
                 course.title.toLowerCase().includes(purchasedCourseFilters.search.trim().toLowerCase());
-            const subjectMatch = purchasedCourseFilters.subject === 'All' || course.subject === courseFilters.subject;
+            const subjectMatch = purchasedCourseFilters.subject === 'All' || course.subject === purchasedCourseFilters.subject;
             return searchMatch && subjectMatch;
         });
     }, [purchasedCoursesWithDetails, purchasedCourseFilters]);
@@ -748,7 +748,7 @@ function DashboardPage() {
                                             <div className="font-medium">{assignment.title}</div>
                                             <div className="text-xs text-muted-foreground">{assignment.course}</div>
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{format(assignment.dueDate.toDate(), 'PPP')}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{assignment.dueDate ? format(assignment.dueDate.toDate(), 'PPP') : 'N/A'}</TableCell>
                                         <TableCell>
                                             <Badge variant={"outline"} className={getStatusBadgeVariant(assignment.status)}>
                                                 {getStatusIcon(assignment.status)}
@@ -1105,3 +1105,5 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
