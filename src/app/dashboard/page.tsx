@@ -62,7 +62,6 @@ type SubmittedAssignment = {
 type Transaction = (typeof studentData.transactions)[0];
 
 function DashboardPage() {
-    const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
     
@@ -117,16 +116,26 @@ function DashboardPage() {
     React.useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
-        const firestore = getFirestore(app);
 
-        const unsubscribe = onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                setLoadingAssignments(true);
+        const fetchAssignments = async (user: User) => {
+            setLoadingAssignments(true);
+            try {
+                const firestore = getFirestore(app);
                 const q = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
                 const querySnapshot = await getDocs(q);
                 const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
                 setSubmittedAssignments(assignments);
+            } catch (error) {
+                console.error("Error fetching assignments: ", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your assignments.' });
+            } finally {
                 setLoadingAssignments(false);
+            }
+        };
+
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                fetchAssignments(user);
             } else {
                 setSubmittedAssignments([]);
                 setLoadingAssignments(false);
@@ -134,7 +143,7 @@ function DashboardPage() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [toast]);
 
 
     const handleAssignmentSubmit = async (data: AssignmentFormValues) => {
@@ -997,6 +1006,8 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
 
     
 
