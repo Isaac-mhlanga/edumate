@@ -28,7 +28,7 @@ import withAuth from "@/components/with-auth";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
@@ -46,7 +46,7 @@ const assignmentFormSchema = z.object({
   title: z.string().min(1, "Assignment title is required."),
   course: z.string().min(1, "Course name is required."),
   instructions: z.string().optional(),
-  file: z.instanceof(File).refine(file => file.size > 0, 'A file is required.').refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.'),
+  file: z.instanceof(File).refine(file => file.size > 0, 'A file is required.').refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.').optional(),
 });
 type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
 
@@ -57,6 +57,8 @@ type SubmittedAssignment = {
     status: 'Paid' | 'Awaiting Payment' | 'Submitted' | 'Pending Submission' | 'Pending Review';
     price: number | null;
     solutionUrl: string | null;
+    fileUrl: string;
+    instructions?: string;
     submittedAt: Timestamp;
 };
 type Transaction = (typeof studentData.transactions)[0];
@@ -92,6 +94,8 @@ function DashboardPage() {
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
     const [isAssignmentDialogOpen, setIsAssignmentDialogOpen] = React.useState(false);
     const [isSubmitting, setIsSubmitting] = React.useState(false);
+    const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
+
 
     // State for courses filtering and pagination
     const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All', status: 'All' });
@@ -127,7 +131,7 @@ function DashboardPage() {
                 setSubmittedAssignments(assignments);
             } catch (error: any) {
                 console.error("Error fetching assignments: ", error);
-                let errorMessage = 'Could not fetch your assignments.';
+                let errorMessage = 'Could not fetch your assignments. This can happen if the required database index is not set up.';
                 if (error instanceof FirebaseError) {
                     errorMessage = error.message;
                 }
@@ -165,13 +169,15 @@ function DashboardPage() {
         }
 
         try {
-            // Upload file to Firebase Storage
-            const storageRef = ref(storage, `assignments/${user.uid}/${Date.now()}-${data.file.name}`);
-            const uploadResult = await uploadBytes(storageRef, data.file);
-            const downloadURL = await getDownloadURL(uploadResult.ref);
+            let downloadURL = selectedAssignment?.fileUrl; // Keep existing URL if not changing file
+            // If a new file is provided, upload it
+            if (data.file) {
+                 const storageRef = ref(storage, `assignments/${user.uid}/${Date.now()}-${data.file.name}`);
+                 const uploadResult = await uploadBytes(storageRef, data.file);
+                 downloadURL = await getDownloadURL(uploadResult.ref);
+            }
 
-            // Add metadata to Firestore
-            const newAssignmentRef = await addDoc(collection(firestore, 'assignments'), {
+            const assignmentData = {
                 studentId: user.uid,
                 studentName: user.displayName,
                 studentEmail: user.email,
@@ -180,24 +186,32 @@ function DashboardPage() {
                 instructions: data.instructions,
                 fileUrl: downloadURL,
                 status: 'Pending Review',
-                price: null,
-                solutionUrl: null,
+                price: selectedAssignment ? selectedAssignment.price : null,
+                solutionUrl: selectedAssignment ? selectedAssignment.solutionUrl : null,
                 submittedAt: serverTimestamp(),
-            });
-            
-            // Add new assignment to local state
-            setSubmittedAssignments(prev => [{
-                id: newAssignmentRef.id,
-                title: data.title,
-                course: data.course,
-                status: 'Pending Review',
-                price: null,
-                solutionUrl: null,
-                submittedAt: Timestamp.now(),
-            },...prev]);
+            };
 
-            toast({ title: 'Success', description: 'Your assignment has been submitted successfully.' });
+            if (selectedAssignment) { // Update existing assignment
+                const assignmentRef = doc(firestore, 'assignments', selectedAssignment.id);
+                await updateDoc(assignmentRef, assignmentData);
+
+                // Update local state
+                setSubmittedAssignments(prev => prev.map(a => a.id === selectedAssignment.id ? { ...a, ...assignmentData, submittedAt: a.submittedAt } : a));
+                toast({ title: 'Success', description: 'Your assignment has been updated.' });
+
+            } else { // Add new assignment
+                const newAssignmentRef = await addDoc(collection(firestore, 'assignments'), assignmentData);
+                 // Add new assignment to local state
+                setSubmittedAssignments(prev => [{
+                    id: newAssignmentRef.id,
+                    ...assignmentData,
+                    submittedAt: Timestamp.now(),
+                }, ...prev]);
+                toast({ title: 'Success', description: 'Your assignment has been submitted successfully.' });
+            }
+
             setIsAssignmentDialogOpen(false);
+            setSelectedAssignment(null);
             assignmentForm.reset();
         } catch (error) {
             console.error("Error submitting assignment: ", error);
@@ -207,6 +221,27 @@ function DashboardPage() {
         }
     };
 
+    const handleOpenAssignmentDialog = (assignment: SubmittedAssignment | null) => {
+        setSelectedAssignment(assignment);
+        if (assignment) {
+            assignmentForm.reset({
+                title: assignment.title,
+                course: assignment.course,
+                instructions: assignment.instructions || '',
+                file: undefined, // Don't pre-fill file input
+            });
+             assignmentForm.clearErrors();
+        } else {
+            assignmentForm.reset({
+                title: '',
+                course: '',
+                instructions: '',
+                file: undefined,
+            });
+             assignmentForm.clearErrors();
+        }
+        setIsAssignmentDialogOpen(true);
+    };
 
     const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
         setAssignmentFilters(prev => ({ ...prev, [key]: value }));
@@ -270,7 +305,7 @@ function DashboardPage() {
     }, [transactionFilters]);
 
     const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
-    const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * transactionsPerPage);
+    const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * assignmentsPerPage);
     
     const allCourses = instructorData.courses;
     const purchasedCourseIds = new Set(studentData.purchasedCourses.map(c => c.id));
@@ -304,7 +339,7 @@ function DashboardPage() {
         return purchasedCoursesWithDetails.filter(course => {
             const searchMatch = purchasedCourseFilters.search.trim().toLowerCase() === '' ||
                 course.title.toLowerCase().includes(purchasedCourseFilters.search.trim().toLowerCase());
-            const subjectMatch = purchasedCourseFilters.subject === 'All' || course.subject === purchasedCourseFilters.subject;
+            const subjectMatch = purchasedCourseFilters.subject === 'All' || course.subject === courseFilters.subject;
             return searchMatch && subjectMatch;
         });
     }, [purchasedCoursesWithDetails, purchasedCourseFilters]);
@@ -330,7 +365,7 @@ function DashboardPage() {
             case 'Paid': return 'bg-green-500/20 text-green-700 border-green-500/30 dark:text-green-400';
             case 'Awaiting Payment': return 'bg-blue-500/20 text-blue-700 border-blue-500/30 dark:text-blue-400';
             case 'Pending Review': return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:text-yellow-400';
-            case 'Submitted': return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:text-yellow-400';
+            case 'Submitted': return 'bg-purple-500/20 text-purple-700 border-purple-500/30 dark:text-purple-400';
             case 'Pending Submission': return 'bg-slate-500/20 text-slate-700 border-slate-500/30 dark:text-slate-400';
             default: return 'outline';
         }
@@ -669,84 +704,9 @@ function DashboardPage() {
                                     </DropdownMenuRadioGroup>
                                 </DropdownMenuContent>
                             </DropdownMenu>
-                            <Dialog open={isAssignmentDialogOpen} onOpenChange={setIsAssignmentDialogOpen}>
-                                <DialogTrigger asChild>
-                                    <Button className="w-full"><UploadCloud className="mr-2"/>Upload</Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader>
-                                        <DialogTitle>Upload New Assignment</DialogTitle>
-                                        <DialogDescription>Fill in the details and upload your assignment file (must be a .zip).</DialogDescription>
-                                    </DialogHeader>
-                                    <Form {...assignmentForm}>
-                                        <form onSubmit={assignmentForm.handleSubmit(handleAssignmentSubmit)} className="space-y-4 py-4">
-                                            <FormField
-                                                control={assignmentForm.control}
-                                                name="title"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Assignment Title</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g. Chapter 5 Problem Set" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={assignmentForm.control}
-                                                name="course"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Course Name</FormLabel>
-                                                        <FormControl>
-                                                            <Input placeholder="e.g. Grade 12 Maths" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={assignmentForm.control}
-                                                name="instructions"
-                                                render={({ field }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Extra Instructions</FormLabel>
-                                                        <FormControl>
-                                                            <Textarea placeholder="Any specific notes for the instructor?" {...field} />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <FormField
-                                                control={assignmentForm.control}
-                                                name="file"
-                                                render={({ field: { onChange, value, ...rest } }) => (
-                                                    <FormItem>
-                                                        <FormLabel>Assignment File (.zip)</FormLabel>
-                                                        <FormControl>
-                                                            <Input 
-                                                                type="file" 
-                                                                accept=".zip" 
-                                                                onChange={(e) => onChange(e.target.files?.[0])} 
-                                                                {...rest} 
-                                                            />
-                                                        </FormControl>
-                                                        <FormMessage />
-                                                    </FormItem>
-                                                )}
-                                            />
-                                            <DialogFooter>
-                                                <Button type="button" variant="ghost" onClick={() => setIsAssignmentDialogOpen(false)}>Cancel</Button>
-                                                <Button type="submit" disabled={isSubmitting}>
-                                                    {isSubmitting ? 'Submitting...' : 'Submit Assignment'}
-                                                </Button>
-                                            </DialogFooter>
-                                        </form>
-                                    </Form>
-                                </DialogContent>
-                            </Dialog>
+                            <Button className="w-full" onClick={() => handleOpenAssignmentDialog(null)}>
+                                <UploadCloud className="mr-2"/>Upload
+                            </Button>
                         </div>
                     </div>
                     <Table>
@@ -783,8 +743,8 @@ function DashboardPage() {
                                         </TableCell>
                                         <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
                                         <TableCell className="text-right">
-                                            {assignment.status === 'Pending Submission' && <Button variant="secondary" size="sm"><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5"/><span className="hidden sm:inline">Submit Now</span></Button>}
-                                            {(assignment.status === 'Submitted' || assignment.status === 'Pending Review') && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
+                                            {assignment.status === 'Pending Review' && <Button variant="secondary" size="sm" onClick={() => handleOpenAssignmentDialog(assignment)}><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Edit</span></Button>}
+                                            {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
                                             {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href="/payment"><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
                                             {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl!} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
                                         </TableCell>
@@ -988,6 +948,88 @@ function DashboardPage() {
                 </div>
             )}
 
+            <Dialog open={isAssignmentDialogOpen} onOpenChange={(open) => {
+                if (!open) {
+                    setSelectedAssignment(null);
+                    assignmentForm.reset();
+                }
+                setIsAssignmentDialogOpen(open)
+            }}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>{selectedAssignment ? 'Edit' : 'Upload New'} Assignment</DialogTitle>
+                        <DialogDescription>Fill in the details and upload your assignment file (must be a .zip).</DialogDescription>
+                    </DialogHeader>
+                    <Form {...assignmentForm}>
+                        <form onSubmit={assignmentForm.handleSubmit(handleAssignmentSubmit)} className="space-y-4 py-4">
+                            <FormField
+                                control={assignmentForm.control}
+                                name="title"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Assignment Title</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g. Chapter 5 Problem Set" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={assignmentForm.control}
+                                name="course"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Course Name</FormLabel>
+                                        <FormControl>
+                                            <Input placeholder="e.g. Grade 12 Maths" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={assignmentForm.control}
+                                name="instructions"
+                                render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Extra Instructions</FormLabel>
+                                        <FormControl>
+                                            <Textarea placeholder="Any specific notes for the instructor?" {...field} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <FormField
+                                control={assignmentForm.control}
+                                name="file"
+                                render={({ field: { onChange, value, ...rest } }) => (
+                                    <FormItem>
+                                        <FormLabel>Assignment File (.zip) {selectedAssignment ? '(Optional: leave blank to keep existing file)' : ''}</FormLabel>
+                                        <FormControl>
+                                            <Input 
+                                                type="file" 
+                                                accept=".zip" 
+                                                onChange={(e) => onChange(e.target.files?.[0])} 
+                                                {...rest} 
+                                            />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}
+                            />
+                            <DialogFooter>
+                                <Button type="button" variant="ghost" onClick={() => setIsAssignmentDialogOpen(false)}>Cancel</Button>
+                                <Button type="submit" disabled={isSubmitting}>
+                                    {isSubmitting ? (selectedAssignment ? 'Updating...' : 'Submitting...') : (selectedAssignment ? 'Update Assignment' : 'Submit Assignment')}
+                                </Button>
+                            </DialogFooter>
+                        </form>
+                    </Form>
+                </DialogContent>
+            </Dialog>
+
             <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
@@ -1010,6 +1052,8 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
 
     
 
