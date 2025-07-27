@@ -22,12 +22,12 @@ const GradedQuestionSchema = z.object({
   feedback: z.string().describe("AI-generated feedback for the student's answer, explaining why it was right or wrong."),
 });
 
-export const GradeQuizInputSchema = z.object({
+const GradeQuizInputSchema = z.object({
   questionsAndAnswers: z.array(QuestionAnswerSchema).describe("An array of questions, their correct answers, and the student's answers."),
 });
 export type GradeQuizInput = z.infer<typeof GradeQuizInputSchema>;
 
-export const GradeQuizOutputSchema = z.object({
+const GradeQuizOutputSchema = z.object({
   overallScore: z.number().describe("The student's overall score as a percentage."),
   summary: z.string().describe("A brief summary of the student's performance."),
   gradedQuestions: z.array(GradedQuestionSchema).describe("An array of the graded questions with feedback."),

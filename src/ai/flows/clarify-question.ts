@@ -11,12 +11,12 @@
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
-export const ClarifyQuestionInputSchema = z.object({
+const ClarifyQuestionInputSchema = z.object({
   question: z.string().describe('The quiz question the student is asking about.'),
 });
 export type ClarifyQuestionInput = z.infer<typeof ClarifyQuestionInputSchema>;
 
-export const ClarifyQuestionOutputSchema = z.object({
+const ClarifyQuestionOutputSchema = z.object({
   clarification: z.string().describe('A hint or clarification that guides the student towards the answer without revealing it directly.'),
 });
 export type ClarifyQuestionOutput = z.infer<typeof ClarifyQuestionOutputSchema>;
@@ -54,5 +54,3 @@ const clarifyQuestionFlow = ai.defineFlow(
     return output!;
   }
 );
-
-    
