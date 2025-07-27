@@ -31,7 +31,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import withAuth from "@/components/with-auth";
 import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
-import { getAuth, type User } from "firebase/auth";
+import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp, doc, updateDoc, writeBatch, deleteDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -953,7 +953,7 @@ function InstructorPage() {
                                     <TableRow key={assignment.id}>
                                         <TableCell>
                                             <div className="font-medium">{assignment.studentName}</div>
-                                            <div className="text-xs text-muted-foreground md:hidden">{assignment.title}</div>
+                                            <div className="text-xs text-muted-foreground md:hidden">{assignment.title || assignment.course}</div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">
                                             <div className="font-medium">{assignment.title}</div>
@@ -1508,10 +1508,10 @@ function InstructorPage() {
                   <div className="space-y-6 py-4">
                       <div className="space-y-4 p-4 rounded-lg bg-muted/50">
                           <h4 className="font-semibold">Submission Details</h4>
-                          <div className="text-sm space-y-2">
-                            <p><span className="text-muted-foreground">Student:</span> {selectedAssignment.studentName}</p>
-                            <p><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.title} / {selectedAssignment.course}</p>
-                            {selectedAssignment.instructions && <p><span className="text-muted-foreground">Instructions:</span> {selectedAssignment.instructions}</p>}
+                           <div className="text-sm space-y-2">
+                                <p><span className="text-muted-foreground">Student:</span> {selectedAssignment.studentName}</p>
+                                <p><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.title || 'N/A'} / {selectedAssignment.course}</p>
+                                {selectedAssignment.instructions && <p><span className="text-muted-foreground">Instructions:</span> {selectedAssignment.instructions}</p>}
                           </div>
                           <Button variant="outline" size="sm" asChild>
                             <a href={selectedAssignment.fileUrl} download><Download className="mr-2 h-4 w-4"/>Download Submission</a>
