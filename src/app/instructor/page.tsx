@@ -55,7 +55,7 @@ const chartConfig = {
 const courseFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  subject: z.enum(["Maths", "Physical Sciences"]),
+  subject: z.enum(["Maths", "Physical Sciences", "Life Sciences"]),
   grade: z.enum(["10", "11", "12"]),
   pricingModel: z.enum(["free", "purchase", "subscription"]),
   price: z.coerce.number().optional(),
@@ -84,7 +84,7 @@ type Course = {
     instructorId: string;
     title: string;
     description: string;
-    subject: 'Maths' | 'Physical Sciences';
+    subject: 'Maths' | 'Physical Sciences' | 'Life Sciences';
     grade: '10' | '11' | '12';
     thumbnail: string;
     pricing: {
@@ -1029,9 +1029,9 @@ function InstructorPage() {
                                 <DropdownMenuRadioItem value="Pending Review">Pending Review</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Awaiting Payment">Awaiting Payment</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Paid">Paid</DropdownMenuRadioItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
                 </div>
                 <CardContent className="p-0">
                     {loadingAssignments ? (
@@ -1821,7 +1821,7 @@ function InstructorPage() {
         <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Refund</DialogTitle>
+                    <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
                     <AlertDialogDescription>
                         Are you sure you want to refund this transaction?
                         <div className="p-2 mt-2 bg-muted rounded-md text-sm">
@@ -1864,5 +1864,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
