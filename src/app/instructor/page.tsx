@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp, FileQuestion, Send } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -76,6 +76,7 @@ type VideoData = {
     id: string;
     title: string;
     url: string;
+    quizId?: string;
 };
 
 type Course = {
@@ -88,7 +89,7 @@ type Course = {
     thumbnail: string;
     pricing: {
         type: 'free' | 'purchase' | 'subscription';
-        price?: number;
+        price?: number | null;
     };
     status: 'Draft' | 'Published' | 'Pending Approval' | 'Rejected';
     videos: VideoData[];
@@ -129,6 +130,7 @@ type VideoUpload = {
     title: string;
     file: File | null;
     fileName: string;
+    quizId?: string;
 };
 
 function InstructorPage() {
@@ -288,6 +290,12 @@ function InstructorPage() {
     newUploads[index].title = title;
     setVideoUploads(newUploads);
   };
+  
+  const handleVideoQuizChange = (index: number, quizId: string) => {
+    const newUploads = [...videoUploads];
+    newUploads[index].quizId = quizId;
+    setVideoUploads(newUploads);
+  };
 
   const handleVideoFileChange = (index: number, file: File | null) => {
     const newUploads = [...videoUploads];
@@ -312,7 +320,7 @@ function InstructorPage() {
             subject: selectedCourse.subject,
             grade: selectedCourse.grade,
             pricingModel: selectedCourse.pricing.type,
-            price: selectedCourse.pricing.price,
+            price: selectedCourse.pricing.price || undefined,
             thumbnail: undefined,
           });
           setVideoUploads([]);
@@ -412,6 +420,21 @@ function InstructorPage() {
     }
   };
 
+  const handlePublishCourse = async (course: Course) => {
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const courseRef = doc(firestore, 'courses', course.id);
+
+    try {
+        await updateDoc(courseRef, { status: 'Published' });
+        setCourses(courses.map(c => c.id === course.id ? { ...c, status: 'Published' } : c));
+        toast({ title: "Course Published!", description: `"${course.title}" is now live.` });
+    } catch (error) {
+        console.error("Error publishing course: ", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to publish course.' });
+    }
+  };
+
   async function onCourseSubmit(data: CourseFormValues) {
     if (!user) return;
     setIsSubmitting(true);
@@ -434,7 +457,7 @@ function InstructorPage() {
                 const videoRef = ref(storage, `videos/${user.uid}/${Date.now()}-${videoUpload.file.name}`);
                 const snapshot = await uploadBytes(videoRef, videoUpload.file);
                 const url = await getDownloadURL(snapshot.ref);
-                uploadedVideos.push({ id: `V${Date.now()}-${videoUpload.title}`, title: videoUpload.title, url });
+                uploadedVideos.push({ id: `V${Date.now()}-${videoUpload.title}`, title: videoUpload.title, url, quizId: videoUpload.quizId });
             }
         }
         
@@ -487,7 +510,6 @@ function InstructorPage() {
             status: 'Awaiting Payment'
         });
         
-        // Update local state to reflect the change immediately
         setSubmittedAssignments(assignments => assignments.map(a => 
             a.id === assignmentId ? { ...a, status: 'Awaiting Payment', price: price } : a
         ));
@@ -836,12 +858,12 @@ function InstructorPage() {
                    ) : paginatedCourses.length > 0 ? (
                     <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {paginatedCourses.map((course) => (
-                        <Card key={course.id} className="overflow-hidden shadow-md rounded-xl">
+                        <Card key={course.id} className="overflow-hidden shadow-md rounded-xl flex flex-col">
                           <CardHeader className="p-0 relative">
                             <Image src={course.thumbnail} alt={course.title} width={400} height={200} className="aspect-video object-cover" data-ai-hint="online course" />
                             <Badge className="absolute top-2 right-2" variant={course.status === 'Published' ? 'default' : 'secondary'}>{course.status}</Badge>
                           </CardHeader>
-                          <CardContent className="p-4">
+                          <CardContent className="p-4 flex-grow">
                             <div className="flex justify-between items-start">
                                 <div className="flex-1">
                                     <h3 className="font-bold text-lg">{course.title}</h3>
@@ -856,6 +878,8 @@ function InstructorPage() {
                                           </Link>
                                         </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => handleEditCourse(course)}><Edit className="mr-2 h-4 w-4"/>Edit Course</DropdownMenuItem>
+                                        {course.status === 'Draft' && <DropdownMenuItem onClick={() => handlePublishCourse(course)}><Send className="mr-2 h-4 w-4"/>Publish Course</DropdownMenuItem>}
+                                        <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={() => handleDeleteCourseClick(course)} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete Course</DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>
@@ -891,6 +915,26 @@ function InstructorPage() {
                     </div>
                 </CardFooter>
             </Card>
+          )}
+
+          {currentTab === 'quizzes' && (
+             <Card>
+                <CardHeader>
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div>
+                            <CardTitle>Quiz Management</CardTitle>
+                            <CardDescription>Create and manage quizzes for your courses.</CardDescription>
+                        </div>
+                        <Button><PlusCircle className="mr-2"/> Create New Quiz</Button>
+                    </div>
+                </CardHeader>
+                <CardContent>
+                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                      <h3 className="text-lg font-semibold">No Quizzes Created Yet</h3>
+                      <p className="text-muted-foreground mt-1">Click "Create New Quiz" to get started.</p>
+                    </div>
+                </CardContent>
+             </Card>
           )}
 
           {currentTab === 'assignments' && (
@@ -1390,6 +1434,7 @@ function InstructorPage() {
                                       <SelectContent>
                                           <SelectItem value="Maths">Maths</SelectItem>
                                           <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                          <SelectItem value="Life Sciences">Life Sciences</SelectItem>
                                       </SelectContent>
                                   </Select>
                                   <FormMessage />
@@ -1475,6 +1520,15 @@ function InstructorPage() {
                                                 </span>
                                                 <Input id={`video-upload-${index}`} type="file" accept="video/*" className="sr-only" onChange={(e) => handleVideoFileChange(index, e.target.files ? e.target.files[0] : null)} />
                                             </label>
+                                            <Select onValueChange={(value) => handleVideoQuizChange(index, value)}>
+                                                <SelectTrigger>
+                                                    <SelectValue placeholder="Link a quiz (optional)" />
+                                                </SelectTrigger>
+                                                <SelectContent>
+                                                    <SelectItem value="Q001">Maths Grade 12 - Algebra Basics</SelectItem>
+                                                    <SelectItem value="Q002">Physics Grade 12 - Kinematics Test</SelectItem>
+                                                </SelectContent>
+                                            </Select>
                                         </div>
                                         <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveVideo(index)}>
                                             <Trash2 className="h-4 w-4 text-destructive" />
