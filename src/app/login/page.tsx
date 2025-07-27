@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getAuth, signInWithEmailAndPassword, sendEmailVerification, type Auth } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, sendEmailVerification, type User } from "firebase/auth";
 import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
@@ -25,20 +25,17 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+// Initialize Firebase app and auth service at the module level
+const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+const auth = getAuth(app);
+
 export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
-    const [auth, setAuth] = React.useState<Auth | null>(null);
     const [isLoading, setIsLoading] = React.useState(false);
     const [emailNotVerified, setEmailNotVerified] = React.useState(false);
-    const [currentUser, setCurrentUser] = React.useState<any>(null);
+    const [currentUser, setCurrentUser] = React.useState<User | null>(null);
 
-
-    React.useEffect(() => {
-        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-        setAuth(getAuth(app));
-    }, []);
-    
     const handleResendVerification = async () => {
         if (!currentUser) return;
         setIsLoading(true);
@@ -61,8 +58,7 @@ export default function LoginPage() {
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!auth) return;
-
+        
         setIsLoading(true);
         setEmailNotVerified(false);
         setCurrentUser(null);
@@ -189,7 +185,7 @@ export default function LoginPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
-                            <Button type="submit" className="w-full" disabled={isLoading || !auth || emailNotVerified}>
+                            <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading ? 'Signing in...' : 'Sign In'}
                             </Button>
                             <div className="text-center text-sm text-muted-foreground">
