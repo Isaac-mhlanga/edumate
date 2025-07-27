@@ -12,14 +12,49 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import React from "react";
+import { getFirestore, doc, getDoc } from "firebase/firestore";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { Skeleton } from "@/components/ui/skeleton";
+
+type VideoData = {
+    id: string;
+    title: string;
+    url: string;
+};
+
+type Course = {
+    id: string;
+    instructorId: string;
+    title: string;
+    description: string;
+    subject: 'Maths' | 'Physical Sciences';
+    grade: '10' | '11' | '12';
+    thumbnail: string;
+    pricing: {
+        type: 'free' | 'purchase' | 'subscription';
+        price?: number;
+    };
+    status: 'Draft' | 'Published' | 'Pending Approval' | 'Rejected';
+    videos: VideoData[];
+};
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 export default function CoursePreviewPage() {
     const params = useParams();
     const searchParams = useSearchParams();
     const courseId = params.id as string;
-    const course = instructorData.courses.find(c => c.id === courseId);
+    const [course, setCourse] = React.useState<Course | null>(null);
+    const [loading, setLoading] = React.useState(true);
     
-    const [activeVideo, setActiveVideo] = React.useState(course?.videos[0]);
+    const [activeVideo, setActiveVideo] = React.useState<VideoData | undefined>(undefined);
     const [quality, setQuality] = React.useState('720p');
     const [playbackRate, setPlaybackRate] = React.useState('1');
     const videoRef = React.useRef<HTMLVideoElement>(null);
@@ -34,14 +69,31 @@ export default function CoursePreviewPage() {
     );
 
     React.useEffect(() => {
+        const fetchCourse = async () => {
+            if (!courseId) return;
+            setLoading(true);
+            const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+            const firestore = getFirestore(app);
+            const courseRef = doc(firestore, 'courses', courseId);
+            const docSnap = await getDoc(courseRef);
+
+            if (docSnap.exists()) {
+                const courseData = { id: docSnap.id, ...docSnap.data() } as Course;
+                setCourse(courseData);
+                setActiveVideo(courseData.videos[0]);
+            } else {
+                console.error("No such course!");
+            }
+            setLoading(false);
+        };
+        fetchCourse();
+    }, [courseId]);
+
+    React.useEffect(() => {
         if (videoRef.current) {
             videoRef.current.playbackRate = parseFloat(playbackRate);
         }
     }, [playbackRate]);
-
-    if (!course) {
-        notFound();
-    }
 
     const from = searchParams.get('from');
     let backLink = '/instructor?tab=courses';
@@ -49,6 +101,26 @@ export default function CoursePreviewPage() {
         backLink = '/dashboard?tab=courses';
     } else if (from === 'admin') {
         backLink = '/admin?tab=courses';
+    }
+
+    if (loading) {
+        return (
+             <div className="space-y-6">
+                <div><Skeleton className="h-10 w-40" /></div>
+                <div className="grid lg:grid-cols-3 gap-8">
+                    <div className="lg:col-span-2 space-y-6">
+                         <Card><CardHeader><Skeleton className="h-96 w-full" /></CardHeader><CardContent className="pt-4 space-y-2"><Skeleton className="h-8 w-3/4" /><Skeleton className="h-5 w-full" /></CardContent></Card>
+                    </div>
+                     <div className="lg:col-span-1 space-y-6">
+                        <Card><Skeleton className="h-64 w-full" /></Card>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+
+    if (!course) {
+        notFound();
     }
 
 
@@ -75,7 +147,7 @@ export default function CoursePreviewPage() {
                                             key={activeVideo.id}
                                             className="w-full h-full"
                                             controls
-                                            src="http://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                                            src={activeVideo.url}
                                         >
                                             Your browser does not support the video tag.
                                         </video>
@@ -130,7 +202,6 @@ export default function CoursePreviewPage() {
                                     <span>4.8 (24 reviews)</span>
                                 </div>
                                 <span>{instructorData.enrolledStudents.length} students</span>
-                                <span>Created by {instructorData.name}</span>
                             </div>
                             <CardDescription className="mt-4 text-base">
                                 {course.description}
@@ -208,3 +279,5 @@ export default function CoursePreviewPage() {
         </div>
     );
 }
+
+    

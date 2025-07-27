@@ -32,7 +32,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import withAuth from "@/components/with-auth";
 import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
 import { getAuth, type User } from "firebase/auth";
-import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp, doc, updateDoc, writeBatch, deleteDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 
@@ -58,6 +59,7 @@ const courseFormSchema = z.object({
   grade: z.enum(["10", "11", "12"]),
   pricingModel: z.enum(["free", "purchase", "subscription"]),
   price: z.coerce.number().optional(),
+  thumbnail: z.instanceof(File).optional(),
 }).refine(data => {
     if (data.pricingModel === 'purchase') {
         return data.price !== undefined && data.price > 0;
@@ -69,7 +71,30 @@ const courseFormSchema = z.object({
 });
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
-type Course = (typeof instructorData.courses)[0];
+
+type VideoData = {
+    id: string;
+    title: string;
+    url: string;
+};
+
+type Course = {
+    id: string;
+    instructorId: string;
+    title: string;
+    description: string;
+    subject: 'Maths' | 'Physical Sciences';
+    grade: '10' | '11' | '12';
+    thumbnail: string;
+    pricing: {
+        type: 'free' | 'purchase' | 'subscription';
+        price?: number;
+    };
+    status: 'Draft' | 'Published' | 'Pending Approval' | 'Rejected';
+    videos: VideoData[];
+    createdAt: Timestamp;
+};
+
 
 type SubmittedAssignment = {
     id: string;
@@ -110,17 +135,20 @@ function InstructorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { toast } = useToast();
+  const [user, setUser] = React.useState<User | null>(null);
   
   const currentTab = searchParams.get('tab') || 'overview';
 
-  const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
+  const [courses, setCourses] = React.useState<Course[]>([]);
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
 
+  const [loadingCourses, setLoadingCourses] = React.useState(true);
   const [loadingAssignments, setLoadingAssignments] = React.useState(true);
   const [loadingTransactions, setLoadingTransactions] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
   const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
@@ -177,62 +205,72 @@ function InstructorPage() {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
     const auth = getAuth(app);
-    const user = auth.currentUser;
 
-    const fetchAssignments = async () => {
-        setLoadingAssignments(true);
-        try {
-            // In a real multi-instructor app, you'd filter by instructorId
-            const q = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
-            const querySnapshot = await getDocs(q);
-            const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
-            setSubmittedAssignments(assignments);
-        } catch (error) {
-            console.error("Error fetching assignments: ", error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Could not fetch assignments."
-            });
-        } finally {
+    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        setUser(currentUser);
+
+        if (!currentUser) {
+            setLoadingCourses(false);
             setLoadingAssignments(false);
-        }
-    };
-    
-     const fetchTransactions = async () => {
-        setLoadingTransactions(true);
-        try {
-            // In a real multi-instructor app, you'd filter by instructorId
-            const q = query(collection(firestore, 'transactions'), orderBy('createdAt', 'desc'));
-            const querySnapshot = await getDocs(q);
-            const transactions = querySnapshot.docs.map(doc => {
-                 const data = doc.data();
-                 return {
-                    id: doc.id,
-                    ...data,
-                    date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A'
-                 } as Transaction;
-            });
-            setTransactions(transactions);
-        } catch (error) {
-            console.error("Error fetching transactions: ", error);
-            toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Could not fetch transactions."
-            });
-        } finally {
             setLoadingTransactions(false);
+            return;
         }
-    };
 
-    if (currentTab === 'assignments' || currentTab === 'overview') {
-        fetchAssignments();
-    }
-    if (currentTab === 'earnings' || currentTab === 'overview') {
-        fetchTransactions();
-    }
-}, [currentTab, toast]);
+        const fetchCourses = async () => {
+            setLoadingCourses(true);
+            try {
+                const q = query(collection(firestore, 'courses'), where('instructorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const fetchedCourses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
+                setCourses(fetchedCourses);
+            } catch (error) {
+                console.error("Error fetching courses: ", error);
+                toast({ variant: "destructive", title: "Error", description: "Could not fetch courses." });
+            } finally {
+                setLoadingCourses(false);
+            }
+        };
+
+        const fetchAssignments = async () => {
+            setLoadingAssignments(true);
+            try {
+                const q = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
+                setSubmittedAssignments(assignments);
+            } catch (error) {
+                console.error("Error fetching assignments: ", error);
+                toast({ variant: "destructive", title: "Error", description: "Could not fetch assignments."});
+            } finally {
+                setLoadingAssignments(false);
+            }
+        };
+        
+        const fetchTransactions = async () => {
+            setLoadingTransactions(true);
+            try {
+                const q = query(collection(firestore, 'transactions'), orderBy('createdAt', 'desc'));
+                const querySnapshot = await getDocs(q);
+                const transactions = querySnapshot.docs.map(doc => {
+                     const data = doc.data();
+                     return { id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A' } as Transaction;
+                });
+                setTransactions(transactions);
+            } catch (error) {
+                console.error("Error fetching transactions: ", error);
+                toast({ variant: "destructive", title: "Error", description: "Could not fetch transactions."});
+            } finally {
+                setLoadingTransactions(false);
+            }
+        };
+        
+        fetchCourses();
+        if (currentTab === 'assignments' || currentTab === 'overview') fetchAssignments();
+        if (currentTab === 'earnings' || currentTab === 'overview') fetchTransactions();
+    });
+
+    return () => unsubscribe();
+  }, [currentTab, toast]);
 
 
   const pricingModel = form.watch("pricingModel");
@@ -262,28 +300,32 @@ function InstructorPage() {
 
   
   React.useEffect(() => {
-    if (selectedCourse) {
-      form.reset({
-        title: selectedCourse.title,
-        description: selectedCourse.description,
-        subject: selectedCourse.subject,
-        grade: selectedCourse.grade,
-        pricingModel: selectedCourse.pricing.type,
-        price: selectedCourse.pricing.price,
-      });
-      setVideoUploads([]); // Reset video uploads for now. Could be extended to edit existing videos.
-    } else {
-      form.reset({
-        title: "",
-        description: "",
-        subject: "Maths",
-        grade: "12",
-        pricingModel: "free",
-        price: undefined,
-      });
-      setVideoUploads([]);
+    if (isCourseDialogOpen) {
+        if (selectedCourse) {
+          form.reset({
+            title: selectedCourse.title,
+            description: selectedCourse.description,
+            subject: selectedCourse.subject,
+            grade: selectedCourse.grade,
+            pricingModel: selectedCourse.pricing.type,
+            price: selectedCourse.pricing.price,
+            thumbnail: undefined,
+          });
+          setVideoUploads([]);
+        } else {
+          form.reset({
+            title: "",
+            description: "",
+            subject: "Maths",
+            grade: "12",
+            pricingModel: "free",
+            price: undefined,
+            thumbnail: undefined,
+          });
+          setVideoUploads([]);
+        }
     }
-  }, [selectedCourse, form]);
+  }, [selectedCourse, form, isCourseDialogOpen]);
 
   const handleCourseDialogOpenChange = (open: boolean) => {
     setIsCourseDialogOpen(open);
@@ -319,52 +361,106 @@ function InstructorPage() {
     setIsReviewDialogOpen(true);
   }
   
-  const confirmDeleteCourse = () => {
+  const confirmDeleteCourse = async () => {
     if (!selectedCourse) return;
-    setCourses(courses.filter(c => c.id !== selectedCourse.id));
-    toast({
-      title: "Course Deleted",
-      description: `The course "${selectedCourse.title}" has been successfully deleted.`,
-    });
-    setIsDeleteDialogOpen(false);
-    setSelectedCourse(null);
+
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const storage = getStorage(app);
+    const courseRef = doc(firestore, "courses", selectedCourse.id);
+
+    try {
+        // Delete video files from Storage
+        const videoPromises = selectedCourse.videos.map(video => {
+            const videoFileRef = ref(storage, video.url);
+            return deleteObject(videoFileRef);
+        });
+        
+        // Delete thumbnail from Storage
+        const thumbnailRef = ref(storage, selectedCourse.thumbnail);
+        const thumbnailPromise = deleteObject(thumbnailRef);
+        
+        await Promise.all([...videoPromises, thumbnailPromise]);
+
+        // Delete course document from Firestore
+        await deleteDoc(courseRef);
+
+        setCourses(courses.filter(c => c.id !== selectedCourse.id));
+        toast({
+          title: "Course Deleted",
+          description: `The course "${selectedCourse.title}" and its files have been deleted.`,
+        });
+    } catch (error) {
+        console.error("Error deleting course: ", error);
+        toast({ variant: "destructive", title: "Error", description: "Failed to delete course." });
+    } finally {
+        setIsDeleteDialogOpen(false);
+        setSelectedCourse(null);
+    }
   };
 
-  function onCourseSubmit(data: CourseFormValues) {
-    const newVideos = videoUploads.map((v, i) => ({ id: `V${Date.now() + i}`, title: v.title }));
+  async function onCourseSubmit(data: CourseFormValues) {
+    if (!user) return;
+    setIsSubmitting(true);
+    
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const storage = getStorage(app);
 
-    if (selectedCourse) {
-      setCourses(courses.map(c => c.id === selectedCourse.id ? { 
-        ...c, 
-        ...data, 
-        pricing: { type: data.pricingModel, price: data.price },
-        videos: [...c.videos, ...newVideos]
-      } : c));
-      toast({
-        title: "Course Updated!",
-        description: `The course "${data.title}" has been updated with ${newVideos.length} new video(s).`,
-      });
-    } else {
-      const newCourse: Course = {
-        id: `C${Date.now()}`,
-        ...data,
-        thumbnail: 'https://placehold.co/600x400.png',
-        status: 'Draft',
-        videos: newVideos,
-        pricing: {
-          type: data.pricingModel,
-          price: data.price
+    try {
+        let thumbnailUrl = selectedCourse?.thumbnail || '';
+        if (data.thumbnail) {
+            const thumbnailRef = ref(storage, `courses/${user.uid}/${Date.now()}-${data.thumbnail.name}`);
+            const snapshot = await uploadBytes(thumbnailRef, data.thumbnail);
+            thumbnailUrl = await getDownloadURL(snapshot.ref);
         }
-      };
-      setCourses([newCourse, ...courses]);
-      toast({
-        title: "Course Created!",
-        description: `The course "${data.title}" has been successfully created with ${newVideos.length} video(s).`,
-      });
+
+        const uploadedVideos: VideoData[] = [];
+        for (const videoUpload of videoUploads) {
+            if (videoUpload.file) {
+                const videoRef = ref(storage, `videos/${user.uid}/${Date.now()}-${videoUpload.file.name}`);
+                const snapshot = await uploadBytes(videoRef, videoUpload.file);
+                const url = await getDownloadURL(snapshot.ref);
+                uploadedVideos.push({ id: `V${Date.now()}-${videoUpload.title}`, title: videoUpload.title, url });
+            }
+        }
+        
+        const courseData = {
+            instructorId: user.uid,
+            title: data.title,
+            description: data.description,
+            subject: data.subject,
+            grade: data.grade,
+            pricing: {
+                type: data.pricingModel,
+                price: data.price,
+            },
+            thumbnail: thumbnailUrl,
+            status: 'Draft' as const,
+            videos: selectedCourse ? [...selectedCourse.videos, ...uploadedVideos] : uploadedVideos,
+            createdAt: selectedCourse?.createdAt || serverTimestamp(),
+        };
+
+        if (selectedCourse) {
+            const courseRef = doc(firestore, 'courses', selectedCourse.id);
+            await updateDoc(courseRef, courseData);
+            setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...courseData, id: c.id, createdAt: c.createdAt } as Course : c));
+            toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
+        } else {
+            const newDocRef = await addDoc(collection(firestore, 'courses'), courseData);
+            setCourses([{ id: newDocRef.id, ...courseData, createdAt: Timestamp.now() }, ...courses]);
+            toast({ title: "Course Created!", description: `The course "${data.title}" has been created.` });
+        }
+
+        setIsCourseDialogOpen(false);
+        setSelectedCourse(null);
+
+    } catch (error) {
+        console.error("Error saving course: ", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to save course.' });
+    } finally {
+        setIsSubmitting(false);
     }
-    setIsCourseDialogOpen(false);
-    setSelectedCourse(null);
-    setVideoUploads([]);
   }
 
   async function handleSaveSolution(assignmentId: string, price: number) {
@@ -717,7 +813,13 @@ function InstructorPage() {
                     </div>
                 </CardHeader>
                 <CardContent>
-                  {paginatedCourses.length > 0 ? (
+                  {loadingCourses ? (
+                    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {Array.from({length: 3}).map((_, i) => (
+                             <Card key={i}><CardHeader><Skeleton className="h-40 w-full" /></CardHeader><CardContent className="space-y-2 pt-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /></CardContent><CardFooter><Skeleton className="h-6 w-full" /></CardFooter></Card>
+                        ))}
+                    </div>
+                   ) : paginatedCourses.length > 0 ? (
                     <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {paginatedCourses.map((course) => (
                         <Card key={course.id} className="overflow-hidden shadow-md rounded-xl">
@@ -1227,19 +1329,28 @@ function InstructorPage() {
               <Form {...form}>
                   <form onSubmit={form.handleSubmit(onCourseSubmit)} className="space-y-6 py-4 max-h-[70vh] overflow-y-auto pr-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div className="space-y-4 col-span-1 md:col-span-2">
-                              <Label>Thumbnail / Cover Image</Label>
-                              <div className="flex items-center justify-center w-full">
-                                  <label htmlFor="dropzone-file-course" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
-                                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                          <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                          <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
-                                          <p className="text-xs text-muted-foreground">PNG, JPG or GIF (MAX. 800x400px)</p>
+                            <FormField
+                                control={form.control}
+                                name="thumbnail"
+                                render={({ field }) => (
+                                <FormItem className="col-span-1 md:col-span-2">
+                                  <FormLabel>Thumbnail / Cover Image</FormLabel>
+                                  <FormControl>
+                                      <div className="flex items-center justify-center w-full">
+                                          <label htmlFor="dropzone-file-course" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
+                                              <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                                  <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                                  <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                  <p className="text-xs text-muted-foreground">PNG or JPG (MAX. 800x400px)</p>
+                                              </div>
+                                              <Input id="dropzone-file-course" type="file" className="hidden" onChange={(e) => field.onChange(e.target.files?.[0])} />
+                                          </label>
                                       </div>
-                                      <Input id="dropzone-file-course" type="file" className="hidden" />
-                                  </label>
-                              </div>
-                          </div>
+                                  </FormControl>
+                                  <FormMessage />
+                                </FormItem>
+                                )}
+                            />
 
                           <FormField control={form.control} name="title" render={({ field }) => (
                               <FormItem className="col-span-1 md:col-span-2">
@@ -1363,7 +1474,7 @@ function InstructorPage() {
                       </div>
                       <DialogFooter className="pt-4 border-t sticky bottom-0 bg-background/95 pb-0 -mx-4 px-4">
                           <Button type="button" variant="ghost" onClick={() => handleCourseDialogOpenChange(false)}>Cancel</Button>
-                          <Button type="submit">Save Course</Button>
+                          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Course'}</Button>
                       </DialogFooter>
                   </form>
               </Form>
@@ -1399,8 +1510,7 @@ function InstructorPage() {
                           <h4 className="font-semibold">Submission Details</h4>
                           <div className="text-sm space-y-2">
                             <p><span className="text-muted-foreground">Student:</span> {selectedAssignment.studentName}</p>
-                            <p><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.title}</p>
-                            <p><span className="text-muted-foreground">Course:</span> {selectedAssignment.course}</p>
+                            <p><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.title} / {selectedAssignment.course}</p>
                             {selectedAssignment.instructions && <p><span className="text-muted-foreground">Instructions:</span> {selectedAssignment.instructions}</p>}
                           </div>
                           <Button variant="outline" size="sm" asChild>
@@ -1626,7 +1736,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
 
     
