@@ -238,9 +238,13 @@ function InstructorPage() {
                 const querySnapshot = await getDocs(q);
                 const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
                 setSubmittedAssignments(assignments);
-            } catch (error) {
+            } catch (error: any) {
                 console.error("Error fetching assignments: ", error);
-                toast({ variant: "destructive", title: "Error", description: "Could not fetch assignments."});
+                let errorMessage = 'Could not fetch assignments. This can happen if the required database index is not set up.';
+                if (error instanceof FirebaseError) {
+                    errorMessage = error.message;
+                }
+                toast({ variant: 'destructive', title: 'Error', description: errorMessage });
             } finally {
                 setLoadingAssignments(false);
             }
@@ -372,15 +376,24 @@ function InstructorPage() {
     try {
         // Delete video files from Storage
         const videoPromises = selectedCourse.videos.map(video => {
-            const videoFileRef = ref(storage, video.url);
-            return deleteObject(videoFileRef);
+            try {
+                const videoFileRef = ref(storage, video.url);
+                return deleteObject(videoFileRef);
+            } catch (e) {
+                console.error("Could not delete video file:", video.url, e);
+                return Promise.resolve();
+            }
         });
         
         // Delete thumbnail from Storage
-        const thumbnailRef = ref(storage, selectedCourse.thumbnail);
-        const thumbnailPromise = deleteObject(thumbnailRef);
+        try {
+            const thumbnailRef = ref(storage, selectedCourse.thumbnail);
+            await deleteObject(thumbnailRef);
+        } catch (e) {
+            console.error("Could not delete thumbnail file:", selectedCourse.thumbnail, e);
+        }
         
-        await Promise.all([...videoPromises, thumbnailPromise]);
+        await Promise.all(videoPromises);
 
         // Delete course document from Firestore
         await deleteDoc(courseRef);
@@ -433,7 +446,7 @@ function InstructorPage() {
             grade: data.grade,
             pricing: {
                 type: data.pricingModel,
-                price: data.price,
+                price: data.pricingModel === 'purchase' ? data.price : null,
             },
             thumbnail: thumbnailUrl,
             status: 'Draft' as const,
@@ -448,7 +461,7 @@ function InstructorPage() {
             toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
         } else {
             const newDocRef = await addDoc(collection(firestore, 'courses'), courseData);
-            setCourses([{ id: newDocRef.id, ...courseData, createdAt: Timestamp.now() }, ...courses]);
+            setCourses([{ id: newDocRef.id, ...courseData, createdAt: Timestamp.now() } as Course, ...courses]);
             toast({ title: "Course Created!", description: `The course "${data.title}" has been created.` });
         }
 
@@ -525,7 +538,8 @@ function InstructorPage() {
     return submittedAssignments.filter(assignment => {
         const searchMatch = assignmentFilters.search.trim().toLowerCase() === '' ||
             assignment.studentName.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase()) ||
-            assignment.title.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase());
+            (assignment.title && assignment.title.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase())) ||
+            (assignment.course && assignment.course.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase()));
         
         const statusMatch = assignmentFilters.status === 'All' || assignment.status === assignmentFilters.status;
 
@@ -956,7 +970,7 @@ function InstructorPage() {
                                             <div className="text-xs text-muted-foreground md:hidden">{assignment.title || assignment.course}</div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">
-                                            <div className="font-medium">{assignment.title}</div>
+                                            <div className="font-medium">{assignment.title || 'Untitled Assignment'}</div>
                                             <div className="text-xs text-muted-foreground">{assignment.course}</div>
                                         </TableCell>
                                         <TableCell>
@@ -1620,7 +1634,7 @@ function InstructorPage() {
               <AlertDialogHeader>
                   <AlertDialogTitle>Are you sure you want to unenroll this student?</AlertDialogTitle>
                   <AlertDialogDescription>
-                      This will remove <strong>{selectedStudent?.name}</strong> from the course. They will lose access to the course content. This action can be reversed by having them enroll again.
+                      This will remove <strong>{selectedStudent?.name}</strong> from the course. They will lose access to the course content. This action can be reversed by have them enroll again.
                   </AlertDialogDescription>
               </AlertDialogHeader>
               <AlertDialogFooter>
@@ -1736,5 +1750,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
