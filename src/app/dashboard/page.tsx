@@ -50,12 +50,14 @@ const assignmentFormSchema = z.object({
   course: z.string().min(1, "Course name is required."),
   dueDate: z.date({ required_error: "A due date is required." }),
   instructions: z.string().optional(),
-  file: z.instanceof(File).refine(file => file.size > 0, 'A file is required.').refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.').optional(),
+  file: z.instanceof(File).refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.').optional(),
 });
 type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
 
 type SubmittedAssignment = {
     id: string;
+    studentId: string;
+    studentName: string;
     title: string;
     course: string;
     status: 'Paid' | 'Awaiting Payment' | 'Submitted' | 'Pending Submission' | 'Pending Review';
@@ -201,7 +203,10 @@ function DashboardPage() {
                 const assignmentRef = doc(firestore, 'assignments', selectedAssignment.id);
                 // Don't update submittedAt on edit
                 const { submittedAt, ...updateData } = assignmentData;
-                await updateDoc(assignmentRef, updateData);
+                await updateDoc(assignmentRef, {
+                    ...updateData,
+                    dueDate: Timestamp.fromDate(data.dueDate)
+                });
 
                 // Update local state
                 setSubmittedAssignments(prev => prev.map(a => a.id === selectedAssignment.id ? { ...a, ...updateData, dueDate: Timestamp.fromDate(data.dueDate), submittedAt: a.submittedAt } : a));
@@ -639,7 +644,7 @@ function DashboardPage() {
                                                 {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'By Subscription'}
                                             </h4>
                                             <Button asChild>
-                                                <Link href="/payment">
+                                                <Link href={`/payment?type=course&id=${course.id}&title=${encodeURIComponent(course.title)}&price=${course.pricing.price}`}>
                                                     {course.pricing.type === 'purchase' ? 'Buy Now' : 'Subscribe'}
                                                 </Link>
                                             </Button>
@@ -759,7 +764,7 @@ function DashboardPage() {
                                         <TableCell className="text-right">
                                             {assignment.status === 'Pending Review' && <Button variant="secondary" size="sm" onClick={() => handleOpenAssignmentDialog(assignment)}><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Edit</span></Button>}
                                             {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
-                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href="/payment"><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
+                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href={`/payment?type=assignment&id=${assignment.id}&title=${encodeURIComponent(assignment.title)}&price=${assignment.price}`}><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
                                             {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl!} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
                                         </TableCell>
                                     </TableRow>
