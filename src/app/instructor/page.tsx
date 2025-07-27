@@ -96,6 +96,13 @@ type Course = {
     createdAt: Timestamp;
 };
 
+type Quiz = {
+    id: string;
+    title: string;
+    subject: string;
+    grade: string;
+};
+
 
 type SubmittedAssignment = {
     id: string;
@@ -142,12 +149,14 @@ function InstructorPage() {
   const currentTab = searchParams.get('tab') || 'overview';
 
   const [courses, setCourses] = React.useState<Course[]>([]);
+  const [quizzes, setQuizzes] = React.useState<Quiz[]>([]);
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
 
   const [loadingCourses, setLoadingCourses] = React.useState(true);
+  const [loadingQuizzes, setLoadingQuizzes] = React.useState(true);
   const [loadingAssignments, setLoadingAssignments] = React.useState(true);
   const [loadingTransactions, setLoadingTransactions] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
@@ -213,6 +222,7 @@ function InstructorPage() {
 
         if (!currentUser) {
             setLoadingCourses(false);
+            setLoadingQuizzes(false);
             setLoadingAssignments(false);
             setLoadingTransactions(false);
             return;
@@ -230,6 +240,21 @@ function InstructorPage() {
                 toast({ variant: "destructive", title: "Error", description: "Could not fetch courses." });
             } finally {
                 setLoadingCourses(false);
+            }
+        };
+
+        const fetchQuizzes = async () => {
+            setLoadingQuizzes(true);
+            try {
+                const q = query(collection(firestore, 'quizzes'), where('instructorId', '==', currentUser.uid));
+                const querySnapshot = await getDocs(q);
+                const fetchedQuizzes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Quiz[];
+                setQuizzes(fetchedQuizzes);
+            } catch (error) {
+                console.error("Error fetching quizzes: ", error);
+                toast({ variant: "destructive", title: "Error", description: "Could not fetch quizzes." });
+            } finally {
+                setLoadingQuizzes(false);
             }
         };
 
@@ -271,6 +296,7 @@ function InstructorPage() {
         };
         
         fetchCourses();
+        if (currentTab === 'quizzes') fetchQuizzes();
         if (currentTab === 'assignments' || currentTab === 'overview') fetchAssignments();
         if (currentTab === 'earnings' || currentTab === 'overview') fetchTransactions();
     });
@@ -925,14 +951,47 @@ function InstructorPage() {
                             <CardTitle>Quiz Management</CardTitle>
                             <CardDescription>Create and manage quizzes for your courses.</CardDescription>
                         </div>
-                        <Button><PlusCircle className="mr-2"/> Create New Quiz</Button>
+                        <Button asChild>
+                            <Link href="/instructor/quizzes/create">
+                                <PlusCircle className="mr-2"/> Create New Quiz
+                            </Link>
+                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                      <h3 className="text-lg font-semibold">No Quizzes Created Yet</h3>
-                      <p className="text-muted-foreground mt-1">Click "Create New Quiz" to get started.</p>
-                    </div>
+                    {loadingQuizzes ? (
+                        <div className="text-center py-16 text-muted-foreground">Loading quizzes...</div>
+                    ) : quizzes.length > 0 ? (
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Title</TableHead>
+                                    <TableHead>Subject</TableHead>
+                                    <TableHead>Grade</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {quizzes.map(quiz => (
+                                    <TableRow key={quiz.id}>
+                                        <TableCell className="font-medium">{quiz.title}</TableCell>
+                                        <TableCell>{quiz.subject}</TableCell>
+                                        <TableCell>{quiz.grade}</TableCell>
+                                        <TableCell className="text-right">
+                                            <Button variant="outline" size="sm" asChild>
+                                                <Link href={`/quiz/${quiz.id}`}>View</Link>
+                                            </Button>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    ) : (
+                        <div className="text-center py-16 border-2 border-dashed rounded-lg">
+                            <h3 className="text-lg font-semibold">No Quizzes Created Yet</h3>
+                            <p className="text-muted-foreground mt-1">Click "Create New Quiz" to get started.</p>
+                        </div>
+                    )}
                 </CardContent>
              </Card>
           )}
@@ -1525,8 +1584,9 @@ function InstructorPage() {
                                                     <SelectValue placeholder="Link a quiz (optional)" />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    <SelectItem value="Q001">Maths Grade 12 - Algebra Basics</SelectItem>
-                                                    <SelectItem value="Q002">Physics Grade 12 - Kinematics Test</SelectItem>
+                                                    {quizzes.map(quiz => (
+                                                        <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>
+                                                    ))}
                                                 </SelectContent>
                                             </Select>
                                         </div>
@@ -1775,7 +1835,7 @@ function InstructorPage() {
                     <AlertDialogAction onClick={confirmRefundTransaction} className={buttonVariants({ variant: "destructive" })}>Confirm Refund</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </AlertDialog>
+        </Dialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
@@ -1804,3 +1864,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    

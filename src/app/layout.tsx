@@ -6,6 +6,7 @@ import { ThemeProvider } from '@/components/theme-provider';
 import { usePathname } from 'next/navigation';
 import { AppLayout } from '@/components/app-layout';
 import React from 'react';
+import 'katex/dist/katex.min.css';
 
 // export const metadata: Metadata = {
 //   title: 'Edumate Pro',
@@ -30,6 +31,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVEMmg9ikOAiqRT5bDLA+UY+qCFs1IIF1oFHbkdsUgUjdVYEzpv" crossOrigin="anonymous" />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning={true}>
         <ThemeProvider
@@ -45,3 +47,5 @@ export default function RootLayout({
     </html>
   );
 }
+
+    
