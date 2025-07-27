@@ -1029,9 +1029,9 @@ function InstructorPage() {
                                 <DropdownMenuRadioItem value="Pending Review">Pending Review</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Awaiting Payment">Awaiting Payment</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Paid">Paid</DropdownMenuRadioItem>
-                            </DropdownMenuRadioGroup>
-                        </DropdownMenuContent>
-                    </DropdownMenu>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
                 </div>
                 <CardContent className="p-0">
                     {loadingAssignments ? (
@@ -1821,7 +1821,7 @@ function InstructorPage() {
         <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Confirm Refund</AlertDialogTitle>
+                    <AlertDialogTitle>Confirm Refund</DialogTitle>
                     <AlertDialogDescription>
                         Are you sure you want to refund this transaction?
                         <div className="p-2 mt-2 bg-muted rounded-md text-sm">
@@ -1835,7 +1835,7 @@ function InstructorPage() {
                     <AlertDialogAction onClick={confirmRefundTransaction} className={buttonVariants({ variant: "destructive" })}>Confirm Refund</AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </Dialog>
+        </AlertDialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
