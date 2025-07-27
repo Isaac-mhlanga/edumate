@@ -28,6 +28,7 @@ function PaymentForm() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
     const [user, setUser] = useState<User | null>(null);
+    const [loading, setLoading] = useState(true);
 
     const paymentType = searchParams.get('type');
     const itemId = searchParams.get('id');
@@ -39,6 +40,7 @@ function PaymentForm() {
         const auth = getAuth(app);
         const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
             setUser(currentUser);
+            setLoading(false);
         });
         return () => unsubscribe();
     }, []);
@@ -72,29 +74,31 @@ function PaymentForm() {
     const initializePayment = usePaystackPayment(config);
 
     const onSuccess = (reference: any) => {
-        // Implementation for whatever you want to do with reference and after success call.
         console.log(reference);
         toast({ title: 'Payment Successful!', description: 'Your transaction has been received and is being processed.' });
         router.push('/dashboard?tab=assignments');
     };
 
     const onClose = () => {
-        // implementation for  whatever you want to do when the Paystack dialog closed.
         console.log('closed');
         toast({ variant: 'destructive', title: 'Payment Canceled', description: 'You have canceled the payment process.' });
     };
 
-    if (!itemTitle || !itemPrice || !user) {
+    if (loading || !itemTitle || !itemPrice) {
         return (
-             <div className="flex min-h-screen items-center justify-center bg-muted">
-                <Card className="w-full max-w-md">
+             <div className="flex min-h-screen items-center justify-center bg-muted/40 p-4 sm:p-6 lg:p-8">
+                <Card className="w-full max-w-lg mx-auto">
                     <CardHeader>
-                        <CardTitle>Loading Payment Details...</CardTitle>
+                        <Skeleton className="h-7 w-3/5" />
+                        <Skeleton className="h-4 w-4/5" />
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                        <Skeleton className="h-8 w-3/4" />
+                    <CardContent className="space-y-6">
+                        <Skeleton className="h-20 w-full" />
+                        <div className="space-y-2 pt-4 border-t">
+                            <Skeleton className="h-4 w-1/2" />
+                            <Skeleton className="h-4 w-1/2" />
+                        </div>
                         <Skeleton className="h-12 w-full" />
-                        <Skeleton className="h-10 w-full" />
                     </CardContent>
                 </Card>
             </div>
@@ -131,8 +135,14 @@ function PaymentForm() {
                          <Button 
                             className="w-full mt-4" 
                             size="lg" 
-                            onClick={() => initializePayment({onSuccess, onClose})}
-                            disabled={!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY}
+                            onClick={() => {
+                                if (user && itemPrice) {
+                                    initializePayment({onSuccess, onClose});
+                                } else {
+                                    toast({ variant: 'destructive', title: 'Error', description: 'User details not loaded. Please wait a moment and try again.'});
+                                }
+                            }}
+                            disabled={!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || loading}
                         >
                             <CreditCard className="mr-2" /> Pay Now
                         </Button>
