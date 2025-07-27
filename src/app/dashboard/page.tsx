@@ -68,16 +68,30 @@ type SubmittedAssignment = {
     submittedAt: Timestamp;
     dueDate?: Timestamp;
 };
-type Transaction = (typeof studentData.transactions)[0];
+
+type Transaction = {
+    id: string;
+    item: string;
+    itemTitle: string;
+    type: string;
+    itemType: 'course' | 'assignment' | 'subscription';
+    status: 'Completed' | 'Refunded';
+    amount: number;
+    createdAt: Timestamp;
+    date: string; // for display
+};
 
 function DashboardPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
+    const [user, setUser] = React.useState<User | null>(null);
     
     const currentTab = searchParams.get('tab') || 'overview';
 
     const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
+    const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [loadingAssignments, setLoadingAssignments] = React.useState(true);
+    const [loadingTransactions, setLoadingTransactions] = React.useState(true);
 
     const completedAssignmentsCount = submittedAssignments.filter(a => a.status === 'Paid').length;
     const certificatesEarned = 1; 
@@ -128,32 +142,52 @@ function DashboardPage() {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
 
-        const fetchAssignments = async (user: User) => {
+        const fetchStudentData = async (user: User) => {
             setLoadingAssignments(true);
+            setLoadingTransactions(true);
+            const firestore = getFirestore(app);
             try {
-                const firestore = getFirestore(app);
-                const q = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
-                const querySnapshot = await getDocs(q);
-                const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
+                // Fetch assignments
+                const assignmentsQuery = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
+                const assignmentsSnapshot = await getDocs(assignmentsQuery);
+                const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
                 setSubmittedAssignments(assignments);
+
+                // Fetch transactions
+                const transactionsQuery = query(collection(firestore, 'transactions'), where('studentId', '==', user.uid), orderBy('createdAt', 'desc'));
+                const transactionsSnapshot = await getDocs(transactionsQuery);
+                const transactions = transactionsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        ...data,
+                        date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A'
+                    }
+                }) as Transaction[];
+                setTransactions(transactions);
+
             } catch (error: any) {
-                console.error("Error fetching assignments: ", error);
-                let errorMessage = 'Could not fetch your assignments. This can happen if the required database index is not set up.';
+                console.error("Error fetching student data: ", error);
+                let errorMessage = 'Could not fetch your data. This can happen if the required database index is not set up.';
                 if (error instanceof FirebaseError) {
                     errorMessage = error.message;
                 }
                 toast({ variant: 'destructive', title: 'Error', description: errorMessage });
             } finally {
                 setLoadingAssignments(false);
+                setLoadingTransactions(false);
             }
         };
 
         const unsubscribe = onAuthStateChanged(auth, (user) => {
+            setUser(user);
             if (user) {
-                fetchAssignments(user);
+                fetchStudentData(user);
             } else {
                 setSubmittedAssignments([]);
+                setTransactions([]);
                 setLoadingAssignments(false);
+                setLoadingTransactions(false);
             }
         });
 
@@ -187,7 +221,6 @@ function DashboardPage() {
             const assignmentData: Omit<SubmittedAssignment, 'id' | 'submittedAt'> & { submittedAt: any } = {
                 studentId: user.uid,
                 studentName: user.displayName || 'Anonymous',
-                studentEmail: user.email || '',
                 title: data.title,
                 course: data.course,
                 instructions: data.instructions,
@@ -205,11 +238,12 @@ function DashboardPage() {
                 const { submittedAt, ...updateData } = assignmentData;
                 await updateDoc(assignmentRef, {
                     ...updateData,
+                    status: "Pending Review", // Reset status on re-submission
                     dueDate: Timestamp.fromDate(data.dueDate)
                 });
 
                 // Update local state
-                setSubmittedAssignments(prev => prev.map(a => a.id === selectedAssignment.id ? { ...a, ...updateData, dueDate: Timestamp.fromDate(data.dueDate), submittedAt: a.submittedAt } : a));
+                setSubmittedAssignments(prev => prev.map(a => a.id === selectedAssignment.id ? { ...a, ...updateData, status: "Pending Review", dueDate: Timestamp.fromDate(data.dueDate), submittedAt: a.submittedAt } : a));
                 toast({ title: 'Success', description: 'Your assignment has been updated.' });
 
             } else { // Add new assignment
@@ -288,7 +322,7 @@ function DashboardPage() {
         if (!selectedTransaction) return;
         toast({
             title: "Refund Request Submitted",
-            description: `Your refund request for "${selectedTransaction.item}" has been submitted for review.`,
+            description: `Your refund request for "${selectedTransaction.itemTitle}" has been submitted for review.`,
         });
         setIsRefundDialogOpen(false);
         setSelectedTransaction(null);
@@ -310,15 +344,15 @@ function DashboardPage() {
     const paginatedAssignments = filteredAssignments.slice((currentAssignmentPage - 1) * assignmentsPerPage, currentAssignmentPage * assignmentsPerPage);
 
     const filteredTransactions = React.useMemo(() => {
-        return studentData.transactions.filter(transaction => {
+        return transactions.filter(transaction => {
             const searchMatch = transactionFilters.search.trim().toLowerCase() === '' ||
-                transaction.item.toLowerCase().includes(transactionFilters.search.trim().toLowerCase());
+                transaction.itemTitle.toLowerCase().includes(transactionFilters.search.trim().toLowerCase());
             
-            const typeMatch = transactionFilters.type === 'All' || transaction.type === transactionFilters.type;
+            const typeMatch = transactionFilters.type === 'All' || transaction.itemType === transactionFilters.type;
 
             return searchMatch && typeMatch;
         });
-    }, [transactionFilters]);
+    }, [transactions, transactionFilters]);
 
     const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
     const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * assignmentsPerPage);
@@ -829,9 +863,9 @@ function DashboardPage() {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuRadioGroup value={transactionFilters.type} onValueChange={(value) => handleTransactionFilterChange('type', value)}>
                                     <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Course">Course</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Assignment">Assignment</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Subscription">Subscription</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="course">Course</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="assignment">Assignment</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="subscription">Subscription</DropdownMenuRadioItem>
                                 </DropdownMenuRadioGroup>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -847,40 +881,58 @@ function DashboardPage() {
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedTransactions.map((transaction) => (
-                                <TableRow key={transaction.id}>
-                                    <TableCell className="font-medium">{transaction.item}</TableCell>
-                                    <TableCell className="hidden sm:table-cell">
-                                        <Badge variant="outline" className="gap-1.5">
-                                            {transaction.type === 'Course' && <GraduationCap className="h-3 w-3" />}
-                                            {transaction.type === 'Assignment' && <ReceiptText className="h-3 w-3" />}
-                                            {transaction.type === 'Subscription' && <Banknote className="h-3 w-3" />}
-                                            {transaction.type}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="hidden md:table-cell">{transaction.date}</TableCell>
-                                    <TableCell className={`font-semibold ${transaction.status === 'Refunded' ? 'text-red-600' : ''}`}>
-                                        {transaction.amount.toFixed(2)}
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {transaction.status !== 'Refunded' && (
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
-                                                        <ReceiptText className="mr-2 h-4 w-4"/>View Receipt
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem onClick={() => handleRefundRequest(transaction)} className="text-destructive focus:text-destructive">
-                                                        <Undo2 className="mr-2 h-4 w-4"/>Request Refund
-                                                    </DropdownMenuItem>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        )}
+                            {loadingTransactions ? (
+                                Array.from({ length: 3 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
+                                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                                    <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
+                                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
+                                </TableRow>
+                                ))
+                            ) : paginatedTransactions.length > 0 ? (
+                                paginatedTransactions.map((transaction) => (
+                                    <TableRow key={transaction.id}>
+                                        <TableCell className="font-medium">{transaction.itemTitle}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">
+                                            <Badge variant="outline" className="gap-1.5 capitalize">
+                                                {transaction.itemType === 'course' && <GraduationCap className="h-3 w-3" />}
+                                                {transaction.itemType === 'assignment' && <ReceiptText className="h-3 w-3" />}
+                                                {transaction.itemType === 'subscription' && <Banknote className="h-3 w-3" />}
+                                                {transaction.itemType}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell">{transaction.date}</TableCell>
+                                        <TableCell className={`font-semibold ${transaction.status === 'Refunded' ? 'text-red-600' : ''}`}>
+                                            {transaction.amount.toFixed(2)}
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {transaction.status !== 'Refunded' && (
+                                                <DropdownMenu>
+                                                    <DropdownMenuTrigger asChild>
+                                                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                                    </DropdownMenuTrigger>
+                                                    <DropdownMenuContent align="end">
+                                                        <DropdownMenuItem>
+                                                            <ReceiptText className="mr-2 h-4 w-4"/>View Receipt
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => handleRefundRequest(transaction)} className="text-destructive focus:text-destructive">
+                                                            <Undo2 className="mr-2 h-4 w-4"/>Request Refund
+                                                        </DropdownMenuItem>
+                                                    </DropdownMenuContent>
+                                                </DropdownMenu>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))
+                            ) : (
+                                <TableRow>
+                                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                        You have no transaction history yet.
                                     </TableCell>
                                 </TableRow>
-                            ))}
+                            )}
                         </TableBody>
                     </Table>
                      <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
@@ -1093,7 +1145,7 @@ function DashboardPage() {
                     <AlertDialogHeader>
                         <AlertDialogTitle>Request a Refund</AlertDialogTitle>
                         <AlertDialogDescription>
-                            Please provide a reason for your refund request for <strong>"{selectedTransaction?.item}"</strong>. Our team will review it shortly.
+                            Please provide a reason for your refund request for <strong>"{selectedTransaction?.itemTitle}"</strong>. Our team will review it shortly.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <div className="py-2">
@@ -1110,5 +1162,7 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
 
     

@@ -31,8 +31,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import withAuth from "@/components/with-auth";
 import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
+import { getAuth, type User } from "firebase/auth";
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
 import { Skeleton } from "@/components/ui/skeleton";
+import { format } from "date-fns";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -74,7 +76,7 @@ type SubmittedAssignment = {
     studentId: string;
     studentName: string;
     studentEmail: string;
-    assignmentTitle: string;
+    title: string;
     course: string;
     status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'Submitted';
     price: number | null;
@@ -86,7 +88,17 @@ type SubmittedAssignment = {
 };
 
 type EnrolledStudent = (typeof instructorData.enrolledStudents)[0];
-type Transaction = (typeof instructorData.transactions)[0];
+
+type Transaction = {
+    id: string;
+    itemTitle: string;
+    studentName?: string;
+    type: 'Course Sale' | 'Assignment Sale' | 'Subscription' | 'Refund' | 'Payout';
+    status: 'Completed' | 'Pending' | 'Refunded';
+    amount: number;
+    createdAt: Timestamp;
+    date: string; // for display
+};
 
 type VideoUpload = {
     title: string;
@@ -103,11 +115,13 @@ function InstructorPage() {
 
   const [courses, setCourses] = React.useState<Course[]>(instructorData.courses);
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
-  const [loadingAssignments, setLoadingAssignments] = React.useState(true);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
-  const [transactions, setTransactions] = React.useState<Transaction[]>(instructorData.transactions);
+  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
 
+  const [loadingAssignments, setLoadingAssignments] = React.useState(true);
+  const [loadingTransactions, setLoadingTransactions] = React.useState(true);
+  
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
   const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
   const [selectedStudent, setSelectedStudent] = React.useState<EnrolledStudent | null>(null);
@@ -160,11 +174,15 @@ function InstructorPage() {
   });
   
   React.useEffect(() => {
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const auth = getAuth(app);
+    const user = auth.currentUser;
+
     const fetchAssignments = async () => {
         setLoadingAssignments(true);
         try {
-            const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-            const firestore = getFirestore(app);
+            // In a real multi-instructor app, you'd filter by instructorId
             const q = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
             const querySnapshot = await getDocs(q);
             const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
@@ -180,9 +198,39 @@ function InstructorPage() {
             setLoadingAssignments(false);
         }
     };
+    
+     const fetchTransactions = async () => {
+        setLoadingTransactions(true);
+        try {
+            // In a real multi-instructor app, you'd filter by instructorId
+            const q = query(collection(firestore, 'transactions'), orderBy('createdAt', 'desc'));
+            const querySnapshot = await getDocs(q);
+            const transactions = querySnapshot.docs.map(doc => {
+                 const data = doc.data();
+                 return {
+                    id: doc.id,
+                    ...data,
+                    date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A'
+                 } as Transaction;
+            });
+            setTransactions(transactions);
+        } catch (error) {
+            console.error("Error fetching transactions: ", error);
+            toast({
+                variant: "destructive",
+                title: "Error",
+                description: "Could not fetch transactions."
+            });
+        } finally {
+            setLoadingTransactions(false);
+        }
+    };
 
     if (currentTab === 'assignments' || currentTab === 'overview') {
         fetchAssignments();
+    }
+    if (currentTab === 'earnings' || currentTab === 'overview') {
+        fetchTransactions();
     }
 }, [currentTab, toast]);
 
@@ -319,13 +367,35 @@ function InstructorPage() {
     setVideoUploads([]);
   }
 
-  function handleSaveSolution(assignmentId: string, price: number) {
-    setSubmittedAssignments(assignments => assignments.map(a => a.id === assignmentId ? { ...a, status: 'Awaiting Payment', price: price } : a));
-    toast({
-        title: "Solution Uploaded!",
-        description: `The solution has been priced and is now awaiting student payment.`
-    });
-    handleReviewDialogOpenChange(false);
+  async function handleSaveSolution(assignmentId: string, price: number) {
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const assignmentRef = doc(firestore, 'assignments', assignmentId);
+
+    try {
+        await updateDoc(assignmentRef, {
+            price: price,
+            status: 'Awaiting Payment'
+        });
+        
+        // Update local state to reflect the change immediately
+        setSubmittedAssignments(assignments => assignments.map(a => 
+            a.id === assignmentId ? { ...a, status: 'Awaiting Payment', price: price } : a
+        ));
+
+        toast({
+            title: "Solution Uploaded!",
+            description: `The solution has been priced and is now awaiting student payment.`
+        });
+        handleReviewDialogOpenChange(false);
+    } catch (error) {
+        console.error("Error updating assignment: ", error);
+        toast({
+            variant: "destructive",
+            title: "Error",
+            description: "Failed to save the solution price. Please try again."
+        });
+    }
   }
 
   // Course filtering and pagination logic
@@ -359,7 +429,7 @@ function InstructorPage() {
     return submittedAssignments.filter(assignment => {
         const searchMatch = assignmentFilters.search.trim().toLowerCase() === '' ||
             assignment.studentName.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase()) ||
-            assignment.assignmentTitle.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase());
+            assignment.title.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase());
         
         const statusMatch = assignmentFilters.status === 'All' || assignment.status === assignmentFilters.status;
 
@@ -430,7 +500,7 @@ function InstructorPage() {
 
   const confirmRefundTransaction = () => {
     if (!selectedTransaction) return;
-    setTransactions(transactions.map(t => t.id === selectedTransaction.id ? { ...t, status: 'Refunded' } : t));
+    setTransactions(transactions.map(t => t.id === selectedTransaction.id ? { ...t, status: 'Refunded', amount: -Math.abs(t.amount) } : t));
     toast({ title: "Refund Processed", description: `Transaction ${selectedTransaction.id} has been refunded.` });
     setIsRefundDialogOpen(false);
     setSelectedTransaction(null);
@@ -441,13 +511,13 @@ function InstructorPage() {
     setIsPayoutDialogOpen(false);
   };
 
-  const totalRevenue = React.useMemo(() => transactions.filter(t => t.type !== 'Payout' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0), [transactions]);
+  const totalRevenue = React.useMemo(() => transactions.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0), [transactions]);
   const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
 
   const filteredTransactions = React.useMemo(() => {
     return transactions.filter(transaction => {
       const searchMatch = transactionFilters.search.trim().toLowerCase() === '' ||
-        transaction.item.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()) ||
+        transaction.itemTitle.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()) ||
         (transaction.studentName && transaction.studentName.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()));
       
       const typeMatch = transactionFilters.type === 'All' || transaction.type === transactionFilters.type;
@@ -482,7 +552,7 @@ function InstructorPage() {
                       <stat.icon className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{stat.value}</div>
+                      <div className="text-2xl font-bold">{stat.title.includes('Earnings') ? `R ${availableForPayout.toFixed(2)}` : stat.value}</div>
                       <p className="text-xs text-muted-foreground flex items-center">
                         <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span> vs last month
                       </p>
@@ -529,7 +599,7 @@ function InstructorPage() {
                           <li key={assignment.id} className="flex items-center gap-4">
                             <Avatar className="h-10 w-10"><AvatarFallback>{assignment.studentName.charAt(0)}</AvatarFallback></Avatar>
                             <div className="flex-1">
-                              <p className="font-medium">{assignment.assignmentTitle}</p>
+                              <p className="font-medium">{assignment.title}</p>
                               <p className="text-sm text-muted-foreground">From {assignment.studentName}</p>
                             </div>
                             <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>Review</Button>
@@ -781,10 +851,10 @@ function InstructorPage() {
                                     <TableRow key={assignment.id}>
                                         <TableCell>
                                             <div className="font-medium">{assignment.studentName}</div>
-                                            <div className="text-xs text-muted-foreground md:hidden">{assignment.assignmentTitle}</div>
+                                            <div className="text-xs text-muted-foreground md:hidden">{assignment.title}</div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">
-                                            <div className="font-medium">{assignment.assignmentTitle}</div>
+                                            <div className="font-medium">{assignment.title}</div>
                                             <div className="text-xs text-muted-foreground">{assignment.course}</div>
                                         </TableCell>
                                         <TableCell>
@@ -1041,7 +1111,30 @@ function InstructorPage() {
                         </div>
                     </div>
                     <CardContent className="p-0">
-                        {paginatedTransactionsData.length > 0 ? (
+                        {loadingTransactions ? (
+                             <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Item / Description</TableHead>
+                                        <TableHead className="hidden sm:table-cell">Student</TableHead>
+                                        <TableHead className="hidden md:table-cell">Status</TableHead>
+                                        <TableHead className="text-right">Amount (R)</TableHead>
+                                        <TableHead className="text-right hidden md:table-cell">Actions</TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {Array.from({ length: 5 }).map((_, i) => (
+                                        <TableRow key={i}>
+                                            <TableCell><Skeleton className="h-5 w-40" /></TableCell>
+                                            <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                                            <TableCell className="hidden md:table-cell"><Skeleton className="h-6 w-28" /></TableCell>
+                                            <TableCell className="text-right"><Skeleton className="h-5 w-16 ml-auto" /></TableCell>
+                                            <TableCell className="text-right hidden md:table-cell"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        ) : paginatedTransactionsData.length > 0 ? (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
@@ -1055,7 +1148,7 @@ function InstructorPage() {
                                 <TableBody>
                                     {paginatedTransactionsData.map((transaction) => (
                                         <TableRow key={transaction.id}>
-                                            <TableCell className="font-medium">{transaction.item}</TableCell>
+                                            <TableCell className="font-medium">{transaction.itemTitle}</TableCell>
                                             <TableCell className="text-muted-foreground hidden sm:table-cell">{transaction.studentName || 'N/A'}</TableCell>
                                             <TableCell className="hidden md:table-cell">
                                                 <Badge
@@ -1306,7 +1399,7 @@ function InstructorPage() {
                           <h4 className="font-semibold">Submission Details</h4>
                           <div className="text-sm space-y-2">
                             <p><span className="text-muted-foreground">Student:</span> {selectedAssignment.studentName}</p>
-                            <p><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.assignmentTitle}</p>
+                            <p><span className="text-muted-foreground">Assignment:</span> {selectedAssignment.title}</p>
                             <p><span className="text-muted-foreground">Course:</span> {selectedAssignment.course}</p>
                             {selectedAssignment.instructions && <p><span className="text-muted-foreground">Instructions:</span> {selectedAssignment.instructions}</p>}
                           </div>
@@ -1454,7 +1547,7 @@ function InstructorPage() {
                         <div className="space-y-4 py-4">
                             <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Item</span>
-                                <span className="font-medium">{selectedTransaction.item}</span>
+                                <span className="font-medium">{selectedTransaction.itemTitle}</span>
                             </div>
                             <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Student</span>
@@ -1467,7 +1560,7 @@ function InstructorPage() {
                             </div>
                              <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Type</span>
-                                <span className="font-medium">{selectedTransaction.type}</span>
+                                <span className="font-medium capitalize">{selectedTransaction.type}</span>
                             </div>
                              <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Status</span>
@@ -1494,7 +1587,7 @@ function InstructorPage() {
                     <AlertDialogDescription>
                         Are you sure you want to refund this transaction?
                         <div className="p-2 mt-2 bg-muted rounded-md text-sm">
-                            <strong>{selectedTransaction?.item}</strong> for <strong>R {selectedTransaction?.amount.toFixed(2)}</strong>
+                            <strong>{selectedTransaction?.itemTitle}</strong> for <strong>R {selectedTransaction?.amount.toFixed(2)}</strong>
                         </div>
                         This action cannot be undone.
                     </AlertDialogDescription>
@@ -1533,5 +1626,7 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
 
     
