@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -477,7 +476,12 @@ function InstructorPage() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleReviewAssignment = async (assignment: SubmittedAssignment) => {
+  const handleReviewAssignment = (assignment: SubmittedAssignment) => {
+      setSelectedAssignment(assignment);
+      setIsReviewDialogOpen(true);
+  };
+  
+  const handleAcceptAssignment = async (assignment: SubmittedAssignment) => {
     if (!user) return;
 
     if (assignment.status === 'Pending Review') {
@@ -490,29 +494,22 @@ function InstructorPage() {
                 markerId: user.uid,
                 markerName: user.displayName
             });
+            const updatedAssignment = { ...assignment, status: 'In Progress' as const, markerId: user.uid, markerName: user.displayName || 'Instructor' };
             setSubmittedAssignments(prev =>
                 prev.map(a =>
-                    a.id === assignment.id
-                        ? { ...a, status: 'In Progress', markerId: user.uid, markerName: user.displayName || 'Instructor' }
-                        : a
+                    a.id === assignment.id ? updatedAssignment : a
                 )
             );
-            setSelectedAssignment({ ...assignment, status: 'In Progress', markerId: user.uid });
-            setIsReviewDialogOpen(true);
-            toast({ title: 'Assignment Claimed', description: 'You can now work on the solution.' });
+            setSelectedAssignment(updatedAssignment);
+            toast({ title: 'Assignment Accepted', description: 'You can now work on the solution.' });
+            setIsReviewDialogOpen(false); // Close dialog on accept
         } catch (error) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not claim assignment. It might have been taken by another instructor.' });
-            // Optionally, refresh the list of assignments here
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not accept assignment. It might have been taken by another instructor.' });
         }
-    } else if (assignment.markerId === user.uid) {
-        // If it's already in progress by this instructor, just open the dialog
-        setSelectedAssignment(assignment);
-        setIsReviewDialogOpen(true);
     } else {
-        // If it's in progress by someone else
-        toast({ variant: 'destructive', title: 'Assignment Locked', description: `This assignment is currently being worked on by ${assignment.markerName || 'another instructor'}.` });
+        toast({ variant: 'destructive', title: 'Assignment Unavailable', description: `This assignment is no longer pending review.` });
     }
-};
+  };
   
   const confirmDeleteCourse = async () => {
     if (!selectedCourse) return;
@@ -824,9 +821,11 @@ function InstructorPage() {
 
   // Overview Pending Assignments Pagination Logic
   const pendingAssignments = React.useMemo(() => {
-    return submittedAssignments.filter(a => a.status === 'Pending Review');
-  }, [submittedAssignments]);
+    return submittedAssignments.filter(a => a.status === 'In Progress' && a.markerId === user?.uid);
+  }, [submittedAssignments, user]);
+  
   const totalPendingAssignmentPages = Math.ceil(pendingAssignments.length / pendingAssignmentsPerPage);
+  
   const paginatedPendingAssignments = pendingAssignments.slice(
     (currentPendingAssignmentPage - 1) * pendingAssignmentsPerPage,
     currentPendingAssignmentPage * pendingAssignmentsPerPage
@@ -891,12 +890,12 @@ function InstructorPage() {
                   </Card>
                   <Card className="shadow-md rounded-xl">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">Pending Assignments</CardTitle>
+                      <CardTitle className="text-sm font-medium">Accepted Assignments</CardTitle>
                       <Clock className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
                       <div className="text-2xl font-bold">{loadingAssignments ? <Skeleton className="h-8 w-16" /> : pendingAssignments.length}</div>
-                       <p className="text-xs text-muted-foreground">Awaiting your review</p>
+                       <p className="text-xs text-muted-foreground">Awaiting your solution</p>
                     </CardContent>
                   </Card>
               </section>
@@ -952,8 +951,8 @@ function InstructorPage() {
                 
                 <Card className="shadow-md rounded-xl flex flex-col">
                   <CardHeader>
-                    <CardTitle className="text-xl">Pending Assignments</CardTitle>
-                    <CardDescription>Assignments waiting for your review.</CardDescription>
+                    <CardTitle className="text-xl">Your Pending Assignments</CardTitle>
+                    <CardDescription>Assignments you have accepted to work on.</CardDescription>
                   </CardHeader>
                   <CardContent className="flex-grow">
                     {loadingAssignments ? (
@@ -972,7 +971,7 @@ function InstructorPage() {
                               <p className="text-sm text-muted-foreground">From {assignment.studentName}</p>
                             </div>
                             <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>
-                                <Edit className="mr-2 h-4 w-4" /> Review
+                                <Edit className="mr-2 h-4 w-4" /> Continue
                             </Button>
                           </li>
                         ))}
@@ -981,7 +980,7 @@ function InstructorPage() {
                       <div className="text-center text-muted-foreground h-full flex flex-col justify-center items-center">
                           <CheckCircle className="h-10 w-10 mb-2"/>
                           <h3 className="font-semibold">All caught up!</h3>
-                          <p className="text-sm">No pending assignments to review.</p>
+                          <p className="text-sm">You have no pending assignments.</p>
                       </div>
                     )}
                   </CardContent>
@@ -1943,7 +1942,9 @@ function InstructorPage() {
               <DialogHeader>
                   <DialogTitle>Review Assignment</DialogTitle>
                   <DialogDescription>
-                      Review the student's submission, upload a solution, and set a price.
+                    {selectedAssignment?.status === 'Pending Review' 
+                      ? "Review the student's submission and accept it to provide a solution."
+                      : "Upload a solution and set a price for your work."}
                   </DialogDescription>
               </DialogHeader>
               {selectedAssignment && (
@@ -1959,31 +1960,44 @@ function InstructorPage() {
                             <a href={selectedAssignment.fileUrl} download><Download className="mr-2 h-4 w-4"/>Download Submission</a>
                           </Button>
                       </div>
-                      <div className="space-y-2">
-                          <Label>Upload Solution</Label>
-                          <div className="flex items-center justify-center w-full">
-                              <label htmlFor="dropzone-file-solution" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
-                                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                      <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                      <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
-                                      <p className="text-xs text-muted-foreground">PDF, DOCX, or JPG</p>
-                                  </div>
-                                  <Input id="dropzone-file-solution" type="file" className="hidden" />
-                              </label>
+
+                      {selectedAssignment.status === 'In Progress' && selectedAssignment.markerId === user?.uid && (
+                        <>
+                          <div className="space-y-2">
+                              <Label>Upload Solution</Label>
+                              <div className="flex items-center justify-center w-full">
+                                  <label htmlFor="dropzone-file-solution" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
+                                      <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                          <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                          <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
+                                          <p className="text-xs text-muted-foreground">PDF, DOCX, or JPG</p>
+                                      </div>
+                                      <Input id="dropzone-file-solution" type="file" className="hidden" />
+                                  </label>
+                              </div>
                           </div>
-                      </div>
-                       <div className="space-y-2">
-                          <Label>Set Price (R)</Label>
-                           <div className="relative">
-                               <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R</span>
-                               <Input id="solution-price" type="number" placeholder="e.g. 150" className="pl-8" defaultValue={selectedAssignment.price ?? ''} />
-                           </div>
-                       </div>
+                          <div className="space-y-2">
+                              <Label>Set Price (R)</Label>
+                              <div className="relative">
+                                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">R</span>
+                                  <Input id="solution-price" type="number" placeholder="e.g. 150" className="pl-8" defaultValue={selectedAssignment.price ?? ''} />
+                              </div>
+                          </div>
+                        </>
+                      )}
+
                       <DialogFooter>
                           <Button type="button" variant="ghost" onClick={() => handleReviewDialogOpenChange(false)}>Cancel</Button>
-                          <Button type="button" onClick={() => handleSaveSolution(selectedAssignment.id, parseFloat((document.getElementById('solution-price') as HTMLInputElement).value || '0'))}>
-                               <Save className="mr-2 h-4 w-4" /> Save Solution
-                          </Button>
+                          {selectedAssignment.status === 'Pending Review' && (
+                            <Button type="button" onClick={() => handleAcceptAssignment(selectedAssignment)}>
+                               <Check className="mr-2 h-4 w-4" /> Accept Assignment
+                            </Button>
+                          )}
+                          {selectedAssignment.status === 'In Progress' && (
+                            <Button type="button" onClick={() => handleSaveSolution(selectedAssignment.id, parseFloat((document.getElementById('solution-price') as HTMLInputElement).value || '0'))}>
+                                <Save className="mr-2 h-4 w-4" /> Save Solution
+                            </Button>
+                          )}
                       </DialogFooter>
                   </div>
               )}
