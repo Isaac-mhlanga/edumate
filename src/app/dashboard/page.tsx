@@ -90,8 +90,10 @@ function DashboardPage() {
 
     const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+    const [allCourses, setAllCourses] = React.useState<(typeof instructorData.courses)>([]);
     const [loadingAssignments, setLoadingAssignments] = React.useState(true);
     const [loadingTransactions, setLoadingTransactions] = React.useState(true);
+    const [loadingCourses, setLoadingCourses] = React.useState(true);
 
     const completedAssignmentsCount = submittedAssignments.filter(a => a.status === 'Paid').length;
     const certificatesEarned = 1; 
@@ -141,11 +143,12 @@ function DashboardPage() {
     React.useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
+        const firestore = getFirestore(app);
 
         const fetchStudentData = async (user: User) => {
             setLoadingAssignments(true);
             setLoadingTransactions(true);
-            const firestore = getFirestore(app);
+            setLoadingCourses(true);
             try {
                 // Fetch assignments
                 const assignmentsQuery = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
@@ -166,6 +169,10 @@ function DashboardPage() {
                 }) as Transaction[];
                 setTransactions(transactions);
 
+                // Fetch all courses
+                const coursesSnapshot = await getDocs(collection(firestore, 'courses'));
+                setAllCourses(coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as typeof allCourses);
+
             } catch (error: any) {
                 console.error("Error fetching student data: ", error);
                 let errorMessage = 'Could not fetch your data. This can happen if the required database index is not set up.';
@@ -176,6 +183,7 @@ function DashboardPage() {
             } finally {
                 setLoadingAssignments(false);
                 setLoadingTransactions(false);
+                setLoadingCourses(false);
             }
         };
 
@@ -186,8 +194,10 @@ function DashboardPage() {
             } else {
                 setSubmittedAssignments([]);
                 setTransactions([]);
+                setAllCourses([]);
                 setLoadingAssignments(false);
                 setLoadingTransactions(false);
+                setLoadingCourses(false);
             }
         });
 
@@ -357,8 +367,7 @@ function DashboardPage() {
     const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
     const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * assignmentsPerPage);
     
-    const allCourses = instructorData.courses;
-    const purchasedCourseIds = new Set(studentData.purchasedCourses.map(c => c.id));
+    const purchasedCourseIds = new Set(transactions.filter(t => t.itemType === 'course').map(t => t.itemId));
 
     const filteredCourses = React.useMemo(() => {
         return allCourses.filter(course => {
@@ -382,8 +391,8 @@ function DashboardPage() {
     const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
 
     const purchasedCoursesWithDetails = React.useMemo(() => {
-        return instructorData.courses.filter(c => purchasedCourseIds.has(c.id));
-    }, [purchasedCourseIds]);
+        return allCourses.filter(c => purchasedCourseIds.has(c.id));
+    }, [purchasedCourseIds, allCourses]);
 
     const filteredPurchasedCourses = React.useMemo(() => {
         return purchasedCoursesWithDetails.filter(course => {
@@ -644,7 +653,13 @@ function DashboardPage() {
                         </Popover>
                     </div>
                     <CardContent className="pt-6">
-                        {paginatedCourses.length > 0 ? (
+                        {loadingCourses ? (
+                            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {Array.from({length: 3}).map((_, i) => (
+                                    <Card key={i}><Skeleton className="h-64 w-full" /></Card>
+                                ))}
+                            </div>
+                        ) : paginatedCourses.length > 0 ? (
                         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {paginatedCourses.map((course) => (
                             <Card key={course.id} className="shadow-md rounded-xl overflow-hidden group flex flex-col">
@@ -1162,7 +1177,3 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
-
-    
-
-    

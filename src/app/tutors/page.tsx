@@ -26,11 +26,11 @@ type Day = (typeof tutorData.availability)[0];
 
 const allTutors = [
     tutorData, 
-    { ...tutorData, id: "T002", name: "Dr. Evelyn Reed", avatar: "https://placehold.co/100x100.png", hourlyRate: 300, subjects: ["Maths"], location: "Johannesburg, Gauteng" },
-    { ...tutorData, id: "T003", name: "Ben Carter", avatar: "https://placehold.co/100x100.png", hourlyRate: 220, subjects: ["Physical Sciences"], grades: ["11", "12"], location: "Durban, KZN" },
-    { ...tutorData, id: "T004", name: "Chloe Taylor", avatar: "https://placehold.co/100x100.png", hourlyRate: 275, subjects: ["Maths"], grades: ["10"], location: "Pretoria, Gauteng" },
-    { ...tutorData, id: "T005", name: "David Lee", avatar: "https://placehold.co/100x100.png", hourlyRate: 250, subjects: ["Maths", "Physical Sciences"], grades: ["12"], location: "Cape Town, Western Cape" },
-    { ...tutorData, id: "T006", name: "Sarah Miller", avatar: "https://placehold.co/100x100.png", hourlyRate: 280, subjects: ["Physical Sciences"], grades: ["10", "11"], location: "Johannesburg, Gauteng" },
+    { ...tutorData, id: "T002", name: "Dr. Evelyn Reed", avatar: "https://placehold.co/100x100.png", hourlyRate: 300, subjects: ["Maths"], location: "Johannesburg, Gauteng", modes: ["Online"] },
+    { ...tutorData, id: "T003", name: "Ben Carter", avatar: "https://placehold.co/100x100.png", hourlyRate: 220, subjects: ["Physical Sciences"], grades: ["11", "12"], location: "Durban, KZN", modes: ["In-person"] },
+    { ...tutorData, id: "T004", name: "Chloe Taylor", avatar: "https://placehold.co/100x100.png", hourlyRate: 275, subjects: ["Maths"], grades: ["10"], location: "Pretoria, Gauteng", modes: ["Online", "In-person"] },
+    { ...tutorData, id: "T005", name: "David Lee", avatar: "https://placehold.co/100x100.png", hourlyRate: 250, subjects: ["Maths", "Physical Sciences"], grades: ["12"], location: "Cape Town, Western Cape", modes: ["Online"] },
+    { ...tutorData, id: "T006", name: "Sarah Miller", avatar: "https://placehold.co/100x100.png", hourlyRate: 280, subjects: ["Physical Sciences"], grades: ["10", "11"], location: "Johannesburg, Gauteng", modes: ["In-person"] },
 ];
 
 export default function TutorsPage() {
@@ -100,9 +100,8 @@ export default function TutorsPage() {
                     <span className="text-xl font-bold">Edumate Pro</span>
                 </Link>
                 <nav className="hidden md:flex items-center gap-6">
-                    <Link href="/#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
+                    <Link href="/#services" className="text-sm font-medium hover:text-primary transition-colors">Services</Link>
                     <Link href="/tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
-                    <Link href="/dashboard" className="text-sm font-medium hover:text-primary transition-colors">Dashboard</Link>
                 </nav>
                 <div className="flex items-center gap-2">
                     <Button variant="ghost" asChild>

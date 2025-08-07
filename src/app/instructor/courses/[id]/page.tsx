@@ -80,7 +80,9 @@ export default function CoursePreviewPage() {
             if (docSnap.exists()) {
                 const courseData = { id: docSnap.id, ...docSnap.data() } as Course;
                 setCourse(courseData);
-                setActiveVideo(courseData.videos[0]);
+                if (courseData.videos && courseData.videos.length > 0) {
+                    setActiveVideo(courseData.videos[0]);
+                }
             } else {
                 console.error("No such course!");
             }
@@ -144,9 +146,10 @@ export default function CoursePreviewPage() {
                                     <>
                                         <video
                                             ref={videoRef}
-                                            key={activeVideo.id}
+                                            key={activeVideo.url}
                                             className="w-full h-full"
                                             controls
+                                            autoPlay
                                             src={activeVideo.url}
                                         >
                                             Your browser does not support the video tag.
@@ -279,5 +282,3 @@ export default function CoursePreviewPage() {
         </div>
     );
 }
-
-    

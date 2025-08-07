@@ -15,33 +15,73 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, DollarSign, Download, Eye, FileText, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, Search, Shield, ShieldCheck, Trash2, Upload, UserCog, UserMinus, UserPlus, Users, X, XCircle, Clock, FileUp } from "lucide-react";
+import { PayoutRequest as PayoutRequestType, adminData } from "@/lib/data";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, Search, ShieldCheck, Trash2, UserCog, UserMinus, UserPlus, Users, X, XCircle } from "lucide-react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { PayoutReceipt } from "@/components/payout-receipt";
 import { useReactToPrint } from "react-to-print";
 import withAuth from "@/components/with-auth";
+import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, writeBatch, query, where } from "firebase/firestore";
+import { getApp, getApps, initializeApp } from "firebase/app";
 
-type User = (typeof adminData.users)[0];
-type Course = (typeof adminData.courses)[0];
-type PayoutRequest = (typeof adminData.payoutRequests)[0];
-type Assignment = (typeof adminData.assignments)[0];
-type Subscription = (typeof adminData.subscriptions)[0];
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+type User = { id: string; name: string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; status: 'Active' | 'Suspended' };
+type Course = { id: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft' };
+type PayoutRequest = PayoutRequestType;
+type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
+type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 
 function AdminPage() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
+    const [firestore, setFirestore] = React.useState(getFirestore(getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)));
 
     const currentTab = searchParams.get('tab') || 'overview';
 
-    const [users, setUsers] = React.useState(adminData.users);
-    const [courses, setCourses] = React.useState(adminData.courses);
-    const [assignments, setAssignments] = React.useState(adminData.assignments);
-    const [payoutRequests, setPayoutRequests] = React.useState(adminData.payoutRequests);
-    const [subscriptions, setSubscriptions] = React.useState(adminData.subscriptions);
+    const [users, setUsers] = React.useState<User[]>([]);
+    const [courses, setCourses] = React.useState<Course[]>([]);
+    const [assignments, setAssignments] = React.useState<Assignment[]>([]);
+    const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>(adminData.payoutRequests);
+    const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
+
+    React.useEffect(() => {
+        const fetchData = async () => {
+            try {
+                // Fetch users
+                const usersSnapshot = await getDocs(collection(firestore, "users"));
+                setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User)));
+
+                // Fetch courses
+                const coursesSnapshot = await getDocs(collection(firestore, "courses"));
+                setCourses(coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course)));
+
+                // Fetch assignments
+                const assignmentsSnapshot = await getDocs(collection(firestore, "assignments"));
+                setAssignments(assignmentsSnapshot.docs.map(doc => ({ id: doc.id, assignmentTitle: doc.data().title, ...doc.data() } as Assignment)));
+
+                // Fetch subscriptions
+                setSubscriptions(adminData.subscriptions);
+
+            } catch (error) {
+                console.error("Error fetching admin data:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch platform data.' });
+            }
+        };
+
+        fetchData();
+    }, [firestore, toast]);
+
 
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
     const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = React.useState(false);
@@ -124,16 +164,25 @@ function AdminPage() {
         if (action === 'delete') setIsDeleteUserDialogOpen(true);
     };
 
-    const confirmSuspendUser = () => {
+    const confirmSuspendUser = async () => {
         if (!selectedUser) return;
-        setUsers(users.map(u => u.id === selectedUser.id ? {...u, status: u.status === 'Active' ? 'Suspended' : 'Active'} : u));
-        toast({ title: "User Status Updated", description: `${selectedUser.name}'s status has been changed.` });
+        const newStatus = selectedUser.status === 'Active' ? 'Suspended' : 'Active';
+        const userRef = doc(firestore, 'users', selectedUser.id);
+        await updateDoc(userRef, { status: newStatus });
+
+        setUsers(users.map(u => u.id === selectedUser.id ? {...u, status: newStatus} : u));
+        toast({ title: "User Status Updated", description: `${selectedUser.name}'s status has been changed to ${newStatus}.` });
         setIsSuspendUserDialogOpen(false);
         setSelectedUser(null);
     }
 
-    const confirmDeleteUser = () => {
+    const confirmDeleteUser = async () => {
         if (!selectedUser) return;
+        
+        // This is a placeholder. In a real app, you would need a Cloud Function to delete the user from Firebase Auth.
+        // For now, we will just delete their Firestore document.
+        await deleteDoc(doc(firestore, "users", selectedUser.id));
+
         setUsers(users.filter(u => u.id !== selectedUser.id));
         toast({ title: "User Deleted", description: `${selectedUser.name} has been permanently deleted.`, variant: "destructive" });
         setIsDeleteUserDialogOpen(false);
@@ -146,9 +195,12 @@ function AdminPage() {
         setIsCourseActionDialogOpen(true);
     };
 
-    const confirmCourseAction = () => {
+    const confirmCourseAction = async () => {
         if (!selectedCourse || !courseAction) return;
         const newStatus = courseAction === 'Approve' ? 'Published' : 'Rejected';
+        const courseRef = doc(firestore, 'courses', selectedCourse.id);
+        await updateDoc(courseRef, { status: newStatus });
+        
         setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, status: newStatus } : c));
         toast({ title: `Course ${courseAction}d`, description: `The course "${selectedCourse.title}" has been ${newStatus.toLowerCase()}.` });
         setIsCourseActionDialogOpen(false);
@@ -372,7 +424,6 @@ function AdminPage() {
                                          <DropdownMenu>
                                             <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
-                                                <DropdownMenuItem><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
                                                 <DropdownMenuItem onClick={() => handleUserAction(user, 'suspend')}><UserMinus className="mr-2 h-4 w-4"/>{user.status === 'Active' ? 'Suspend' : 'Unsuspend'}</DropdownMenuItem>
                                                 <DropdownMenuSeparator />
                                                 <DropdownMenuItem onClick={() => handleUserAction(user, 'delete')} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete User</DropdownMenuItem>
