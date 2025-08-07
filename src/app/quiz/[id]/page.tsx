@@ -1,9 +1,8 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useForm, Controller } from 'react-hook-form';
@@ -17,10 +16,10 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { ArrowLeft, ArrowRight, Lightbulb, CheckCircle, XCircle, Check, Award, ChevronLeft } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Lightbulb, CheckCircle, XCircle, Check, Award, ChevronLeft, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { clarifyQuestion } from '@/ai/flows/clarify-question';
-import { gradeQuiz, GradeQuizInput, GradeQuizOutput } from '@/ai/flows/grade-quiz';
+import { gradeQuiz, type GradeQuizInput, type GradeQuizOutput } from '@/ai/flows/grade-quiz';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import { Progress } from '@/components/ui/progress';
@@ -50,6 +49,11 @@ type Quiz = {
   grade: string;
   questions: Question[];
 };
+type SubmissionHistory = {
+    id: string;
+    submittedAt: Timestamp;
+    result: GradeQuizOutput;
+}
 
 const generateFormSchema = (questions: Question[]) => {
   const schemaObject = questions.reduce((acc, _, index) => {
@@ -71,6 +75,7 @@ function QuizViewerPage() {
   const [isHintLoading, setIsHintLoading] = useState(false);
   const [isGrading, setIsGrading] = useState(false);
   const [quizResult, setQuizResult] = useState<GradeQuizOutput | null>(null);
+  const [submissionHistory, setSubmissionHistory] = useState<SubmissionHistory[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   const formSchema = quiz ? generateFormSchema(quiz.questions) : z.object({});
@@ -86,21 +91,42 @@ function QuizViewerPage() {
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, setUser);
+    const firestore = getFirestore(app);
 
-    const fetchQuiz = async () => {
+    const fetchQuizAndHistory = async (currentUser: User) => {
       if (!quizId) return;
       setLoading(true);
-      const firestore = getFirestore(app);
+      
+      // Fetch quiz data
       const quizRef = doc(firestore, 'quizzes', quizId);
       const docSnap = await getDoc(quizRef);
       if (docSnap.exists()) {
         setQuiz({ id: docSnap.id, ...docSnap.data() } as Quiz);
       }
+      
+      // Fetch submission history
+      const submissionsQuery = query(
+        collection(firestore, 'quizSubmissions'),
+        where('quizId', '==', quizId),
+        where('studentId', '==', currentUser.uid),
+        orderBy('submittedAt', 'desc')
+      );
+      const submissionsSnapshot = await getDocs(submissionsQuery);
+      const history = submissionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmissionHistory[];
+      setSubmissionHistory(history);
+
       setLoading(false);
     };
-
-    fetchQuiz();
+    
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser)
+        if (currentUser) {
+            fetchQuizAndHistory(currentUser)
+        } else {
+            setLoading(false)
+        }
+    });
+    
     return () => unsubscribe();
   }, [quizId]);
 
@@ -173,7 +199,7 @@ function QuizViewerPage() {
     const studentAnswers = form.getValues();
     return (
       <div className="space-y-6 max-w-4xl mx-auto">
-         <Button variant="outline" onClick={() => router.back()} className="mb-4">
+         <Button variant="outline" onClick={() => router.push('/instructor?tab=quizzes')} className="mb-4">
             <ChevronLeft className="mr-2 h-4 w-4" /> Back to Quizzes
          </Button>
         <Card className="shadow-lg border-primary">
@@ -216,6 +242,15 @@ function QuizViewerPage() {
             <CardHeader>
                 <CardTitle className="text-xl">{quiz.title}</CardTitle>
                 <CardDescription>{quiz.subject} - Grade {quiz.grade}</CardDescription>
+                 {submissionHistory.length > 0 && (
+                    <Alert className="mt-2 text-sm">
+                        <RefreshCw className="h-4 w-4" />
+                        <AlertTitle>Welcome Back!</AlertTitle>
+                        <AlertDescription>
+                            This is attempt #{submissionHistory.length + 1}. Your best score is {Math.max(...submissionHistory.map(s => s.result.overallScore)) || 0}%.
+                        </AlertDescription>
+                    </Alert>
+                )}
             </CardHeader>
             <CardContent className="flex-1 flex flex-col gap-4">
                 <div>
@@ -244,7 +279,7 @@ function QuizViewerPage() {
                 </div>
             </CardContent>
              <CardFooter>
-                 <Button variant="outline" onClick={() => router.back()}>
+                 <Button variant="outline" onClick={() => router.push('/instructor?tab=quizzes')}>
                     <ChevronLeft className="mr-2 h-4 w-4" /> End Quiz
                  </Button>
             </CardFooter>
@@ -328,5 +363,3 @@ function QuizViewerPage() {
 }
 
 export default withAuth(QuizViewerPage, ['student', 'instructor', 'admin']);
-
-    

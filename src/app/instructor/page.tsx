@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -21,7 +20,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp, FileQuestion, Send } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp, FileQuestion, Send, Check } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -36,6 +35,7 @@ import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDoc
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "firebase/storage";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
+import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -103,6 +103,10 @@ type Quiz = {
     grade: string;
 };
 
+type QuizSubmission = {
+    quizId: string;
+    result: GradeQuizOutput;
+};
 
 type SubmittedAssignment = {
     id: string;
@@ -150,6 +154,7 @@ function InstructorPage() {
 
   const [courses, setCourses] = React.useState<Course[]>([]);
   const [quizzes, setQuizzes] = React.useState<Quiz[]>([]);
+  const [quizSubmissions, setQuizSubmissions] = React.useState<QuizSubmission[]>([]);
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
@@ -228,81 +233,62 @@ function InstructorPage() {
             return;
         }
 
-        const fetchCourses = async () => {
-            setLoadingCourses(true);
+        const fetchAllData = async () => {
+             setLoadingCourses(true);
+             setLoadingQuizzes(true);
+             setLoadingAssignments(true);
+             setLoadingTransactions(true);
+
             try {
-                const q = query(collection(firestore, 'courses'), where('instructorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
-                const querySnapshot = await getDocs(q);
-                const fetchedCourses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
+                // Fetch Courses
+                const coursesQuery = query(collection(firestore, 'courses'), where('instructorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+                const coursesSnapshot = await getDocs(coursesQuery);
+                const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
                 setCourses(fetchedCourses);
-            } catch (error) {
-                console.error("Error fetching courses: ", error);
-                toast({ variant: "destructive", title: "Error", description: "Could not fetch courses." });
-            } finally {
-                setLoadingCourses(false);
-            }
-        };
 
-        const fetchQuizzes = async () => {
-            setLoadingQuizzes(true);
-            try {
-                const q = query(collection(firestore, 'quizzes'), where('instructorId', '==', currentUser.uid));
-                const querySnapshot = await getDocs(q);
-                const fetchedQuizzes = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Quiz[];
+                // Fetch Quizzes
+                const quizzesQuery = query(collection(firestore, 'quizzes'), where('instructorId', '==', currentUser.uid));
+                const quizzesSnapshot = await getDocs(quizzesQuery);
+                const fetchedQuizzes = quizzesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Quiz[];
                 setQuizzes(fetchedQuizzes);
-            } catch (error) {
-                console.error("Error fetching quizzes: ", error);
-                toast({ variant: "destructive", title: "Error", description: "Could not fetch quizzes." });
-            } finally {
-                setLoadingQuizzes(false);
-            }
-        };
+                
+                // Fetch Quiz Submissions by the student
+                const quizSubmissionsQuery = query(collection(firestore, 'quizSubmissions'), where('studentId', '==', currentUser.uid));
+                const quizSubmissionsSnapshot = await getDocs(quizSubmissionsQuery);
+                const fetchedSubmissions = quizSubmissionsSnapshot.docs.map(doc => doc.data()) as QuizSubmission[];
+                setQuizSubmissions(fetchedSubmissions);
 
-        const fetchAssignments = async () => {
-            setLoadingAssignments(true);
-            try {
-                const q = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
-                const querySnapshot = await getDocs(q);
-                const assignments = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
+                // Fetch Assignments
+                const assignmentsQuery = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
+                const assignmentsSnapshot = await getDocs(assignmentsQuery);
+                const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
                 setSubmittedAssignments(assignments);
-            } catch (error: any) {
-                console.error("Error fetching assignments: ", error);
-                let errorMessage = 'Could not fetch assignments. This can happen if the required database index is not set up.';
-                if (error instanceof FirebaseError) {
-                    errorMessage = error.message;
-                }
-                toast({ variant: 'destructive', title: 'Error', description: errorMessage });
-            } finally {
-                setLoadingAssignments(false);
-            }
-        };
-        
-        const fetchTransactions = async () => {
-            setLoadingTransactions(true);
-            try {
-                const q = query(collection(firestore, 'transactions'), orderBy('createdAt', 'desc'));
-                const querySnapshot = await getDocs(q);
-                const transactions = querySnapshot.docs.map(doc => {
+                
+                // Fetch Transactions
+                const transactionsQuery = query(collection(firestore, 'transactions'), orderBy('createdAt', 'desc'));
+                const transactionsSnapshot = await getDocs(transactionsQuery);
+                const transactions = transactionsSnapshot.docs.map(doc => {
                      const data = doc.data();
                      return { id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A' } as Transaction;
                 });
                 setTransactions(transactions);
+
             } catch (error) {
-                console.error("Error fetching transactions: ", error);
-                toast({ variant: "destructive", title: "Error", description: "Could not fetch transactions."});
+                console.error("Error fetching instructor data: ", error);
+                toast({ variant: "destructive", title: "Error", description: "Could not fetch your dashboard data." });
             } finally {
+                setLoadingCourses(false);
+                setLoadingQuizzes(false);
+                setLoadingAssignments(false);
                 setLoadingTransactions(false);
             }
         };
         
-        fetchCourses();
-        if (currentTab === 'quizzes') fetchQuizzes();
-        if (currentTab === 'assignments' || currentTab === 'overview') fetchAssignments();
-        if (currentTab === 'earnings' || currentTab === 'overview') fetchTransactions();
+        fetchAllData();
     });
 
     return () => unsubscribe();
-  }, [currentTab, toast]);
+  }, [toast]);
 
 
   const pricingModel = form.watch("pricingModel");
@@ -949,7 +935,7 @@ function InstructorPage() {
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
                             <CardTitle>Quiz Management</CardTitle>
-                            <CardDescription>Create and manage quizzes for your courses.</CardDescription>
+                            <CardDescription>Create quizzes and view student attempts.</CardDescription>
                         </div>
                         <Button asChild>
                             <Link href="/instructor/quizzes/create">
@@ -972,18 +958,27 @@ function InstructorPage() {
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {quizzes.map(quiz => (
-                                    <TableRow key={quiz.id}>
-                                        <TableCell className="font-medium">{quiz.title}</TableCell>
-                                        <TableCell>{quiz.subject}</TableCell>
-                                        <TableCell>{quiz.grade}</TableCell>
-                                        <TableCell className="text-right">
-                                            <Button variant="outline" size="sm" asChild>
-                                                <Link href={`/quiz/${quiz.id}`}>View</Link>
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
+                                {quizzes.map(quiz => {
+                                    const hasAttempt = quizSubmissions.some(sub => sub.quizId === quiz.id);
+                                    return (
+                                        <TableRow key={quiz.id}>
+                                            <TableCell className="font-medium">{quiz.title}</TableCell>
+                                            <TableCell>{quiz.subject}</TableCell>
+                                            <TableCell>{quiz.grade}</TableCell>
+                                            <TableCell className="text-right">
+                                                <Button variant="outline" size="sm" asChild>
+                                                    <Link href={`/quiz/${quiz.id}`}>
+                                                        {hasAttempt ? (
+                                                            <><Check className="mr-2 h-4 w-4"/> View Results / Retake</>
+                                                        ) : (
+                                                            'Start Quiz'
+                                                        )}
+                                                    </Link>
+                                                </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    )
+                                })}
                             </TableBody>
                         </Table>
                     ) : (
