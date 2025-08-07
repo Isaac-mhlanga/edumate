@@ -849,7 +849,7 @@ function InstructorPage() {
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
+                        <div className="space-y-1">
                             <CardTitle>Course Management</CardTitle>
                             <CardDescription>Upload, edit, and manage your courses.</CardDescription>
                         </div>
@@ -959,7 +959,7 @@ function InstructorPage() {
             <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                        <div>
+                        <div className="space-y-1">
                             <CardTitle>Quiz Management</CardTitle>
                             <CardDescription>Create quizzes and view student attempts.</CardDescription>
                         </div>
