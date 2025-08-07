@@ -84,7 +84,7 @@ type MenuItem = {
   label: string;
   icon: LucideIcon;
   basePath: string;
-  tab: string;
+  tab?: string;
 }
 
 const studentMenuItems: MenuItem[] = [
@@ -100,6 +100,7 @@ const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=courses', label: 'Courses', icon: GraduationCap, basePath: '/instructor', tab: 'courses' },
   { href: '/instructor?tab=quizzes', label: 'Quizzes', icon: FileQuestion, basePath: '/instructor', tab: 'quizzes' },
   { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
+  { href: '/calendar', label: 'Calendar', icon: Calendar, basePath: '/calendar' },
   { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },
   { href: '/instructor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/instructor', tab: 'earnings' },
 ];
@@ -207,7 +208,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton
                     asChild
-                    isActive={pathname.startsWith(item.basePath) && currentTab === item.tab}
+                    isActive={item.tab ? (pathname.startsWith(item.basePath) && currentTab === item.tab) : pathname === item.basePath}
                     tooltip={{
                         children: item.label,
                         side: 'right',

@@ -113,18 +113,19 @@ type QuizSubmission = {
 type SubmittedAssignment = {
     id: string;
     studentId: string;
-    instructorId: string;
     studentName: string;
     studentEmail: string;
     title: string;
     course: string;
-    status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'Submitted';
+    status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted';
     price: number | null;
     solutionUrl: string | null;
     fileUrl: string;
     instructions?: string;
     submittedAt: Timestamp;
     dueDate?: Timestamp;
+    markerId?: string;
+    markerName?: string;
 };
 
 type EnrolledStudent = {
@@ -277,20 +278,20 @@ function InstructorPage() {
       setLoadingAiSummary(true);
 
       try {
-        // Fetch Courses
+        // Fetch Courses for this instructor
         const coursesQuery = query(collection(firestore, 'courses'), where('instructorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
         const coursesSnapshot = await getDocs(coursesQuery);
         const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
         setCourses(fetchedCourses);
 
-        // Fetch Quizzes
+        // Fetch Quizzes created by this instructor
         const quizzesQuery = query(collection(firestore, 'quizzes'), where('instructorId', '==', currentUser.uid));
         const quizzesSnapshot = await getDocs(quizzesQuery);
         const fetchedQuizzes = quizzesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Quiz[];
         setQuizzes(fetchedQuizzes);
         setLoadingQuizzes(false);
         
-        // Fetch Quiz Submissions by students
+        // Fetch Quiz Submissions for this instructor's quizzes
         const quizIds = fetchedQuizzes.map(q => q.id);
         if (quizIds.length > 0) {
             const quizSubmissionsQuery = query(collection(firestore, 'quizSubmissions'), where('quizId', 'in', quizIds));
@@ -301,8 +302,8 @@ function InstructorPage() {
              setQuizSubmissions([]);
         }
 
-        // Fetch Assignments for this instructor
-        const assignmentsQuery = query(collection(firestore, 'assignments'), where('instructorId', '==', currentUser.uid), orderBy('submittedAt', 'desc'));
+        // Fetch Assignments available for review (platform-wide)
+        const assignmentsQuery = query(collection(firestore, 'assignments'), where('status', 'in', ['Pending Review', 'In Progress']), orderBy('submittedAt', 'desc'));
         const assignmentsSnapshot = await getDocs(assignmentsQuery);
         const fetchedAssignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
         setSubmittedAssignments(fetchedAssignments);
@@ -321,7 +322,7 @@ function InstructorPage() {
         });
         setTransactions(fetchedTransactions);
 
-        // Derive enrolled students from transactions
+        // Derive enrolled students from instructor's transactions
         const studentMap = new Map<string, EnrolledStudent>();
         fetchedTransactions.filter(t => t.itemType === 'Course Sale' || t.itemType === 'Subscription').forEach(t => {
             if (t.studentId && !studentMap.has(t.studentId)) {
@@ -472,10 +473,42 @@ function InstructorPage() {
     setIsDeleteDialogOpen(true);
   };
 
-  const handleReviewAssignment = (assignment: SubmittedAssignment) => {
-    setSelectedAssignment(assignment);
-    setIsReviewDialogOpen(true);
-  }
+  const handleReviewAssignment = async (assignment: SubmittedAssignment) => {
+    if (!user) return;
+
+    if (assignment.status === 'Pending Review') {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const assignmentRef = doc(firestore, 'assignments', assignment.id);
+        try {
+            await updateDoc(assignmentRef, {
+                status: 'In Progress',
+                markerId: user.uid,
+                markerName: user.displayName
+            });
+            setSubmittedAssignments(prev =>
+                prev.map(a =>
+                    a.id === assignment.id
+                        ? { ...a, status: 'In Progress', markerId: user.uid, markerName: user.displayName || 'Instructor' }
+                        : a
+                )
+            );
+            setSelectedAssignment({ ...assignment, status: 'In Progress', markerId: user.uid });
+            setIsReviewDialogOpen(true);
+            toast({ title: 'Assignment Claimed', description: 'You can now work on the solution.' });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not claim assignment. It might have been taken by another instructor.' });
+            // Optionally, refresh the list of assignments here
+        }
+    } else if (assignment.markerId === user.uid) {
+        // If it's already in progress by this instructor, just open the dialog
+        setSelectedAssignment(assignment);
+        setIsReviewDialogOpen(true);
+    } else {
+        // If it's in progress by someone else
+        toast({ variant: 'destructive', title: 'Assignment Locked', description: `This assignment is currently being worked on by ${assignment.markerName || 'another instructor'}.` });
+    }
+};
   
   const confirmDeleteCourse = async () => {
     if (!selectedCourse) return;
@@ -802,6 +835,20 @@ function InstructorPage() {
     currentRecentStudentPage * recentStudentsPerPage
   );
 
+  const getAssignmentStatusBadge = (assignment: SubmittedAssignment) => {
+    switch (assignment.status) {
+        case 'Paid':
+            return <Badge variant={"outline"} className='bg-green-500/20 text-green-700'><CheckCircle className="mr-1 h-3 w-3" />Paid</Badge>;
+        case 'Awaiting Payment':
+            return <Badge variant={"outline"} className='bg-blue-500/20 text-blue-700'><CircleDollarSign className="mr-1 h-3 w-3" />Awaiting Payment</Badge>;
+        case 'Pending Review':
+            return <Badge variant={"outline"} className='bg-yellow-500/20 text-yellow-700'><Hourglass className="mr-1 h-3 w-3" />Pending Review</Badge>;
+        case 'In Progress':
+            return <Badge variant={"outline"} className='bg-purple-500/20 text-purple-700'><Clock className="mr-1 h-3 w-3" />In Progress by {assignment.markerId === user?.uid ? 'You' : assignment.markerName}</Badge>;
+        default:
+            return <Badge variant={"outline"}>{assignment.status}</Badge>;
+    }
+  };
 
   return (
       <div className="space-y-8">
@@ -856,7 +903,7 @@ function InstructorPage() {
                         <div className="flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Sparkles className="text-primary h-6 w-6" />
-                                <CardTitle>AI Performance Summary</CardTitle>
+                                <CardTitle className="text-xl">AI Performance Summary</CardTitle>
                             </div>
                             <Button variant="ghost" size="sm" onClick={() => user && generatePerformanceSummary(user, courses, enrolledStudents, submittedAssignments, transactions)} disabled={loadingAiSummary}>
                                 <RefreshCw className={`mr-2 h-4 w-4 ${loadingAiSummary ? 'animate-spin' : ''}`} />
@@ -882,7 +929,7 @@ function InstructorPage() {
               <section className="grid gap-8 lg:grid-cols-2">
                 <Card className="shadow-md rounded-xl">
                   <CardHeader>
-                    <CardTitle>Engagement & Income</CardTitle>
+                    <CardTitle className="text-xl">Engagement & Income</CardTitle>
                     <CardDescription>Monthly student engagement and income over the last 6 months.</CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -901,7 +948,7 @@ function InstructorPage() {
                 
                 <Card className="shadow-md rounded-xl flex flex-col">
                   <CardHeader>
-                    <CardTitle>Pending Assignments</CardTitle>
+                    <CardTitle className="text-xl">Pending Assignments</CardTitle>
                     <CardDescription>Assignments waiting for your review.</CardDescription>
                   </CardHeader>
                   <CardContent className="flex-grow">
@@ -1032,7 +1079,7 @@ function InstructorPage() {
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="space-y-1">
-                            <CardTitle>Course Management</CardTitle>
+                            <CardTitle className="text-xl">Course Management</CardTitle>
                             <CardDescription>Upload, edit, and manage your courses.</CardDescription>
                         </div>
                         <Button onClick={handleAddNewCourse}><PlusCircle className="mr-2"/> Add New Course</Button>
@@ -1142,7 +1189,7 @@ function InstructorPage() {
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div className="space-y-1">
-                            <CardTitle>Quiz Management</CardTitle>
+                            <CardTitle className="text-xl">Quiz Management</CardTitle>
                             <CardDescription>Create quizzes and view student attempts.</CardDescription>
                         </div>
                         <Button asChild>
@@ -1260,7 +1307,7 @@ function InstructorPage() {
           {currentTab === 'assignments' && (
              <Card>
                 <CardHeader>
-                    <CardTitle>Assignment Management</CardTitle>
+                    <CardTitle className="text-xl">Assignment Management</CardTitle>
                     <CardDescription>Review submitted assignments, upload solutions, and set pricing.</CardDescription>
                 </CardHeader>
                  <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -1288,6 +1335,7 @@ function InstructorPage() {
                             <DropdownMenuRadioGroup value={assignmentFilters.status} onValueChange={(value) => handleAssignmentFilterChange('status', value)}>
                                 <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Pending Review">Pending Review</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="In Progress">In Progress</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Awaiting Payment">Awaiting Payment</DropdownMenuRadioItem>
                                 <DropdownMenuRadioItem value="Paid">Paid</DropdownMenuRadioItem>
                             </DropdownMenuRadioGroup>
@@ -1337,24 +1385,15 @@ function InstructorPage() {
                                             <div className="font-medium">{assignment.title || 'Untitled Assignment'}</div>
                                             <div className="text-xs text-muted-foreground">{assignment.course}</div>
                                         </TableCell>
-                                        <TableCell>
-                                            <Badge
-                                                variant={"outline"}
-                                                className={
-                                                    assignment.status === 'Paid' ? 'bg-green-500/20 text-green-700'
-                                                    : assignment.status === 'Awaiting Payment' ? 'bg-blue-500/20 text-blue-700'
-                                                    : 'bg-yellow-500/20 text-yellow-700'
-                                                }
-                                            >
-                                                {assignment.status === 'Paid' && <CheckCircle className="mr-1 h-3 w-3" />}
-                                                {assignment.status === 'Awaiting Payment' && <CircleDollarSign className="mr-1 h-3 w-3" />}
-                                                {assignment.status === 'Pending Review' && <Hourglass className="mr-1 h-3 w-3" />}
-                                                {assignment.status}
-                                            </Badge>
-                                        </TableCell>
+                                        <TableCell>{getAssignmentStatusBadge(assignment)}</TableCell>
                                         <TableCell className="text-right">
-                                            <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>
-                                                {assignment.status === 'Pending Review' ? 'Review' : 'View'}
+                                            <Button
+                                                variant="outline"
+                                                size="sm"
+                                                onClick={() => handleReviewAssignment(assignment)}
+                                                disabled={assignment.status === 'In Progress' && assignment.markerId !== user?.uid}
+                                            >
+                                                {assignment.status === 'In Progress' && assignment.markerId === user?.uid ? 'Continue' : 'Review'}
                                             </Button>
                                         </TableCell>
                                     </TableRow>
@@ -1394,7 +1433,7 @@ function InstructorPage() {
           {currentTab === 'students' && (
              <Card>
                 <CardHeader>
-                    <CardTitle>Student Management</CardTitle>
+                    <CardTitle className="text-xl">Student Management</CardTitle>
                     <CardDescription>View enrolled students, track their progress, and manage access.</CardDescription>
                 </CardHeader>
                 <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -1548,7 +1587,7 @@ function InstructorPage() {
                 <Card>
                     <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-2">
                         <div>
-                            <CardTitle>Transaction History</CardTitle>
+                            <CardTitle className="text-xl">Transaction History</CardTitle>
                             <CardDescription>A detailed log of all your financial activities.</CardDescription>
                         </div>
                         <Button onClick={() => setIsPayoutDialogOpen(true)}>Request Payout</Button>
