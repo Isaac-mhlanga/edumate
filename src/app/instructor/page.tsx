@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar, Save } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -971,7 +971,9 @@ function InstructorPage() {
                               <p className="font-medium">{assignment.title}</p>
                               <p className="text-sm text-muted-foreground">From {assignment.studentName}</p>
                             </div>
-                            <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>Review</Button>
+                            <Button variant="outline" size="sm" onClick={() => handleReviewAssignment(assignment)}>
+                                <Edit className="mr-2 h-4 w-4" /> Review
+                            </Button>
                           </li>
                         ))}
                       </ul>
@@ -1279,7 +1281,7 @@ function InstructorPage() {
                                                         {hasAttempt ? (
                                                             <><Check className="mr-2 h-4 w-4"/> View Results / Retake</>
                                                         ) : (
-                                                            'Start Quiz'
+                                                            <><FileQuestion className="mr-2 h-4 w-4"/> Start Quiz</>
                                                         )}
                                                     </Link>
                                                 </Button>
@@ -1397,6 +1399,7 @@ function InstructorPage() {
                                                 onClick={() => handleReviewAssignment(assignment)}
                                                 disabled={assignment.status === 'In Progress' && assignment.markerId !== user?.uid}
                                             >
+                                                <Edit className="mr-2 h-4 w-4" />
                                                 {assignment.status === 'In Progress' && assignment.markerId === user?.uid ? 'Continue' : 'Review'}
                                             </Button>
                                         </TableCell>
@@ -1489,7 +1492,7 @@ function InstructorPage() {
                                         <TableCell className="hidden sm:table-cell"><Badge variant="outline">{student.course}</Badge></TableCell>
                                         <TableCell className="hidden md:table-cell">
                                           <div className="flex items-center gap-2">
-                                            <Progress value={student.progress} className="w-24 h-2"/>
+                                            <Progress value={student.progress} className="w-24 h-2" />
                                             <span className="text-xs text-muted-foreground">{student.progress}%</span>
                                           </div>
                                         </TableCell>
@@ -1594,7 +1597,9 @@ function InstructorPage() {
                             <CardTitle className="text-xl">Transaction History</CardTitle>
                             <CardDescription>A detailed log of all your financial activities.</CardDescription>
                         </div>
-                        <Button onClick={() => setIsPayoutDialogOpen(true)}>Request Payout</Button>
+                        <Button onClick={() => setIsPayoutDialogOpen(true)}>
+                            <Banknote className="mr-2 h-4 w-4" /> Request Payout
+                        </Button>
                     </CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
                         <div className="relative flex-1 w-full">
@@ -1761,7 +1766,7 @@ function InstructorPage() {
                                           <label htmlFor="dropzone-file-course" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
                                               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                   <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                                  <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                                  <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
                                                   <p className="text-xs text-muted-foreground">PNG or JPG (MAX. 800x400px)</p>
                                               </div>
                                               <Input id="dropzone-file-course" type="file" className="hidden" onChange={(e) => field.onChange(e.target.files?.[0])} />
@@ -1906,7 +1911,10 @@ function InstructorPage() {
                       </div>
                       <DialogFooter className="pt-4 border-t sticky bottom-0 bg-background/95 pb-0 -mx-4 px-4">
                           <Button type="button" variant="ghost" onClick={() => handleCourseDialogOpenChange(false)}>Cancel</Button>
-                          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? 'Saving...' : 'Save Course'}</Button>
+                          <Button type="submit" disabled={isSubmitting}>
+                              <Save className="mr-2 h-4 w-4" />
+                              {isSubmitting ? 'Saving...' : 'Save Course'}
+                          </Button>
                       </DialogFooter>
                   </form>
               </Form>
@@ -1923,7 +1931,9 @@ function InstructorPage() {
             </AlertDialogHeader>
             <AlertDialogFooter>
                 <AlertDialogCancel onClick={() => setSelectedCourse(null)}>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={confirmDeleteCourse} className={buttonVariants({ variant: "destructive" })}>Delete</AlertDialogAction>
+                <AlertDialogAction onClick={confirmDeleteCourse} className={buttonVariants({ variant: "destructive" })}>
+                    <Trash2 className="mr-2 h-4 w-4" /> Delete
+                </AlertDialogAction>
             </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
@@ -1955,7 +1965,7 @@ function InstructorPage() {
                               <label htmlFor="dropzone-file-solution" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
                                   <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                       <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                      <p className="mb-2 text-sm text-muted-foreground"><span className="font-semibold">Click to upload</span> or drag and drop</p>
+                                      <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
                                       <p className="text-xs text-muted-foreground">PDF, DOCX, or JPG</p>
                                   </div>
                                   <Input id="dropzone-file-solution" type="file" className="hidden" />
@@ -1971,7 +1981,9 @@ function InstructorPage() {
                        </div>
                       <DialogFooter>
                           <Button type="button" variant="ghost" onClick={() => handleReviewDialogOpenChange(false)}>Cancel</Button>
-                          <Button type="button" onClick={() => handleSaveSolution(selectedAssignment.id, parseFloat((document.getElementById('solution-price') as HTMLInputElement).value || '0'))}>Save Solution</Button>
+                          <Button type="button" onClick={() => handleSaveSolution(selectedAssignment.id, parseFloat((document.getElementById('solution-price') as HTMLInputElement).value || '0'))}>
+                               <Save className="mr-2 h-4 w-4" /> Save Solution
+                          </Button>
                       </DialogFooter>
                   </div>
               )}
@@ -2026,7 +2038,9 @@ function InstructorPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                   <AlertDialogCancel onClick={() => setSelectedStudent(null)}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmUnenrollStudent}>Unenroll</AlertDialogAction>
+                  <AlertDialogAction onClick={confirmUnenrollStudent}>
+                      <UserMinus className="mr-2 h-4 w-4" /> Unenroll
+                  </AlertDialogAction>
               </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>
@@ -2041,7 +2055,9 @@ function InstructorPage() {
               </AlertDialogHeader>
               <AlertDialogFooter>
                   <AlertDialogCancel onClick={() => setSelectedStudent(null)}>Cancel</AlertDialogCancel>
-                  <AlertDialogAction onClick={confirmDeleteStudent} className={buttonVariants({ variant: "destructive" })}>Delete Student</AlertDialogAction>
+                  <AlertDialogAction onClick={confirmDeleteStudent} className={buttonVariants({ variant: "destructive" })}>
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete Student
+                  </AlertDialogAction>
               </AlertDialogFooter>
           </AlertDialogContent>
       </AlertDialog>
@@ -2105,7 +2121,9 @@ function InstructorPage() {
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={() => setSelectedTransaction(null)}>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={confirmRefundTransaction} className={buttonVariants({ variant: "destructive" })}>Confirm Refund</AlertDialogAction>
+                    <AlertDialogAction onClick={confirmRefundTransaction} className={buttonVariants({ variant: "destructive" })}>
+                        <Undo2 className="mr-2 h-4 w-4" /> Confirm Refund
+                    </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
         </AlertDialog>
@@ -2128,7 +2146,9 @@ function InstructorPage() {
                  </div>
                 <DialogFooter>
                     <Button variant="ghost" onClick={() => setIsPayoutDialogOpen(false)}>Cancel</Button>
-                    <Button onClick={() => handlePayoutRequest(parseFloat((document.getElementById('payout-amount') as HTMLInputElement).value || '0'))}>Request Payout</Button>
+                    <Button onClick={() => handlePayoutRequest(parseFloat((document.getElementById('payout-amount') as HTMLInputElement).value || '0'))}>
+                        <Send className="mr-2 h-4 w-4" /> Request Payout
+                    </Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
