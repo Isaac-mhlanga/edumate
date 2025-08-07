@@ -17,8 +17,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Montserrat', 'sans-serif'],
-        headline: ['Montserrat', 'sans-serif'],
+        body: ['Roboto', 'sans-serif'],
+        headline: ['Roboto', 'sans-serif'],
         code: ['monospace'],
       },
       colors: {
@@ -74,10 +74,10 @@ export default {
         },
       },
       borderRadius: {
-        xl: `calc(var(--radius))`,
+        xl: `calc(var(--radius) + 2px)`,
         lg: `var(--radius)`,
-        md: `calc(var(--radius) - 4px)`,
-        sm: 'calc(var(--radius) - 8px)',
+        md: `calc(var(--radius) - 2px)`,
+        sm: 'calc(var(--radius) - 4px)',
       },
       keyframes: {
         'accordion-down': {
