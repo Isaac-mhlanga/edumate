@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -141,7 +141,7 @@ type Transaction = {
     itemTitle: string;
     studentName?: string;
     studentId?: string;
-    type: 'Course Sale' | 'Assignment Sale' | 'Subscription' | 'Refund' | 'Payout';
+    itemType: 'Course Sale' | 'Assignment Sale' | 'Subscription' | 'Refund' | 'Payout';
     status: 'Completed' | 'Pending' | 'Refunded';
     amount: number;
     createdAt: Timestamp;
@@ -248,7 +248,7 @@ function InstructorPage() {
             instructorName: instructor.displayName || 'Instructor',
             totalStudents: enrolledStudents.length,
             totalCourses: courses.length,
-            totalEarnings: transactions.filter(t => t.type === 'Course Sale' || t.type === 'Assignment Sale').reduce((acc, t) => acc + t.amount, 0),
+            totalEarnings: transactions.filter(t => t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale').reduce((acc, t) => acc + t.amount, 0),
             pendingAssignments: submittedAssignments.filter(a => a.status === 'Pending Review').length,
             courseTitles: courses.map(c => c.title)
         });
@@ -762,7 +762,7 @@ function InstructorPage() {
     setIsPayoutDialogOpen(false);
   };
 
-  const totalRevenue = React.useMemo(() => transactions.filter(t => t.amount > 0 && t.type !== 'Refund').reduce((acc, t) => acc + t.amount, 0), [transactions]);
+  const totalRevenue = React.useMemo(() => transactions.filter(t => t.amount > 0 && t.itemType !== 'Refund').reduce((acc, t) => acc + t.amount, 0), [transactions]);
   const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
 
   const filteredTransactions = React.useMemo(() => {
@@ -771,7 +771,7 @@ function InstructorPage() {
         transaction.itemTitle.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()) ||
         (transaction.studentName && transaction.studentName.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()));
       
-      const typeMatch = transactionFilters.type === 'All' || transaction.type === 'Course Sale';
+      const typeMatch = transactionFilters.type === 'All' || transaction.itemType === 'Course Sale';
 
       return searchMatch && typeMatch;
     });
@@ -1522,7 +1522,7 @@ function InstructorPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                +R {transactions.filter(t => t.type === 'Course Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                                +R {transactions.filter(t => t.itemType === 'Course Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
                             </div>
                             <p className="text-xs text-muted-foreground">From one-time purchases.</p>
                         </CardContent>
@@ -1534,7 +1534,7 @@ function InstructorPage() {
                         </CardHeader>
                         <CardContent>
                             <div className="text-2xl font-bold">
-                                +R {transactions.filter(t => t.type === 'Assignment Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
+                                +R {transactions.filter(t => t.itemType === 'Assignment Sale' && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0).toFixed(2)}
                             </div>
                             <p className="text-xs text-muted-foreground">From paid solutions.</p>
                         </CardContent>
@@ -1650,7 +1650,7 @@ function InstructorPage() {
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'view')}><Eye className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
-                                                        {transaction.type !== 'Payout' && transaction.status === 'Completed' && (
+                                                        {transaction.itemType !== 'Payout' && transaction.status === 'Completed' && (
                                                             <DropdownMenuItem onClick={() => handleTransactionAction(transaction, 'refund')} className="text-destructive focus:text-destructive"><Undo2 className="mr-2 h-4 w-4"/>Issue Refund</DropdownMenuItem>
                                                         )}
                                                     </DropdownMenuContent>
@@ -2023,7 +2023,7 @@ function InstructorPage() {
                             </div>
                              <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Type</span>
-                                <span className="font-medium capitalize">{selectedTransaction.type}</span>
+                                <span className="font-medium capitalize">{selectedTransaction.itemType}</span>
                             </div>
                              <div className="flex justify-between items-center">
                                 <span className="text-muted-foreground">Status</span>
