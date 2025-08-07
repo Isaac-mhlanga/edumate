@@ -113,6 +113,7 @@ type QuizSubmission = {
 type SubmittedAssignment = {
     id: string;
     studentId: string;
+    instructorId: string;
     studentName: string;
     studentEmail: string;
     title: string;
@@ -141,6 +142,7 @@ type Transaction = {
     itemTitle: string;
     studentName?: string;
     studentId?: string;
+    instructorId?: string;
     itemType: 'Course Sale' | 'Assignment Sale' | 'Subscription' | 'Refund' | 'Payout';
     status: 'Completed' | 'Pending' | 'Refunded';
     amount: number;
@@ -240,16 +242,16 @@ function InstructorPage() {
     },
   });
   
-  const generatePerformanceSummary = React.useCallback(async (instructor: User) => {
+  const generatePerformanceSummary = React.useCallback(async (instructor: User, courses: Course[], students: EnrolledStudent[], assignments: SubmittedAssignment[], transactions: Transaction[]) => {
     if (!instructor) return;
     setLoadingAiSummary(true);
     try {
         const response = await summarizeInstructorPerformance({
             instructorName: instructor.displayName || 'Instructor',
-            totalStudents: enrolledStudents.length,
+            totalStudents: students.length,
             totalCourses: courses.length,
-            totalEarnings: transactions.filter(t => t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale').reduce((acc, t) => acc + t.amount, 0),
-            pendingAssignments: submittedAssignments.filter(a => a.status === 'Pending Review').length,
+            totalEarnings: transactions.filter(t => (t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale') && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0),
+            pendingAssignments: assignments.filter(a => a.status === 'Pending Review').length,
             courseTitles: courses.map(c => c.title)
         });
         setAiSummary(response.summary);
@@ -259,7 +261,7 @@ function InstructorPage() {
     } finally {
         setLoadingAiSummary(false);
     }
-  }, [courses, enrolledStudents, submittedAssignments, transactions]);
+  }, []);
 
   React.useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -272,6 +274,7 @@ function InstructorPage() {
       setLoadingAssignments(true);
       setLoadingTransactions(true);
       setLoadingStudents(true);
+      setLoadingAiSummary(true);
 
       try {
         // Fetch Courses
@@ -288,59 +291,60 @@ function InstructorPage() {
         setLoadingQuizzes(false);
         
         // Fetch Quiz Submissions by students
-        const quizSubmissionsQuery = query(collection(firestore, 'quizSubmissions'));
-        const quizSubmissionsSnapshot = await getDocs(quizSubmissionsQuery);
-        const fetchedSubmissions = quizSubmissionsSnapshot.docs.map(doc => doc.data()) as QuizSubmission[];
-        setQuizSubmissions(fetchedSubmissions);
+        const quizIds = fetchedQuizzes.map(q => q.id);
+        if (quizIds.length > 0) {
+            const quizSubmissionsQuery = query(collection(firestore, 'quizSubmissions'), where('quizId', 'in', quizIds));
+            const quizSubmissionsSnapshot = await getDocs(quizSubmissionsQuery);
+            const fetchedSubmissions = quizSubmissionsSnapshot.docs.map(doc => doc.data()) as QuizSubmission[];
+            setQuizSubmissions(fetchedSubmissions);
+        } else {
+             setQuizSubmissions([]);
+        }
 
-        // Fetch Assignments
-        const assignmentsQuery = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
+        // Fetch Assignments for this instructor
+        const assignmentsQuery = query(collection(firestore, 'assignments'), where('instructorId', '==', currentUser.uid), orderBy('submittedAt', 'desc'));
         const assignmentsSnapshot = await getDocs(assignmentsQuery);
-        const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
-        setSubmittedAssignments(assignments);
+        const fetchedAssignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
+        setSubmittedAssignments(fetchedAssignments);
         setLoadingAssignments(false);
         
-        // Fetch Transactions related to the instructor's courses
-        const courseIds = fetchedCourses.map(c => c.id);
-        if (courseIds.length > 0) {
-            const transactionsQuery = query(
-                collection(firestore, 'transactions'),
-                where('itemId', 'in', courseIds),
-                orderBy('createdAt', 'desc')
-            );
-            const transactionsSnapshot = await getDocs(transactionsQuery);
-            const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
-                const data = doc.data();
-                return { id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A' } as Transaction;
-            });
-            setTransactions(fetchedTransactions);
+        // Fetch Transactions for this instructor
+        const transactionsQuery = query(
+            collection(firestore, 'transactions'),
+            where('instructorId', '==', currentUser.uid),
+            orderBy('createdAt', 'desc')
+        );
+        const transactionsSnapshot = await getDocs(transactionsQuery);
+        const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            return { id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A' } as Transaction;
+        });
+        setTransactions(fetchedTransactions);
 
-            // Derive enrolled students from transactions
-            const studentMap = new Map<string, EnrolledStudent>();
-            fetchedTransactions.forEach(t => {
-                if (t.studentId && !studentMap.has(t.studentId)) {
-                     studentMap.set(t.studentId, {
-                        id: t.studentId,
-                        name: t.studentName || 'Unknown Student',
-                        email: 'unknown@example.com', // This should be fetched from users collection ideally
-                        course: t.itemTitle,
-                        joined: t.date,
-                        progress: Math.floor(Math.random() * 100), // Placeholder
-                        transactionDate: t.createdAt
-                    });
-                }
-            });
-            const students = Array.from(studentMap.values()).sort((a,b) => b.transactionDate.toMillis() - a.transactionDate.toMillis());
-            setEnrolledStudents(students);
-
-        } else {
-            setTransactions([]);
-            setEnrolledStudents([]);
-        }
+        // Derive enrolled students from transactions
+        const studentMap = new Map<string, EnrolledStudent>();
+        fetchedTransactions.filter(t => t.itemType === 'Course Sale' || t.itemType === 'Subscription').forEach(t => {
+            if (t.studentId && !studentMap.has(t.studentId)) {
+                  studentMap.set(t.studentId, {
+                    id: t.studentId,
+                    name: t.studentName || 'Unknown Student',
+                    email: 'unknown@example.com',
+                    course: t.itemTitle,
+                    joined: t.date,
+                    progress: Math.floor(Math.random() * 100), // Placeholder
+                    transactionDate: t.createdAt
+                });
+            }
+        });
+        const fetchedStudents = Array.from(studentMap.values()).sort((a,b) => b.transactionDate.toMillis() - a.transactionDate.toMillis());
+        setEnrolledStudents(fetchedStudents);
 
         setLoadingCourses(false);
         setLoadingTransactions(false);
         setLoadingStudents(false);
+
+        // Generate AI summary with all fetched data
+        await generatePerformanceSummary(currentUser, fetchedCourses, fetchedStudents, fetchedAssignments, fetchedTransactions);
 
       } catch (error) {
         console.error("Error fetching instructor data: ", error);
@@ -350,6 +354,7 @@ function InstructorPage() {
         setLoadingAssignments(false);
         setLoadingTransactions(false);
         setLoadingStudents(false);
+        setLoadingAiSummary(false);
       }
     };
     
@@ -357,7 +362,6 @@ function InstructorPage() {
         setUser(currentUser);
         if (currentUser) {
             await fetchAllData(currentUser);
-            await generatePerformanceSummary(currentUser);
         } else {
             // Clear all data if user logs out
             setCourses([]);
@@ -371,6 +375,7 @@ function InstructorPage() {
             setLoadingAssignments(false);
             setLoadingTransactions(false);
             setLoadingStudents(false);
+            setLoadingAiSummary(false);
         }
     });
 
@@ -762,7 +767,7 @@ function InstructorPage() {
     setIsPayoutDialogOpen(false);
   };
 
-  const totalRevenue = React.useMemo(() => transactions.filter(t => t.amount > 0 && t.itemType !== 'Refund').reduce((acc, t) => acc + t.amount, 0), [transactions]);
+  const totalRevenue = React.useMemo(() => transactions.filter(t => t.amount > 0 && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0), [transactions]);
   const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
 
   const filteredTransactions = React.useMemo(() => {
@@ -853,7 +858,7 @@ function InstructorPage() {
                                 <Sparkles className="text-primary h-6 w-6" />
                                 <CardTitle>AI Performance Summary</CardTitle>
                             </div>
-                            <Button variant="ghost" size="sm" onClick={() => user && generatePerformanceSummary(user)} disabled={loadingAiSummary}>
+                            <Button variant="ghost" size="sm" onClick={() => user && generatePerformanceSummary(user, courses, enrolledStudents, submittedAssignments, transactions)} disabled={loadingAiSummary}>
                                 <RefreshCw className={`mr-2 h-4 w-4 ${loadingAiSummary ? 'animate-spin' : ''}`} />
                                 Regenerate
                             </Button>

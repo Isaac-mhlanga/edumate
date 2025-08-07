@@ -3,7 +3,7 @@ import { NextResponse } from 'next/server';
 import { headers } from 'next/headers';
 import crypto from 'crypto';
 import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
-import { getFirestore, doc, addDoc, updateDoc, collection, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, addDoc, updateDoc, collection, serverTimestamp, query, where, getDocs, getDoc } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -52,10 +52,29 @@ export async function POST(request: Request) {
         try {
             const { studentId, itemId, itemType, itemTitle } = data.metadata;
             const amount = data.amount / 100; // convert from kobo to ZAR
+            let instructorId = null;
 
-            // 1. Record transaction in Firestore
+            // Determine instructorId based on itemType
+            if (itemType === 'assignment' && itemId) {
+                const assignmentRef = doc(firestore, 'assignments', itemId);
+                const assignmentSnap = await getDoc(assignmentRef);
+                if (assignmentSnap.exists()) {
+                    instructorId = assignmentSnap.data().instructorId;
+                    await updateDoc(assignmentRef, { status: 'Paid' });
+                    console.log(`Updated assignment ${itemId} to Paid.`);
+                }
+            } else if (itemType === 'course' && itemId) {
+                 const courseRef = doc(firestore, 'courses', itemId);
+                 const courseSnap = await getDoc(courseRef);
+                 if (courseSnap.exists()) {
+                    instructorId = courseSnap.data().instructorId;
+                 }
+            }
+
+            // Record transaction in Firestore
             await addDoc(collection(firestore, 'transactions'), {
                 studentId: studentId || "unknown",
+                instructorId: instructorId,
                 itemId: itemId,
                 itemType: itemType,
                 itemTitle: itemTitle,
@@ -66,17 +85,8 @@ export async function POST(request: Request) {
                 paystackReference: data.reference,
                 createdAt: serverTimestamp(),
             });
-
-            // 2. Update item status if it's an assignment
-            if (itemType === 'assignment' && itemId) {
-                const assignmentRef = doc(firestore, 'assignments', itemId);
-                await updateDoc(assignmentRef, {
-                    status: 'Paid',
-                });
-                console.log(`Updated assignment ${itemId} to Paid.`);
-            }
             
-            // TODO: If type is 'course' or 'subscription', add logic to grant access.
+            // TODO: If type is 'subscription', add logic to grant access.
 
         } catch (dbError) {
             console.error('Error updating Firestore:', dbError);
