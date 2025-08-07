@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -302,8 +302,12 @@ function InstructorPage() {
              setQuizSubmissions([]);
         }
 
-        // Fetch Assignments available for review (platform-wide)
-        const assignmentsQuery = query(collection(firestore, 'assignments'), where('status', 'in', ['Pending Review', 'In Progress']), orderBy('submittedAt', 'desc'));
+        // Fetch all assignments available for review by any instructor
+        const assignmentsQuery = query(
+            collection(firestore, 'assignments'), 
+            where('status', 'in', ['Pending Review', 'In Progress']), 
+            orderBy('submittedAt', 'desc')
+        );
         const assignmentsSnapshot = await getDocs(assignmentsQuery);
         const fetchedAssignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
         setSubmittedAssignments(fetchedAssignments);
