@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp, FileQuestion, Send, Check } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -37,6 +37,7 @@ import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from "fire
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
+import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -125,12 +126,21 @@ type SubmittedAssignment = {
     dueDate?: Timestamp;
 };
 
-type EnrolledStudent = (typeof instructorData.enrolledStudents)[0];
+type EnrolledStudent = {
+    id: string;
+    name: string;
+    email: string;
+    course: string;
+    joined: string;
+    progress: number;
+    transactionDate: Timestamp;
+};
 
 type Transaction = {
     id: string;
     itemTitle: string;
     studentName?: string;
+    studentId?: string;
     type: 'Course Sale' | 'Assignment Sale' | 'Subscription' | 'Refund' | 'Payout';
     status: 'Completed' | 'Pending' | 'Refunded';
     amount: number;
@@ -157,14 +167,17 @@ function InstructorPage() {
   const [quizzes, setQuizzes] = React.useState<Quiz[]>([]);
   const [quizSubmissions, setQuizSubmissions] = React.useState<QuizSubmission[]>([]);
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
-  const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>(instructorData.enrolledStudents);
+  const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>([]);
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
+  const [aiSummary, setAiSummary] = React.useState('');
+  const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
 
   const [loadingCourses, setLoadingCourses] = React.useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = React.useState(true);
   const [loadingAssignments, setLoadingAssignments] = React.useState(true);
   const [loadingTransactions, setLoadingTransactions] = React.useState(true);
+  const [loadingStudents, setLoadingStudents] = React.useState(true);
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   
   const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
@@ -212,6 +225,10 @@ function InstructorPage() {
   const [currentPendingAssignmentPage, setCurrentPendingAssignmentPage] = React.useState(1);
   const pendingAssignmentsPerPage = 3;
 
+  // State for overview recent students pagination
+  const [currentRecentStudentPage, setCurrentRecentStudentPage] = React.useState(1);
+  const recentStudentsPerPage = 4;
+
   const form = useForm<CourseFormValues>({
     resolver: zodResolver(courseFormSchema),
     defaultValues: {
@@ -223,78 +240,142 @@ function InstructorPage() {
     },
   });
   
+  const generatePerformanceSummary = React.useCallback(async (instructor: User) => {
+    if (!instructor) return;
+    setLoadingAiSummary(true);
+    try {
+        const response = await summarizeInstructorPerformance({
+            instructorName: instructor.displayName || 'Instructor',
+            totalStudents: enrolledStudents.length,
+            totalCourses: courses.length,
+            totalEarnings: transactions.filter(t => t.type === 'Course Sale' || t.type === 'Assignment Sale').reduce((acc, t) => acc + t.amount, 0),
+            pendingAssignments: submittedAssignments.filter(a => a.status === 'Pending Review').length,
+            courseTitles: courses.map(c => c.title)
+        });
+        setAiSummary(response.summary);
+    } catch (error) {
+        console.error("Error generating AI summary: ", error);
+        setAiSummary("Could not generate performance summary at this time.");
+    } finally {
+        setLoadingAiSummary(false);
+    }
+  }, [courses, enrolledStudents, submittedAssignments, transactions]);
+
   React.useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
     const auth = getAuth(app);
 
+    const fetchAllData = async (currentUser: User) => {
+      setLoadingCourses(true);
+      setLoadingQuizzes(true);
+      setLoadingAssignments(true);
+      setLoadingTransactions(true);
+      setLoadingStudents(true);
+
+      try {
+        // Fetch Courses
+        const coursesQuery = query(collection(firestore, 'courses'), where('instructorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+        const coursesSnapshot = await getDocs(coursesQuery);
+        const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
+        setCourses(fetchedCourses);
+
+        // Fetch Quizzes
+        const quizzesQuery = query(collection(firestore, 'quizzes'), where('instructorId', '==', currentUser.uid));
+        const quizzesSnapshot = await getDocs(quizzesQuery);
+        const fetchedQuizzes = quizzesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Quiz[];
+        setQuizzes(fetchedQuizzes);
+        setLoadingQuizzes(false);
+        
+        // Fetch Quiz Submissions by students
+        const quizSubmissionsQuery = query(collection(firestore, 'quizSubmissions'));
+        const quizSubmissionsSnapshot = await getDocs(quizSubmissionsQuery);
+        const fetchedSubmissions = quizSubmissionsSnapshot.docs.map(doc => doc.data()) as QuizSubmission[];
+        setQuizSubmissions(fetchedSubmissions);
+
+        // Fetch Assignments
+        const assignmentsQuery = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
+        const assignmentsSnapshot = await getDocs(assignmentsQuery);
+        const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
+        setSubmittedAssignments(assignments);
+        setLoadingAssignments(false);
+        
+        // Fetch Transactions related to the instructor's courses
+        const courseIds = fetchedCourses.map(c => c.id);
+        if (courseIds.length > 0) {
+            const transactionsQuery = query(
+                collection(firestore, 'transactions'),
+                where('itemId', 'in', courseIds),
+                orderBy('createdAt', 'desc')
+            );
+            const transactionsSnapshot = await getDocs(transactionsQuery);
+            const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
+                const data = doc.data();
+                return { id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A' } as Transaction;
+            });
+            setTransactions(fetchedTransactions);
+
+            // Derive enrolled students from transactions
+            const studentMap = new Map<string, EnrolledStudent>();
+            fetchedTransactions.forEach(t => {
+                if (t.studentId && !studentMap.has(t.studentId)) {
+                     studentMap.set(t.studentId, {
+                        id: t.studentId,
+                        name: t.studentName || 'Unknown Student',
+                        email: 'unknown@example.com', // This should be fetched from users collection ideally
+                        course: t.itemTitle,
+                        joined: t.date,
+                        progress: Math.floor(Math.random() * 100), // Placeholder
+                        transactionDate: t.createdAt
+                    });
+                }
+            });
+            const students = Array.from(studentMap.values()).sort((a,b) => b.transactionDate.toMillis() - a.transactionDate.toMillis());
+            setEnrolledStudents(students);
+
+        } else {
+            setTransactions([]);
+            setEnrolledStudents([]);
+        }
+
+        setLoadingCourses(false);
+        setLoadingTransactions(false);
+        setLoadingStudents(false);
+
+      } catch (error) {
+        console.error("Error fetching instructor data: ", error);
+        toast({ variant: "destructive", title: "Error", description: "Could not fetch your dashboard data." });
+        setLoadingCourses(false);
+        setLoadingQuizzes(false);
+        setLoadingAssignments(false);
+        setLoadingTransactions(false);
+        setLoadingStudents(false);
+      }
+    };
+    
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
         setUser(currentUser);
-
-        if (!currentUser) {
+        if (currentUser) {
+            await fetchAllData(currentUser);
+            await generatePerformanceSummary(currentUser);
+        } else {
+            // Clear all data if user logs out
+            setCourses([]);
+            setQuizzes([]);
+            setQuizSubmissions([]);
+            setSubmittedAssignments([]);
+            setEnrolledStudents([]);
+            setTransactions([]);
             setLoadingCourses(false);
             setLoadingQuizzes(false);
             setLoadingAssignments(false);
             setLoadingTransactions(false);
-            return;
+            setLoadingStudents(false);
         }
-
-        const fetchAllData = async () => {
-             setLoadingCourses(true);
-             setLoadingQuizzes(true);
-             setLoadingAssignments(true);
-             setLoadingTransactions(true);
-
-            try {
-                // Fetch Courses
-                const coursesQuery = query(collection(firestore, 'courses'), where('instructorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
-                const coursesSnapshot = await getDocs(coursesQuery);
-                const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
-                setCourses(fetchedCourses);
-
-                // Fetch Quizzes
-                const quizzesQuery = query(collection(firestore, 'quizzes'), where('instructorId', '==', currentUser.uid));
-                const quizzesSnapshot = await getDocs(quizzesQuery);
-                const fetchedQuizzes = quizzesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Quiz[];
-                setQuizzes(fetchedQuizzes);
-                
-                // Fetch Quiz Submissions by the student
-                const quizSubmissionsQuery = query(collection(firestore, 'quizSubmissions'), where('studentId', '==', currentUser.uid));
-                const quizSubmissionsSnapshot = await getDocs(quizSubmissionsQuery);
-                const fetchedSubmissions = quizSubmissionsSnapshot.docs.map(doc => doc.data()) as QuizSubmission[];
-                setQuizSubmissions(fetchedSubmissions);
-
-                // Fetch Assignments
-                const assignmentsQuery = query(collection(firestore, 'assignments'), orderBy('submittedAt', 'desc'));
-                const assignmentsSnapshot = await getDocs(assignmentsQuery);
-                const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
-                setSubmittedAssignments(assignments);
-                
-                // Fetch Transactions
-                const transactionsQuery = query(collection(firestore, 'transactions'), orderBy('createdAt', 'desc'));
-                const transactionsSnapshot = await getDocs(transactionsQuery);
-                const transactions = transactionsSnapshot.docs.map(doc => {
-                     const data = doc.data();
-                     return { id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A' } as Transaction;
-                });
-                setTransactions(transactions);
-
-            } catch (error) {
-                console.error("Error fetching instructor data: ", error);
-                toast({ variant: "destructive", title: "Error", description: "Could not fetch your dashboard data." });
-            } finally {
-                setLoadingCourses(false);
-                setLoadingQuizzes(false);
-                setLoadingAssignments(false);
-                setLoadingTransactions(false);
-            }
-        };
-        
-        fetchAllData();
     });
 
     return () => unsubscribe();
-  }, [toast]);
+  }, [toast, generatePerformanceSummary]);
 
 
   const pricingModel = form.watch("pricingModel");
@@ -681,7 +762,7 @@ function InstructorPage() {
     setIsPayoutDialogOpen(false);
   };
 
-  const totalRevenue = React.useMemo(() => transactions.filter(t => t.amount > 0).reduce((acc, t) => acc + t.amount, 0), [transactions]);
+  const totalRevenue = React.useMemo(() => transactions.filter(t => t.amount > 0 && t.type !== 'Refund').reduce((acc, t) => acc + t.amount, 0), [transactions]);
   const availableForPayout = React.useMemo(() => transactions.reduce((acc, t) => acc + t.amount, 0), [transactions]);
 
   const filteredTransactions = React.useMemo(() => {
@@ -690,7 +771,7 @@ function InstructorPage() {
         transaction.itemTitle.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()) ||
         (transaction.studentName && transaction.studentName.toLowerCase().includes(transactionFilters.search.trim().toLowerCase()));
       
-      const typeMatch = transactionFilters.type === 'All' || transaction.type === transactionFilters.type;
+      const typeMatch = transactionFilters.type === 'All' || transaction.type === 'Course Sale';
 
       return searchMatch && typeMatch;
     });
@@ -709,26 +790,88 @@ function InstructorPage() {
     currentPendingAssignmentPage * pendingAssignmentsPerPage
   );
 
+  // Overview Recent Students Pagination Logic
+  const totalRecentStudentPages = Math.ceil(enrolledStudents.length / recentStudentsPerPage);
+  const paginatedRecentStudents = enrolledStudents.slice(
+    (currentRecentStudentPage - 1) * recentStudentsPerPage,
+    currentRecentStudentPage * recentStudentsPerPage
+  );
+
 
   return (
       <div className="space-y-8">
           {currentTab === 'overview' && (
             <div className="space-y-8">
               <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                {instructorData.stats.map((stat) => (
-                  <Card key={stat.title} className="shadow-md rounded-xl">
+                  <Card className="shadow-md rounded-xl">
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                      <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                      <stat.icon className="h-5 w-5 text-muted-foreground" />
+                      <CardTitle className="text-sm font-medium">Enrolled Students</CardTitle>
+                      <Users className="h-5 w-5 text-muted-foreground" />
                     </CardHeader>
                     <CardContent>
-                      <div className="text-2xl font-bold">{stat.title.includes('Earnings') ? `R ${availableForPayout.toFixed(2)}` : stat.value}</div>
-                      <p className="text-xs text-muted-foreground flex items-center">
-                        <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span> vs last month
-                      </p>
+                      <div className="text-2xl font-bold">{loadingStudents ? <Skeleton className="h-8 w-16" /> : enrolledStudents.length}</div>
+                      <p className="text-xs text-muted-foreground">+0 this month</p>
                     </CardContent>
                   </Card>
-                ))}
+                   <Card className="shadow-md rounded-xl">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Your Courses</CardTitle>
+                      <GraduationCap className="h-5 w-5 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{loadingCourses ? <Skeleton className="h-8 w-16" /> : courses.length}</div>
+                      <p className="text-xs text-muted-foreground">+0 this month</p>
+                    </CardContent>
+                  </Card>
+                   <Card className="shadow-md rounded-xl">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Total Earnings</CardTitle>
+                      <DollarSign className="h-5 w-5 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{loadingTransactions ? <Skeleton className="h-8 w-24" /> : `R ${totalRevenue.toFixed(2)}`}</div>
+                      <p className="text-xs text-muted-foreground">All-time earnings</p>
+                    </CardContent>
+                  </Card>
+                  <Card className="shadow-md rounded-xl">
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">Pending Assignments</CardTitle>
+                      <Clock className="h-5 w-5 text-muted-foreground" />
+                    </CardHeader>
+                    <CardContent>
+                      <div className="text-2xl font-bold">{loadingAssignments ? <Skeleton className="h-8 w-16" /> : pendingAssignments.length}</div>
+                       <p className="text-xs text-muted-foreground">Awaiting your review</p>
+                    </CardContent>
+                  </Card>
+              </section>
+              
+              <section>
+                <Card>
+                    <CardHeader>
+                        <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-2">
+                                <Sparkles className="text-primary h-6 w-6" />
+                                <CardTitle>AI Performance Summary</CardTitle>
+                            </div>
+                            <Button variant="ghost" size="sm" onClick={() => user && generatePerformanceSummary(user)} disabled={loadingAiSummary}>
+                                <RefreshCw className={`mr-2 h-4 w-4 ${loadingAiSummary ? 'animate-spin' : ''}`} />
+                                Regenerate
+                            </Button>
+                        </div>
+                        <CardDescription>An AI-powered analysis of your current performance.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        {loadingAiSummary ? (
+                            <div className="space-y-2">
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-full" />
+                                <Skeleton className="h-4 w-3/4" />
+                            </div>
+                        ) : (
+                            <p className="text-muted-foreground">{aiSummary}</p>
+                        )}
+                    </CardContent>
+                </Card>
               </section>
 
               <section className="grid gap-8 lg:grid-cols-2">
@@ -817,29 +960,63 @@ function InstructorPage() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {enrolledStudents.slice(0, 4).map((student) => (
-                        <TableRow key={student.id}>
-                          <TableCell className="font-medium">
-                            <div className="flex items-center gap-3">
-                               <Avatar className="h-9 w-9"><AvatarFallback>{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
-                               <div>
-                                  <p className="font-medium">{student.name}</p>
-                                  <p className="text-xs text-muted-foreground">{student.email}</p>
-                               </div>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{student.course}</Badge></TableCell>
-                          <TableCell className="hidden md:table-cell">
-                            <div className="flex items-center gap-2">
-                              <Progress value={student.progress} className="w-24 h-2" />
-                              <span className="text-xs text-muted-foreground">{student.progress}%</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="hidden lg:table-cell">{student.joined}</TableCell>
-                        </TableRow>
-                      ))}
+                        {loadingStudents ? (
+                           Array.from({ length: 4 }).map((_, i) => (
+                             <TableRow key={i}>
+                                <TableCell><Skeleton className="h-10 w-48" /></TableCell>
+                                <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-32" /></TableCell>
+                                <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
+                                <TableCell className="hidden lg:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
+                            </TableRow>
+                           ))
+                        ) : paginatedRecentStudents.length > 0 ? (
+                            paginatedRecentStudents.map((student) => (
+                                <TableRow key={student.id}>
+                                <TableCell className="font-medium">
+                                    <div className="flex items-center gap-3">
+                                    <Avatar className="h-9 w-9"><AvatarFallback>{student.name.split(' ').map(n => n[0]).join('')}</AvatarFallback></Avatar>
+                                    <div>
+                                        <p className="font-medium">{student.name}</p>
+                                        {/* <p className="text-xs text-muted-foreground">{student.email}</p> */}
+                                    </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell"><Badge variant="secondary">{student.course}</Badge></TableCell>
+                                <TableCell className="hidden md:table-cell">
+                                    <div className="flex items-center gap-2">
+                                    <Progress value={student.progress} className="w-24 h-2" />
+                                    <span className="text-xs text-muted-foreground">{student.progress}%</span>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="hidden lg:table-cell">{student.joined}</TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                             <TableRow>
+                                <TableCell colSpan={4} className="h-24 text-center text-muted-foreground">
+                                    No students have enrolled in your courses yet.
+                                </TableCell>
+                            </TableRow>
+                        )}
                     </TableBody>
                   </Table>
+                   {totalRecentStudentPages > 1 && (
+                    <CardFooter className="flex items-center justify-between border-t pt-4">
+                        <div className="text-xs text-muted-foreground">
+                            Page <strong>{currentRecentStudentPage}</strong> of <strong>{totalRecentStudentPages}</strong>
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCurrentRecentStudentPage(p => p - 1)} disabled={currentRecentStudentPage === 1}>
+                                <ChevronLeft className="h-4 w-4" />
+                                <span className="sr-only">Previous</span>
+                            </Button>
+                            <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCurrentRecentStudentPage(p => p + 1)} disabled={currentRecentStudentPage >= totalRecentStudentPages}>
+                                <ChevronRight className="h-4 w-4" />
+                                <span className="sr-only">Next</span>
+                            </Button>
+                        </div>
+                    </CardFooter>
+                  )}
                 </Card>
               </section>
             </div>
@@ -1782,37 +1959,6 @@ function InstructorPage() {
                         
                         <Separator />
 
-                        <div>
-                            <h4 className="font-semibold mb-3 text-base">Active Subscriptions</h4>
-                            {selectedStudent.activeSubscriptions && selectedStudent.activeSubscriptions.length > 0 ? (
-                                <div className="space-y-2">
-                                    {selectedStudent.activeSubscriptions.map(sub => (
-                                        <Card key={sub} className="p-3 bg-muted/50">
-                                            <div className="flex items-center gap-3">
-                                                <ShieldCheck className="h-5 w-5 text-primary"/>
-                                                <p className="font-medium text-sm">{sub}</p>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </div>
-                            ) : <p className="text-sm text-muted-foreground">No active subscriptions.</p>}
-                        </div>
-
-                        <div>
-                            <h4 className="font-semibold mb-3 text-base">Purchased Courses</h4>
-                            {selectedStudent.purchasedCourses && selectedStudent.purchasedCourses.length > 0 ? (
-                                <div className="space-y-2">
-                                    {selectedStudent.purchasedCourses.map(course => (
-                                        <Card key={course} className="p-3 bg-muted/50">
-                                            <div className="flex items-center gap-3">
-                                                <GraduationCap className="h-5 w-5 text-secondary"/>
-                                                <p className="font-medium text-sm">{course}</p>
-                                            </div>
-                                        </Card>
-                                    ))}
-                                </div>
-                            ) : <p className="text-sm text-muted-foreground">No purchased courses.</p>}
-                        </div>
                     </div>
                      <DialogFooter>
                         <Button variant="outline" onClick={() => setIsStudentDetailsDialogOpen(false)}>Close</Button>
