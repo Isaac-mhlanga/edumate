@@ -5,33 +5,34 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { CheckCircle2, GraduationCap, Laptop, MapPin, Search, Users } from "lucide-react";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import React from "react";
 
 export default function Home() {
-  const router = useRouter();
 
-  const features = [
-    {
-      icon: <Laptop className="h-8 w-8 text-primary" />,
-      title: "Video Lessons",
-      description: "Access a vast library of expert-led video lessons for Grades 10, 11, and 12 Maths & Physical Sciences.",
-    },
+  const services = [
     {
       icon: <GraduationCap className="h-8 w-8 text-primary" />,
       title: "Tutoring Services",
-      description: "Connect with experienced tutors for personalized one-on-one or group sessions to boost your understanding.",
+      description: "One-on-One & Group Tutoring for high school and university subjects, led by qualified instructors. Both in-person and online sessions are available.",
     },
     {
-      icon: <Users className="h-8 w-8 text-primary" />,
-      title: "Paid Assignments",
-      description: "Get help with challenging assignments and receive detailed feedback from our qualified instructors.",
+      icon: <PenSquare className="h-8 w-8 text-primary" />,
+      title: "Assignment Help",
+      description: "Support for coding projects, essays, and research papers. Work is delivered professionally with academic integrity and confidentiality.",
+    },
+    {
+      icon: <BookOpen className="h-8 w-8 text-primary" />,
+      title: "Free & Paid Courses",
+      description: "Access high-quality video lessons for various topics. Premium courses offer in-depth explanations, exercises, and downloadable materials.",
+    },
+     {
+      icon: <Bot className="h-8 w-8 text-primary" />,
+      title: "Interactive Quizzes & Resources",
+      description: "Practice what you learn with interactive quizzes and assignments. Unlock all resources with a monthly or annual subscription.",
     },
   ];
 
@@ -44,7 +45,7 @@ export default function Home() {
             <span className="text-xl font-bold">Edumate Pro</span>
           </Link>
           <nav className="hidden md:flex items-center gap-6">
-            <Link href="#features" className="text-sm font-medium hover:text-primary transition-colors">Features</Link>
+            <Link href="#services" className="text-sm font-medium hover:text-primary transition-colors">Services</Link>
             <Link href="/tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
           </nav>
           <div className="flex items-center gap-2">
@@ -59,59 +60,58 @@ export default function Home() {
       </header>
 
       <main className="flex-grow">
-        <section className="relative flex items-center justify-center h-[60vh] md:h-[80vh] overflow-hidden text-white">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute z-0 w-auto min-w-full min-h-full max-w-none object-cover"
-          >
-            <source src="https://cdn.pixabay.com/video/2020/05/01/39906-419032601_large.mp4" type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
-          <div className="absolute inset-0 bg-black/60 z-10"></div>
-          <div className="relative z-20 text-center p-4">
-              <div className="animate-in fade-in slide-in-from-bottom-12 duration-1000">
-                <h1 className="text-4xl md:text-6xl font-extrabold tracking-tighter mb-4">
-                  Unlock Your Potential.
-                  <span className="block text-primary">Future-Proof Your Skills.</span>
-                </h1>
-                <p className="text-lg md:text-xl text-white/80 mb-8 max-w-2xl mx-auto">
-                  Edumate Pro provides a modern, engaging platform for students to excel in Maths and Physical Sciences.
-                </p>
-              </div>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-in fade-in slide-in-from-bottom-16 duration-1000">
-                  <Button size="lg" asChild>
-                    <Link href="/dashboard?tab=courses">Explore Courses</Link>
-                  </Button>
-                  <Button size="lg" variant="secondary" asChild>
-                      <Link href="#features">Learn More</Link>
-                  </Button>
-              </div>
-          </div>
+        <section className="bg-background">
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 items-center py-20 md:py-32">
+                <div className="space-y-6">
+                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
+                        Empower Your Learning Journey with Edumate
+                    </h1>
+                    <p className="text-lg text-muted-foreground">
+                        At Edumate, we provide a wide range of academic support and learning resources tailored for high school and university students.
+                    </p>
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <Button size="lg" asChild>
+                            <Link href="/register">Start Learning Today <ArrowRight className="ml-2"/></Link>
+                        </Button>
+                        <Button size="lg" variant="outline">
+                            Explore Services
+                        </Button>
+                    </div>
+                </div>
+                 <div className="relative">
+                    <div className="absolute -inset-4 bg-primary/10 rounded-full blur-3xl"></div>
+                    <Image 
+                        src="https://placehold.co/600x400.png"
+                        alt="Student learning online"
+                        width={600}
+                        height={400}
+                        className="rounded-xl shadow-2xl relative"
+                        data-ai-hint="student learning online"
+                    />
+                </div>
+            </div>
         </section>
 
 
-        <section id="features" className="bg-card py-16 md:py-24">
+        <section id="services" className="bg-muted/50 py-16 md:py-24">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold">Everything You Need to Succeed</h2>
-              <p className="text-lg text-muted-foreground mt-2">Our platform is designed to support your learning journey.</p>
+              <h2 className="text-3xl md:text-4xl font-bold">Our Services</h2>
+              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our services are designed to empower students through flexible, high-quality, and affordable education solutions.</p>
             </div>
-            <div className="grid md:grid-cols-3 gap-8">
-              {features.map((feature, i) => (
-                <div key={feature.title} className="animate-in fade-in slide-in-from-bottom-12" style={{animationDelay: `${i * 150}ms`, animationFillMode: 'backwards'}}>
-                    <Card className="text-center shadow-lg rounded-xl border-t-4 border-t-primary h-full">
-                    <CardHeader className="items-center">
-                        <div className="bg-primary/10 p-4 rounded-full">
-                        {feature.icon}
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        <h3 className="text-xl font-semibold mb-2">{feature.title}</h3>
-                        <p className="text-muted-foreground">{feature.description}</p>
-                    </CardContent>
+            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+              {services.map((service, i) => (
+                <div key={service.title}>
+                    <Card className="text-left shadow-lg rounded-xl h-full border-t-4 border-t-primary">
+                        <CardHeader>
+                            <div className="bg-primary/10 p-3 rounded-full w-fit">
+                                {service.icon}
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
+                            <p className="text-muted-foreground">{service.description}</p>
+                        </CardContent>
                     </Card>
                 </div>
               ))}
@@ -121,35 +121,12 @@ export default function Home() {
         
         <section className="bg-background py-16 md:py-24">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="grid md:grid-cols-2 gap-12 items-center">
-                    <div>
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">Learn on Your Terms</h2>
-                        <p className="text-muted-foreground mb-6">Our platform is built to be flexible and accessible, so you can learn whenever and wherever you want.</p>
-                        <ul className="space-y-4">
-                            <li className="flex items-start gap-3">
-                                <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
-                                <span><span className="font-semibold">AI-Powered Summaries:</span> Quickly grasp key concepts from any lesson with intelligent, auto-generated summaries.</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
-                                <span><span className="font-semibold">Personalized Dashboards:</span> Track your progress, manage subscriptions, and view your entire learning history in one place.</span>
-                            </li>
-                            <li className="flex items-start gap-3">
-                                <CheckCircle2 className="h-6 w-6 text-secondary mt-1 shrink-0" />
-                                <span><span className="font-semibold">Seamless Payments:</span> Securely pay for courses, assignments, and tutoring sessions with our integrated payment system.</span>
-                            </li>
-                        </ul>
-                    </div>
-                    <div>
-                        <Image 
-                            src="https://placehold.co/600x400.png"
-                            alt="Student learning online"
-                            width={600}
-                            height={400}
-                            className="rounded-xl shadow-2xl"
-                            data-ai-hint="student learning"
-                        />
-                    </div>
+                <div className="text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold">Ready to Start?</h2>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Join thousands of students who are achieving their academic goals with Edumate Pro.</p>
+                    <Button size="lg" className="mt-8" asChild>
+                        <Link href="/register">Sign Up for Free</Link>
+                    </Button>
                 </div>
             </div>
         </section>
