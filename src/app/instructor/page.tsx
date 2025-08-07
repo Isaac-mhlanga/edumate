@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -99,8 +100,8 @@ type Course = {
 type Quiz = {
     id: string;
     title: string;
-    subject: string;
-    grade: string;
+    subject: 'Maths' | 'Physical Sciences' | 'Life Sciences';
+    grade: '10' | '11' | '12';
 };
 
 type QuizSubmission = {
@@ -186,6 +187,11 @@ function InstructorPage() {
   const [courseFilters, setCourseFilters] = React.useState({ search: '', status: 'All' });
   const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
   const coursesPerPage = 6;
+  
+  // State for quizzes filtering and pagination
+  const [quizFilters, setQuizFilters] = React.useState({ search: '', subject: 'All', grade: 'All' });
+  const [currentQuizPage, setCurrentQuizPage] = React.useState(1);
+  const quizzesPerPage = 10;
   
   // State for assignments filtering and pagination
   const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', status: 'All' });
@@ -562,6 +568,26 @@ function InstructorPage() {
   const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
   const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
 
+  // Quiz filtering and pagination logic
+  const handleQuizFilterChange = (key: 'search' | 'subject' | 'grade', value: string) => {
+    setQuizFilters(prev => ({ ...prev, [key]: value }));
+    setCurrentQuizPage(1);
+  };
+
+  const filteredQuizzes = React.useMemo(() => {
+    return quizzes.filter(quiz => {
+        const searchMatch = quizFilters.search.trim().toLowerCase() === '' ||
+            quiz.title.toLowerCase().includes(quizFilters.search.trim().toLowerCase());
+        const subjectMatch = quizFilters.subject === 'All' || quiz.subject === quizFilters.subject;
+        const gradeMatch = quizFilters.grade === 'All' || quiz.grade === quizFilters.grade;
+        return searchMatch && subjectMatch && gradeMatch;
+    });
+  }, [quizzes, quizFilters]);
+
+  const totalQuizPages = Math.ceil(filteredQuizzes.length / quizzesPerPage);
+  const paginatedQuizzes = filteredQuizzes.slice((currentQuizPage - 1) * quizzesPerPage, currentQuizPage * quizzesPerPage);
+
+
   // Assignment filtering and pagination logic
   const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
     setAssignmentFilters(prev => ({ ...prev, [key]: value }));
@@ -930,7 +956,7 @@ function InstructorPage() {
           )}
 
           {currentTab === 'quizzes' && (
-             <Card>
+            <Card>
                 <CardHeader>
                     <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                         <div>
@@ -944,27 +970,76 @@ function InstructorPage() {
                         </Button>
                     </div>
                 </CardHeader>
-                <CardContent>
+                <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                    <div className="relative flex-1 w-full">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search by quiz title..."
+                            className="pl-8"
+                            value={quizFilters.search}
+                            onChange={(e) => handleQuizFilterChange('search', e.target.value)}
+                        />
+                    </div>
+                    <div className="flex items-center gap-2 w-full md:w-auto">
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Subject</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Subject</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={quizFilters.subject} onValueChange={(value) => handleQuizFilterChange('subject', value)}>
+                                    <DropdownMenuRadioItem value="All">All Subjects</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Maths">Maths</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Physical Sciences">Physical Sciences</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Life Sciences">Life Sciences</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                         <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Grade</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Grade</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={quizFilters.grade} onValueChange={(value) => handleQuizFilterChange('grade', value)}>
+                                    <DropdownMenuRadioItem value="All">All Grades</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="10">Grade 10</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="11">Grade 11</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="12">Grade 12</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                </div>
+                <CardContent className="p-0">
                     {loadingQuizzes ? (
-                        <div className="text-center py-16 text-muted-foreground">Loading quizzes...</div>
-                    ) : quizzes.length > 0 ? (
+                         <div className="text-center py-16 text-muted-foreground">Loading quizzes...</div>
+                    ) : paginatedQuizzes.length > 0 ? (
                         <Table>
                             <TableHeader>
                                 <TableRow>
                                     <TableHead>Title</TableHead>
-                                    <TableHead>Subject</TableHead>
-                                    <TableHead>Grade</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Subject</TableHead>
+                                    <TableHead className="hidden md:table-cell">Grade</TableHead>
                                     <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
-                                {quizzes.map(quiz => {
+                                {paginatedQuizzes.map(quiz => {
                                     const hasAttempt = quizSubmissions.some(sub => sub.quizId === quiz.id);
                                     return (
                                         <TableRow key={quiz.id}>
                                             <TableCell className="font-medium">{quiz.title}</TableCell>
-                                            <TableCell>{quiz.subject}</TableCell>
-                                            <TableCell>{quiz.grade}</TableCell>
+                                            <TableCell className="hidden sm:table-cell"><Badge variant="outline">{quiz.subject}</Badge></TableCell>
+                                            <TableCell className="hidden md:table-cell"><Badge variant="secondary">Grade {quiz.grade}</Badge></TableCell>
                                             <TableCell className="text-right">
                                                 <Button variant="outline" size="sm" asChild>
                                                     <Link href={`/quiz/${quiz.id}`}>
@@ -982,13 +1057,22 @@ function InstructorPage() {
                             </TableBody>
                         </Table>
                     ) : (
-                        <div className="text-center py-16 border-2 border-dashed rounded-lg">
-                            <h3 className="text-lg font-semibold">No Quizzes Created Yet</h3>
-                            <p className="text-muted-foreground mt-1">Click "Create New Quiz" to get started.</p>
+                        <div className="text-center py-16 border-2 border-dashed rounded-lg m-4">
+                            <h3 className="text-lg font-semibold">No Quizzes Found</h3>
+                            <p className="text-muted-foreground mt-1">{quizFilters.search || quizFilters.subject !== 'All' || quizFilters.grade !== 'All' ? 'Try adjusting your search or filters.' : 'Click "Create New Quiz" to get started.'}</p>
                         </div>
                     )}
                 </CardContent>
-             </Card>
+                <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                    <div className="text-xs text-muted-foreground">
+                        Showing <strong>{(currentQuizPage - 1) * quizzesPerPage + 1}-{Math.min(currentQuizPage * quizzesPerPage, filteredQuizzes.length)}</strong> of <strong>{filteredQuizzes.length}</strong> quizzes.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setCurrentQuizPage(p => p - 1)} disabled={currentQuizPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                        <Button variant="outline" size="sm" onClick={() => setCurrentQuizPage(p => p + 1)} disabled={currentQuizPage >= totalQuizPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                    </div>
+                </CardFooter>
+            </Card>
           )}
 
           {currentTab === 'assignments' && (
