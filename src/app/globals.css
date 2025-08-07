@@ -23,7 +23,7 @@
     --border: 0 0% 88%; /* #E0E0E0 */
     --input: 0 0% 88%;
     --ring: 217 89% 51%;
-    --radius: 0.25rem; /* Reduced for sharper corners */
+    --radius: 0.3rem; /* Updated radius */
     --chart-1: 217 89% 51%;
     --chart-2: 45 98% 52%;
     --chart-3: 217 89% 65%;
