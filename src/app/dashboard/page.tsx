@@ -17,9 +17,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { instructorData, studentData } from "@/lib/data";
+import { studentData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Award, Banknote, BookOpen, CalendarIcon, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -228,7 +228,7 @@ function DashboardPage() {
                  downloadURL = await getDownloadURL(uploadResult.ref);
             }
 
-            const assignmentData: Omit<SubmittedAssignment, 'id' | 'submittedAt'> & { submittedAt: any } = {
+            const assignmentData: Omit<SubmittedAssignment, 'id' | 'submittedAt'> &amp; { submittedAt: any } = {
                 studentId: user.uid,
                 studentName: user.displayName || 'Anonymous',
                 title: data.title,
@@ -436,7 +436,7 @@ function DashboardPage() {
                 <div className="space-y-8">
                     <section className="grid gap-6 md:grid-cols-3">
                         {stats.map((stat) => (
-                            <Card key={stat.title} className="shadow-md rounded-xl">
+                            <Card key={stat.title}>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                                     <stat.icon className="h-5 w-5 text-muted-foreground" />
@@ -453,7 +453,7 @@ function DashboardPage() {
                         <h2 className="text-2xl font-semibold mb-4">Continue Learning</h2>
                         <div className="grid md:grid-cols-2 gap-6">
                             {studentData.activeSubscriptions.map((sub) => (
-                                <Card key={sub.id} className="shadow-md rounded-xl flex flex-col">
+                                <Card key={sub.id} className="flex flex-col">
                                     <CardHeader>
                                         <div className="flex justify-between items-start">
                                             <CardTitle>{sub.name}</CardTitle>
@@ -484,7 +484,7 @@ function DashboardPage() {
                     </section>
 
                     <section>
-                        <Card className="shadow-md rounded-xl">
+                        <Card>
                             <CardHeader>
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                     <div>
@@ -662,7 +662,7 @@ function DashboardPage() {
                         ) : paginatedCourses.length > 0 ? (
                         <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {paginatedCourses.map((course) => (
-                            <Card key={course.id} className="shadow-md rounded-xl overflow-hidden group flex flex-col">
+                            <Card key={course.id} className="overflow-hidden group flex flex-col">
                                 <CardHeader className="p-0">
                                     <div className="bg-primary/10 aspect-video flex items-center justify-center">
                                         <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract"/>
@@ -693,7 +693,7 @@ function DashboardPage() {
                                                 {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'By Subscription'}
                                             </h4>
                                             <Button asChild>
-                                                <Link href={`/payment?type=course&id=${course.id}&title=${encodeURIComponent(course.title)}&price=${course.pricing.price}`}>
+                                                <Link href={`/payment?type=course&amp;id=${course.id}&amp;title=${encodeURIComponent(course.title)}&amp;price=${course.pricing.price}`}>
                                                     {course.pricing.type === 'purchase' ? 'Buy Now' : 'Subscribe'}
                                                 </Link>
                                             </Button>
@@ -734,7 +734,7 @@ function DashboardPage() {
             )}
 
             {currentTab === 'assignments' && (
-                 <Card className="shadow-md rounded-xl">
+                 <Card>
                     <CardHeader>
                         <CardTitle>My Assignments</CardTitle>
                         <CardDescription>Upload your work, track instructor feedback, and access paid solutions.</CardDescription>
@@ -813,7 +813,7 @@ function DashboardPage() {
                                         <TableCell className="text-right">
                                             {assignment.status === 'Pending Review' && <Button variant="secondary" size="sm" onClick={() => handleOpenAssignmentDialog(assignment)}><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Edit</span></Button>}
                                             {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
-                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href={`/payment?type=assignment&id=${assignment.id}&title=${encodeURIComponent(assignment.title)}&price=${assignment.price}`}><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
+                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href={`/payment?type=assignment&amp;id=${assignment.id}&amp;title=${encodeURIComponent(assignment.title)}&amp;price=${assignment.price}`}><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
                                             {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl!} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
                                         </TableCell>
                                     </TableRow>
@@ -1095,7 +1095,7 @@ function DashboardPage() {
                                                         ) : (
                                                             <span>Pick a date</span>
                                                         )}
-                                                        <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                                        <CalendarLucide className="ml-auto h-4 w-4 opacity-50" />
                                                     </Button>
                                                 </FormControl>
                                             </PopoverTrigger>

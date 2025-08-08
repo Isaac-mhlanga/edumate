@@ -1,6 +1,5 @@
 
-
-import { BarChart, Book, CheckCircle, Clock, DollarSign, Users, MessageSquare, Calendar, UserCog } from "lucide-react";
+import { BarChart, Book, CheckCircle, Clock, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote } from "lucide-react";
 
 export const studentData = {
     name: "Alex Johnson",
@@ -50,7 +49,7 @@ export const studentData = {
             name: 'All Subjects Pro',
             price: 600,
             features: [
-                'Access to all Maths & Science courses',
+                'Access to all Maths &amp; Science courses',
                 'Priority tutor support',
                 'Exclusive webinars',
                 'All downloadable resources'
@@ -157,7 +156,7 @@ export const instructorData = {
             status: 'Draft',
             videos: [
                 { id: 'V008', title: 'First Law of Motion' },
-                { id: 'V009', title: 'Second & Third Laws' },
+                { id: 'V009', title: 'Second &amp; Third Laws' },
                 { id: 'V010', title: 'Universal Gravitation' },
             ]
         },
@@ -239,12 +238,12 @@ export const tutorData = {
 };
 
 const allUsers = [
-    { id: 'I001', name: 'Dr. Evelyn Reed', email: 'evelyn.r@example.com', role: 'Instructor', joined: '2023-01-10', status: 'Active' },
-    ...instructorData.enrolledStudents.map(s => ({...s, role: 'Student', status: 'Active'})),
-    { id: 'I002', name: 'Dr. Alan Grant', email: 'alan.g@example.com', role: 'Instructor', joined: '2023-05-22', status: 'Suspended' },
-    { id: 'T001', name: 'John Smith', email: 'john.smith.tutor@example.com', role: 'Tutor', joined: '2023-02-14', status: 'Active' },
-    { id: 'S006', name: 'Emily White', email: 'emily.w@example.com', role: 'Student', joined: '2024-04-12', status: 'Active' },
-    { id: 'S007', name: 'James Brown', email: 'james.b@example.com', role: 'Student', joined: '2024-04-18', status: 'Active' },
+    { id: 'I001', name: 'Dr. Evelyn Reed', email: 'evelyn.r@example.com', role: 'instructor', joined: '2023-01-10', status: 'Active' },
+    ...instructorData.enrolledStudents.map(s => ({...s, role: 'student', status: 'Active'})),
+    { id: 'I002', name: 'Dr. Alan Grant', email: 'alan.g@example.com', role: 'instructor', joined: '2023-05-22', status: 'Suspended' },
+    { id: 'T001', name: 'John Smith', email: 'john.smith.tutor@example.com', role: 'tutor', joined: '2023-02-14', status: 'Active' },
+    { id: 'S006', name: 'Emily White', email: 'emily.w@example.com', role: 'student', joined: '2024-04-12', status: 'Active' },
+    { id: 'S007', name: 'James Brown', email: 'james.b@example.com', role: 'student', joined: '2024-04-18', status: 'Active' },
 ];
 
 const allCourses = [
@@ -300,8 +299,8 @@ export const adminData = {
     stats: [
         { title: "Total Revenue", value: `R ${allTransactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0).toFixed(2)}`, icon: DollarSign, change: "+15% this month" },
         { title: "Total Users", value: allUsers.length, icon: Users, change: "+5 new users" },
-        { title: "Active Subscriptions", value: allSubscriptions.filter(s => s.status === 'Active').length, icon: Users, change: "+2 this month" },
-        { title: "Active Courses", value: allCourses.filter(c => c.status === 'Published').length, icon: Book, change: "+2 this month" },
+        { title: "Active Subscriptions", value: allSubscriptions.filter(s => s.status === 'Active').length, icon: CreditCard, change: "+2 this month" },
+        { title: "Active Courses", value: allCourses.filter(c => c.status === 'Published').length, icon: BookOpen, change: "+2 this month" },
     ],
     users: allUsers,
     courses: allCourses,

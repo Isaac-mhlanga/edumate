@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { PayoutRequest as PayoutRequestType, adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, Search, ShieldCheck, Trash2, UserCog, UserMinus, UserPlus, Users, X, XCircle } from "lucide-react";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, RefreshCw, Search, Sparkles, Trash2, UserMinus, UserPlus, Users, X, XCircle } from "lucide-react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -25,6 +25,7 @@ import { useReactToPrint } from "react-to-print";
 import withAuth from "@/components/with-auth";
 import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, writeBatch, query, where } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
+import { Skeleton } from "@/components/ui/skeleton";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -35,7 +36,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-type User = { id: string; name: string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; status: 'Active' | 'Suspended' };
+type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; status: 'Active' | 'Suspended' };
 type Course = { id: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft' };
 type PayoutRequest = PayoutRequestType;
 type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
@@ -54,13 +55,15 @@ function AdminPage() {
     const [assignments, setAssignments] = React.useState<Assignment[]>([]);
     const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>(adminData.payoutRequests);
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
+    const [loading, setLoading] = React.useState(true);
 
     React.useEffect(() => {
         const fetchData = async () => {
+            setLoading(true);
             try {
                 // Fetch users
                 const usersSnapshot = await getDocs(collection(firestore, "users"));
-                setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as User)));
+                setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().fullName, ...doc.data() } as User)));
 
                 // Fetch courses
                 const coursesSnapshot = await getDocs(collection(firestore, "courses"));
@@ -77,6 +80,7 @@ function AdminPage() {
                 console.error("Error fetching admin data:", error);
                 toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch platform data.' });
             }
+            setLoading(false);
         };
 
         fetchData();
@@ -310,7 +314,7 @@ function AdminPage() {
             {currentTab === 'overview' && (
                 <div className="space-y-8">
                     <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        {adminData.stats.map((stat) => (
+                        {loading ? Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : adminData.stats.map((stat) => (
                             <Card key={stat.title}>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -324,6 +328,30 @@ function AdminPage() {
                                 </CardContent>
                             </Card>
                         ))}
+                    </section>
+                     <section>
+                        <Card>
+                            <CardHeader>
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <Sparkles className="text-primary h-6 w-6" />
+                                        <CardTitle>AI Performance Summary</CardTitle>
+                                    </div>
+                                    <Button variant="ghost" size="sm" disabled={true}>
+                                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                        Regenerate
+                                    </Button>
+                                </div>
+                                <CardDescription>An AI-powered analysis of your platform's performance.</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-3/4" />
+                                </div>
+                            </CardContent>
+                        </Card>
                     </section>
                     <section>
                         <Card>
@@ -381,8 +409,8 @@ function AdminPage() {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuRadioGroup value={userFilters.role} onValueChange={(value) => handleUserFilterChange('role', value)}>
                                     <DropdownMenuRadioItem value="All">All Roles</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Student">Student</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Instructor">Instructor</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="student">Student</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="instructor">Instructor</DropdownMenuRadioItem>
                                 </DropdownMenuRadioGroup>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -410,7 +438,7 @@ function AdminPage() {
                                         </div>
                                     </TableCell>
                                     <TableCell className="hidden sm:table-cell">
-                                        <Badge variant={user.role === 'Instructor' ? 'secondary' : 'outline'}>
+                                        <Badge variant={user.role === 'instructor' ? 'secondary' : 'outline'} className="capitalize">
                                             {user.role}
                                         </Badge>
                                     </TableCell>
@@ -449,7 +477,7 @@ function AdminPage() {
             {currentTab === 'courses' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Course Review & Management</CardTitle>
+                        <CardTitle>Course Review &amp; Management</CardTitle>
                         <CardDescription>Approve, reject, and manage all courses on the platform.</CardDescription>
                     </CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -643,6 +671,18 @@ function AdminPage() {
                             <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p + 1)} disabled={currentAssignmentPage >= totalAssignmentPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
                         </div>
                     </CardFooter>
+                </Card>
+            )}
+            
+            {currentTab === 'calendar' && (
+                <Card>
+                    <CardHeader>
+                        <CardTitle>Platform Calendar</CardTitle>
+                        <CardDescription>View all scheduled events across the platform.</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                        <p>Calendar component will be here.</p>
+                    </CardContent>
                 </Card>
             )}
 
