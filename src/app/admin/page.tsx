@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { PayoutRequest as PayoutRequestType, adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, RefreshCw, Search, Sparkles, Trash2, UserMinus, UserPlus, Users, X, XCircle } from "lucide-react";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, RefreshCw, Search, Sparkles, Trash2, UserMinus, UserPlus, Users, X, XCircle, PlusCircle, Calendar as CalendarIcon } from "lucide-react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -26,6 +26,14 @@ import withAuth from "@/components/with-auth";
 import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, writeBatch, query, where } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { Skeleton } from "@/components/ui/skeleton";
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import listPlugin from '@fullcalendar/list';
+import { createCalendarEvent, CreateCalendarEventOutput } from '@/ai/flows/create-calendar-event';
+import { Checkbox } from '@/components/ui/checkbox';
+import { format } from 'date-fns';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -41,6 +49,7 @@ type Course = { id: string; title: string; subject: string; grade: string; instr
 type PayoutRequest = PayoutRequestType;
 type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
 type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
+type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; };
 
 function AdminPage() {
     const router = useRouter();
@@ -56,6 +65,20 @@ function AdminPage() {
     const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>(adminData.payoutRequests);
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
     const [loading, setLoading] = React.useState(true);
+    
+    // Calendar State
+    const [events, setEvents] = React.useState<CalendarEvent[]>([
+        { id: '1', title: 'Platform Maintenance', start: '2024-08-20T02:00:00', end: '2024-08-20T04:00:00', allDay: false, color: 'hsl(var(--destructive))', description: 'Scheduled server upgrades.' },
+        { id: '2', title: 'Instructor Payout Deadline', start: '2024-08-25', allDay: true, color: 'hsl(var(--primary))', description: 'All payout requests must be submitted.' }
+    ]);
+    const [isAiDialogOpen, setIsAiDialogOpen] = React.useState(false);
+    const [isManualDialogOpen, setIsManualDialogOpen] = React.useState(false);
+    const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
+    const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent | null>(null);
+    const [aiPrompt, setAiPrompt] = React.useState('');
+    const [isAiLoading, setIsAiLoading] = React.useState(false);
+    const [manualEvent, setManualEvent] = React.useState<Partial<CalendarEvent>>({});
+
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -148,6 +171,69 @@ function AdminPage() {
         content: () => receiptComponentRef.current,
         documentTitle: `Payout-Receipt-${selectedPayout?.id}`,
     });
+
+    // Calendar Handlers
+    const handleDateClick = (arg: any) => {
+        setManualEvent({ start: arg.dateStr, allDay: arg.allDay });
+        setIsManualDialogOpen(true);
+    };
+    
+    const handleEventClick = (clickInfo: any) => {
+        const event = clickInfo.event;
+        setSelectedEvent({
+            id: event.id,
+            title: event.title,
+            start: event.startStr,
+            end: event.endStr,
+            allDay: event.allDay,
+            description: event.extendedProps.description,
+            color: event.backgroundColor,
+        });
+        setIsDetailDialogOpen(true);
+    };
+    
+    const handleAddManualEvent = () => {
+        if (!manualEvent.title || !manualEvent.start) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
+            return;
+        }
+        const newEvent = { ...manualEvent, id: String(Date.now()) } as CalendarEvent
+        setEvents([...events, newEvent]);
+        toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
+        setIsManualDialogOpen(false);
+        setManualEvent({});
+    };
+
+    const handleAiCreateEvent = async () => {
+        if (!aiPrompt) return;
+        setIsAiLoading(true);
+
+        try {
+            const result: CreateCalendarEventOutput = await createCalendarEvent({ prompt: aiPrompt });
+            if (result.title && result.start) {
+                const newEvent: CalendarEvent = {
+                    id: String(Date.now()),
+                    title: result.title,
+                    start: result.start,
+                    end: result.end || undefined,
+                    allDay: result.allDay,
+                    color: 'hsl(var(--accent))'
+                };
+                setEvents([...events, newEvent]);
+                toast({ title: 'Event Created!', description: `"${result.title}" has been added to the calendar.` });
+                setIsAiDialogOpen(false);
+                setAiPrompt('');
+            } else {
+                toast({ variant: 'destructive', title: 'Could not create event', description: 'The AI could not understand the event details. Please try being more specific.' });
+            }
+        } catch (error) {
+            console.error("Error creating AI event:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while creating the event.' });
+        } finally {
+            setIsAiLoading(false);
+        }
+    };
+
 
     const handleUserFilterChange = (key: keyof typeof userFilters, value: string) => {
         setUserFilters(prev => ({ ...prev, [key]: value }));
@@ -328,6 +414,41 @@ function AdminPage() {
 
     return (
         <div className="space-y-8">
+            <style jsx global>{`
+                .fc {
+                    font-family: var(--font-body), sans-serif;
+                }
+                .fc .fc-toolbar-title {
+                    font-size: 1.5rem;
+                    font-weight: 500;
+                }
+                .fc .fc-button {
+                    background-color: transparent !important;
+                    border-color: hsl(var(--border)) !important;
+                    color: hsl(var(--foreground)) !important;
+                    box-shadow: none !important;
+                    text-transform: capitalize;
+                }
+                 .fc .fc-button:hover {
+                    background-color: hsl(var(--muted)) !important;
+                 }
+                .fc .fc-button-primary:not(:disabled).fc-button-active, 
+                .fc .fc-button-primary:not(:disabled):active {
+                    background-color: hsl(var(--primary)) !important;
+                    border-color: hsl(var(--primary)) !important;
+                    color: hsl(var(--primary-foreground)) !important;
+                }
+                .fc-daygrid-day.fc-day-today {
+                    background-color: hsla(var(--primary), 0.05) !important;
+                }
+                .fc-event {
+                    border-radius: 4px;
+                    border: 0;
+                    padding: 4px 6px;
+                    cursor: pointer;
+                }
+            `}</style>
+
             {currentTab === 'overview' && (
                 <div className="space-y-8">
                     <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -703,13 +824,42 @@ function AdminPage() {
             )}
             
             {currentTab === 'calendar' && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Platform Calendar</CardTitle>
-                        <CardDescription>View all scheduled events across the platform.</CardDescription>
+                <Card className="shadow-lg rounded-xl">
+                    <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <div>
+                            <CardTitle className="text-2xl">Platform Calendar</CardTitle>
+                            <CardDescription>View and manage all scheduled events across the platform.</CardDescription>
+                        </div>
+                        <div className="flex gap-2">
+                             <Button variant="outline" onClick={() => setIsManualDialogOpen(true)}>
+                                 <PlusCircle className="mr-2 h-4 w-4" /> Add Event
+                             </Button>
+                             <Button onClick={() => setIsAiDialogOpen(true)}>
+                                <Sparkles className="mr-2 h-4 w-4" /> Create with AI
+                            </Button>
+                        </div>
                     </CardHeader>
                     <CardContent>
-                        <p>Calendar component will be here.</p>
+                        <div className="rounded-lg border overflow-hidden p-1">
+                            <FullCalendar
+                                plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
+                                initialView="dayGridMonth"
+                                headerToolbar={{
+                                    left: 'prev,next today',
+                                    center: 'title',
+                                    right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
+                                }}
+                                events={events}
+                                dateClick={handleDateClick}
+                                eventClick={handleEventClick}
+                                editable={true}
+                                selectable={true}
+                                height="auto"
+                                contentHeight="auto"
+                                aspectRatio={2}
+                                dayMaxEvents={true}
+                            />
+                        </div>
                     </CardContent>
                 </Card>
             )}
@@ -1071,6 +1221,108 @@ function AdminPage() {
                             Print / Save PDF
                         </Button>
                     </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* AI Event Dialog */}
+            <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Create Event with AI</DialogTitle>
+                        <DialogDescription>
+                            Describe the event you want to create. For example, "Schedule a meeting with the team for next Friday at 2pm."
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4">
+                        <Label htmlFor="ai-prompt" className="sr-only">AI Prompt</Label>
+                        <Textarea
+                            id="ai-prompt"
+                            placeholder="e.g. Set up a Maths study session for Grade 12s on Saturday from 10am to 12pm."
+                            value={aiPrompt}
+                            onChange={(e) => setAiPrompt(e.target.value)}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsAiDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleAiCreateEvent} disabled={isAiLoading}>
+                            {isAiLoading ? "Creating..." : "Create Event"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Manual Event Dialog */}
+            <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Add New Event</DialogTitle>
+                        <DialogDescription>Fill in the details for your new event.</DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-4">
+                        <div className="space-y-2">
+                            <Label htmlFor="manual-title">Event Title</Label>
+                            <Input id="manual-title" value={manualEvent.title || ''} onChange={(e) => setManualEvent(prev => ({...prev, title: e.target.value}))}/>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="manual-start">Start Date</Label>
+                                <Input id="manual-start" type="date" value={manualEvent.start?.split('T')[0] || ''} onChange={(e) => setManualEvent(prev => ({...prev, start: e.target.value}))}/>
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="manual-end">End Date (Optional)</Label>
+                                <Input id="manual-end" type="date" value={manualEvent.end?.split('T')[0] || ''} onChange={(e) => setManualEvent(prev => ({...prev, end: e.target.value}))}/>
+                            </div>
+                        </div>
+                         <div className="space-y-2">
+                            <Label htmlFor="manual-description">Description (Optional)</Label>
+                            <Textarea id="manual-description" value={manualEvent.description || ''} onChange={(e) => setManualEvent(prev => ({...prev, description: e.target.value}))}/>
+                        </div>
+                        <div className="flex items-center space-x-2">
+                            <Checkbox id="all-day" checked={manualEvent.allDay} onCheckedChange={(checked) => setManualEvent(prev => ({...prev, allDay: !!checked}))} />
+                            <Label htmlFor="all-day">All-day event</Label>
+                        </div>
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsManualDialogOpen(false)}>Cancel</Button>
+                        <Button onClick={handleAddManualEvent}>Add Event</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+            
+             {/* Event Detail Dialog */}
+            <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
+                <DialogContent>
+                    {selectedEvent && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center">
+                                     <span className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: selectedEvent.color || 'hsl(var(--primary))' }}></span>
+                                    {selectedEvent.title}
+                                </DialogTitle>
+                            </DialogHeader>
+                            <div className="py-4 space-y-4">
+                                <div className="flex items-start gap-4 text-muted-foreground">
+                                    <CalendarIcon className="h-5 w-5 mt-1" />
+                                    <div className="text-sm">
+                                        {selectedEvent.allDay ? (
+                                            <p>{format(new Date(selectedEvent.start), 'eeee, MMMM d, yyyy')}</p>
+                                        ) : (
+                                            <>
+                                                <p>{format(new Date(selectedEvent.start), 'eeee, MMMM d, yyyy')}</p>
+                                                <p>{format(new Date(selectedEvent.start), 'p')} {selectedEvent.end ? ` - ${format(new Date(selectedEvent.end), 'p')}` : ''}</p>
+                                            </>
+                                        )}
+                                    </div>
+                                </div>
+                                {selectedEvent.description && (
+                                    <p className="text-sm">{selectedEvent.description}</p>
+                                )}
+                            </div>
+                            <DialogFooter>
+                                <Button variant="ghost" onClick={() => setIsDetailDialogOpen(false)}>Close</Button>
+                            </DialogFooter>
+                        </>
+                    )}
                 </DialogContent>
             </Dialog>
         </div>
