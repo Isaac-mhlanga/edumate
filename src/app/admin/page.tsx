@@ -170,6 +170,8 @@ function AdminPage() {
     const eventsPerPage = 4;
     const [currentPayoutRequestPage, setCurrentPayoutRequestPage] = React.useState(1);
     const payoutRequestsPerPage = 4;
+    const [currentActivityPage, setCurrentActivityPage] = React.useState(1);
+    const activitiesPerPage = 4;
 
 
     // Receipt printing logic
@@ -432,6 +434,9 @@ function AdminPage() {
     const totalPayoutRequestPages = Math.ceil(pendingPayoutRequests.length / payoutRequestsPerPage);
     const paginatedPayoutRequests = pendingPayoutRequests.slice((currentPayoutRequestPage - 1) * payoutRequestsPerPage, currentPayoutRequestPage * payoutRequestsPerPage);
 
+    const totalActivityPages = Math.ceil(adminData.recentActivity.length / activitiesPerPage);
+    const paginatedActivities = adminData.recentActivity.slice((currentActivityPage - 1) * activitiesPerPage, currentActivityPage * activitiesPerPage);
+
 
     return (
         <div className="space-y-8">
@@ -440,8 +445,8 @@ function AdminPage() {
                     font-family: var(--font-body), sans-serif;
                 }
                 .fc .fc-toolbar-title {
-                    font-size: 1.5rem;
-                    font-weight: 500;
+                    font-size: 1.25rem;
+                    font-weight: 600;
                 }
                 .fc .fc-button {
                     background-color: transparent !important;
@@ -512,28 +517,47 @@ function AdminPage() {
                                 </div>
                             </CardContent>
                         </Card>
-                        <Card>
+                        <Card className="flex flex-col">
                             <CardHeader>
                                 <CardTitle>Recent Platform Activity</CardTitle>
                                 <CardDescription>A log of recent important events across the platform.</CardDescription>
                             </CardHeader>
-                            <CardContent>
-                                <ul className="space-y-4">
-                                    {adminData.recentActivity.map(activity => (
-                                        <li key={activity.id} className="flex items-start gap-4">
-                                            <div className="bg-muted p-2 rounded-full mt-1">
-                                                {activity.type === 'New User' && <UserPlus className="h-5 w-5 text-muted-foreground"/>}
-                                                {activity.type === 'New Course' && <BookOpen className="h-5 w-5 text-muted-foreground"/>}
-                                                {activity.type === 'Payout' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
-                                            </div>
-                                            <div className="flex-1">
-                                                <p className="font-medium">{activity.description}</p>
-                                                <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
+                            <CardContent className="flex-grow">
+                                {paginatedActivities.length > 0 ? (
+                                    <ul className="space-y-4">
+                                        {paginatedActivities.map(activity => (
+                                            <li key={activity.id} className="flex items-start gap-4">
+                                                <div className="bg-muted p-2 rounded-full mt-1">
+                                                    {activity.type === 'New User' && <UserPlus className="h-5 w-5 text-muted-foreground"/>}
+                                                    {activity.type === 'New Course' && <BookOpen className="h-5 w-5 text-muted-foreground"/>}
+                                                    {activity.type === 'Payout' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
+                                                </div>
+                                                <div className="flex-1">
+                                                    <p className="font-medium">{activity.description}</p>
+                                                    <p className="text-sm text-muted-foreground">{activity.timestamp}</p>
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground text-center py-8">No recent activity.</p>
+                                )}
                             </CardContent>
+                             {totalActivityPages > 1 && (
+                                <CardFooter className="flex items-center justify-between border-t pt-4">
+                                    <div className="text-xs text-muted-foreground">
+                                        Page <strong>{currentActivityPage}</strong> of <strong>{totalActivityPages}</strong>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCurrentActivityPage(p => p - 1)} disabled={currentActivityPage === 1}>
+                                            <ChevronLeft className="h-4 w-4" />
+                                        </Button>
+                                        <Button variant="outline" size="icon" className="h-7 w-7" onClick={() => setCurrentActivityPage(p => p + 1)} disabled={currentActivityPage >= totalActivityPages}>
+                                            <ChevronRight className="h-4 w-4" />
+                                        </Button>
+                                    </div>
+                                </CardFooter>
+                            )}
                         </Card>
                     </section>
                     
@@ -932,7 +956,7 @@ function AdminPage() {
                 <Card className="shadow-lg rounded-xl">
                     <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
-                            <CardTitle className="text-2xl">Platform Calendar</CardTitle>
+                            <CardTitle>Platform Calendar</CardTitle>
                             <CardDescription>View and manage all scheduled events across the platform.</CardDescription>
                         </div>
                         <div className="flex gap-2">
