@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -16,28 +16,28 @@ export default function Home() {
     {
       icon: <GraduationCap className="h-8 w-8 text-primary" />,
       title: "Tutoring Services",
-      description: "One-on-One & Group Tutoring for high school and university subjects, led by qualified instructors. Both in-person and online sessions are available.",
+      description: "One-on-One & Group Tutoring for high school and university subjects, led by qualified instructors.",
     },
     {
       icon: <PenSquare className="h-8 w-8 text-primary" />,
       title: "Assignment Help",
-      description: "Support for coding projects, essays, and research papers. Work is delivered professionally with academic integrity and confidentiality.",
+      description: "Support for coding projects, essays, and research papers. Work is delivered professionally with academic integrity.",
     },
     {
       icon: <BookOpen className="h-8 w-8 text-primary" />,
       title: "Free & Paid Courses",
-      description: "Access high-quality video lessons for various topics. Premium courses offer in-depth explanations, exercises, and downloadable materials.",
+      description: "Access high-quality video lessons for various topics. Premium courses offer in-depth explanations and exercises.",
     },
      {
       icon: <Bot className="h-8 w-8 text-primary" />,
       title: "Interactive Quizzes & Resources",
-      description: "Practice what you learn with interactive quizzes and assignments. Unlock all resources with a monthly or annual subscription.",
+      description: "Practice what you learn with interactive quizzes. Unlock all resources with a monthly or annual subscription.",
     },
   ];
 
   return (
-    <div className="flex flex-col min-h-screen bg-background">
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    <div className="flex flex-col min-h-screen bg-background text-foreground animate-fade-in-up">
+      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2">
             <Icons.logo className="h-8 w-8 text-primary" />
@@ -51,7 +51,7 @@ export default function Home() {
               <Button variant="ghost" asChild>
                   <Link href="/login">Log In</Link>
               </Button>
-              <Button asChild>
+              <Button asChild className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
                   <Link href="/register">Get Started</Link>
               </Button>
           </div>
@@ -59,71 +59,67 @@ export default function Home() {
       </header>
 
       <main className="flex-grow">
-        <section className="bg-background">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-8 items-center py-20 md:py-32">
-                <div className="space-y-6">
-                    <h1 className="text-4xl md:text-5xl font-bold tracking-tighter">
-                        Empower Your Learning Journey with Edumate
+        <section className="relative overflow-hidden">
+             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-primary/10 rounded-full blur-3xl -z-10" />
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center py-24 md:py-32">
+                <div className="space-y-6 text-center md:text-left">
+                    <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight">
+                        Unlock Your Potential, Master Your Future.
                     </h1>
-                    <p className="text-lg text-muted-foreground">
-                        At Edumate, we provide a wide range of academic support and learning resources tailored for high school and university students.
+                    <p className="text-lg text-muted-foreground max-w-xl mx-auto md:mx-0">
+                        Edumate provides a universe of learning resources tailored for ambitious students. Dive into expert-led courses, get personalized tutoring, and conquer your assignments.
                     </p>
-                    <div className="flex flex-col sm:flex-row gap-4">
-                        <Button size="lg" asChild>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                        <Button size="lg" asChild className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
                             <Link href="/register">Start Learning Today <ArrowRight className="ml-2"/></Link>
-                        </Button>
-                        <Button size="lg" variant="outline">
-                            Explore Services
                         </Button>
                     </div>
                 </div>
                  <div className="relative">
-                    <div className="absolute -inset-4 bg-primary/10 rounded-full blur-3xl"></div>
+                    <div className="absolute -inset-8 bg-secondary/10 rounded-full blur-3xl opacity-50"></div>
                     <Image 
                         src="https://placehold.co/600x400.png"
-                        alt="Student learning online"
+                        alt="Student interacting with a futuristic learning interface"
                         width={600}
                         height={400}
-                        className="rounded-xl shadow-2xl relative"
-                        data-ai-hint="student learning online"
+                        className="rounded-2xl shadow-2xl relative"
+                        data-ai-hint="student futuristic learning"
                     />
                 </div>
             </div>
         </section>
 
 
-        <section id="services" className="bg-muted/50 py-16 md:py-24">
+        <section id="services" className="py-20 md:py-28">
           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-bold">Our Services</h2>
-              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Our services are designed to empower students through flexible, high-quality, and affordable education solutions.</p>
+            <div className="text-center mb-16">
+              <h2 className="text-3xl md:text-4xl font-bold">A Complete Learning Ecosystem</h2>
+              <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">From one-on-one tutoring to comprehensive assignment help, we provide the tools you need to excel.</p>
             </div>
             <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {services.map((service, i) => (
-                <div key={service.title}>
-                    <Card className="text-left shadow-lg rounded-xl h-full border-t-4 border-t-primary">
-                        <CardHeader>
-                            <div className="bg-primary/10 p-3 rounded-full w-fit">
-                                {service.icon}
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
-                            <p className="text-muted-foreground">{service.description}</p>
-                        </CardContent>
-                    </Card>
-                </div>
+              {services.map((service) => (
+                <Card key={service.title} className="text-center border-t-4 border-primary hover:-translate-y-2 hover:shadow-card-glow">
+                    <CardHeader className="items-center">
+                        <div className="bg-primary/10 p-4 rounded-full">
+                            {service.icon}
+                        </div>
+                    </CardHeader>
+                    <CardContent className="flex flex-col items-center">
+                        <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
+                        <p className="text-muted-foreground flex-grow">{service.description}</p>
+                    </CardContent>
+                </Card>
               ))}
             </div>
           </div>
         </section>
         
-        <section className="bg-background py-16 md:py-24">
+        <section className="py-20 md:py-28 bg-muted/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center">
                     <h2 className="text-3xl md:text-4xl font-bold">Ready to Start?</h2>
-                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Join thousands of students who are achieving their academic goals with Edumate Pro.</p>
-                    <Button size="lg" className="mt-8" asChild>
+                    <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">Join thousands of students who are achieving their academic goals with Edumate Pro.</p>
+                    <Button size="lg" className="mt-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow" asChild>
                         <Link href="/register">Sign Up for Free</Link>
                     </Button>
                 </div>
