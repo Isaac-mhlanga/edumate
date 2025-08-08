@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { PayoutRequest as PayoutRequestType, adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, RefreshCw, Search, Sparkles, Trash2, UserMinus, UserPlus, Users, X, XCircle, PlusCircle, Calendar as CalendarIcon } from "lucide-react";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, RefreshCw, Search, Sparkles, Trash2, UserMinus, UserPlus, Users, X, XCircle, PlusCircle, Calendar as CalendarIcon, Save, Edit, FileQuestion, Send } from "lucide-react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -34,6 +34,7 @@ import listPlugin from '@fullcalendar/list';
 import { createCalendarEvent, CreateCalendarEventOutput } from '@/ai/flows/create-calendar-event';
 import { Checkbox } from '@/components/ui/checkbox';
 import { format } from 'date-fns';
+import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -65,6 +66,8 @@ function AdminPage() {
     const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>(adminData.payoutRequests);
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
     const [loading, setLoading] = React.useState(true);
+    const [aiSummary, setAiSummary] = React.useState('');
+    const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
     
     // Calendar State
     const [events, setEvents] = React.useState<CalendarEvent[]>([
@@ -79,6 +82,26 @@ function AdminPage() {
     const [aiPrompt, setAiPrompt] = React.useState('');
     const [isAiLoading, setIsAiLoading] = React.useState(false);
     const [manualEvent, setManualEvent] = React.useState<Partial<CalendarEvent>>({});
+
+    const generatePerformanceSummary = React.useCallback(async (courses: Course[], users: User[], assignments: Assignment[]) => {
+        setLoadingAiSummary(true);
+        try {
+            const response = await summarizeInstructorPerformance({
+                instructorName: "Admin",
+                totalStudents: users.filter(u => u.role === 'student').length,
+                totalCourses: courses.length,
+                totalEarnings: 0, // Not tracked for admin
+                pendingAssignments: assignments.filter(a => a.status === 'Pending Review').length,
+                courseTitles: courses.map(c => c.title)
+            });
+            setAiSummary(response.summary);
+        } catch (error) {
+            console.error("Error generating AI summary: ", error);
+            setAiSummary("Could not generate performance summary at this time.");
+        } finally {
+            setLoadingAiSummary(false);
+        }
+    }, []);
 
 
     React.useEffect(() => {
@@ -111,21 +134,27 @@ function AdminPage() {
 
                 // Fetch courses
                 const coursesSnapshot = await getDocs(collection(firestore, "courses"));
-                setCourses(coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course)));
+                const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
+                setCourses(fetchedCourses);
 
                 // Fetch assignments
                 const assignmentsSnapshot = await getDocs(collection(firestore, "assignments"));
-                setAssignments(assignmentsSnapshot.docs.map(doc => ({ id: doc.id, assignmentTitle: doc.data().title, ...doc.data() } as Assignment)));
+                const fetchedAssignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, assignmentTitle: doc.data().title, ...doc.data() } as Assignment));
+                setAssignments(fetchedAssignments);
+                
+                await generatePerformanceSummary(fetchedCourses, usersWithSubscriptions, fetchedAssignments);
+
 
             } catch (error) {
                 console.error("Error fetching admin data:", error);
                 toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch platform data.' });
+                 setLoadingAiSummary(false);
             }
             setLoading(false);
         };
 
         fetchData();
-    }, [firestore, toast]);
+    }, [firestore, toast, generatePerformanceSummary]);
 
 
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
@@ -502,19 +531,23 @@ function AdminPage() {
                                         <Sparkles className="text-primary h-6 w-6" />
                                         <CardTitle>AI Performance Summary</CardTitle>
                                     </div>
-                                    <Button variant="ghost" size="sm" disabled={true}>
-                                        <RefreshCw className="mr-2 h-4 w-4 animate-spin" />
+                                    <Button variant="ghost" size="sm" disabled={loadingAiSummary} onClick={() => generatePerformanceSummary(courses, users, assignments)}>
+                                        <RefreshCw className={`mr-2 h-4 w-4 ${loadingAiSummary ? 'animate-spin' : ''}`} />
                                         Regenerate
                                     </Button>
                                 </div>
                                 <CardDescription>An AI-powered analysis of your platform's performance.</CardDescription>
                             </CardHeader>
                             <CardContent>
-                                <div className="space-y-2">
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-full" />
-                                    <Skeleton className="h-4 w-3/4" />
-                                </div>
+                                {loadingAiSummary ? (
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-full" />
+                                        <Skeleton className="h-4 w-3/4" />
+                                    </div>
+                                ) : (
+                                    <p className="text-muted-foreground">{aiSummary}</p>
+                                )}
                             </CardContent>
                         </Card>
                         <Card className="flex flex-col">
@@ -1308,7 +1341,7 @@ function AdminPage() {
                                         <label htmlFor="dropzone-file-solution-admin" className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
                                             <div className="flex flex-col items-center justify-center">
                                                 <FileUp className="w-6 h-6 mb-1 text-muted-foreground" />
-                                                <p className="text-xs text-muted-foreground"><span className="font-semibold">Click to upload</span></p>
+                                                <p className="text-xs text-muted-foreground"><span className="font-medium">Click to upload</span></p>
                                             </div>
                                             <Input id="dropzone-file-solution-admin" type="file" className="hidden" />
                                         </label>
