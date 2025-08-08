@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { PayoutRequest as PayoutRequestType, adminData } from "@/lib/data";
-import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, RefreshCw, Search, Sparkles, Trash2, UserMinus, UserPlus, Users, X, XCircle } from "lucide-react";
+import { ArrowUpRight, Banknote, BookOpen, Check, CheckCircle, ChevronLeft, ChevronRight, Clock, CreditCard, DollarSign, Download, Eye, FileText, FileUp, Hourglass, ListFilter, MessageSquare, MoreVertical, Printer, ReceiptText, RefreshCw, Search, Sparkles, Trash2, UserMinus, UserPlus, Users, X, XCircle } from "lucide-react";
 import React from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -36,7 +36,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; status: 'Active' | 'Suspended' };
+type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
 type Course = { id: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft' };
 type PayoutRequest = PayoutRequestType;
 type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
@@ -63,7 +63,27 @@ function AdminPage() {
             try {
                 // Fetch users
                 const usersSnapshot = await getDocs(collection(firestore, "users"));
-                setUsers(usersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().fullName, ...doc.data() } as User)));
+                const fetchedUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().fullName, ...doc.data() } as User));
+
+                // Fetch subscriptions
+                const fetchedSubscriptions = adminData.subscriptions;
+                setSubscriptions(fetchedSubscriptions);
+                
+                // Create a map of studentId to subscription plan
+                const subscriptionMap = new Map<string, string>();
+                fetchedSubscriptions.forEach(sub => {
+                    if (sub.status === 'Active') {
+                        subscriptionMap.set(sub.studentId, sub.planName);
+                    }
+                });
+
+                // Merge subscription data into users
+                const usersWithSubscriptions = fetchedUsers.map(user => ({
+                    ...user,
+                    subscriptionPlan: subscriptionMap.get(user.id)
+                }));
+                setUsers(usersWithSubscriptions);
+
 
                 // Fetch courses
                 const coursesSnapshot = await getDocs(collection(firestore, "courses"));
@@ -72,9 +92,6 @@ function AdminPage() {
                 // Fetch assignments
                 const assignmentsSnapshot = await getDocs(collection(firestore, "assignments"));
                 setAssignments(assignmentsSnapshot.docs.map(doc => ({ id: doc.id, assignmentTitle: doc.data().title, ...doc.data() } as Assignment)));
-
-                // Fetch subscriptions
-                setSubscriptions(adminData.subscriptions);
 
             } catch (error) {
                 console.error("Error fetching admin data:", error);
@@ -420,6 +437,7 @@ function AdminPage() {
                             <TableRow>
                                 <TableHead>User</TableHead>
                                 <TableHead className="hidden sm:table-cell">Role</TableHead>
+                                <TableHead className="hidden lg:table-cell">Subscription Plan</TableHead>
                                 <TableHead className="hidden md:table-cell">Joined Date</TableHead>
                                 <TableHead>Status</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
@@ -441,6 +459,16 @@ function AdminPage() {
                                         <Badge variant={user.role === 'instructor' ? 'secondary' : 'outline'} className="capitalize">
                                             {user.role}
                                         </Badge>
+                                    </TableCell>
+                                    <TableCell className="hidden lg:table-cell">
+                                        {user.subscriptionPlan ? (
+                                            <Badge variant="default" className="bg-primary/20 text-primary-foreground hover:bg-primary/30">
+                                                <CreditCard className="mr-1.5 h-3 w-3"/>
+                                                {user.subscriptionPlan}
+                                            </Badge>
+                                        ) : (
+                                            <span className="text-xs text-muted-foreground">N/A</span>
+                                        )}
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">{user.joined}</TableCell>
                                     <TableCell>
