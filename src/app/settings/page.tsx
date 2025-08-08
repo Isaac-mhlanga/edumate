@@ -83,12 +83,11 @@ function SettingsPage() {
         await updateProfile(user, { displayName: data.fullName });
       }
       
-      // Update user document in Firestore
+      // Update user document in Firestore (but not the role)
       const db = getFirestore(auth.app);
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
         fullName: data.fullName,
-        role: data.role,
       });
 
       toast({
@@ -165,7 +164,7 @@ function SettingsPage() {
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled>
                         <FormControl>
                             <SelectTrigger>
                                 <SelectValue placeholder="Select your role" />
@@ -179,7 +178,7 @@ function SettingsPage() {
                         </SelectContent>
                     </Select>
                      <FormDescription>
-                        Changing your role will change your dashboard view upon next login.
+                        Your role is assigned by an administrator and cannot be changed.
                     </FormDescription>
                     <FormMessage />
                   </FormItem>
