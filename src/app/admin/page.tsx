@@ -1,3 +1,4 @@
+
 'use client';
 
 import { AppLayout } from "@/components/app-layout";
@@ -528,7 +529,7 @@ function AdminPage() {
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
                                         <Sparkles className="text-primary h-6 w-6" />
-                                        <CardTitle>AI Performance Summary</CardTitle>
+                                        <CardTitle className="text-xl">AI Performance Summary</CardTitle>
                                     </div>
                                     <Button variant="ghost" size="sm" disabled={loadingAiSummary} onClick={() => generatePerformanceSummary(courses, users, assignments)}>
                                         <RefreshCw className={`mr-2 h-4 w-4 ${loadingAiSummary ? 'animate-spin' : ''}`} />
@@ -551,7 +552,7 @@ function AdminPage() {
                         </Card>
                         <Card className="flex flex-col">
                             <CardHeader>
-                                <CardTitle>Recent Platform Activity</CardTitle>
+                                <CardTitle className="text-xl">Recent Platform Activity</CardTitle>
                                 <CardDescription>A log of recent important events across the platform.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow">
@@ -596,7 +597,7 @@ function AdminPage() {
                     <section className="grid gap-6 lg:grid-cols-2">
                         <Card className="flex flex-col">
                             <CardHeader>
-                                <CardTitle>Upcoming Events</CardTitle>
+                                <CardTitle className="text-xl">Upcoming Events</CardTitle>
                                 <CardDescription>Key dates and events scheduled on the platform.</CardDescription>
                             </CardHeader>
                              <CardContent className="flex-grow">
@@ -637,7 +638,7 @@ function AdminPage() {
                         </Card>
                         <Card className="flex flex-col">
                             <CardHeader>
-                                <CardTitle>Pending Payouts</CardTitle>
+                                <CardTitle className="text-xl">Pending Payouts</CardTitle>
                                 <CardDescription>Instructor payout requests awaiting approval.</CardDescription>
                             </CardHeader>
                             <CardContent className="flex-grow">
@@ -683,7 +684,7 @@ function AdminPage() {
             {currentTab === 'users' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>User Management</CardTitle>
+                        <CardTitle className="text-xl">User Management</CardTitle>
                         <CardDescription>Manage all students and instructors on the platform.</CardDescription>
                     </CardHeader>
                      <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -787,7 +788,7 @@ function AdminPage() {
             {currentTab === 'courses' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Course Review &amp; Management</CardTitle>
+                        <CardTitle className="text-xl">Course Review &amp; Management</CardTitle>
                         <CardDescription>Approve, reject, and manage all courses on the platform.</CardDescription>
                     </CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -896,7 +897,7 @@ function AdminPage() {
             {currentTab === 'assignments' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Assignments Oversight</CardTitle>
+                        <CardTitle className="text-xl">Assignments Oversight</CardTitle>
                         <CardDescription>Monitor all submitted assignments for quality and pricing fairness.</CardDescription>
                     </CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -988,7 +989,7 @@ function AdminPage() {
                 <Card className="shadow-lg rounded-xl">
                     <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
-                            <CardTitle>Platform Calendar</CardTitle>
+                            <CardTitle className="text-xl">Platform Calendar</CardTitle>
                             <CardDescription>View and manage all scheduled events across the platform.</CardDescription>
                         </div>
                         <div className="flex gap-2">
@@ -1028,7 +1029,7 @@ function AdminPage() {
             {currentTab === 'payouts' && (
                 <Card>
                      <CardHeader>
-                        <CardTitle>Instructor Payouts</CardTitle>
+                        <CardTitle className="text-xl">Instructor Payouts</CardTitle>
                         <CardDescription>Review and process pending payout requests from instructors.</CardDescription>
                     </CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -1120,7 +1121,7 @@ function AdminPage() {
             {currentTab === 'subscriptions' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Subscription Management</CardTitle>
+                        <CardTitle className="text-xl">Subscription Management</CardTitle>
                         <CardDescription>Oversee all active and canceled student subscriptions.</CardDescription>
                     </CardHeader>
                     <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
@@ -1288,7 +1289,7 @@ function AdminPage() {
             <Dialog open={isAssignmentReviewDialogOpen} onOpenChange={setIsAssignmentReviewDialogOpen}>
                 <DialogContent className="sm:max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>Review Assignment</DialogTitle>
+                        <DialogTitle className="text-xl">Review Assignment</DialogTitle>
                         <DialogDescription>
                             Review submission for quality, fairness, and provide feedback.
                         </DialogDescription>
@@ -1365,7 +1366,7 @@ function AdminPage() {
             <Dialog open={isReceiptDialogOpen} onOpenChange={setIsReceiptDialogOpen}>
                 <DialogContent className="sm:max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle>Payout Receipt</DialogTitle>
+                        <DialogTitle className="text-xl">Payout Receipt</DialogTitle>
                         <DialogDescription>
                             A detailed record of the payout transaction.
                         </DialogDescription>
@@ -1389,7 +1390,7 @@ function AdminPage() {
             <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Create Event with AI</DialogTitle>
+                        <DialogTitle className="text-xl">Create Event with AI</DialogTitle>
                         <DialogDescription>
                             Describe the event you want to create. For example, "Schedule a meeting with the team for next Friday at 2pm."
                         </DialogDescription>
@@ -1416,7 +1417,7 @@ function AdminPage() {
             <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>Add New Event</DialogTitle>
+                        <DialogTitle className="text-xl">Add New Event</DialogTitle>
                         <DialogDescription>Fill in the details for your new event.</DialogDescription>
                     </DialogHeader>
                     <div className="py-4 space-y-4">
@@ -1456,7 +1457,7 @@ function AdminPage() {
                     {selectedEvent && (
                         <>
                             <DialogHeader>
-                                <DialogTitle className="flex items-center">
+                                <DialogTitle className="flex items-center text-xl">
                                      <span className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: selectedEvent.color || 'hsl(var(--primary))' }}></span>
                                     {selectedEvent.title}
                                 </DialogTitle>
@@ -1491,5 +1492,3 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
-
-    
