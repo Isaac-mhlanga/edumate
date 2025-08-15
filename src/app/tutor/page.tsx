@@ -11,29 +11,135 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 import { tutorData } from "@/lib/data";
 import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle } from "lucide-react";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import withAuth from "@/components/with-auth";
 import { useSearchParams } from "next/navigation";
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { Skeleton } from "@/components/ui/skeleton";
 
-type Booking = (typeof tutorData.bookings)[0];
+type Booking = {
+    id: string;
+    studentName: string;
+    date: string;
+    time: string;
+    subject: string;
+    status: 'Confirmed' | 'Completed' | 'Pending Confirmation';
+};
+
 type Message = (typeof tutorData.messages)[0];
 type Mode = "Online" | "In-person";
 
+type TutorProfile = {
+    id: string;
+    name: string;
+    email: string;
+    avatar: string;
+    bio: string;
+    hourlyRate: number;
+    subjects: string[];
+    grades: string[];
+    location: string;
+    modes: Mode[];
+    availability: { day: string; slots: string[] }[];
+};
+
 function TutorPage() {
     const searchParams = useSearchParams();
-    const currentTab = searchParams.get('tab') || 'overview';
-    
-    const [bookings, setBookings] = React.useState<Booking[]>(tutorData.bookings);
-    const [messages, setMessages] = React.useState<Message[]>(tutorData.messages);
+    const { toast } = useToast();
+    const [user, setUser] = useState<User | null>(null);
+    const [profile, setProfile] = useState<TutorProfile | null>(null);
+    const [bookings, setBookings] = useState<Booking[]>([]);
+    const [messages, setMessages] = useState<Message[]>([]);
+    const [loading, setLoading] = useState(true);
 
-    const [isEditingAvailability, setIsEditingAvailability] = React.useState(false);
-    const [availability, setAvailability] = React.useState(tutorData.availability);
-    const [tutoringModes, setTutoringModes] = React.useState<Mode[]>(tutorData.modes as Mode[]);
+    const currentTab = searchParams.get('tab') || 'overview';
+    const [isEditingProfile, setIsEditingProfile] = useState(false);
+    
+    useEffect(() => {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const firestore = getFirestore(app);
+
+        const fetchData = async (currentUser: User) => {
+            setLoading(true);
+            try {
+                // Fetch Tutor Profile
+                const profileRef = doc(firestore, 'tutors', currentUser.uid);
+                const profileSnap = await getDoc(profileRef);
+                if (profileSnap.exists()) {
+                    setProfile({ id: profileSnap.id, ...profileSnap.data() } as TutorProfile);
+                } else {
+                    // Create a default profile if none exists
+                    const defaultProfile: TutorProfile = {
+                        id: currentUser.uid,
+                        name: currentUser.displayName || 'New Tutor',
+                        email: currentUser.email || '',
+                        avatar: currentUser.photoURL || 'https://placehold.co/100x100.png',
+                        bio: '',
+                        hourlyRate: 200,
+                        subjects: [],
+                        grades: [],
+                        location: '',
+                        modes: [],
+                        availability: tutorData.availability,
+                    };
+                    await setDoc(profileRef, defaultProfile);
+                    setProfile(defaultProfile);
+                }
+                
+                // Fetch Bookings
+                const bookingsQuery = query(collection(firestore, 'bookings'), where('tutorId', '==', currentUser.uid));
+                const bookingsSnap = await getDocs(bookingsQuery);
+                setBookings(bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}) as Booking));
+
+                // Fetch Messages (using static for now)
+                setMessages(tutorData.messages);
+
+            } catch (error) {
+                console.error("Error fetching tutor data:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your data.' });
+            }
+            setLoading(false);
+        };
+        
+        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                fetchData(currentUser);
+            } else {
+                setLoading(false);
+            }
+        });
+        
+        return () => unsubscribe();
+
+    }, [toast]);
+    
+    const handleProfileChange = (field: keyof TutorProfile, value: any) => {
+        if (!profile) return;
+        setProfile({ ...profile, [field]: value });
+    };
+
+    const handleSaveProfile = async () => {
+        if (!user || !profile) return;
+        const firestore = getFirestore();
+        const profileRef = doc(firestore, 'tutors', user.uid);
+        try {
+            await updateDoc(profileRef, { ...profile });
+            toast({ title: 'Profile Updated', description: 'Your changes have been saved.' });
+        } catch (error) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not save your profile.' });
+        }
+    };
 
     const handleSlotToggle = (dayIndex: number, slot: string) => {
-        const newAvailability = [...availability];
+        if (!profile) return;
+        const newAvailability = [...profile.availability];
         const day = newAvailability[dayIndex];
         const slotIndex = day.slots.indexOf(slot);
 
@@ -42,16 +148,15 @@ function TutorPage() {
         } else {
             day.slots.push(slot);
         }
-        setAvailability(newAvailability);
+        handleProfileChange('availability', newAvailability);
     };
     
     const handleModeToggle = (mode: Mode) => {
-        setTutoringModes(prev => {
-            if (prev.includes(mode)) {
-                return prev.filter(m => m !== mode);
-            }
-            return [...prev, mode];
-        });
+        if (!profile) return;
+        const newModes = profile.modes.includes(mode)
+            ? profile.modes.filter(m => m !== mode)
+            : [...profile.modes, mode];
+        handleProfileChange('modes', newModes);
     };
 
     const getStatusIcon = (status: Booking['status']) => {
@@ -62,6 +167,14 @@ function TutorPage() {
             default: return null;
         }
     };
+
+    if (loading) {
+        return <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-64 w-full" /></div>
+    }
+
+    if (!profile) {
+        return <div>Loading profile...</div>
+    }
 
     return (
         <div className="space-y-8">
@@ -138,34 +251,24 @@ function TutorPage() {
                         <CardContent className="space-y-6">
                             <div className="flex items-center gap-6">
                                 <Avatar className="w-24 h-24 border-2 border-primary">
-                                    <AvatarImage src={tutorData.avatar} alt={tutorData.name} />
-                                    <AvatarFallback className="text-3xl">{tutorData.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                    <AvatarImage src={profile.avatar} alt={profile.name} />
+                                    <AvatarFallback className="text-3xl">{profile.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                 </Avatar>
                                 <div className="space-y-2 flex-1">
                                     <div className="space-y-1">
                                         <Label htmlFor="tutor-name">Full Name</Label>
-                                        <Input id="tutor-name" defaultValue={tutorData.name} />
+                                        <Input id="tutor-name" value={profile.name} onChange={(e) => handleProfileChange('name', e.target.value)} />
                                     </div>
                                     <Button size="sm" variant="outline">Upload New Photo</Button>
                                 </div>
                             </div>
                             <div className="space-y-1">
                                 <Label htmlFor="tutor-bio">Biography</Label>
-                                <Textarea id="tutor-bio" defaultValue={tutorData.bio} rows={5} placeholder="Tell students about yourself, your teaching style, and your experience."/>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <Label htmlFor="tutor-email">Email Address</Label>
-                                    <Input id="tutor-email" type="email" defaultValue={tutorData.email} />
-                                </div>
-                                <div className="space-y-1">
-                                    <Label htmlFor="tutor-phone">Phone Number</Label>
-                                    <Input id="tutor-phone" type="tel" defaultValue="(123) 456-7890" />
-                                </div>
+                                <Textarea id="tutor-bio" value={profile.bio} onChange={(e) => handleProfileChange('bio', e.target.value)} rows={5} placeholder="Tell students about yourself, your teaching style, and your experience."/>
                             </div>
                         </CardContent>
                         <CardFooter className="justify-end">
-                            <Button><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
+                            <Button onClick={handleSaveProfile}><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
                         </CardFooter>
                     </Card>
 
@@ -175,64 +278,25 @@ function TutorPage() {
                             <CardDescription>Define subjects, rates, and how you conduct sessions.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                <div className="space-y-4">
-                                    <Label>Subjects</Label>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="terms1" defaultChecked={tutorData.subjects.includes("Maths")}/>
-                                        <label htmlFor="terms1" className="text-sm font-medium leading-none">Maths</label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="terms2" defaultChecked={tutorData.subjects.includes("Physical Sciences")}/>
-                                        <label htmlFor="terms2" className="text-sm font-medium leading-none">Physical Sciences</label>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <Label>Grades</Label>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="grade10" defaultChecked={tutorData.grades.includes("10")}/>
-                                        <label htmlFor="grade10" className="text-sm font-medium leading-none">Grade 10</label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="grade11" defaultChecked={tutorData.grades.includes("11")}/>
-                                        <label htmlFor="grade11" className="text-sm font-medium leading-none">Grade 11</label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="grade12" defaultChecked={tutorData.grades.includes("12")}/>
-                                        <label htmlFor="grade12" className="text-sm font-medium leading-none">Grade 12</label>
-                                    </div>
-                                </div>
-                                <div className="space-y-4">
-                                    <Label>Tutoring Mode</Label>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="mode-online" checked={tutoringModes.includes("Online")} onCheckedChange={() => handleModeToggle("Online")}/>
-                                        <label htmlFor="mode-online" className="text-sm font-medium leading-none flex items-center gap-1.5"><Computer className="h-4 w-4"/>Online</label>
-                                    </div>
-                                    <div className="flex items-center space-x-2">
-                                        <Checkbox id="mode-inperson" checked={tutoringModes.includes("In-person")} onCheckedChange={() => handleModeToggle("In-person")}/>
-                                        <label htmlFor="mode-inperson" className="text-sm font-medium leading-none flex items-center gap-1.5"><Users className="h-4 w-4"/>In-person</label>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="tutor-rate">Your Hourly Rate (R)</Label>
                                     <div className="relative">
                                         <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                                        <Input id="tutor-rate" type="number" className="pl-8" defaultValue={tutorData.hourlyRate} />
+                                        <Input id="tutor-rate" type="number" className="pl-8" value={profile.hourlyRate} onChange={(e) => handleProfileChange('hourlyRate', parseFloat(e.target.value))}/>
                                     </div>
                                 </div>
                                 <div className="space-y-1">
                                     <Label htmlFor="tutor-location">Location (for in-person)</Label>
                                     <div className="relative">
                                         <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                                        <Input id="tutor-location" className="pl-8" defaultValue={tutorData.location} />
+                                        <Input id="tutor-location" className="pl-8" value={profile.location} onChange={(e) => handleProfileChange('location', e.target.value)} />
                                     </div>
                                 </div>
                             </div>
                         </CardContent>
                         <CardFooter className="justify-end">
-                            <Button><Save className="mr-2 h-4 w-4"/>Save Expertise</Button>
+                            <Button onClick={handleSaveProfile}><Save className="mr-2 h-4 w-4"/>Save Expertise</Button>
                         </CardFooter>
                     </Card>
                     
@@ -243,14 +307,17 @@ function TutorPage() {
                                     <CardTitle>Availability</CardTitle>
                                     <CardDescription>Set the time slots when you are available for tutoring.</CardDescription>
                                 </div>
-                                <Button variant={isEditingAvailability ? "default" : "outline"} onClick={() => setIsEditingAvailability(!isEditingAvailability)}>
-                                    {isEditingAvailability ? <><Save className="mr-2 h-4 w-4" /> Save</> : <><Edit className="mr-2 h-4 w-4" /> Edit</>}
+                                <Button variant={isEditingProfile ? "default" : "outline"} onClick={() => {
+                                    if(isEditingProfile) handleSaveProfile();
+                                    setIsEditingProfile(!isEditingProfile)
+                                }}>
+                                    {isEditingProfile ? <><Save className="mr-2 h-4 w-4" /> Save</> : <><Edit className="mr-2 h-4 w-4" /> Edit</>}
                                 </Button>
                             </div>
                         </CardHeader>
                         <CardContent>
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {availability.map((day, dayIndex) => (
+                                {profile.availability.map((day, dayIndex) => (
                                     <div key={day.day}>
                                         <h4 className="font-semibold mb-3">{day.day}</h4>
                                         <div className="space-y-2">
@@ -259,7 +326,7 @@ function TutorPage() {
                                                     <Checkbox 
                                                         id={`${day.day}-${slot}`} 
                                                         checked={day.slots.includes(slot)}
-                                                        disabled={!isEditingAvailability}
+                                                        disabled={!isEditingProfile}
                                                         onCheckedChange={() => handleSlotToggle(dayIndex, slot)}
                                                     />
                                                     <label htmlFor={`${day.day}-${slot}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
@@ -356,5 +423,14 @@ function TutorPage() {
         </div>
     );
 }
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 export default withAuth(TutorPage, ['tutor']);

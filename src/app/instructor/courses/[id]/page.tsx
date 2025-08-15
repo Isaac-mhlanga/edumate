@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { instructorData } from "@/lib/data";
-import { ArrowLeft, ChevronLeft, ChevronRight, Clapperboard, PlayCircle, Settings, Star } from "lucide-react";
+import { ArrowLeft, ChevronLeft, ChevronRight, Clapperboard, PlayCircle, Settings, Sparkles, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
@@ -15,6 +15,9 @@ import React from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { Skeleton } from "@/components/ui/skeleton";
+import { summarizeLesson } from "@/ai/flows/summarize-lesson";
+import { useToast } from "@/hooks/use-toast";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type VideoData = {
     id: string;
@@ -50,6 +53,7 @@ const firebaseConfig = {
 export default function CoursePreviewPage() {
     const params = useParams();
     const searchParams = useSearchParams();
+    const { toast } = useToast();
     const courseId = params.id as string;
     const [course, setCourse] = React.useState<Course | null>(null);
     const [loading, setLoading] = React.useState(true);
@@ -58,6 +62,10 @@ export default function CoursePreviewPage() {
     const [quality, setQuality] = React.useState('720p');
     const [playbackRate, setPlaybackRate] = React.useState('1');
     const videoRef = React.useRef<HTMLVideoElement>(null);
+    
+    const [isSummarizing, setIsSummarizing] = React.useState(false);
+    const [summary, setSummary] = React.useState<string | null>(null);
+
 
     // Pagination for video list
     const [currentVideoPage, setCurrentVideoPage] = React.useState(1);
@@ -96,6 +104,36 @@ export default function CoursePreviewPage() {
             videoRef.current.playbackRate = parseFloat(playbackRate);
         }
     }, [playbackRate]);
+
+    const handleSummarize = async () => {
+        if (!activeVideo || !course) return;
+        setIsSummarizing(true);
+        setSummary(null);
+
+        try {
+            const result = await summarizeLesson({
+                lessonTitle: activeVideo.title,
+                lessonDescription: 'A video about ' + activeVideo.title, // Placeholder
+                transcript: '...', // Placeholder for transcript
+                courseContext: course.description,
+                studentPreviousActivity: 'Watched introduction', // Placeholder
+            });
+            setSummary(result.summary);
+            toast({
+                title: 'Summary Generated!',
+                description: 'The AI-powered summary is now available.',
+            });
+        } catch (error) {
+            console.error("Error summarizing lesson:", error);
+            toast({
+                variant: 'destructive',
+                title: 'Summarization Failed',
+                description: 'Could not generate a summary for this lesson.',
+            });
+        } finally {
+            setIsSummarizing(false);
+        }
+    };
 
     const from = searchParams.get('from');
     let backLink = '/instructor?tab=courses';
@@ -195,7 +233,7 @@ export default function CoursePreviewPage() {
                             <div className="flex justify-between items-start">
                                 <div>
                                     <Badge variant="secondary" className="mb-2">{course.subject} - Grade {course.grade}</Badge>
-                                    <CardTitle className="text-3xl">{course.title}</CardTitle>
+                                    <CardTitle className="text-xl">{course.title}</CardTitle>
                                 </div>
                                 {activeVideo && <h2 className="text-xl font-semibold text-right flex-shrink-0 pl-4">{activeVideo.title}</h2>}
                             </div>
@@ -209,6 +247,22 @@ export default function CoursePreviewPage() {
                             <CardDescription className="mt-4 text-base">
                                 {course.description}
                             </CardDescription>
+                            <div className="mt-4 pt-4 border-t">
+                                <Button onClick={handleSummarize} disabled={isSummarizing || !activeVideo}>
+                                    <Sparkles className="mr-2 h-4 w-4" />
+                                    {isSummarizing ? 'Summarizing...' : 'Summarize with AI'}
+                                </Button>
+                                {isSummarizing && <Skeleton className="h-20 w-full mt-2" />}
+                                {summary && (
+                                    <Alert className="mt-4">
+                                        <Sparkles className="h-4 w-4" />
+                                        <AlertTitle>AI Summary</AlertTitle>
+                                        <AlertDescription>
+                                            {summary}
+                                        </AlertDescription>
+                                    </Alert>
+                                )}
+                            </div>
                         </CardContent>
                     </Card>
                 </div>
