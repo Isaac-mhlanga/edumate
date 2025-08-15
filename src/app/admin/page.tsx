@@ -23,7 +23,7 @@ import Link from "next/link";
 import { PayoutReceipt } from "@/components/payout-receipt";
 import { useReactToPrint } from "react-to-print";
 import withAuth from "@/components/with-auth";
-import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, writeBatch, query, where } from "firebase/firestore";
+import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, writeBatch, query, where, Timestamp } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { Skeleton } from "@/components/ui/skeleton";
 import FullCalendar from '@fullcalendar/react';
@@ -51,6 +51,8 @@ type PayoutRequest = PayoutRequestType;
 type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
 type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; };
+type Transaction = { id: string; itemType: string; status: string; amount: number; createdAt: Timestamp; };
+
 
 function AdminPage() {
     const router = useRouter();
@@ -65,6 +67,7 @@ function AdminPage() {
     const [assignments, setAssignments] = React.useState<Assignment[]>([]);
     const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>(adminData.payoutRequests);
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
+    const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [loading, setLoading] = React.useState(true);
     const [aiSummary, setAiSummary] = React.useState('');
     const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
@@ -83,14 +86,18 @@ function AdminPage() {
     const [isAiLoading, setIsAiLoading] = React.useState(false);
     const [manualEvent, setManualEvent] = React.useState<Partial<CalendarEvent>>({});
 
-    const generatePerformanceSummary = React.useCallback(async (courses: Course[], users: User[], assignments: Assignment[]) => {
+    const generatePerformanceSummary = React.useCallback(async (courses: Course[], users: User[], assignments: Assignment[], transactions: Transaction[]) => {
         setLoadingAiSummary(true);
         try {
+            const totalRevenue = transactions
+                .filter(t => t.itemType === 'course' || t.itemType === 'assignment' && t.status !== 'Refunded')
+                .reduce((sum, t) => sum + t.amount, 0);
+
             const response = await summarizeInstructorPerformance({
                 instructorName: "Admin",
                 totalStudents: users.filter(u => u.role === 'student').length,
                 totalCourses: courses.length,
-                totalEarnings: 0, // Not tracked for admin
+                totalEarnings: totalRevenue,
                 pendingAssignments: assignments.filter(a => a.status === 'Pending Review').length,
                 courseTitles: courses.map(c => c.title)
             });
@@ -142,7 +149,12 @@ function AdminPage() {
                 const fetchedAssignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, assignmentTitle: doc.data().title, ...doc.data() } as Assignment));
                 setAssignments(fetchedAssignments);
                 
-                await generatePerformanceSummary(fetchedCourses, usersWithSubscriptions, fetchedAssignments);
+                // Fetch transactions
+                const transactionsSnapshot = await getDocs(collection(firestore, "transactions"));
+                const fetchedTransactions = transactionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+                setTransactions(fetchedTransactions);
+                
+                await generatePerformanceSummary(fetchedCourses, usersWithSubscriptions, fetchedAssignments, fetchedTransactions);
 
 
             } catch (error) {
@@ -531,7 +543,7 @@ function AdminPage() {
                                         <Sparkles className="text-primary h-6 w-6" />
                                         <CardTitle className="text-xl">AI Performance Summary</CardTitle>
                                     </div>
-                                    <Button variant="ghost" size="sm" disabled={loadingAiSummary} onClick={() => generatePerformanceSummary(courses, users, assignments)}>
+                                    <Button variant="ghost" size="sm" disabled={loadingAiSummary} onClick={() => generatePerformanceSummary(courses, users, assignments, transactions)}>
                                         <RefreshCw className={`mr-2 h-4 w-4 ${loadingAiSummary ? 'animate-spin' : ''}`} />
                                         Regenerate
                                     </Button>
@@ -1492,3 +1504,5 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
+
+    
