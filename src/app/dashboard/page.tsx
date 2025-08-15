@@ -17,7 +17,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { studentData } from "@/lib/data";
+import { studentData, instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
 import Image from "next/image";
@@ -71,7 +71,7 @@ type SubmittedAssignment = {
 
 type Transaction = {
     id: string;
-    item: string;
+    itemId: string;
     itemTitle: string;
     type: string;
     itemType: 'course' | 'assignment' | 'subscription';
@@ -228,7 +228,7 @@ function DashboardPage() {
                  downloadURL = await getDownloadURL(uploadResult.ref);
             }
 
-            const assignmentData: Omit<SubmittedAssignment, 'id' | 'submittedAt'> &amp; { submittedAt: any } = {
+            const assignmentData: Omit<SubmittedAssignment, 'id' | 'submittedAt'> & { submittedAt: any } = {
                 studentId: user.uid,
                 studentName: user.displayName || 'Anonymous',
                 title: data.title,
@@ -392,7 +392,7 @@ function DashboardPage() {
 
     const purchasedCoursesWithDetails = React.useMemo(() => {
         return allCourses.filter(c => purchasedCourseIds.has(c.id));
-    }, [purchasedCourseIds, allCourses]);
+    }, [allCourses, purchasedCourseIds]);
 
     const filteredPurchasedCourses = React.useMemo(() => {
         return purchasedCoursesWithDetails.filter(course => {
@@ -450,7 +450,7 @@ function DashboardPage() {
                     </section>
                     
                     <section>
-                        <h2 className="text-2xl font-semibold mb-4">Continue Learning</h2>
+                        <h2 className="text-xl font-semibold mb-4">Continue Learning</h2>
                         <div className="grid md:grid-cols-2 gap-6">
                             {studentData.activeSubscriptions.map((sub) => (
                                 <Card key={sub.id} className="flex flex-col">
@@ -693,7 +693,7 @@ function DashboardPage() {
                                                 {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'By Subscription'}
                                             </h4>
                                             <Button asChild>
-                                                <Link href={`/payment?type=course&amp;id=${course.id}&amp;title=${encodeURIComponent(course.title)}&amp;price=${course.pricing.price}`}>
+                                                <Link href={`/payment?type=course&id=${course.id}&title=${encodeURIComponent(course.title)}&price=${course.pricing.price}`}>
                                                     {course.pricing.type === 'purchase' ? 'Buy Now' : 'Subscribe'}
                                                 </Link>
                                             </Button>
@@ -813,7 +813,7 @@ function DashboardPage() {
                                         <TableCell className="text-right">
                                             {assignment.status === 'Pending Review' && <Button variant="secondary" size="sm" onClick={() => handleOpenAssignmentDialog(assignment)}><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Edit</span></Button>}
                                             {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
-                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href={`/payment?type=assignment&amp;id=${assignment.id}&amp;title=${encodeURIComponent(assignment.title)}&amp;price=${assignment.price}`}><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
+                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href={`/payment?type=assignment&id=${assignment.id}&title=${encodeURIComponent(assignment.title)}&price=${assignment.price}`}><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
                                             {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl!} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
                                         </TableCell>
                                     </TableRow>
