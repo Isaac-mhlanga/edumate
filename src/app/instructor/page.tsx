@@ -18,12 +18,14 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar, Save, Wand2, Lightbulb, Image as ImageIcon } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar, Save, Wand2, Lightbulb, Image as ImageIcon, BookOpen, Printer } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import { useReactToPrint } from "react-to-print";
 import { useForm } from "react-hook-form";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { z } from "zod";
@@ -38,12 +40,11 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
-import { Checkbox } from "@/components/ui/checkbox";
-import { extractQuestionsFromPapers, type ExtractedQuestion } from "@/ai/flows/extract-questions-from-papers";
+import { solveQuestionPaper, type SolveQuestionPaperOutput } from "@/ai/flows/solve-question-paper";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { clarifyQuestion } from "@/ai/flows/clarify-question";
 import 'katex/dist/katex.min.css';
-import { InlineMath } from 'react-katex';
+import { InlineMath, BlockMath } from 'react-katex';
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
@@ -166,11 +167,6 @@ type VideoUpload = {
     quizId?: string;
 };
 
-type ExtractedQuestionGroup = {
-    paperName: string;
-    questions: ExtractedQuestion[];
-};
-
 function InstructorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -189,13 +185,17 @@ function InstructorPage() {
   const [aiSummary, setAiSummary] = React.useState('');
   const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
 
-  // AI Quiz Generator State
-  const [questionPapers, setQuestionPapers] = React.useState<File[]>([]);
-  const [isExtracting, setIsExtracting] = React.useState(false);
-  const [extractedQuestionGroups, setExtractedQuestionGroups] = React.useState<ExtractedQuestionGroup[]>([]);
-  const [selectedQuestions, setSelectedQuestions] = React.useState<Set<string>>(new Set());
-  const [clarification, setClarification] = React.useState<{ questionId: string; text: string } | null>(null);
-  const [isClarifying, setIsClarifying] = React.useState<string | null>(null);
+  // AI Solution Generator State
+  const [questionPaper, setQuestionPaper] = React.useState<File | null>(null);
+  const [isSolving, setIsSolving] = React.useState(false);
+  const [aiSolution, setAiSolution] = React.useState<SolveQuestionPaperOutput | null>(null);
+  const solutionPrintRef = React.useRef(null);
+
+  const handlePrint = useReactToPrint({
+      content: () => solutionPrintRef.current,
+      documentTitle: `solutions-${questionPaper?.name.replace(/\.[^/.]+$/, "") || 'paper'}`
+  });
+
 
   const [loadingCourses, setLoadingCourses] = React.useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = React.useState(true);
@@ -875,26 +875,21 @@ function InstructorPage() {
     }
   };
 
-  // AI Quiz Generator Logic
+  // AI Solution Generator Logic
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setQuestionPapers(prev => [...prev, ...newFiles].slice(0, 5));
+    if (e.target.files && e.target.files.length > 0) {
+      setQuestionPaper(e.target.files[0]);
+      setAiSolution(null); // Reset solution when a new file is chosen
     }
   };
 
-  const handleRemoveFile = (index: number) => {
-    setQuestionPapers(prev => prev.filter((_, i) => i !== index));
-  };
-  
-    const handleExtractQuestions = async () => {
-    if (questionPapers.length === 0) {
-      toast({ variant: 'destructive', title: 'No Files', description: 'Please upload at least one question paper.' });
+  const handleSolvePaper = async () => {
+    if (!questionPaper) {
+      toast({ variant: 'destructive', title: 'No File', description: 'Please upload a question paper first.' });
       return;
     }
-    setIsExtracting(true);
-    setExtractedQuestionGroups([]);
-    setSelectedQuestions(new Set());
+    setIsSolving(true);
+    setAiSolution(null);
 
     const fileToDataURI = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -905,80 +900,19 @@ function InstructorPage() {
         });
     };
 
-    const newGroups: ExtractedQuestionGroup[] = [];
-
-    for (const paper of questionPapers) {
-        try {
-            const paperDataUri = await fileToDataURI(paper);
-            const result = await extractQuestionsFromPapers({ paperDataUris: [paperDataUri] });
-            if (result.questions.length > 0) {
-                newGroups.push({ paperName: paper.name, questions: result.questions });
-            }
-        } catch (error) {
-            console.error(`Error processing ${paper.name}:`, error);
-            toast({ variant: 'destructive', title: `Extraction Failed for ${paper.name}`, description: 'Could not extract questions from this document.' });
-        }
+    try {
+        const paperDataUri = await fileToDataURI(questionPaper);
+        const result = await solveQuestionPaper({ paperDataUri });
+        setAiSolution(result);
+        toast({ title: 'Processing Complete!', description: 'The solutions and study notes have been generated.' });
+    } catch (error) {
+        console.error(`Error solving paper:`, error);
+        toast({ variant: 'destructive', title: `Solving Failed`, description: 'The AI could not process this document. Please try another one.' });
+    } finally {
+        setIsSolving(false);
     }
-    
-    setExtractedQuestionGroups(newGroups);
-    if(newGroups.length > 0) {
-        const totalQuestions = newGroups.reduce((acc, group) => acc + group.questions.length, 0);
-        toast({ title: 'Extraction Complete', description: `Found ${totalQuestions} questions across ${newGroups.length} paper(s).` });
-    } else {
-        toast({ variant: 'destructive', title: 'No Questions Found', description: 'The AI could not find any questions in the uploaded documents.' });
-    }
-    setIsExtracting(false);
   };
-  
-    const handleToggleQuestion = (questionId: string) => {
-        setSelectedQuestions(prev => {
-            const newSet = new Set(prev);
-            if (newSet.has(questionId)) {
-                newSet.delete(questionId);
-            } else {
-                newSet.add(questionId);
-            }
-            return newSet;
-        });
-    };
-    
-    const handleToggleAllQuestions = (group: ExtractedQuestionGroup, checked: boolean) => {
-        const questionIds = group.questions.map(q => q.id);
-        setSelectedQuestions(prev => {
-            const newSet = new Set(prev);
-            if (checked) {
-                questionIds.forEach(id => newSet.add(id));
-            } else {
-                questionIds.forEach(id => newSet.delete(id));
-            }
-            return newSet;
-        });
-    };
 
-    const handleCreateQuiz = () => {
-        const allQuestions = extractedQuestionGroups.flatMap(g => g.questions);
-        const questionsToCreate = allQuestions.filter(q => selectedQuestions.has(q.id));
-        
-        const query = new URLSearchParams({
-            prefill: JSON.stringify(questionsToCreate.map(q => ({ questionText: q.text, type: 'short-answer', correctAnswer: '' })))
-        }).toString();
-        
-        router.push(`/instructor/quizzes/create?${query}`);
-    };
-
-    const handleClarifyQuestion = async (question: ExtractedQuestion) => {
-        setIsClarifying(question.id);
-        setClarification(null);
-        try {
-            const result = await clarifyQuestion({ question: question.text });
-            setClarification({ questionId: question.id, text: result.clarification });
-        } catch (error) {
-            console.error("Error clarifying question:", error);
-            toast({ variant: 'destructive', title: 'Clarification Failed', description: 'Could not get a clarification at this time.' });
-        } finally {
-            setIsClarifying(null);
-        }
-    };
 
   return (
       <div className="space-y-8">
@@ -1059,7 +993,7 @@ function InstructorPage() {
               <section className="grid gap-8 lg:grid-cols-2">
                 <Card className="shadow-md rounded-xl">
                   <CardHeader>
-                    <CardTitle className="text-xl">Engagement & Income</CardTitle>
+                    <CardTitle className="text-xl">Engagement &amp; Income</CardTitle>
                     <CardDescription>Monthly student engagement and income over the last 6 months.</CardDescription>
                   </CardHeader>
                   <CardContent>
@@ -1440,133 +1374,109 @@ function InstructorPage() {
             <div className="space-y-6">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="text-xl">AI Quiz Generator</CardTitle>
-                        <CardDescription>Upload question papers (PDF, DOCX) and let AI extract questions to build a new quiz.</CardDescription>
+                        <CardTitle className="text-xl">AI Solution &amp; Study Guide Generator</CardTitle>
+                        <CardDescription>Upload a question paper (PDF, DOCX, PNG, JPG) to get full solutions and generated study notes.</CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-6">
                         <div>
-                            <Label>Upload Question Papers (up to 5)</Label>
                              <div className="mt-2 flex items-center justify-center w-full">
                                 <label htmlFor="dropzone-file-papers" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
                                     <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                         <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
                                     </div>
-                                    <Input id="dropzone-file-papers" type="file" className="hidden" multiple accept=".pdf,.doc,.docx,.png,.jpg" onChange={handleFileChange} />
+                                    <Input id="dropzone-file-papers" type="file" className="hidden" accept=".pdf,.doc,.docx,.png,.jpg" onChange={handleFileChange} />
                                 </label>
                             </div>
                         </div>
-                        {questionPapers.length > 0 && (
+                        {questionPaper && (
                             <div>
-                                <Label>Uploaded Files</Label>
-                                <ul className="mt-2 space-y-2">
-                                    {questionPapers.map((file, index) => (
-                                        <li key={index} className="flex items-center justify-between p-2 rounded-md bg-muted">
-                                            <span className="text-sm font-medium truncate">{file.name}</span>
-                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(index)}>
-                                                <XCircle className="h-4 w-4 text-destructive" />
-                                            </Button>
-                                        </li>
-                                    ))}
-                                </ul>
+                                <Label>Uploaded File</Label>
+                                <div className="mt-2 flex items-center justify-between p-2 rounded-md bg-muted">
+                                    <span className="text-sm font-medium truncate">{questionPaper.name}</span>
+                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setQuestionPaper(null); setAiSolution(null); }}>
+                                        <XCircle className="h-4 w-4 text-destructive" />
+                                    </Button>
+                                </div>
                             </div>
                         )}
                     </CardContent>
                     <CardFooter>
-                        <Button onClick={handleExtractQuestions} disabled={isExtracting || questionPapers.length === 0}>
+                        <Button onClick={handleSolvePaper} disabled={isSolving || !questionPaper}>
                             <Wand2 className="mr-2 h-4 w-4" />
-                            {isExtracting ? `Extracting... (${questionPapers.length} papers)` : 'Extract Questions'}
+                            {isSolving ? 'Solving with AI...' : 'Solve with AI'}
                         </Button>
                     </CardFooter>
                 </Card>
 
-                {(isExtracting || extractedQuestionGroups.length > 0) && (
+                {isSolving && (
+                    <Card>
+                        <CardContent className="pt-6 text-center text-muted-foreground space-y-4">
+                            <Sparkles className="h-10 w-10 mx-auto animate-pulse text-primary" />
+                            <h3 className="text-lg font-semibold">AI is at work...</h3>
+                            <p>Analyzing the document, solving questions, and generating study notes. This may take a moment.</p>
+                            <Skeleton className="h-4 w-3/4 mx-auto" />
+                            <Skeleton className="h-4 w-1/2 mx-auto" />
+                        </CardContent>
+                    </Card>
+                )}
+
+                {aiSolution && (
                     <Card>
                         <CardHeader>
-                            <CardTitle>Extracted Questions</CardTitle>
-                            <CardDescription>Select the questions you want to include in the new quiz.</CardDescription>
+                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                                <div>
+                                    <CardTitle>AI Generated Results</CardTitle>
+                                    <CardDescription>Review the solutions and study notes generated by the AI.</CardDescription>
+                                </div>
+                                <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" /> Save as PDF</Button>
+                            </div>
                         </CardHeader>
                         <CardContent>
-                            {isExtracting ? (
-                                <div className="space-y-4">
-                                    <Skeleton className="h-24 w-full" />
-                                    <Skeleton className="h-16 w-full" />
-                                    <Skeleton className="h-20 w-full" />
+                            <Tabs defaultValue="solutions">
+                                <TabsList className="grid w-full grid-cols-2">
+                                    <TabsTrigger value="solutions">Solutions &amp; Explanations</TabsTrigger>
+                                    <TabsTrigger value="notes">Study Notes</TabsTrigger>
+                                </TabsList>
+                                <div ref={solutionPrintRef} className="printable-content">
+                                    <TabsContent value="solutions" className="mt-4 space-y-6">
+                                        {aiSolution.solvedQuestions.map((item, index) => (
+                                            <Card key={index} className="overflow-hidden">
+                                                <CardHeader>
+                                                    <CardTitle className="text-lg">Question {index + 1}</CardTitle>
+                                                    <div className="text-muted-foreground prose dark:prose-invert max-w-none">
+                                                        <BlockMath math={item.questionText} />
+                                                    </div>
+                                                </CardHeader>
+                                                <CardContent>
+                                                    <h4 className="font-semibold text-primary mb-2">Solution:</h4>
+                                                    <div className="prose dark:prose-invert max-w-none text-sm">
+                                                        <BlockMath math={item.detailedSolution} />
+                                                    </div>
+                                                </CardContent>
+                                                <CardFooter className="bg-muted/30 p-4">
+                                                    <div>
+                                                        <h4 className="font-semibold mb-2">Explanation:</h4>
+                                                        <p className="text-sm text-muted-foreground">{item.explanation}</p>
+                                                    </div>
+                                                </CardFooter>
+                                            </Card>
+                                        ))}
+                                    </TabsContent>
+                                    <TabsContent value="notes" className="mt-4">
+                                        <Card>
+                                            <CardHeader>
+                                                <CardTitle>Generated Study Notes</CardTitle>
+                                                <CardDescription>Key concepts and formulas from the question paper.</CardDescription>
+                                            </CardHeader>
+                                            <CardContent className="prose dark:prose-invert max-w-none">
+                                                <BlockMath math={aiSolution.studyNotes} />
+                                            </CardContent>
+                                        </Card>
+                                    </TabsContent>
                                 </div>
-                            ) : (
-                                <Accordion type="multiple" defaultValue={extractedQuestionGroups.map(g => g.paperName)} className="w-full space-y-4">
-                                    {extractedQuestionGroups.map((group) => {
-                                        const allQuestionsInGroupSelected = group.questions.every(q => selectedQuestions.has(q.id));
-                                        return (
-                                            <AccordionItem value={group.paperName} key={group.paperName} className="border rounded-xl bg-muted/20">
-                                                <AccordionTrigger className="p-4 text-lg hover:no-underline">
-                                                    <div className="flex items-center gap-4">
-                                                         <Checkbox
-                                                            id={`select-all-${group.paperName}`}
-                                                            checked={allQuestionsInGroupSelected}
-                                                            onCheckedChange={(checked) => handleToggleAllQuestions(group, !!checked)}
-                                                            onClick={(e) => e.stopPropagation()}
-                                                        />
-                                                        <Label htmlFor={`select-all-${group.paperName}`} className="font-semibold text-base">{group.paperName}</Label>
-                                                    </div>
-                                                </AccordionTrigger>
-                                                <AccordionContent className="p-4 pt-0">
-                                                    <div className="space-y-4">
-                                                        {group.questions.map((q) => (
-                                                            <div key={q.id}>
-                                                                <div className="flex items-start gap-4 p-4 rounded-md border bg-background">
-                                                                    <Checkbox
-                                                                        id={q.id}
-                                                                        checked={selectedQuestions.has(q.id)}
-                                                                        onCheckedChange={() => handleToggleQuestion(q.id)}
-                                                                        className="mt-1"
-                                                                    />
-                                                                    <div className="flex-1 space-y-2">
-                                                                        <Label htmlFor={q.id} className="text-base font-normal leading-relaxed">
-                                                                            <InlineMath math={q.text} />
-                                                                        </Label>
-                                                                        {q.diagramDescription && (
-                                                                            <div className="text-sm text-muted-foreground italic flex items-start gap-2 border-l-2 pl-3">
-                                                                                <ImageIcon className="h-4 w-4 mt-0.5 shrink-0"/>
-                                                                                <span>{q.diagramDescription}</span>
-                                                                            </div>
-                                                                        )}
-                                                                    </div>
-                                                                    <Button
-                                                                        variant="ghost"
-                                                                        size="icon"
-                                                                        onClick={() => handleClarifyQuestion(q)}
-                                                                        disabled={isClarifying === q.id}
-                                                                        title="Clarify with AI"
-                                                                    >
-                                                                        <Lightbulb className={`h-4 w-4 ${isClarifying === q.id ? 'animate-pulse' : ''}`} />
-                                                                    </Button>
-                                                                </div>
-                                                                 {clarification?.questionId === q.id && (
-                                                                    <Alert className="mt-2">
-                                                                        <Lightbulb className="h-4 w-4" />
-                                                                        <AlertTitle>AI Clarification</AlertTitle>
-                                                                        <AlertDescription>{clarification.text}</AlertDescription>
-                                                                    </Alert>
-                                                                )}
-                                                            </div>
-                                                        ))}
-                                                    </div>
-                                                </AccordionContent>
-                                            </AccordionItem>
-                                        );
-                                    })}
-                                </Accordion>
-                            )}
+                            </Tabs>
                         </CardContent>
-                        {extractedQuestionGroups.length > 0 && (
-                            <CardFooter className="justify-between items-center">
-                                <p className="text-sm text-muted-foreground">{selectedQuestions.size} question(s) selected</p>
-                                <Button onClick={handleCreateQuiz} disabled={selectedQuestions.size === 0}>
-                                    <PlusCircle className="mr-2 h-4 w-4" /> Create Quiz with Selected
-                                </Button>
-                            </CardFooter>
-                        )}
                     </Card>
                 )}
             </div>
