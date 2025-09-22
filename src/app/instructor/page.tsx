@@ -21,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar, Save, Wand2 } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar, Save, Wand2, Lightbulb, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -40,6 +40,12 @@ import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { Checkbox } from "@/components/ui/checkbox";
 import { extractQuestionsFromPapers, ExtractedQuestion } from "@/ai/flows/extract-questions-from-papers";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { clarifyQuestion } from "@/ai/flows/clarify-question";
+import 'katex/dist/katex.min.css';
+import { InlineMath } from 'react-katex';
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -160,6 +166,11 @@ type VideoUpload = {
     quizId?: string;
 };
 
+type ExtractedQuestionGroup = {
+    paperName: string;
+    questions: ExtractedQuestion[];
+};
+
 function InstructorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -181,8 +192,10 @@ function InstructorPage() {
   // AI Quiz Generator State
   const [questionPapers, setQuestionPapers] = React.useState<File[]>([]);
   const [isExtracting, setIsExtracting] = React.useState(false);
-  const [extractedQuestions, setExtractedQuestions] = React.useState<ExtractedQuestion[]>([]);
+  const [extractedQuestionGroups, setExtractedQuestionGroups] = React.useState<ExtractedQuestionGroup[]>([]);
   const [selectedQuestions, setSelectedQuestions] = React.useState<Set<string>>(new Set());
+  const [clarification, setClarification] = React.useState<{ questionId: string; text: string } | null>(null);
+  const [isClarifying, setIsClarifying] = React.useState<string | null>(null);
 
   const [loadingCourses, setLoadingCourses] = React.useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = React.useState(true);
@@ -874,61 +887,98 @@ function InstructorPage() {
     setQuestionPapers(prev => prev.filter((_, i) => i !== index));
   };
   
-  const handleExtractQuestions = async () => {
+    const handleExtractQuestions = async () => {
     if (questionPapers.length === 0) {
       toast({ variant: 'destructive', title: 'No Files', description: 'Please upload at least one question paper.' });
       return;
     }
     setIsExtracting(true);
-    setExtractedQuestions([]);
+    setExtractedQuestionGroups([]);
     setSelectedQuestions(new Set());
 
-    try {
-      const fileToDataURI = (file: File): Promise<string> => {
+    const fileToDataURI = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
-          const reader = new FileReader();
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
+            const reader = new FileReader();
+            reader.onload = () => resolve(reader.result as string);
+            reader.onerror = reject;
+            reader.readAsDataURL(file);
         });
-      };
-      
-      const paperDataUris = await Promise.all(questionPapers.map(fileToDataURI));
-      
-      const result = await extractQuestionsFromPapers({ paperDataUris });
-      
-      setExtractedQuestions(result.questions);
-      toast({ title: 'Extraction Complete', description: `Found ${result.questions.length} questions.` });
+    };
 
-    } catch (error) {
-      console.error("Error extracting questions:", error);
-      toast({ variant: 'destructive', title: 'Extraction Failed', description: 'Could not extract questions from the documents.' });
-    } finally {
-      setIsExtracting(false);
+    const newGroups: ExtractedQuestionGroup[] = [];
+
+    for (const paper of questionPapers) {
+        try {
+            const paperDataUri = await fileToDataURI(paper);
+            const result = await extractQuestionsFromPapers({ paperDataUris: [paperDataUri] });
+            if (result.questions.length > 0) {
+                newGroups.push({ paperName: paper.name, questions: result.questions });
+            }
+        } catch (error) {
+            console.error(`Error processing ${paper.name}:`, error);
+            toast({ variant: 'destructive', title: `Extraction Failed for ${paper.name}`, description: 'Could not extract questions from this document.' });
+        }
     }
+    
+    setExtractedQuestionGroups(newGroups);
+    if(newGroups.length > 0) {
+        const totalQuestions = newGroups.reduce((acc, group) => acc + group.questions.length, 0);
+        toast({ title: 'Extraction Complete', description: `Found ${totalQuestions} questions across ${newGroups.length} paper(s).` });
+    } else {
+        toast({ variant: 'destructive', title: 'No Questions Found', description: 'The AI could not find any questions in the uploaded documents.' });
+    }
+    setIsExtracting(false);
   };
   
-  const handleToggleQuestion = (questionId: string) => {
-    setSelectedQuestions(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(questionId)) {
-        newSet.delete(questionId);
-      } else {
-        newSet.add(questionId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleCreateQuiz = () => {
-    const questionsToCreate = extractedQuestions.filter(q => selectedQuestions.has(q.id));
-    // Pass this data to the create quiz page
-    const query = new URLSearchParams({
-        prefill: JSON.stringify(questionsToCreate.map(q => ({ questionText: q.text, type: 'short-answer', correctAnswer: '' })))
-    }).toString();
+    const handleToggleQuestion = (questionId: string) => {
+        setSelectedQuestions(prev => {
+            const newSet = new Set(prev);
+            if (newSet.has(questionId)) {
+                newSet.delete(questionId);
+            } else {
+                newSet.add(questionId);
+            }
+            return newSet;
+        });
+    };
     
-    router.push(`/instructor/quizzes/create?${query}`);
-  };
+    const handleToggleAllQuestions = (group: ExtractedQuestionGroup, checked: boolean) => {
+        const questionIds = group.questions.map(q => q.id);
+        setSelectedQuestions(prev => {
+            const newSet = new Set(prev);
+            if (checked) {
+                questionIds.forEach(id => newSet.add(id));
+            } else {
+                questionIds.forEach(id => newSet.delete(id));
+            }
+            return newSet;
+        });
+    };
+
+    const handleCreateQuiz = () => {
+        const allQuestions = extractedQuestionGroups.flatMap(g => g.questions);
+        const questionsToCreate = allQuestions.filter(q => selectedQuestions.has(q.id));
+        
+        const query = new URLSearchParams({
+            prefill: JSON.stringify(questionsToCreate.map(q => ({ questionText: q.text, type: 'short-answer', correctAnswer: '' })))
+        }).toString();
+        
+        router.push(`/instructor/quizzes/create?${query}`);
+    };
+
+    const handleClarifyQuestion = async (question: ExtractedQuestion) => {
+        setIsClarifying(question.id);
+        setClarification(null);
+        try {
+            const result = await clarifyQuestion({ question: question.text });
+            setClarification({ questionId: question.id, text: result.clarification });
+        } catch (error) {
+            console.error("Error clarifying question:", error);
+            toast({ variant: 'destructive', title: 'Clarification Failed', description: 'Could not get a clarification at this time.' });
+        } finally {
+            setIsClarifying(null);
+        }
+    };
 
   return (
       <div className="space-y-8">
@@ -1402,7 +1452,7 @@ function InstructorPage() {
                                         <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
                                         <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
                                     </div>
-                                    <Input id="dropzone-file-papers" type="file" className="hidden" multiple accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                                    <Input id="dropzone-file-papers" type="file" className="hidden" multiple accept=".pdf,.doc,.docx,.png,.jpg" onChange={handleFileChange} />
                                 </label>
                             </div>
                         </div>
@@ -1425,12 +1475,12 @@ function InstructorPage() {
                     <CardFooter>
                         <Button onClick={handleExtractQuestions} disabled={isExtracting || questionPapers.length === 0}>
                             <Wand2 className="mr-2 h-4 w-4" />
-                            {isExtracting ? 'Generating...' : 'Generate Questions'}
+                            {isExtracting ? `Extracting... (${questionPapers.length} papers)` : 'Extract Questions'}
                         </Button>
                     </CardFooter>
                 </Card>
 
-                {(isExtracting || extractedQuestions.length > 0) && (
+                {(isExtracting || extractedQuestionGroups.length > 0) && (
                     <Card>
                         <CardHeader>
                             <CardTitle>Extracted Questions</CardTitle>
@@ -1438,33 +1488,85 @@ function InstructorPage() {
                         </CardHeader>
                         <CardContent>
                             {isExtracting ? (
-                                <div className="space-y-2">
-                                    <Skeleton className="h-10 w-full" />
-                                    <Skeleton className="h-10 w-full" />
-                                    <Skeleton className="h-10 w-full" />
+                                <div className="space-y-4">
+                                    <Skeleton className="h-24 w-full" />
+                                    <Skeleton className="h-16 w-full" />
+                                    <Skeleton className="h-20 w-full" />
                                 </div>
                             ) : (
-                                <div className="space-y-4">
-                                    {extractedQuestions.map((q) => (
-                                        <div key={q.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
-                                            <Checkbox
-                                                id={q.id}
-                                                checked={selectedQuestions.has(q.id)}
-                                                onCheckedChange={() => handleToggleQuestion(q.id)}
-                                                className="mt-1"
-                                            />
-                                            <Label htmlFor={q.id} className="flex-1 text-sm font-normal">{q.text}</Label>
-                                        </div>
-                                    ))}
-                                </div>
+                                <Accordion type="multiple" defaultValue={extractedQuestionGroups.map(g => g.paperName)} className="w-full space-y-4">
+                                    {extractedQuestionGroups.map((group) => {
+                                        const allQuestionsInGroupSelected = group.questions.every(q => selectedQuestions.has(q.id));
+                                        return (
+                                            <AccordionItem value={group.paperName} key={group.paperName} className="border rounded-xl bg-muted/20">
+                                                <AccordionTrigger className="p-4 text-lg hover:no-underline">
+                                                    <div className="flex items-center gap-4">
+                                                         <Checkbox
+                                                            id={`select-all-${group.paperName}`}
+                                                            checked={allQuestionsInGroupSelected}
+                                                            onCheckedChange={(checked) => handleToggleAllQuestions(group, !!checked)}
+                                                            onClick={(e) => e.stopPropagation()}
+                                                        />
+                                                        <Label htmlFor={`select-all-${group.paperName}`} className="font-semibold text-base">{group.paperName}</Label>
+                                                    </div>
+                                                </AccordionTrigger>
+                                                <AccordionContent className="p-4 pt-0">
+                                                    <div className="space-y-4">
+                                                        {group.questions.map((q) => (
+                                                            <div key={q.id}>
+                                                                <div className="flex items-start gap-4 p-4 rounded-md border bg-background">
+                                                                    <Checkbox
+                                                                        id={q.id}
+                                                                        checked={selectedQuestions.has(q.id)}
+                                                                        onCheckedChange={() => handleToggleQuestion(q.id)}
+                                                                        className="mt-1"
+                                                                    />
+                                                                    <div className="flex-1 space-y-2">
+                                                                        <Label htmlFor={q.id} className="text-base font-normal leading-relaxed">
+                                                                            <InlineMath math={q.text} />
+                                                                        </Label>
+                                                                        {q.diagramDescription && (
+                                                                            <div className="text-sm text-muted-foreground italic flex items-start gap-2 border-l-2 pl-3">
+                                                                                <ImageIcon className="h-4 w-4 mt-0.5 shrink-0"/>
+                                                                                <span>{q.diagramDescription}</span>
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="icon"
+                                                                        onClick={() => handleClarifyQuestion(q)}
+                                                                        disabled={isClarifying === q.id}
+                                                                        title="Clarify with AI"
+                                                                    >
+                                                                        <Lightbulb className={`h-4 w-4 ${isClarifying === q.id ? 'animate-pulse' : ''}`} />
+                                                                    </Button>
+                                                                </div>
+                                                                 {clarification?.questionId === q.id && (
+                                                                    <Alert className="mt-2">
+                                                                        <Lightbulb className="h-4 w-4" />
+                                                                        <AlertTitle>AI Clarification</AlertTitle>
+                                                                        <AlertDescription>{clarification.text}</AlertDescription>
+                                                                    </Alert>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        );
+                                    })}
+                                </Accordion>
                             )}
                         </CardContent>
-                        <CardFooter className="justify-between items-center">
-                            <p className="text-sm text-muted-foreground">{selectedQuestions.size} question(s) selected</p>
-                            <Button onClick={handleCreateQuiz} disabled={selectedQuestions.size === 0}>
-                                <PlusCircle className="mr-2 h-4 w-4" /> Create Quiz with Selected
-                            </Button>
-                        </CardFooter>
+                        {extractedQuestionGroups.length > 0 && (
+                            <CardFooter className="justify-between items-center">
+                                <p className="text-sm text-muted-foreground">{selectedQuestions.size} question(s) selected</p>
+                                <Button onClick={handleCreateQuiz} disabled={selectedQuestions.size === 0}>
+                                    <PlusCircle className="mr-2 h-4 w-4" /> Create Quiz with Selected
+                                </Button>
+                            </CardFooter>
+                        )}
                     </Card>
                 )}
             </div>
