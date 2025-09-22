@@ -16,7 +16,7 @@ const ExtractQuestionsInputSchema = z.object({
 });
 export type ExtractQuestionsInput = z.infer<typeof ExtractQuestionsInputSchema>;
 
-export const ExtractedQuestionSchema = z.object({
+const ExtractedQuestionSchema = z.object({
     id: z.string().describe("A unique identifier for the question, e.g., 'q1'."),
     text: z.string().describe("The full text of the extracted question."),
 });
