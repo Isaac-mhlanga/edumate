@@ -39,7 +39,7 @@ import { format } from "date-fns";
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { Checkbox } from "@/components/ui/checkbox";
-import { extractQuestionsFromPapers, ExtractedQuestion } from "@/ai/flows/extract-questions-from-papers";
+import { extractQuestionsFromPapers, type ExtractedQuestion } from "@/ai/flows/extract-questions-from-papers";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { clarifyQuestion } from "@/ai/flows/clarify-question";
 import 'katex/dist/katex.min.css';
