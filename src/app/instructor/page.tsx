@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -20,7 +21,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar, Save } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, UserMinus, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar, Save, Wand2 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -37,6 +38,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
+import { Checkbox } from "@/components/ui/checkbox";
+import { extractQuestionsFromPapers, ExtractedQuestion } from "@/ai/flows/extract-questions-from-papers";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -174,6 +177,12 @@ function InstructorPage() {
   const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
   const [aiSummary, setAiSummary] = React.useState('');
   const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
+
+  // AI Quiz Generator State
+  const [questionPapers, setQuestionPapers] = React.useState<File[]>([]);
+  const [isExtracting, setIsExtracting] = React.useState(false);
+  const [extractedQuestions, setExtractedQuestions] = React.useState<ExtractedQuestion[]>([]);
+  const [selectedQuestions, setSelectedQuestions] = React.useState<Set<string>>(new Set());
 
   const [loadingCourses, setLoadingCourses] = React.useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = React.useState(true);
@@ -853,6 +862,74 @@ function InstructorPage() {
     }
   };
 
+  // AI Quiz Generator Logic
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setQuestionPapers(prev => [...prev, ...newFiles].slice(0, 5));
+    }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setQuestionPapers(prev => prev.filter((_, i) => i !== index));
+  };
+  
+  const handleExtractQuestions = async () => {
+    if (questionPapers.length === 0) {
+      toast({ variant: 'destructive', title: 'No Files', description: 'Please upload at least one question paper.' });
+      return;
+    }
+    setIsExtracting(true);
+    setExtractedQuestions([]);
+    setSelectedQuestions(new Set());
+
+    try {
+      const fileToDataURI = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      };
+      
+      const paperDataUris = await Promise.all(questionPapers.map(fileToDataURI));
+      
+      const result = await extractQuestionsFromPapers({ paperDataUris });
+      
+      setExtractedQuestions(result.questions);
+      toast({ title: 'Extraction Complete', description: `Found ${result.questions.length} questions.` });
+
+    } catch (error) {
+      console.error("Error extracting questions:", error);
+      toast({ variant: 'destructive', title: 'Extraction Failed', description: 'Could not extract questions from the documents.' });
+    } finally {
+      setIsExtracting(false);
+    }
+  };
+  
+  const handleToggleQuestion = (questionId: string) => {
+    setSelectedQuestions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(questionId)) {
+        newSet.delete(questionId);
+      } else {
+        newSet.add(questionId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleCreateQuiz = () => {
+    const questionsToCreate = extractedQuestions.filter(q => selectedQuestions.has(q.id));
+    // Pass this data to the create quiz page
+    const query = new URLSearchParams({
+        prefill: JSON.stringify(questionsToCreate.map(q => ({ questionText: q.text, type: 'short-answer', correctAnswer: '' })))
+    }).toString();
+    
+    router.push(`/instructor/quizzes/create?${query}`);
+  };
+
   return (
       <div className="space-y-8">
           {currentTab === 'overview' && (
@@ -1307,6 +1384,90 @@ function InstructorPage() {
                     </div>
                 </CardFooter>
             </Card>
+          )}
+
+          {currentTab === 'ai-quiz' && (
+            <div className="space-y-6">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-xl">AI Quiz Generator</CardTitle>
+                        <CardDescription>Upload question papers (PDF, DOCX) and let AI extract questions to build a new quiz.</CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-6">
+                        <div>
+                            <Label>Upload Question Papers (up to 5)</Label>
+                             <div className="mt-2 flex items-center justify-center w-full">
+                                <label htmlFor="dropzone-file-papers" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
+                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                        <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
+                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
+                                    </div>
+                                    <Input id="dropzone-file-papers" type="file" className="hidden" multiple accept=".pdf,.doc,.docx" onChange={handleFileChange} />
+                                </label>
+                            </div>
+                        </div>
+                        {questionPapers.length > 0 && (
+                            <div>
+                                <Label>Uploaded Files</Label>
+                                <ul className="mt-2 space-y-2">
+                                    {questionPapers.map((file, index) => (
+                                        <li key={index} className="flex items-center justify-between p-2 rounded-md bg-muted">
+                                            <span className="text-sm font-medium truncate">{file.name}</span>
+                                            <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => handleRemoveFile(index)}>
+                                                <XCircle className="h-4 w-4 text-destructive" />
+                                            </Button>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        )}
+                    </CardContent>
+                    <CardFooter>
+                        <Button onClick={handleExtractQuestions} disabled={isExtracting || questionPapers.length === 0}>
+                            <Wand2 className="mr-2 h-4 w-4" />
+                            {isExtracting ? 'Generating...' : 'Generate Questions'}
+                        </Button>
+                    </CardFooter>
+                </Card>
+
+                {(isExtracting || extractedQuestions.length > 0) && (
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Extracted Questions</CardTitle>
+                            <CardDescription>Select the questions you want to include in the new quiz.</CardDescription>
+                        </CardHeader>
+                        <CardContent>
+                            {isExtracting ? (
+                                <div className="space-y-2">
+                                    <Skeleton className="h-10 w-full" />
+                                    <Skeleton className="h-10 w-full" />
+                                    <Skeleton className="h-10 w-full" />
+                                </div>
+                            ) : (
+                                <div className="space-y-4">
+                                    {extractedQuestions.map((q) => (
+                                        <div key={q.id} className="flex items-start gap-4 p-4 rounded-md border bg-muted/50">
+                                            <Checkbox
+                                                id={q.id}
+                                                checked={selectedQuestions.has(q.id)}
+                                                onCheckedChange={() => handleToggleQuestion(q.id)}
+                                                className="mt-1"
+                                            />
+                                            <Label htmlFor={q.id} className="flex-1 text-sm font-normal">{q.text}</Label>
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                        </CardContent>
+                        <CardFooter className="justify-between items-center">
+                            <p className="text-sm text-muted-foreground">{selectedQuestions.size} question(s) selected</p>
+                            <Button onClick={handleCreateQuiz} disabled={selectedQuestions.size === 0}>
+                                <PlusCircle className="mr-2 h-4 w-4" /> Create Quiz with Selected
+                            </Button>
+                        </CardFooter>
+                    </Card>
+                )}
+            </div>
           )}
 
           {currentTab === 'assignments' && (
