@@ -100,7 +100,6 @@ const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/instructor', tab: 'overview' },
   { href: '/instructor?tab=courses', label: 'Courses', icon: GraduationCap, basePath: '/instructor', tab: 'courses' },
   { href: '/instructor?tab=quizzes', label: 'Quizzes', icon: FileQuestion, basePath: '/instructor', tab: 'quizzes' },
-  { href: '/instructor?tab=ai-quiz', label: 'AI Quiz', icon: Wand2, basePath: '/instructor', tab: 'ai-quiz' },
   { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
   { href: '/calendar', label: 'Calendar', icon: Calendar, basePath: '/calendar' },
   { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },

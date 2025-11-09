@@ -1,70 +1,80 @@
-
-'use server';
-/**
- * @fileOverview An AI flow to solve a question paper and generate study notes.
- *
- * - solveQuestionPaper - Solves a paper, provides explanations, and generates notes.
- * - SolveQuestionPaperInput - The input type for the function.
- * - SolveQuestionPaperOutput - The return type for the function.
- */
-
-import { ai } from '@/ai/genkit';
-import { z } from 'zod';
-
-const SolveQuestionPaperInputSchema = z.object({
-  paperDataUri: z
-    .string()
-    .describe(
-      "A question paper document, as a data URI that must include a MIME type and use Base64 encoding. Expected format: 'data:<mimetype>;base64,<encoded_data>'."
-    ),
-    subject: z.string().optional().describe("The subject of the paper, e.g., 'Maths' or 'Physical Sciences'."),
-    grade: z.string().optional().describe("The grade level for the paper, e.g., '12'."),
-});
-export type SolveQuestionPaperInput = z.infer<typeof SolveQuestionPaperInputSchema>;
-
-const SolvedQuestionSchema = z.object({
-    questionText: z.string().describe("The full text of the question, with all mathematical formulas formatted as LaTeX."),
-    detailedSolution: z.string().describe("A detailed, step-by-step solution to the question. All mathematical formulas must be formatted as LaTeX."),
-    explanation: z.string().describe("A clear explanation of the concepts, formulas, and reasoning used to arrive at the solution."),
-});
-
-const SolveQuestionPaperOutputSchema = z.object({
-  solvedQuestions: z.array(SolvedQuestionSchema).describe("An array of all questions found in the paper, each with its solution and explanation."),
-  studyNotes: z.string().describe("Comprehensive, well-structured study notes based on the topics and solutions from the paper. This should be formatted in Markdown, including headings, lists, and bold text. All mathematical formulas must be formatted as LaTeX."),
-});
-export type SolveQuestionPaperOutput = z.infer<typeof SolveQuestionPaperOutputSchema>;
-
-export async function solveQuestionPaper(input: SolveQuestionPaperInput): Promise<SolveQuestionPaperOutput> {
-  return solveQuestionPaperFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'solveQuestionPaperPrompt',
-  input: { schema: SolveQuestionPaperInputSchema },
-  output: { schema: SolveQuestionPaperOutputSchema },
-  prompt: `You are an expert educator and problem solver for {{subject}} at Grade {{grade}} level. Your task is to meticulously analyze the provided question paper and generate a complete solution set and a set of study notes.
-
-**Instructions:**
-
-1.  **Identify All Questions:** Go through the entire document and identify every single question, including sub-parts.
-2.  **Solve Each Question:** For each question, provide a detailed, step-by-step solution. Show all your work and calculations clearly.
-3.  **Explain the Solution:** After each solution, provide a thorough explanation. Describe the underlying principles, the formulas used, and why each step was taken. Your explanation should be clear enough for a student to learn from it.
-4.  **Generate Study Notes:** After solving all questions, synthesize the information into a comprehensive set of study notes. The notes should cover all the key topics, concepts, and formulas encountered in the paper. Structure the notes logically with Markdown (headings, lists, bold text) for readability.
-5.  **Format Mathematics:** **CRITICAL:** All mathematical symbols, variables, and equations in the question text, solutions, and study notes **MUST** be formatted using LaTeX syntax (e.g., \\(x^2 + y^2 = r^2\\), \\(\\frac{-b \\pm \\sqrt{b^2-4ac}}{2a}\\)).
-
-**Document to Process:**
-{{media url=paperDataUri}}
-`,
-});
-
-const solveQuestionPaperFlow = ai.defineFlow(
-  {
-    name: 'solveQuestionPaperFlow',
-    inputSchema: SolveQuestionPaperInputSchema,
-    outputSchema: SolveQuestionPaperOutputSchema,
+{
+  "name": "nextn",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 9002",
+    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
+    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
-  async (input) => {
-    const { output } = await prompt(input);
-    return output!;
+  "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/list": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+    "@genkit-ai/googleai": "^1.13.0",
+    "@genkit-ai/next": "^1.13.0",
+    "@hookform/resolvers": "^4.1.3",
+    "@radix-ui/react-accordion": "^1.2.3",
+    "@radix-ui/react-alert-dialog": "^1.1.6",
+    "@radix-ui/react-avatar": "^1.1.3",
+    "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-collapsible": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-menubar": "^1.1.6",
+    "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-progress": "^1.1.2",
+    "@radix-ui/react-radio-group": "^1.2.3",
+    "@radix-ui/react-scroll-area": "^1.2.3",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-separator": "^1.1.2",
+    "@radix-ui/react-slider": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.1.3",
+    "@radix-ui/react-tabs": "^1.1.3",
+    "@radix-ui/react-toast": "^1.2.6",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "axios": "^1.7.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.5.0",
+    "embla-carousel-react": "^8.6.0",
+    "firebase": "^11.9.1",
+    "genkit": "^1.13.0",
+    "katex": "^0.16.11",
+    "lucide-react": "^0.475.0",
+    "next": "15.3.3",
+    "next-themes": "^0.3.0",
+    "patch-package": "^8.0.0",
+    "react": "^18.3.1",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "react-katex": "^3.0.1",
+    "react-paystack": "^5.0.0",
+    "react-to-print": "^2.15.1",
+    "recharts": "^2.15.1",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.7",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-katex": "^3.0.4",
+    "genkit-cli": "^1.13.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
-);
+}

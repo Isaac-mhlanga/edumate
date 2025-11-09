@@ -40,12 +40,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
-import { solveQuestionPaper, type SolveQuestionPaperOutput } from "@/ai/flows/solve-question-paper";
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { clarifyQuestion } from "@/ai/flows/clarify-question";
-import 'katex/dist/katex.min.css';
-import { InlineMath, BlockMath } from 'react-katex';
-import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 
 
 const firebaseConfig = {
@@ -184,18 +178,6 @@ function InstructorPage() {
   const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
   const [aiSummary, setAiSummary] = React.useState('');
   const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
-
-  // AI Solution Generator State
-  const [questionPaper, setQuestionPaper] = React.useState<File | null>(null);
-  const [isSolving, setIsSolving] = React.useState(false);
-  const [aiSolution, setAiSolution] = React.useState<SolveQuestionPaperOutput | null>(null);
-  const solutionPrintRef = React.useRef(null);
-
-  const handlePrint = useReactToPrint({
-      content: () => solutionPrintRef.current,
-      documentTitle: `solutions-${questionPaper?.name.replace(/\.[^/.]+$/, "") || 'paper'}`
-  });
-
 
   const [loadingCourses, setLoadingCourses] = React.useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = React.useState(true);
@@ -875,44 +857,6 @@ function InstructorPage() {
     }
   };
 
-  // AI Solution Generator Logic
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files.length > 0) {
-      setQuestionPaper(e.target.files[0]);
-      setAiSolution(null); // Reset solution when a new file is chosen
-    }
-  };
-
-  const handleSolvePaper = async () => {
-    if (!questionPaper) {
-      toast({ variant: 'destructive', title: 'No File', description: 'Please upload a question paper first.' });
-      return;
-    }
-    setIsSolving(true);
-    setAiSolution(null);
-
-    const fileToDataURI = (file: File): Promise<string> => {
-        return new Promise((resolve, reject) => {
-            const reader = new FileReader();
-            reader.onload = () => resolve(reader.result as string);
-            reader.onerror = reject;
-            reader.readAsDataURL(file);
-        });
-    };
-
-    try {
-        const paperDataUri = await fileToDataURI(questionPaper);
-        const result = await solveQuestionPaper({ paperDataUri });
-        setAiSolution(result);
-        toast({ title: 'Processing Complete!', description: 'The solutions and study notes have been generated.' });
-    } catch (error) {
-        console.error(`Error solving paper:`, error);
-        toast({ variant: 'destructive', title: `Solving Failed`, description: 'The AI could not process this document. Please try another one.' });
-    } finally {
-        setIsSolving(false);
-    }
-  };
-
 
   return (
       <div className="space-y-8">
@@ -1368,118 +1312,6 @@ function InstructorPage() {
                     </div>
                 </CardFooter>
             </Card>
-          )}
-
-          {currentTab === 'ai-quiz' && (
-            <div className="space-y-6">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">AI Solution &amp; Study Guide Generator</CardTitle>
-                        <CardDescription>Upload a question paper (PDF, DOCX, PNG, JPG) to get full solutions and generated study notes.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-6">
-                        <div>
-                             <div className="mt-2 flex items-center justify-center w-full">
-                                <label htmlFor="dropzone-file-papers" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
-                                    <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                                        <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                        <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
-                                    </div>
-                                    <Input id="dropzone-file-papers" type="file" className="hidden" accept=".pdf,.doc,.docx,.png,.jpg" onChange={handleFileChange} />
-                                </label>
-                            </div>
-                        </div>
-                        {questionPaper && (
-                            <div>
-                                <Label>Uploaded File</Label>
-                                <div className="mt-2 flex items-center justify-between p-2 rounded-md bg-muted">
-                                    <span className="text-sm font-medium truncate">{questionPaper.name}</span>
-                                    <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => { setQuestionPaper(null); setAiSolution(null); }}>
-                                        <XCircle className="h-4 w-4 text-destructive" />
-                                    </Button>
-                                </div>
-                            </div>
-                        )}
-                    </CardContent>
-                    <CardFooter>
-                        <Button onClick={handleSolvePaper} disabled={isSolving || !questionPaper}>
-                            <Wand2 className="mr-2 h-4 w-4" />
-                            {isSolving ? 'Solving with AI...' : 'Solve with AI'}
-                        </Button>
-                    </CardFooter>
-                </Card>
-
-                {isSolving && (
-                    <Card>
-                        <CardContent className="pt-6 text-center text-muted-foreground space-y-4">
-                            <Sparkles className="h-10 w-10 mx-auto animate-pulse text-primary" />
-                            <h3 className="text-lg font-semibold">AI is at work...</h3>
-                            <p>Analyzing the document, solving questions, and generating study notes. This may take a moment.</p>
-                            <Skeleton className="h-4 w-3/4 mx-auto" />
-                            <Skeleton className="h-4 w-1/2 mx-auto" />
-                        </CardContent>
-                    </Card>
-                )}
-
-                {aiSolution && (
-                    <Card>
-                        <CardHeader>
-                             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                <div>
-                                    <CardTitle>AI Generated Results</CardTitle>
-                                    <CardDescription>Review the solutions and study notes generated by the AI.</CardDescription>
-                                </div>
-                                <Button onClick={handlePrint}><Printer className="mr-2 h-4 w-4" /> Save as PDF</Button>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Tabs defaultValue="solutions">
-                                <TabsList className="grid w-full grid-cols-2">
-                                    <TabsTrigger value="solutions">Solutions &amp; Explanations</TabsTrigger>
-                                    <TabsTrigger value="notes">Study Notes</TabsTrigger>
-                                </TabsList>
-                                <div ref={solutionPrintRef} className="printable-content">
-                                    <TabsContent value="solutions" className="mt-4 space-y-6">
-                                        {aiSolution.solvedQuestions.map((item, index) => (
-                                            <Card key={index} className="overflow-hidden">
-                                                <CardHeader>
-                                                    <CardTitle className="text-lg">Question {index + 1}</CardTitle>
-                                                    <div className="text-muted-foreground prose dark:prose-invert max-w-none">
-                                                        <BlockMath math={item.questionText} />
-                                                    </div>
-                                                </CardHeader>
-                                                <CardContent>
-                                                    <h4 className="font-semibold text-primary mb-2">Solution:</h4>
-                                                    <div className="prose dark:prose-invert max-w-none text-sm">
-                                                        <BlockMath math={item.detailedSolution} />
-                                                    </div>
-                                                </CardContent>
-                                                <CardFooter className="bg-muted/30 p-4">
-                                                    <div>
-                                                        <h4 className="font-semibold mb-2">Explanation:</h4>
-                                                        <p className="text-sm text-muted-foreground">{item.explanation}</p>
-                                                    </div>
-                                                </CardFooter>
-                                            </Card>
-                                        ))}
-                                    </TabsContent>
-                                    <TabsContent value="notes" className="mt-4">
-                                        <Card>
-                                            <CardHeader>
-                                                <CardTitle>Generated Study Notes</CardTitle>
-                                                <CardDescription>Key concepts and formulas from the question paper.</CardDescription>
-                                            </CardHeader>
-                                            <CardContent className="prose dark:prose-invert max-w-none">
-                                                <BlockMath math={aiSolution.studyNotes} />
-                                            </CardContent>
-                                        </Card>
-                                    </TabsContent>
-                                </div>
-                            </Tabs>
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
           )}
 
           {currentTab === 'assignments' && (
@@ -2313,7 +2145,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </AlertDialog>
+        </Dialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>

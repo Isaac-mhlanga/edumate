@@ -1,56 +1,80 @@
-
-'use server';
-/**
- * @fileOverview An AI flow to clarify a student's question without giving away the answer.
- *
- * - clarifyQuestion - A function that provides a hint for a quiz question.
- * - ClarifyQuestionInput - The input type for the clarifyQuestion function.
- * - ClarifyQuestionOutput - The return type for the clarifyQuestion function.
- */
-
-import {ai} from '@/ai/genkit';
-import {z} from 'genkit';
-
-const ClarifyQuestionInputSchema = z.object({
-  question: z.string().describe('The quiz question the student is asking about.'),
-});
-export type ClarifyQuestionInput = z.infer<typeof ClarifyQuestionInputSchema>;
-
-const ClarifyQuestionOutputSchema = z.object({
-  clarification: z.string().describe('A hint or clarification that guides the student towards the answer without revealing it directly.'),
-});
-export type ClarifyQuestionOutput = z.infer<typeof ClarifyQuestionOutputSchema>;
-
-
-export async function clarifyQuestion(input: ClarifyQuestionInput): Promise<ClarifyQuestionOutput> {
-  return clarifyQuestionFlow(input);
-}
-
-const prompt = ai.definePrompt({
-  name: 'clarifyQuestionPrompt',
-  input: {schema: ClarifyQuestionInputSchema},
-  output: {schema: ClarifyQuestionOutputSchema},
-  prompt: `You are an expert tutor. A student is stuck on the following quiz question and has asked for a hint.
-
-Your task is to provide a helpful clarification or a guiding question that points the student in the right direction.
-
-**Crucially, you must NOT give away the direct answer.** Your goal is to help them think and arrive at the solution themselves.
-
-For example, if the question is "What is the powerhouse of the cell?", a good hint would be "Think about which organelle is responsible for generating most of the cell's supply of adenosine triphosphate (ATP)." A bad hint would be "The answer is mitochondria."
-
-Quiz Question:
-"{{{question}}}"
-`,
-});
-
-const clarifyQuestionFlow = ai.defineFlow(
-  {
-    name: 'clarifyQuestionFlow',
-    inputSchema: ClarifyQuestionInputSchema,
-    outputSchema: ClarifyQuestionOutputSchema,
+{
+  "name": "nextn",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev --turbopack -p 9002",
+    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
+    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
   },
-  async (input) => {
-    const {output} = await prompt(input);
-    return output!;
+  "dependencies": {
+    "@fullcalendar/daygrid": "^6.1.15",
+    "@fullcalendar/interaction": "^6.1.15",
+    "@fullcalendar/list": "^6.1.15",
+    "@fullcalendar/react": "^6.1.15",
+    "@fullcalendar/timegrid": "^6.1.15",
+    "@genkit-ai/googleai": "^1.13.0",
+    "@genkit-ai/next": "^1.13.0",
+    "@hookform/resolvers": "^4.1.3",
+    "@radix-ui/react-accordion": "^1.2.3",
+    "@radix-ui/react-alert-dialog": "^1.1.6",
+    "@radix-ui/react-avatar": "^1.1.3",
+    "@radix-ui/react-checkbox": "^1.1.4",
+    "@radix-ui/react-collapsible": "^1.1.11",
+    "@radix-ui/react-dialog": "^1.1.6",
+    "@radix-ui/react-dropdown-menu": "^2.1.6",
+    "@radix-ui/react-label": "^2.1.2",
+    "@radix-ui/react-menubar": "^1.1.6",
+    "@radix-ui/react-popover": "^1.1.6",
+    "@radix-ui/react-progress": "^1.1.2",
+    "@radix-ui/react-radio-group": "^1.2.3",
+    "@radix-ui/react-scroll-area": "^1.2.3",
+    "@radix-ui/react-select": "^2.1.6",
+    "@radix-ui/react-separator": "^1.1.2",
+    "@radix-ui/react-slider": "^1.2.3",
+    "@radix-ui/react-slot": "^1.2.3",
+    "@radix-ui/react-switch": "^1.1.3",
+    "@radix-ui/react-tabs": "^1.1.3",
+    "@radix-ui/react-toast": "^1.2.6",
+    "@radix-ui/react-tooltip": "^1.1.8",
+    "axios": "^1.7.2",
+    "class-variance-authority": "^0.7.1",
+    "clsx": "^2.1.1",
+    "date-fns": "^3.6.0",
+    "dotenv": "^16.5.0",
+    "embla-carousel-react": "^8.6.0",
+    "firebase": "^11.9.1",
+    "genkit": "^1.13.0",
+    "katex": "^0.16.11",
+    "lucide-react": "^0.475.0",
+    "next": "15.3.3",
+    "next-themes": "^0.3.0",
+    "patch-package": "^8.0.0",
+    "react": "^18.3.1",
+    "react-day-picker": "^8.10.1",
+    "react-dom": "^18.3.1",
+    "react-hook-form": "^7.54.2",
+    "react-katex": "^3.0.1",
+    "react-paystack": "^5.0.0",
+    "react-to-print": "^2.15.1",
+    "recharts": "^2.15.1",
+    "tailwind-merge": "^3.0.1",
+    "tailwindcss-animate": "^1.0.7",
+    "zod": "^3.24.2"
+  },
+  "devDependencies": {
+    "@types/katex": "^0.16.7",
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-katex": "^3.0.4",
+    "genkit-cli": "^1.13.0",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
   }
-);
+}
