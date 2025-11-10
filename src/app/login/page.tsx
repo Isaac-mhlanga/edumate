@@ -144,18 +144,18 @@ export default function LoginPage() {
     }
     
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 p-4">
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
             <div className="w-full max-w-md">
                 <form onSubmit={handleLogin}>
-                    <Card className="bg-slate-800/30 backdrop-blur-md border-white/10 text-white rounded-2xl">
+                    <Card>
                         <CardHeader className="text-center">
                             <div className="mb-4 flex justify-center">
                                 <Link href="/">
-                                    <Icons.logo className="h-12 w-12 text-emerald-400" />
+                                    <Icons.logo className="h-12 w-12 text-primary" />
                                 </Link>
                             </div>
-                            <CardTitle className="text-2xl text-white">Welcome Back!</CardTitle>
-                            <CardDescription className="text-gray-300">Enter your credentials to access your account.</CardDescription>
+                            <CardTitle className="text-2xl">Welcome Back!</CardTitle>
+                            <CardDescription>Enter your credentials to access your account.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             {emailNotVerified && (
@@ -173,30 +173,30 @@ export default function LoginPage() {
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <Input id="email" type="email" placeholder="name@example.com" required disabled={emailNotVerified} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="email" type="email" placeholder="name@example.com" required disabled={emailNotVerified} className="pl-10" />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
                                 <div className="relative">
-                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                    <Input id="password" type="password" required disabled={emailNotVerified} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="password" type="password" required disabled={emailNotVerified} className="pl-10" />
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
-                                <Link href="/forgot-password" className="text-sm text-gray-300 hover:text-emerald-400">
+                                <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
                                     Forgot password?
                                 </Link>
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
-                            <Button type="submit" className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300 rounded-xl" disabled={isLoading}>
+                            <Button type="submit" className="w-full" disabled={isLoading}>
                                 {isLoading ? 'Signing in...' : 'Sign In'}
                             </Button>
-                            <div className="text-center text-sm text-gray-300">
+                            <div className="text-center text-sm text-muted-foreground">
                                 Don't have an account?{' '}
-                                <Link href="/register" className="font-medium text-emerald-400 hover:underline">
+                                <Link href="/register" className="font-medium text-primary hover:underline">
                                     Sign Up
                                 </Link>
                             </div>

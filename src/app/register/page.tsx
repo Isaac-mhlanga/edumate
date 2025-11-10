@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -124,17 +125,17 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 p-4">
+        <div className="flex min-h-screen items-center justify-center bg-background p-4">
             <div className="w-full max-w-2xl">
-                <Card className="bg-slate-800/30 backdrop-blur-md border-white/10 text-white rounded-2xl">
+                <Card>
                     <CardHeader className="text-center">
                          <div className="mb-4 flex justify-center">
                             <Link href="/">
-                                <Icons.logo className="h-12 w-12 text-emerald-400" />
+                                <Icons.logo className="h-12 w-12 text-primary" />
                             </Link>
                         </div>
-                        <CardTitle className="text-2xl text-white">Create an Account</CardTitle>
-                        <CardDescription className="text-gray-300">Join Edumate Pro to start your learning journey.</CardDescription>
+                        <CardTitle className="text-2xl">Create an Account</CardTitle>
+                        <CardDescription>Join Edumate Pro to start your learning journey.</CardDescription>
                     </CardHeader>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleRegister)}>
@@ -148,8 +149,8 @@ export default function RegisterPage() {
                                                 <FormLabel>Full Name</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
-                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                        <Input placeholder="John Doe" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input placeholder="John Doe" {...field} className="pl-10" />
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
@@ -164,8 +165,8 @@ export default function RegisterPage() {
                                                 <FormLabel>Email</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
-                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                        <Input placeholder="name@example.com" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input placeholder="name@example.com" {...field} className="pl-10" />
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
@@ -180,8 +181,8 @@ export default function RegisterPage() {
                                                 <FormLabel>Password</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
-                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                        <Input type="password" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="password" {...field} className="pl-10" />
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
@@ -196,8 +197,8 @@ export default function RegisterPage() {
                                                 <FormLabel>Confirm Password</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
-                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                        <Input type="password" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input type="password" {...field} className="pl-10" />
                                                     </div>
                                                 </FormControl>
                                                 <FormMessage />
@@ -213,7 +214,7 @@ export default function RegisterPage() {
                                             <FormLabel>I am a...</FormLabel>
                                              <Select onValueChange={field.onChange} defaultValue={field.value}>
                                                 <FormControl>
-                                                    <SelectTrigger className="bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500">
+                                                    <SelectTrigger>
                                                         <SelectValue placeholder="Select your role" />
                                                     </SelectTrigger>
                                                 </FormControl>
@@ -230,12 +231,12 @@ export default function RegisterPage() {
                                 />
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4">
-                                <Button type="submit" className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300 rounded-xl" disabled={isLoading || !auth}>
+                                <Button type="submit" className="w-full" disabled={isLoading || !auth}>
                                     {isLoading ? 'Creating Account...' : 'Create Account'}
                                 </Button>
-                                <div className="text-center text-sm text-gray-300">
+                                <div className="text-center text-sm text-muted-foreground">
                                     Already have an account?{' '}
-                                    <Link href="/login" className="font-medium text-emerald-400 hover:underline">
+                                    <Link href="/login" className="font-medium text-primary hover:underline">
                                         Sign In
                                     </Link>
                                 </div>
