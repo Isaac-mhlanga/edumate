@@ -63,7 +63,7 @@ export default {
           '5': 'hsl(var(--chart-5))',
         },
          gray: {
-          850: '#1e293b',
+          850: '#111827',
         },
         blue: {
           600: '#2563eb',

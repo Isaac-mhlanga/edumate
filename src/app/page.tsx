@@ -4,11 +4,11 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X, Users, Waves, CircuitBoard, Rocket } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X, Users, Waves, CircuitBoard, Rocket, Dna } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum } from "@/lib/data";
+import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -121,7 +121,7 @@ const Hero = () => {
 export default function Home() {
   const [scrolled, setScrolled] = React.useState(false);
   const [isCurriculumDialogOpen, setIsCurriculumDialogOpen] = useState(false);
-  const [selectedChapter, setSelectedChapter] = useState<(typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0]) | null>(null);
+  const [selectedChapter, setSelectedChapter] = useState<(typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0] | typeof grade12LifeSciencesCurriculum[0]) | null>(null);
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const [selectedVideoUrl, setSelectedVideoUrl] = useState('');
   const [activeCurriculum, setActiveCurriculum] = useState('maths');
@@ -150,7 +150,7 @@ export default function Home() {
     }
   };
 
-  const handleChapterClick = (chapter: (typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0])) => {
+  const handleChapterClick = (chapter: (typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0] | typeof grade12LifeSciencesCurriculum[0])) => {
     setSelectedChapter(chapter);
     setIsCurriculumDialogOpen(true);
   };
@@ -211,8 +211,28 @@ export default function Home() {
       { title: "Chemical Systems", icon: FlaskConical, category: "Chemistry" },
   ];
   
-  const currentCurriculumData = activeCurriculum === 'maths' ? grade12MathsCurriculum : grade12PhysicsCurriculum;
-  const currentChapterIcons = activeCurriculum === 'maths' ? mathsCurriculumChapters : physicsCurriculumChapters;
+  const lifeSciencesCurriculumChapters = [
+      { title: "Paper One", icon: Users },
+      { title: "Paper Two", icon: Dna },
+  ];
+
+  let currentCurriculumData;
+  let currentChapterIcons;
+
+  switch (activeCurriculum) {
+    case 'physical-sciences':
+      currentCurriculumData = grade12PhysicsCurriculum;
+      currentChapterIcons = physicsCurriculumChapters;
+      break;
+    case 'life-sciences':
+        currentCurriculumData = grade12LifeSciencesCurriculum;
+        currentChapterIcons = lifeSciencesCurriculumChapters;
+        break;
+    default:
+      currentCurriculumData = grade12MathsCurriculum;
+      currentChapterIcons = mathsCurriculumChapters;
+      break;
+  }
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -320,10 +340,11 @@ export default function Home() {
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics and prepare you for success.</p>
                 </div>
-                 <Tabs value={activeCurriculum} onValueChange={setActiveCurriculum} className="w-full max-w-md mx-auto mb-8">
-                    <TabsList className="grid w-full grid-cols-2">
+                 <Tabs value={activeCurriculum} onValueChange={setActiveCurriculum} className="w-full max-w-lg mx-auto mb-8">
+                    <TabsList className="grid w-full grid-cols-3">
                         <TabsTrigger value="maths">Maths</TabsTrigger>
                         <TabsTrigger value="physical-sciences">Physical Sciences</TabsTrigger>
+                        <TabsTrigger value="life-sciences">Life Sciences</TabsTrigger>
                     </TabsList>
                 </Tabs>
 
@@ -483,3 +504,4 @@ export default function Home() {
     </div>
   );
 }
+

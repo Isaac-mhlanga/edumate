@@ -198,6 +198,28 @@ export const grade12PhysicsCurriculum = [
     }
 ];
 
+export const grade12LifeSciencesCurriculum = [
+    {
+        chapter: "Paper One",
+        topics: [
+            "Reproduction in vertebrates - 8 marks (5%)",
+            "Human reproduction - 41 marks (27%)",
+            "Responding to the environment (humans) - 54 marks (36%)",
+            "Responding to the environment (plants) - 13 marks (9%)",
+            "Endocrine and homeostasis (humans) - 34 marks (23%)",
+        ]
+    },
+    {
+        chapter: "Paper Two",
+        topics: [
+            "DNA code of life - 27 marks (18%)",
+            "Meiosis - 21 marks (14%)",
+            "Genetics and inheritance - 48 marks (32%)",
+            "Evolution - 54 marks (36%)",
+        ]
+    }
+];
+
 export const studentData = {
     name: "Alex Johnson",
     activeSubscriptions: [
