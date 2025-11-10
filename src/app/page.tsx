@@ -620,39 +620,48 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
                        {courses.slice(0,2).map(course => (
                            <div key={course.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer flex flex-col h-full hover:border-emerald-400/30">
-                              <div className="relative h-40 overflow-hidden">
-                                <Image 
-                                  src={course.thumbnail}
-                                  alt={course.title}
-                                  width={400}
-                                  height={225}
-                                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                  data-ai-hint="online course"
-                                />
-                                <div className="absolute top-3 left-3">
-                                  <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-                                    {course.subject}
-                                  </span>
-                                </div>
-                              </div>
-                              <div className="p-4 flex flex-col flex-grow">
-                                <h3 className="text-base font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-emerald-100 transition-colors duration-300">
-                                  {course.title}
-                                </h3>
-                                <div className="mt-auto flex items-center justify-between">
-                                  <div className="flex flex-col">
-                                    <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                                      {formatPrice(course.pricing.price)}
-                                    </span>
-                                  </div>
-                                   <Link href={`/instructor/courses/${course.id}`} passHref>
-                                    <Button size="sm" variant="link" className="text-emerald-400 p-0 h-auto">
-                                      Enroll Now <ArrowRight className="ml-1 h-4 w-4" />
-                                    </Button>
-                                  </Link>
-                                </div>
-                              </div>
-                            </div>
+            <div className="relative h-40 overflow-hidden">
+              <Image 
+                src={course.thumbnail}
+                alt={course.title}
+                width={400}
+                height={225}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                data-ai-hint="online course"
+              />
+              
+              <div className="absolute top-3 left-3">
+                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                  {course.subject}
+                </span>
+              </div>
+
+              {course.isPopular && (
+                <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                  Popular
+                </div>
+              )}
+            </div>
+
+            <div className="p-4 flex flex-col flex-grow">
+              <h3 className="text-base font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-emerald-100 transition-colors duration-300">
+                {course.title}
+              </h3>
+
+             <div className="mt-auto flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-lg font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                    {formatPrice(course.pricing.price)}
+                  </span>
+                </div>
+                 <Link href={`/instructor/courses/${course.id}`} passHref>
+                  <Button size="sm" variant="link" className="text-emerald-400 p-0 h-auto">
+                    Enroll Now <ArrowRight className="ml-1 h-4 w-4" />
+                  </Button>
+                </Link>
+              </div>
+            </div>
+          </div>
                        ))}
                     </div>
                   </AccordionContent>
