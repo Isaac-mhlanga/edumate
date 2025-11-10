@@ -11,6 +11,24 @@ import Link from "next/link";
 import React from "react";
 
 export default function Home() {
+  const [scrolled, setScrolled] = React.useState(false);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 10);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, []);
+
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const services = [
     {
@@ -37,29 +55,50 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground animate-fade-in-up">
-      <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/95 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2">
-            <Icons.logo className="h-8 w-8 text-primary" />
-            <span className="text-xl font-bold">Edumate Pro</span>
-          </Link>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="#services" className="text-sm font-medium hover:text-primary transition-colors">Services</Link>
-            <Link href="/tutors" className="text-sm font-medium hover:text-primary transition-colors">Find a Tutor</Link>
-          </nav>
-          <div className="flex items-center gap-2">
-              <Button variant="ghost" asChild>
-                  <Link href="/login">Log In</Link>
-              </Button>
-              <Button asChild className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
-                  <Link href="/register">Get Started</Link>
-              </Button>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+        scrolled 
+          ? 'bg-white/98 backdrop-blur-md shadow-lg dark:bg-gray-900/80' 
+          : 'bg-white/95 backdrop-blur-md dark:bg-gray-900/80'
+      }`}>
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center space-x-3">
+              <Link href="/" className="flex items-center gap-2">
+                <Icons.logo className="h-8 w-8 text-primary" />
+                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">EDUMATE</span>
+              </Link>
+            </div>
+            
+            <nav className="hidden md:flex space-x-8">
+              {[
+                { name: 'Home', id: 'home' },
+                { name: 'Courses', id: 'services' },
+                { name: 'About', id: 'about' },
+                { name: 'Contact', id: 'contact' }
+              ].map((item) => (
+                <button
+                  key={item.name}
+                  onClick={() => scrollToSection(item.id)}
+                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 font-medium transition-colors duration-300 relative group"
+                >
+                  {item.name}
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-green-500 to-purple-500 transition-all duration-300 group-hover:w-full"></span>
+                </button>
+              ))}
+            </nav>
+            
+            <button 
+              onClick={() => scrollToSection('services')}
+              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300 animate-pulse hover:animate-none"
+            >
+              Get Started
+            </button>
           </div>
         </div>
       </header>
 
       <main className="flex-grow">
-        <section className="relative overflow-hidden">
+        <section id="home" className="relative overflow-hidden pt-20">
              <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-primary/10 rounded-full blur-3xl -z-10" />
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center py-24 md:py-32">
                 <div className="space-y-6 text-center md:text-left">
@@ -114,7 +153,7 @@ export default function Home() {
           </div>
         </section>
         
-        <section className="py-20 md:py-28 bg-muted/20">
+        <section id="contact" className="py-20 md:py-28 bg-muted/20">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center">
                     <h2 className="text-3xl md:text-4xl font-bold">Ready to Start?</h2>

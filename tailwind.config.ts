@@ -1,3 +1,4 @@
+
 import type {Config} from 'tailwindcss';
 
 export default {
@@ -64,6 +65,15 @@ export default {
          gray: {
           850: '#1e293b',
         },
+        blue: {
+          600: '#2563eb',
+        },
+        purple: {
+          600: '#7c3aed',
+        },
+        green: {
+            500: '#22c55e',
+        }
       },
       borderRadius: {
         lg: "var(--radius)",
