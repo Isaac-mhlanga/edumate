@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -126,7 +125,7 @@ export default function RegisterPage() {
 
     return (
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 p-4">
-            <div className="w-full max-w-md">
+            <div className="w-full max-w-2xl">
                 <Card className="bg-slate-800/30 backdrop-blur-md border-white/10 text-white rounded-2xl">
                     <CardHeader className="text-center">
                          <div className="mb-4 flex justify-center">
@@ -140,70 +139,72 @@ export default function RegisterPage() {
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleRegister)}>
                             <CardContent className="space-y-4">
-                                <FormField
-                                    control={form.control}
-                                    name="fullName"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Full Name</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                    <Input placeholder="John Doe" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="email"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Email</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                    <Input placeholder="name@example.com" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="password"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Password</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                    <Input type="password" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
-                                <FormField
-                                    control={form.control}
-                                    name="confirmPassword"
-                                    render={({ field }) => (
-                                        <FormItem>
-                                            <FormLabel>Confirm Password</FormLabel>
-                                            <FormControl>
-                                                <div className="relative">
-                                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                                                    <Input type="password" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
-                                                </div>
-                                            </FormControl>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="fullName"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Full Name</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                                        <Input placeholder="John Doe" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Email</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                                        <Input placeholder="name@example.com" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="password"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Password</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                                        <Input type="password" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="confirmPassword"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Confirm Password</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                                                        <Input type="password" {...field} className="pl-10 bg-slate-700/50 border-white/20 text-white placeholder:text-gray-400 focus:ring-emerald-500" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                </div>
                                 <FormField
                                     control={form.control}
                                     name="role"
