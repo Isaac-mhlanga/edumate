@@ -268,5 +268,3 @@ function CreateQuizPage() {
 }
 
 export default withAuth(CreateQuizPage, ['instructor']);
-
-    
