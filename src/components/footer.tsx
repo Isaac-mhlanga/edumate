@@ -1,51 +1,54 @@
 
-import { Icons } from "./icons";
 import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="border-t bg-card">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-          <div className="md:col-span-1">
-            <Link href="/" className="flex items-center gap-2">
-              <Icons.logo className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">Edumate Pro</span>
-            </Link>
-            <p className="mt-4 text-muted-foreground text-sm">
-              Future-proofing skills for the next generation of leaders.
+    <footer className="bg-gradient-to-br from-gray-900 to-gray-800 text-white py-16">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 mb-8">
+          {/* Brand Section */}
+          <div className="lg:col-span-1">
+            <h3 className="text-2xl font-bold bg-gradient-to-r from-green-500 to-blue-600 bg-clip-text text-transparent mb-4">
+              EDUMATE
+            </h3>
+            <p className="text-gray-300 leading-relaxed">
+              Empowering students to excel in high school subjects through comprehensive video courses and interactive learning.
             </p>
           </div>
-          <div className="md:col-span-3 grid grid-cols-2 md:grid-cols-3 gap-8">
-            <div>
-              <h4 className="font-semibold">Company</h4>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">About</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Careers</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Press</Link></li>
+          
+          {/* Links Sections */}
+          {[
+            {
+              title: 'Subjects',
+              links: ['Mathematics', 'Science', 'English', 'History', 'Languages']
+            },
+            {
+              title: 'Support',
+              links: ['Help Center', 'Contact Us', 'FAQ', 'Tutorials']
+            },
+            {
+              title: 'Company',
+              links: ['About Us', 'Careers', 'Privacy Policy', 'Terms of Service']
+            }
+          ].map((section, index) => (
+            <div key={index}>
+              <h3 className="text-lg font-semibold text-blue-400 mb-4">{section.title}</h3>
+              <ul className="space-y-2">
+                {section.links.map((link, linkIndex) => (
+                  <li key={linkIndex}>
+                    <Link href="#" className="text-gray-300 hover:text-green-400 transition-colors duration-300 text-left">
+                      {link}
+                    </Link>
+                  </li>
+                ))}
               </ul>
             </div>
-            <div>
-              <h4 className="font-semibold">Resources</h4>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Blog</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Help Center</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Contact Us</Link></li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="font-semibold">Legal</h4>
-              <ul className="mt-4 space-y-2 text-sm">
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Terms of Service</Link></li>
-                <li><Link href="#" className="text-muted-foreground hover:text-primary">Privacy Policy</Link></li>
-              </ul>
-            </div>
-          </div>
+          ))}
         </div>
-        <div className="mt-8 pt-8 border-t flex flex-col sm:flex-row items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} Edumate Pro. All rights reserved.
-          </p>
+        
+        {/* Bottom Bar */}
+        <div className="border-t border-gray-700 pt-8 text-center text-gray-400">
+          <p>&copy; {new Date().getFullYear()} EDUMATE. All rights reserved. Made with love for students.</p>
         </div>
       </div>
     </footer>
