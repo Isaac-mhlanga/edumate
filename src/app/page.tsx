@@ -5,7 +5,7 @@ import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { instructorData } from "@/lib/data";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck, LogIn } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -386,6 +386,19 @@ export default function Home() {
     { number: '10k+', label: 'Students' }
   ];
 
+  const curriculumChapters = [
+      { title: 'Sequences & Series', icon: Sigma },
+      { title: 'Functions', icon: FunctionSquare },
+      { title: 'Finance', icon: Percent },
+      { title: 'Trigonometry', icon: Compass },
+      { title: 'Polynomials', icon: Pi },
+      { title: 'Differential Calculus', icon: Calculator },
+      { title: 'Analytical Geometry', icon: Orbit },
+      { title: 'Euclidean Geometry', icon: BookCopy },
+      { title: 'Statistics', icon: BarChartHorizontal },
+      { title: 'Probability', icon: Dices },
+  ];
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground animate-fade-in-up">
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
@@ -435,7 +448,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-grow">
+      <main className="flex-grow pt-20">
          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
           <Hero />
           
@@ -492,6 +505,29 @@ export default function Home() {
             </div>
           </section>
 
+          <section id="curriculum" className="py-20 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-emerald-900/40 to-slate-900/80 backdrop-blur-3xl"></div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Explore Our Comprehensive Curriculum</h2>
+                    <p className="text-lg text-gray-300 max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics and prepare you for success.</p>
+                </div>
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    {curriculumChapters.map((chapter, index) => (
+                        <div key={index} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center flex flex-col items-center justify-center aspect-square hover:bg-white/10 transition-all duration-300 group">
+                            <chapter.icon className="w-10 h-10 text-emerald-400 mb-3 transition-transform duration-300 group-hover:scale-110" />
+                            <h3 className="text-sm font-semibold text-white leading-tight">{chapter.title}</h3>
+                        </div>
+                    ))}
+                </div>
+                <div className="text-center mt-12">
+                     <Button asChild size="lg" className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                        <Link href="/register">View Full Curriculum & Start Learning</Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+
           {/* Courses Section with Distinct Background */}
           <section id="courses" className="py-20 relative">
             <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-emerald-900/40 to-slate-900/80 backdrop-blur-3xl"></div>
@@ -542,5 +578,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
