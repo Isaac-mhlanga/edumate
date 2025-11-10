@@ -127,7 +127,7 @@ export const instructorData = {
             description: 'A deep dive into the fundamentals of calculus, from limits to derivatives.',
             subject: 'Maths',
             grade: '12',
-            thumbnail: 'https://placehold.co/600x400.png',
+            thumbnail: 'https://picsum.photos/seed/10/600/400',
             pricing: {
                 type: 'purchase',
                 price: 499,
@@ -141,7 +141,12 @@ export const instructorData = {
                 { id: 'V005', title: 'Introduction to Integrals' },
                 { id: 'V006', title: 'The Fundamental Theorem of Calculus' },
                 { id: 'V007', title: 'Advanced Integration Techniques' },
-            ]
+            ],
+            duration: '12h',
+            level: 'Advanced',
+            rating: 4.9,
+            isPopular: true,
+            instructor: 'Dr. Evelyn Reed'
         },
         {
             id: 'C002',
@@ -149,7 +154,7 @@ export const instructorData = {
             description: 'Explore the laws of motion and gravity as described by Sir Isaac Newton.',
             subject: 'Physical Sciences',
             grade: '11',
-            thumbnail: 'https://placehold.co/600x400.png',
+            thumbnail: 'https://picsum.photos/seed/11/600/400',
             pricing: {
                 type: 'subscription',
             },
@@ -158,7 +163,12 @@ export const instructorData = {
                 { id: 'V008', title: 'First Law of Motion' },
                 { id: 'V009', title: 'Second &amp; Third Laws' },
                 { id: 'V010', title: 'Universal Gravitation' },
-            ]
+            ],
+            duration: '6h',
+            level: 'Intermediate',
+            rating: 4.7,
+            isPopular: false,
+            instructor: 'Dr. Evelyn Reed'
         },
         {
             id: 'C003',
@@ -166,7 +176,7 @@ export const instructorData = {
             description: 'Learn the building blocks of organic chemistry, including nomenclature, structures, and basic reactions.',
             subject: 'Physical Sciences',
             grade: '12',
-            thumbnail: 'https://placehold.co/600x400.png',
+            thumbnail: 'https://picsum.photos/seed/12/600/400',
             pricing: {
                 type: 'purchase',
                 price: 299,
@@ -175,7 +185,12 @@ export const instructorData = {
             videos: [
                 { id: 'V011', title: 'Alkane Structures' },
                 { id: 'V012', title: 'Stereochemistry Basics' },
-            ]
+            ],
+            duration: '8h',
+            level: 'Advanced',
+            rating: 4.8,
+            isPopular: true,
+            instructor: 'Dr. Evelyn Reed'
         },
          {
             id: 'C004',
@@ -183,7 +198,7 @@ export const instructorData = {
             description: 'Master trigonometric functions, identities, and their applications in problem-solving.',
             subject: 'Maths',
             grade: '11',
-            thumbnail: 'https://placehold.co/600x400.png',
+            thumbnail: 'https://picsum.photos/seed/13/600/400',
             pricing: {
                 type: 'subscription',
             },
@@ -191,7 +206,44 @@ export const instructorData = {
             videos: [
                 { id: 'V013', title: 'The Unit Circle' },
                 { id: 'V014', title: 'Solving Trig Equations' },
-            ]
+            ],
+            duration: '10h',
+            level: 'Intermediate',
+            rating: 4.6,
+            isPopular: false,
+            instructor: 'Dr. Evelyn Reed'
+        },
+        {
+            id: 'C005', 
+            title: 'Quantum Physics Intro', 
+            description: 'Introduction to Quantum Mechanics.', 
+            subject: 'Physical Sciences', 
+            grade: '12', 
+            thumbnail: 'https://picsum.photos/seed/14/600/400', 
+            pricing: { type: 'purchase', price: 599 }, 
+            status: 'Pending Approval', 
+            videos: [],
+            duration: '15h',
+            level: 'Expert',
+            rating: 4.9,
+            isPopular: false,
+            instructor: 'Dr. Alan Grant'
+        },
+        {
+            id: 'C006', 
+            title: 'Advanced Thermodynamics', 
+            description: 'Deep dive into thermodynamics.', 
+            subject: 'Physical Sciences', 
+            grade: '12', 
+            thumbnail: 'https://picsum.photos/seed/15/600/400', 
+            pricing: { type: 'subscription' }, 
+            status: 'Rejected', 
+            videos: [],
+            duration: '9h',
+            level: 'Advanced',
+            rating: 4.5,
+            isPopular: false,
+            instructor: 'Dr. Alan Grant'
         }
     ]
 };
@@ -314,3 +366,5 @@ export const adminData = {
         { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
     ]
 };
+
+    

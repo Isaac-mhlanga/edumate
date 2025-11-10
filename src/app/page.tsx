@@ -5,7 +5,7 @@ import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { instructorData } from "@/lib/data";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -53,42 +53,135 @@ const Hero = () => {
   )
 }
 
-const CoursesSection = ({ title, description, courses }: { title: string, description: string, courses: any[] }) => (
-  <section className="py-20 relative">
-    <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-emerald-900/40 to-slate-900/80 backdrop-blur-3xl"></div>
-    <div className="max-w-7xl mx-auto px-6 relative z-10">
-       <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
-        <p className="text-lg text-gray-300 max-w-2xl mx-auto">{description}</p>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {courses.map(course => (
-          <div key={course.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-md hover:border-white/20 transition-all duration-300">
-            <Image 
-              src={course.thumbnail}
-              alt={course.title}
-              width={400}
-              height={225}
-              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-              data-ai-hint="online course"
-            />
-            <div className="p-6">
-              <h3 className="font-bold text-xl text-white mb-2">{course.title}</h3>
-              <p className="text-gray-400 text-sm line-clamp-2">{course.description}</p>
-            </div>
-             <div className="p-6 pt-0">
-                <Button variant="link" className="p-0 h-auto as-child text-emerald-400">
-                  <Link href={`/instructor/courses/${course.id}`}>
-                      Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
+const CoursesSection = ({ title, description, courses }: { title: string, description: string, courses: any[] }) => {
+  const icons = {
+    play: <Play className="w-4 h-4" />,
+    clock: <Clock className="w-4 h-4" />,
+    level: <BarChart2 className="w-4 h-4" />,
+    person: <User className="w-5 h-5" />,
+    star: <Star className="w-4 h-4 fill-current" />,
+    enroll: <BadgeCheck className="w-5 h-5" />,
+  };
+
+  const formatPrice = (price?: number | null) => {
+    if (price === 0) return 'Free';
+    if (price) return `R ${price.toFixed(2)}`;
+    return 'By Subscription';
+  };
+
+  const handleEnroll = (courseTitle: string) => {
+    console.log(`Enrolling in ${courseTitle}`);
+  };
+  
+  return (
+    <section className="py-20 relative">
+      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-emerald-900/40 to-slate-900/80 backdrop-blur-3xl"></div>
+      <div className="max-w-7xl mx-auto px-6 relative z-10">
+        <div className="text-center mb-12">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
+          <p className="text-lg text-gray-300 max-w-2xl mx-auto">{description}</p>
+        </div>
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {courses.map(course => (
+            <div key={course.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer flex flex-col h-full hover:border-emerald-400/30">
+              <div className="relative h-40 overflow-hidden">
+                <Image 
+                  src={course.thumbnail}
+                  alt={course.title}
+                  width={400}
+                  height={225}
+                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                  data-ai-hint="online course"
+                />
+                
+                <div className="absolute top-3 left-3">
+                  <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                    {course.subject}
+                  </span>
+                </div>
+
+                {course.isPopular && (
+                  <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                    Popular
+                  </div>
+                )}
+              </div>
+
+              <div className="p-6 flex flex-col flex-grow">
+                <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-emerald-100 transition-colors duration-300">
+                  {course.title}
+                </h3>
+
+                <p className="text-gray-300 text-sm mb-4 line-clamp-2 flex-grow">
+                  {course.description}
+                </p>
+
+                <div className="flex items-center justify-between text-gray-400 text-sm mb-4">
+                  <div className="flex items-center gap-2 text-emerald-300">
+                    {icons.play}
+                    <span>{course.videos.length} lessons</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-teal-300">
+                    {icons.clock}
+                    <span>{course.duration || '8h'}</span>
+                  </div>
+                  <div className="flex items-center gap-2 text-blue-300">
+                    {icons.level}
+                    <span>{course.level || 'All'}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between mb-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-medium shadow-lg">
+                      {icons.person}
+                    </div>
+                    <span className="text-sm text-gray-200 font-medium">
+                      {course.instructor || 'Expert'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-amber-300">
+                    {icons.star}
+                    <span className="text-sm font-bold">
+                      {course.rating || 4.8}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="border-t border-white/10 mb-4"></div>
+
+                <div className="flex items-center justify-between">
+                  <div className="flex flex-col">
+                    <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                      {formatPrice(course.pricing.price)}
+                    </span>
+                    {course.originalPrice && (
+                      <span className="text-sm text-gray-400 line-through">
+                        {formatPrice(course.originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                   <Link href={`/instructor/courses/${course.id}`} passHref>
+                    <button 
+                      onClick={() => handleEnroll(course.title)}
+                      className="group relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+                    >
+                      <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                      <span className="relative flex items-center gap-2">
+                        {icons.enroll}
+                        Enroll
+                      </span>
+                    </button>
                   </Link>
-                </Button>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          ))}
+        </div>
       </div>
-    </div>
-  </section>
-);
+    </section>
+  );
+};
 
 
 export default function Home() {
@@ -117,7 +210,7 @@ export default function Home() {
     {
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
         </svg>
       ),
       title: 'AI-Powered Learning',
@@ -153,7 +246,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground animate-fade-in-up">
-       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
           ? 'bg-white/98 backdrop-blur-md shadow-lg dark:bg-gray-900/80' 
           : 'bg-white/95 backdrop-blur-md dark:bg-gray-900/80'
@@ -262,7 +355,7 @@ export default function Home() {
           />
 
           {/* Green Glass CTA Section */}
-          <section className="py-20 relative" id="about">
+          <section id="about" className="py-20 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-3xl"></div>
             <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-12 hover:border-white/20 transition-all duration-500">
@@ -299,3 +392,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
