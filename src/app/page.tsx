@@ -87,12 +87,14 @@ export default function Home() {
               ))}
             </nav>
             
-            <button 
-              onClick={() => scrollToSection('services')}
-              className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-6 py-3 rounded-full font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300 animate-pulse hover:animate-none"
-            >
-              Get Started
-            </button>
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" asChild>
+                    <Link href="/login">Login</Link>
+                </Button>
+                <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                    <Link href="/register">Register</Link>
+                </Button>
+            </div>
           </div>
         </div>
       </header>
