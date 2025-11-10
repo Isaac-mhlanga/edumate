@@ -5,7 +5,7 @@ import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
 import { instructorData } from "@/lib/data";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck, LogIn } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -419,7 +419,10 @@ export default function Home() {
             
             <div className="flex items-center gap-2">
                 <Button variant="ghost" asChild>
-                    <Link href="/login">Login</Link>
+                    <Link href="/login">
+                      <LogIn className="mr-2 h-4 w-4" />
+                      Login
+                    </Link>
                 </Button>
                 <Button asChild className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
                     <Link href="/register">Register</Link>
@@ -536,3 +539,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
