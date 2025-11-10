@@ -14,7 +14,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal } from "lucide-react";
+import { Terminal, Mail, KeyRound } from "lucide-react";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -172,11 +172,17 @@ export default function LoginPage() {
                             )}
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" placeholder="name@example.com" required disabled={emailNotVerified} />
+                                <div className="relative">
+                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="email" type="email" placeholder="name@example.com" required disabled={emailNotVerified} className="pl-10" />
+                                </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
-                                <Input id="password" type="password" required disabled={emailNotVerified} />
+                                <div className="relative">
+                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input id="password" type="password" required disabled={emailNotVerified} className="pl-10" />
+                                </div>
                             </div>
                             <div className="flex items-center justify-between">
                                 <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">

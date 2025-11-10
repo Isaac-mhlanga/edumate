@@ -33,112 +33,109 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
   };
   
   return (
-    <section className="py-20 relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-emerald-900/40 to-slate-900/80 backdrop-blur-3xl"></div>
-      <div className="max-w-7xl mx-auto px-6 relative z-10">
-        <div className="text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">{description}</p>
-        </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {courses.map(course => (
-            <div key={course.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer flex flex-col h-full hover:border-emerald-400/30">
-              <div className="relative h-40 overflow-hidden">
-                <Image 
-                  src={course.thumbnail}
-                  alt={course.title}
-                  width={400}
-                  height={225}
-                  className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
-                  data-ai-hint="online course"
-                />
-                
-                <div className="absolute top-3 left-3">
-                  <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-                    {course.subject}
+    <>
+      <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
+        <p className="text-lg text-gray-300 max-w-2xl mx-auto">{description}</p>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {courses.map(course => (
+          <div key={course.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer flex flex-col h-full hover:border-emerald-400/30">
+            <div className="relative h-40 overflow-hidden">
+              <Image 
+                src={course.thumbnail}
+                alt={course.title}
+                width={400}
+                height={225}
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                data-ai-hint="online course"
+              />
+              
+              <div className="absolute top-3 left-3">
+                <span className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                  {course.subject}
+                </span>
+              </div>
+
+              {course.isPopular && (
+                <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
+                  Popular
+                </div>
+              )}
+            </div>
+
+            <div className="p-6 flex flex-col flex-grow">
+              <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-emerald-100 transition-colors duration-300">
+                {course.title}
+              </h3>
+
+              <p className="text-gray-300 text-sm mb-4 line-clamp-2 flex-grow">
+                {course.description}
+              </p>
+
+              <div className="flex items-center justify-between text-gray-400 text-sm mb-4">
+                <div className="flex items-center gap-2 text-emerald-300">
+                  {icons.play}
+                  <span>{course.videos.length} lessons</span>
+                </div>
+                <div className="flex items-center gap-2 text-teal-300">
+                  {icons.clock}
+                  <span>{course.duration || '8h'}</span>
+                </div>
+                <div className="flex items-center gap-2 text-blue-300">
+                  {icons.level}
+                  <span>{course.level || 'All'}</span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-9 h-9 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-medium shadow-lg">
+                    {icons.person}
+                  </div>
+                  <span className="text-sm text-gray-200 font-medium">
+                    {course.instructor || 'Expert'}
                   </span>
                 </div>
-
-                {course.isPopular && (
-                  <div className="absolute top-3 right-3 bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-lg backdrop-blur-sm">
-                    Popular
-                  </div>
-                )}
+                <div className="flex items-center gap-2 text-amber-300">
+                  {icons.star}
+                  <span className="text-sm font-bold">
+                    {course.rating || 4.8}
+                  </span>
+                </div>
               </div>
 
-              <div className="p-6 flex flex-col flex-grow">
-                <h3 className="text-lg font-bold text-white mb-3 line-clamp-2 leading-tight group-hover:text-emerald-100 transition-colors duration-300">
-                  {course.title}
-                </h3>
+              <div className="border-t border-white/10 mb-4"></div>
 
-                <p className="text-gray-300 text-sm mb-4 line-clamp-2 flex-grow">
-                  {course.description}
-                </p>
-
-                <div className="flex items-center justify-between text-gray-400 text-sm mb-4">
-                  <div className="flex items-center gap-2 text-emerald-300">
-                    {icons.play}
-                    <span>{course.videos.length} lessons</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-teal-300">
-                    {icons.clock}
-                    <span>{course.duration || '8h'}</span>
-                  </div>
-                  <div className="flex items-center gap-2 text-blue-300">
-                    {icons.level}
-                    <span>{course.level || 'All'}</span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-gradient-to-r from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white text-sm font-medium shadow-lg">
-                      {icons.person}
-                    </div>
-                    <span className="text-sm text-gray-200 font-medium">
-                      {course.instructor || 'Expert'}
+              <div className="flex items-center justify-between">
+                <div className="flex flex-col">
+                  <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
+                    {formatPrice(course.pricing.price)}
+                  </span>
+                  {course.originalPrice && (
+                    <span className="text-sm text-gray-400 line-through">
+                      {formatPrice(course.originalPrice)}
                     </span>
-                  </div>
-                  <div className="flex items-center gap-2 text-amber-300">
-                    {icons.star}
-                    <span className="text-sm font-bold">
-                      {course.rating || 4.8}
-                    </span>
-                  </div>
+                  )}
                 </div>
-
-                <div className="border-t border-white/10 mb-4"></div>
-
-                <div className="flex items-center justify-between">
-                  <div className="flex flex-col">
-                    <span className="text-xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent">
-                      {formatPrice(course.pricing.price)}
+                 <Link href={`/instructor/courses/${course.id}`} passHref>
+                  <button 
+                    onClick={() => handleEnroll(course.title)}
+                    className="group relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
+                  >
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <span className="relative flex items-center gap-2">
+                      {icons.enroll}
+                      Enroll
                     </span>
-                    {course.originalPrice && (
-                      <span className="text-sm text-gray-400 line-through">
-                        {formatPrice(course.originalPrice)}
-                      </span>
-                    )}
-                  </div>
-                   <Link href={`/instructor/courses/${course.id}`} passHref>
-                    <button 
-                      onClick={() => handleEnroll(course.title)}
-                      className="group relative bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-5 py-2.5 rounded-xl font-semibold transition-all duration-300 shadow-lg hover:shadow-xl flex items-center gap-2"
-                    >
-                      <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
-                      <span className="relative flex items-center gap-2">
-                        {icons.enroll}
-                        Enroll
-                      </span>
-                    </button>
-                  </Link>
-                </div>
+                  </button>
+                </Link>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </>
   );
 };
 
@@ -262,7 +259,7 @@ const Hero = () => {
             {currentBanner.hasActionButton && (
               <button 
                 onClick={() => handleActionClick(currentBanner.actionButtonLink)}
-                className={`relative z-30 -mt-8 mb-10 bg-white text-blue-600 px-10 py-5 rounded-full font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all duration-300 ${
+                className={`relative z-30 -mt-8 mb-10 bg-white text-emerald-600 px-10 py-5 rounded-full font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all duration-300 ${
                     isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
                 }`}
                 style={{ transitionDelay: '200ms' }}
@@ -398,7 +395,7 @@ export default function Home() {
             <div className="flex items-center space-x-3">
               <Link href="/" className="flex items-center gap-2">
                 <Icons.logo className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">EDUMATE</span>
+                <span className="text-xl font-bold bg-gradient-to-r from-emerald-500 to-teal-500 bg-clip-text text-transparent">EDUMATE</span>
               </Link>
             </div>
             
@@ -412,10 +409,10 @@ export default function Home() {
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.id)}
-                  className="text-gray-600 dark:text-gray-300 hover:text-blue-600 font-medium transition-colors duration-300 relative group"
+                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-500 font-medium transition-colors duration-300 relative group"
                 >
                   {item.name}
-                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-green-500 to-purple-500 transition-all duration-300 group-hover:w-full"></span>
+                  <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300 group-hover:w-full"></span>
                 </button>
               ))}
             </nav>
@@ -424,7 +421,7 @@ export default function Home() {
                 <Button variant="ghost" asChild>
                     <Link href="/login">Login</Link>
                 </Button>
-                <Button asChild className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+                <Button asChild className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
                     <Link href="/register">Register</Link>
                 </Button>
             </div>
@@ -490,11 +487,16 @@ export default function Home() {
           </section>
 
           {/* Courses Section with Distinct Background */}
-          <CoursesSection
-            title="Recently Added Courses"
-            description="Fresh content to keep you updated with the latest learning materials"
-            courses={allCourses}
-          />
+          <section id="courses" className="py-20 relative">
+            <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-emerald-900/40 to-slate-900/80 backdrop-blur-3xl"></div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+              <CoursesSection
+                title="Recently Added Courses"
+                description="Fresh content to keep you updated with the latest learning materials"
+                courses={allCourses}
+              />
+            </div>
+          </section>
 
           {/* Green Glass CTA Section */}
           <section id="contact" className="py-20 relative">
