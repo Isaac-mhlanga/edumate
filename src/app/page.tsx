@@ -512,17 +512,23 @@ export default function Home() {
                     <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Explore Our Comprehensive Curriculum</h2>
                     <p className="text-lg text-gray-300 max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics and prepare you for success.</p>
                 </div>
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
                     {curriculumChapters.map((chapter, index) => (
-                        <div key={index} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl p-4 text-center flex flex-col items-center justify-center aspect-square hover:bg-white/10 transition-all duration-300 group">
-                            <chapter.icon className="w-10 h-10 text-emerald-400 mb-3 transition-transform duration-300 group-hover:scale-110" />
-                            <h3 className="text-sm font-semibold text-white leading-tight">{chapter.title}</h3>
+                        <div key={index} className="group relative rounded-2xl p-4 text-center flex flex-col items-center justify-center aspect-square transition-all duration-300 overflow-hidden">
+                           <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 rounded-2xl transition-all duration-300 group-hover:from-white/15 group-hover:to-white/10 group-hover:shadow-card-glow"></div>
+                            <div className="relative z-10">
+                                <chapter.icon className="w-10 h-10 text-emerald-400 mb-3 transition-transform duration-300 group-hover:scale-110" />
+                                <h3 className="text-sm font-semibold text-white leading-tight">{chapter.title}</h3>
+                            </div>
                         </div>
                     ))}
                 </div>
                 <div className="text-center mt-12">
                      <Button asChild size="lg" className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-                        <Link href="/register">View Full Curriculum & Start Learning</Link>
+                        <Link href="/register">
+                            View Full Curriculum 
+                            <ArrowRight className="ml-2 h-4 w-4" />
+                        </Link>
                     </Button>
                 </div>
             </div>
