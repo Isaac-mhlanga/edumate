@@ -40,7 +40,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map(course => (
-          <div key={course.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer flex flex-col h-full hover:border-emerald-400/30">
+           <div key={course.id} className="bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden group cursor-pointer flex flex-col h-full hover:border-emerald-400/30">
             <div className="relative h-40 overflow-hidden">
               <Image 
                 src={course.thumbnail}
@@ -236,7 +236,7 @@ const Hero = () => {
                 fill
                 className="object-cover"
                 priority={index === 0}
-                data-ai-hint="education technology"
+                data-ai-hint="technological globe"
               />
             </div>
           ))}
@@ -539,5 +539,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
