@@ -14,6 +14,7 @@ import 'katex/dist/katex.min.css';
 import { BlockMath, InlineMath } from 'react-katex';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 type Solution = {
     questionId: string;
@@ -234,7 +235,7 @@ export default function AiTutorPage() {
                                     ) : selectedSolution ? (
                                         <div className="prose prose-sm dark:prose-invert max-w-none">
                                             <h4>Explanation:</h4>
-                                            <div dangerouslySetInnerHTML={{ __html: selectedSolution.explanation.replace(/\\\[([\s\S]*?)\\\]/g, (match, p1) => `<div class="math-block">${p1}</div>`).replace(/\\\((.*?)\\\)/g, (match, p1) => `<span class="math-inline">${p1}</span>`) }} />
+                                            <div dangerouslySetInnerHTML={{ __html: selectedSolution.explanation }} />
 
                                             <h4>Final Answer:</h4>
                                             <BlockMath math={selectedSolution.finalAnswer} />
@@ -250,10 +251,13 @@ export default function AiTutorPage() {
                                                     </div>
                                                 )}
                                                 {selectedSolution.clarification && (
-                                                    <div className="p-4 bg-muted rounded-lg text-sm space-y-2">
-                                                        <p className="font-semibold flex items-center gap-2"><Lightbulb className="h-5 w-5 text-amber-400"/> Simplified Explanation</p>
-                                                        <p className="text-muted-foreground">{selectedSolution.clarification}</p>
-                                                    </div>
+                                                    <Alert>
+                                                        <Lightbulb className="h-4 w-4" />
+                                                        <AlertTitle>Simplified Explanation</AlertTitle>
+                                                        <AlertDescription>
+                                                            {selectedSolution.clarification}
+                                                        </AlertDescription>
+                                                    </Alert>
                                                 )}
                                             </div>
                                         </div>
