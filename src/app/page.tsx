@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -219,7 +220,7 @@ const Hero = () => {
     <section id="home" className="relative overflow-hidden">
       {/* Banner Carousel Section */}
       <div 
-        className="relative h-96 bg-gray-900"
+        className="relative h-[500px] bg-gray-900"
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
       >
@@ -533,4 +534,3 @@ export default function Home() {
     </div>
   );
 }
-
