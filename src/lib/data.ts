@@ -1,7 +1,7 @@
 
 import { BarChart, Book, BookOpen, CheckCircle, Clock, CreditCard, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote } from "lucide-react";
 
-export const grade12Curriculum = [
+export const grade12MathsCurriculum = [
     {
         chapter: "Sequences & Series",
         topics: [
@@ -134,6 +134,67 @@ export const grade12Curriculum = [
             "End of chapter exercises",
             "Practice this chapter",
         ]
+    }
+];
+
+export const grade12PhysicsCurriculum = [
+    {
+        chapter: "Mechanics",
+        topics: [
+            "Newton's Laws of Motion",
+            "Vertical projectile motion",
+            "Momentum and impulse",
+            "Work, energy, and power",
+        ],
+        category: "Physics"
+    },
+    {
+        chapter: "Waves and Sound",
+        topics: [
+            "The Doppler effect",
+        ],
+        category: "Physics"
+    },
+    {
+        chapter: "Electricity & Magnetism",
+        topics: [
+            "Electrostatics",
+            "Electric circuits",
+            "Electrodynamics",
+        ],
+        category: "Physics"
+    },
+     {
+        chapter: "Modern Physics",
+        topics: [
+            "The photoelectric effect",
+        ],
+        category: "Physics"
+    },
+    {
+        chapter: "Organic Chemistry",
+        topics: [
+            "Molecular structures and IUPAC naming",
+            "Physical properties and reactions (addition, elimination, substitution)",
+            "Polymers and plastics",
+        ],
+        category: "Chemistry"
+    },
+    {
+        chapter: "Chemical Change",
+        topics: [
+            "Rates of reaction and factors affecting them",
+            "Chemical equilibrium",
+            "Acids and bases",
+        ],
+        category: "Chemistry"
+    },
+    {
+        chapter: "Chemical Systems",
+        topics: [
+            "Electrochemical cells",
+        ],
+        category: "Chemistry"
     }
 ];
 

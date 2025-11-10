@@ -17,7 +17,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { studentData, instructorData, grade12Curriculum } from "@/lib/data";
+import { studentData, instructorData, grade12MathsCurriculum } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
@@ -642,7 +642,7 @@ function DashboardPage() {
                     </CardHeader>
                     <CardContent>
                         <Accordion type="single" collapsible className="w-full">
-                            {grade12Curriculum.map((item, index) => (
+                            {grade12MathsCurriculum.map((item, index) => (
                                 <AccordionItem value={`item-${index}`} key={index}>
                                     <AccordionTrigger className="text-lg font-semibold hover:no-underline">
                                         {item.chapter}
