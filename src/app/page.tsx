@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -8,50 +7,9 @@ import { instructorData } from "@/lib/data";
 import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 const courses = instructorData.courses;
-
-const Hero = () => {
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  return (
-     <section id="home" className="relative overflow-hidden">
-        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-primary/10 rounded-full blur-3xl -z-10" />
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center py-24 md:py-32">
-            <div className="space-y-6 text-center md:text-left">
-                <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight text-white">
-                    Unlock Your Potential, Master Your Future.
-                </h1>
-                <p className="text-lg text-muted-foreground max-w-xl mx-auto md:mx-0">
-                    Edumate provides a universe of learning resources tailored for ambitious students. Dive into expert-led courses, get personalized tutoring, and conquer your assignments.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                    <Button size="lg" asChild className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
-                        <Link href="/register">Start Learning Today <ArrowRight className="ml-2"/></Link>
-                    </Button>
-                </div>
-            </div>
-             <div className="relative">
-                <div className="absolute -inset-8 bg-secondary/10 rounded-full blur-3xl opacity-50"></div>
-                <Image 
-                    src="https://picsum.photos/seed/1/600/400"
-                    alt="Student interacting with a futuristic learning interface"
-                    width={600}
-                    height={400}
-                    className="rounded-2xl shadow-2xl relative"
-                    data-ai-hint="student futuristic learning"
-                />
-            </div>
-        </div>
-    </section>
-  )
-}
 
 const CoursesSection = ({ title, description, courses }: { title: string, description: string, courses: any[] }) => {
   const icons = {
@@ -184,6 +142,189 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
 };
 
 
+const Hero = () => {
+  const bannerData = [
+    {
+      id: 1,
+      backgroundImage: "https://picsum.photos/seed/hero1/1920/1080",
+      title: "Master Maths & Science",
+      subtitle: "Ace your exams with our comprehensive video lessons and expert-led tutorials.",
+      hasActionButton: true,
+      actionButtonText: "Explore Courses",
+      actionButtonLink: "#courses",
+    },
+    {
+      id: 2,
+      backgroundImage: "https://picsum.photos/seed/hero2/1920/1080",
+      title: "Personalized Tutoring",
+      subtitle: "Get one-on-one help from our top-rated tutors. Book your session today!",
+      hasActionButton: true,
+      actionButtonText: "Find a Tutor",
+      actionButtonLink: "/tutors",
+    },
+    {
+      id: 3,
+      backgroundImage: "https://picsum.photos/seed/hero3/1920/1080",
+      title: "Join Edumate Pro Today",
+      subtitle: "Unlock your full potential and achieve academic excellence. Your future starts now.",
+      hasActionButton: false,
+    },
+  ];
+
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [isTransitioning, setIsTransitioning] = useState(false);
+  const currentBanner = bannerData[currentSlide];
+
+  const handleNext = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentSlide((prev) => (prev === bannerData.length - 1 ? 0 : prev + 1));
+      setIsTransitioning(false);
+    }, 300);
+  };
+  
+  const handlePrev = () => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentSlide((prev) => (prev === 0 ? bannerData.length - 1 : prev - 1));
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const goToSlide = (index: number) => {
+    setIsTransitioning(true);
+    setTimeout(() => {
+      setCurrentSlide(index);
+      setIsTransitioning(false);
+    }, 300);
+  };
+
+  const handleActionClick = (link: string) => {
+    if (link.startsWith('#')) {
+      document.getElementById(link.substring(1))?.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = link;
+    }
+  };
+
+  useEffect(() => {
+    if (!isPaused) {
+      const timer = setInterval(handleNext, 5000);
+      return () => clearInterval(timer);
+    }
+  }, [currentSlide, isPaused]);
+
+  return (
+    <section id="home" className="relative overflow-hidden">
+      {/* Banner Carousel Section */}
+      <div 
+        className="relative h-96 bg-gray-900"
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+      >
+        {/* Background Images with Transition */}
+        <div className="absolute inset-0">
+          {bannerData.map((banner, index) => (
+            <div
+              key={banner.id}
+              className={`absolute inset-0 transition-opacity duration-500 ${
+                index === currentSlide ? 'opacity-100' : 'opacity-0'
+              }`}
+            >
+              <Image 
+                src={banner.backgroundImage} 
+                alt={banner.title}
+                fill
+                className="object-cover"
+                priority={index === 0}
+                data-ai-hint="education technology"
+              />
+            </div>
+          ))}
+        </div>
+        
+        {/* Hero Content Overlay */}
+        <div className="relative z-20 h-full flex items-center justify-center text-center px-6">
+          <div className="max-w-4xl">
+            <h1 className={`text-5xl md:text-7xl font-extrabold text-white mb-6 leading-tight drop-shadow-lg transition-all duration-500 ${
+              isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+            }`}>
+              {currentBanner.title}
+            </h1>
+            <p className={`text-xl md:text-2xl text-white mb-12 max-w-2xl mx-auto leading-relaxed drop-shadow-md transition-all duration-500 delay-100 ${
+              isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+            }`}>
+              {currentBanner.subtitle}
+            </p>
+            
+            {currentBanner.hasActionButton && (
+              <button 
+                onClick={() => handleActionClick(currentBanner.actionButtonLink)}
+                className={`relative z-30 -mt-8 mb-10 bg-white text-blue-600 px-10 py-5 rounded-full font-bold text-lg hover:scale-105 hover:shadow-2xl transition-all duration-300 ${
+                    isTransitioning ? 'opacity-0 translate-y-4' : 'opacity-100 translate-y-0'
+                }`}
+                style={{ transitionDelay: '200ms' }}
+              >
+                {currentBanner.actionButtonText}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Arrows */}
+        <button
+          onClick={handlePrev}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
+          aria-label="Previous slide"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        
+        <button
+          onClick={handleNext}
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-20 bg-white/20 hover:bg-white/40 text-white p-3 rounded-full backdrop-blur-sm transition-all duration-300 hover:scale-110"
+          aria-label="Next slide"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* Slide Indicators */}
+        <div className="absolute bottom-1 left-1/2 -translate-x-1/2 z-10 flex gap-2">
+          {bannerData.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => goToSlide(index)}
+              className={`transition-all duration-300 rounded-full ${
+                index === currentSlide 
+                  ? 'w-8 h-3 bg-white' 
+                  : 'w-3 h-3 bg-white/50 hover:bg-white/75'
+              }`}
+              aria-label={`Go to slide ${index + 1}`}
+            />
+          ))}
+        </div>
+
+        {/* Pause Indicator */}
+        {isPaused && (
+          <div className="absolute top-6 right-6 z-20 bg-white/20 backdrop-blur-sm text-white px-3 py-1 rounded-full text-sm flex items-center gap-2">
+            <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+              <path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>
+            </svg>
+            Paused
+          </div>
+        )}
+        
+      </div>
+    </section>
+  );
+};
+
+
 export default function Home() {
   const [scrolled, setScrolled] = React.useState(false);
 
@@ -204,13 +345,13 @@ export default function Home() {
     }
   };
 
-  const allCourses = courses.slice(0, 6); // Show 6 courses for 2 rows of 3
+  const allCourses = courses.slice(0, 6);
 
   const features = [
     {
       icon: (
         <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
         </svg>
       ),
       title: 'AI-Powered Learning',
@@ -291,7 +432,7 @@ export default function Home() {
       </header>
 
       <main className="flex-grow pt-20">
-        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
+         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
           <Hero />
           
           {/* Green Glass Stats Section */}
@@ -314,7 +455,7 @@ export default function Home() {
           </section>
 
           {/* Green Glass Features Section */}
-          <section id="courses" className="py-20 relative">
+          <section id="about" className="py-20 relative">
             <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
             <div className="max-w-7xl mx-auto px-6 relative z-10">
               <div className="text-center mb-16">
@@ -355,7 +496,7 @@ export default function Home() {
           />
 
           {/* Green Glass CTA Section */}
-          <section id="about" className="py-20 relative">
+          <section id="contact" className="py-20 relative">
             <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-3xl"></div>
             <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
               <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-12 hover:border-white/20 transition-all duration-500">
@@ -393,4 +534,3 @@ export default function Home() {
   );
 }
 
-    
