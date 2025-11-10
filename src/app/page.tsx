@@ -150,6 +150,7 @@ const Hero = () => {
       hasActionButton: true,
       actionButtonText: "Explore Courses",
       actionButtonLink: "#courses",
+      aiHint: "technological globe",
     },
     {
       id: 2,
@@ -159,6 +160,7 @@ const Hero = () => {
       hasActionButton: true,
       actionButtonText: "Find a Tutor",
       actionButtonLink: "/tutors",
+      aiHint: "technological globe",
     },
     {
       id: 3,
@@ -166,6 +168,7 @@ const Hero = () => {
       title: "Join Edumate Pro Today",
       subtitle: "Unlock your full potential and achieve academic excellence. Your future starts now.",
       hasActionButton: false,
+      aiHint: "technological globe",
     },
   ];
 
@@ -236,7 +239,7 @@ const Hero = () => {
                 fill
                 className="object-cover"
                 priority={index === 0}
-                data-ai-hint="technological globe"
+                data-ai-hint={banner.aiHint}
               />
             </div>
           ))}
@@ -387,8 +390,8 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background text-foreground animate-fade-in-up">
       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
-          ? 'bg-white/98 backdrop-blur-md shadow-lg dark:bg-gray-900/80' 
-          : 'bg-white/95 backdrop-blur-md dark:bg-gray-900/80'
+          ? 'bg-slate-900/80 backdrop-blur-md shadow-lg'
+          : 'bg-transparent'
       }`}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center py-4">
@@ -409,7 +412,7 @@ export default function Home() {
                 <button
                   key={item.name}
                   onClick={() => scrollToSection(item.id)}
-                  className="text-gray-600 dark:text-gray-300 hover:text-emerald-500 font-medium transition-colors duration-300 relative group"
+                  className="text-gray-300 hover:text-emerald-400 font-medium transition-colors duration-300 relative group"
                 >
                   {item.name}
                   <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-emerald-500 to-teal-500 transition-all duration-300 group-hover:w-full"></span>
@@ -432,7 +435,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-grow pt-20">
+      <main className="flex-grow">
          <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
           <Hero />
           
@@ -539,3 +542,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

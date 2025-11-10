@@ -336,3 +336,5 @@ export default function CoursePreviewPage() {
         </div>
     );
 }
+
+    

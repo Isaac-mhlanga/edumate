@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { studentData, instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, XCircle } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -53,6 +53,20 @@ const assignmentFormSchema = z.object({
   file: z.instanceof(File).refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.').optional(),
 });
 type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
+
+type Course = {
+    id: string;
+    title: string;
+    description: string;
+    subject: string;
+    grade: string;
+    thumbnail: string;
+    pricing: {
+        type: string;
+        price?: number;
+    };
+    instructor: string;
+};
 
 type SubmittedAssignment = {
     id: string;
@@ -90,7 +104,7 @@ function DashboardPage() {
 
     const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
-    const [allCourses, setAllCourses] = React.useState<(typeof instructorData.courses)>([]);
+    const [allCourses, setAllCourses] = React.useState<Course[]>([]);
     const [loadingAssignments, setLoadingAssignments] = React.useState(true);
     const [loadingTransactions, setLoadingTransactions] = React.useState(true);
     const [loadingCourses, setLoadingCourses] = React.useState(true);
@@ -171,7 +185,7 @@ function DashboardPage() {
 
                 // Fetch all courses
                 const coursesSnapshot = await getDocs(collection(firestore, 'courses'));
-                setAllCourses(coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as typeof allCourses);
+                setAllCourses(coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[]);
 
             } catch (error: any) {
                 console.error("Error fetching student data: ", error);
@@ -203,6 +217,44 @@ function DashboardPage() {
 
         return () => unsubscribe();
     }, [toast]);
+
+    const handleFreeEnrollment = async (course: Course) => {
+        if (!user) {
+            toast({ variant: 'destructive', title: 'Not Logged In', description: 'You must be logged in to enroll in a course.' });
+            return;
+        }
+
+        const firestore = getFirestore();
+        try {
+            await addDoc(collection(firestore, 'transactions'), {
+                studentId: user.uid,
+                itemId: course.id,
+                itemTitle: course.title,
+                itemType: 'course',
+                amount: 0, // Free enrollment
+                status: 'Completed',
+                currency: 'ZAR',
+                createdAt: serverTimestamp(),
+            });
+
+            // Optimistically update UI
+            setTransactions(prev => [{
+                id: `temp-${Date.now()}`,
+                itemId: course.id,
+                itemTitle: course.title,
+                itemType: 'course',
+                status: 'Completed',
+                amount: 0,
+                createdAt: Timestamp.now(),
+                date: format(new Date(), 'PPP'),
+            } as Transaction, ...prev]);
+
+            toast({ title: 'Enrollment Successful!', description: `You have enrolled in "${course.title}".` });
+        } catch (error) {
+            console.error("Error during free enrollment:", error);
+            toast({ variant: 'destructive', title: 'Enrollment Failed', description: 'Could not enroll in the course. Please try again.' });
+        }
+    };
 
 
     const handleAssignmentSubmit = async (data: AssignmentFormValues) => {
@@ -692,10 +744,8 @@ function DashboardPage() {
                                             <h4 className="text-xl font-bold text-center mb-2">
                                                 {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'By Subscription'}
                                             </h4>
-                                            <Button asChild>
-                                                <Link href={`/payment?type=course&id=${course.id}&title=${encodeURIComponent(course.title)}&price=${course.pricing.price}`}>
-                                                    {course.pricing.type === 'purchase' ? 'Buy Now' : 'Subscribe'}
-                                                </Link>
+                                            <Button onClick={() => handleFreeEnrollment(course)}>
+                                                Enroll for Free
                                             </Button>
                                         </>
                                     )}
@@ -923,7 +973,7 @@ function DashboardPage() {
                                             {transaction.amount.toFixed(2)}
                                         </TableCell>
                                         <TableCell className="text-right">
-                                            {transaction.status !== 'Refunded' && (
+                                            {transaction.status !== 'Refunded' && transaction.amount > 0 && (
                                                 <DropdownMenu>
                                                     <DropdownMenuTrigger asChild>
                                                         <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
@@ -1177,3 +1227,5 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
