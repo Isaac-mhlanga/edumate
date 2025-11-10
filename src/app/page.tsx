@@ -99,8 +99,8 @@ export default function Home() {
         </div>
       </header>
 
-      <main className="flex-grow">
-        <section id="home" className="relative overflow-hidden pt-20">
+      <main className="flex-grow pt-20">
+        <section id="home" className="relative overflow-hidden">
              <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-primary/10 rounded-full blur-3xl -z-10" />
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center py-24 md:py-32">
                 <div className="space-y-6 text-center md:text-left">
