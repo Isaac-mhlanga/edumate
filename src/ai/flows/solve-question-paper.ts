@@ -1,80 +1,61 @@
-{
-  "name": "nextn",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "dev": "next dev --turbopack -p 9002",
-    "genkit:dev": "genkit start -- tsx src/ai/dev.ts",
-    "genkit:watch": "genkit start -- tsx --watch src/ai/dev.ts",
-    "build": "next build",
-    "start": "next start",
-    "lint": "next lint",
-    "typecheck": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@fullcalendar/daygrid": "^6.1.15",
-    "@fullcalendar/interaction": "^6.1.15",
-    "@fullcalendar/list": "^6.1.15",
-    "@fullcalendar/react": "^6.1.15",
-    "@fullcalendar/timegrid": "^6.1.15",
-    "@genkit-ai/googleai": "^1.13.0",
-    "@genkit-ai/next": "^1.13.0",
-    "@hookform/resolvers": "^4.1.3",
-    "@radix-ui/react-accordion": "^1.2.3",
-    "@radix-ui/react-alert-dialog": "^1.1.6",
-    "@radix-ui/react-avatar": "^1.1.3",
-    "@radix-ui/react-checkbox": "^1.1.4",
-    "@radix-ui/react-collapsible": "^1.1.11",
-    "@radix-ui/react-dialog": "^1.1.6",
-    "@radix-ui/react-dropdown-menu": "^2.1.6",
-    "@radix-ui/react-label": "^2.1.2",
-    "@radix-ui/react-menubar": "^1.1.6",
-    "@radix-ui/react-popover": "^1.1.6",
-    "@radix-ui/react-progress": "^1.1.2",
-    "@radix-ui/react-radio-group": "^1.2.3",
-    "@radix-ui/react-scroll-area": "^1.2.3",
-    "@radix-ui/react-select": "^2.1.6",
-    "@radix-ui/react-separator": "^1.1.2",
-    "@radix-ui/react-slider": "^1.2.3",
-    "@radix-ui/react-slot": "^1.2.3",
-    "@radix-ui/react-switch": "^1.1.3",
-    "@radix-ui/react-tabs": "^1.1.3",
-    "@radix-ui/react-toast": "^1.2.6",
-    "@radix-ui/react-tooltip": "^1.1.8",
-    "axios": "^1.7.2",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
-    "date-fns": "^3.6.0",
-    "dotenv": "^16.5.0",
-    "embla-carousel-react": "^8.6.0",
-    "firebase": "^11.9.1",
-    "genkit": "^1.13.0",
-    "katex": "^0.16.11",
-    "lucide-react": "^0.475.0",
-    "next": "15.3.3",
-    "next-themes": "^0.3.0",
-    "patch-package": "^8.0.0",
-    "react": "^18.3.1",
-    "react-day-picker": "^8.10.1",
-    "react-dom": "^18.3.1",
-    "react-hook-form": "^7.54.2",
-    "react-katex": "^3.0.1",
-    "react-paystack": "^5.0.0",
-    "react-to-print": "^2.15.1",
-    "recharts": "^2.15.1",
-    "tailwind-merge": "^3.0.1",
-    "tailwindcss-animate": "^1.0.7",
-    "zod": "^3.24.2"
-  },
-  "devDependencies": {
-    "@types/katex": "^0.16.7",
-    "@types/node": "^20",
-    "@types/react": "^18",
-    "@types/react-dom": "^18",
-    "@types/react-katex": "^3.0.4",
-    "genkit-cli": "^1.13.0",
-    "postcss": "^8",
-    "tailwindcss": "^3.4.1",
-    "typescript": "^5"
-  }
+'use server';
+/**
+ * @fileOverview An AI flow to solve a single question from a question paper.
+ *
+ * - solveQuestionPaper - A function that handles the question solving process.
+ * - SolveQuestionPaperInput - The input type for the function.
+ * - SolveQuestionPaperOutput - The return type for the function.
+ */
+
+import {ai} from '@/ai/genkit';
+import {z} from 'genkit';
+
+const SolveQuestionPaperInputSchema = z.object({
+    questionText: z.string().describe("The full text of the question to be solved, formatted with LaTeX for mathematical formulas."),
+    diagramDescription: z.string().optional().describe("A textual description of any diagram associated with the question."),
+});
+export type SolveQuestionPaperInput = z.infer<typeof SolveQuestionPaperInputSchema>;
+
+const SolveQuestionPaperOutputSchema = z.object({
+  explanation: z.string().describe("A detailed, step-by-step explanation of how to arrive at the solution. This should be formatted as HTML with LaTeX for formulas."),
+  finalAnswer: z.string().describe("The final, concise answer to the question, formatted with LaTeX."),
+});
+export type SolveQuestionPaperOutput = z.infer<typeof SolveQuestionPaperOutputSchema>;
+
+
+export async function solveQuestionPaper(input: SolveQuestionPaperInput): Promise<SolveQuestionPaperOutput> {
+  return solveQuestionPaperFlow(input);
 }
+
+const prompt = ai.definePrompt({
+  name: 'solveQuestionPaperPrompt',
+  input: {schema: SolveQuestionPaperInputSchema},
+  output: {schema: SolveQuestionPaperOutputSchema},
+  prompt: `You are an expert AI tutor specializing in high school Maths and Science. Your task is to provide a comprehensive solution to the following question.
+
+**CRITICAL INSTRUCTIONS:**
+1.  **Explanation Format:** Your explanation MUST be valid HTML. Use tags like <p>, <ul>, <li>, <strong>, etc., for clear formatting.
+2.  **LaTeX for Formulas:** ALL mathematical formulas, variables, and symbols in both the explanation and the final answer MUST be formatted using LaTeX syntax. Use \\\\( ... \\\\) for inline math and \\\\\\[ ... \\\\\\] for block math.
+3.  **Step-by-Step Logic:** Break down the solution into logical, easy-to-follow steps. Explain the 'why' behind each step, including the principles or formulas used.
+4.  **Final Answer:** The final answer should be concise and directly answer the question asked.
+
+**Question to Solve:**
+- **Text:** {{{questionText}}}
+{{#if diagramDescription}}
+- **Associated Diagram:** {{{diagramDescription}}}
+{{/if}}
+
+Provide the solution now.`,
+});
+
+const solveQuestionPaperFlow = ai.defineFlow(
+  {
+    name: 'solveQuestionPaperFlow',
+    inputSchema: SolveQuestionPaperInputSchema,
+    outputSchema: SolveQuestionPaperOutputSchema,
+  },
+  async (input) => {
+    const {output} = await prompt(input);
+    return output!;
+  }
+);

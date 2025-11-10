@@ -42,7 +42,7 @@ const prompt = ai.definePrompt({
 - Identify each distinct question.
 - A question may have sub-parts (e.g., 1.1, 1.2, a, b). Treat the entire parent question as one block.
 - Capture the full text of each question.
-- **CRITICAL**: Format all mathematical formulas and symbols using LaTeX syntax. For example, render x squared as \\(x^2\\) and fractions as \\(\\frac{a}{b}\\).
+- **CRITICAL**: Format all mathematical formulas and symbols using LaTeX syntax. For example, render x squared as \\\\(x^2\\\\) and fractions as \\\\(\\frac{a}{b}\\\\).
 - If a question refers to a diagram or image, create a concise textual description of that diagram and place it in the 'diagramDescription' field.
 - Assign a unique ID to each question you find, starting with 'q1', then 'q2', and so on.
 - Pay close attention to numbering to correctly separate questions.
