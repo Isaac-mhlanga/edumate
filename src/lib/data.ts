@@ -1,6 +1,142 @@
 
 import { BarChart, Book, BookOpen, CheckCircle, Clock, CreditCard, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote } from "lucide-react";
 
+export const grade12Curriculum = [
+    {
+        chapter: "Sequences & Series",
+        topics: [
+            "1.1 Arithmetic sequences",
+            "1.2 Geometric sequences",
+            "1.3 Series",
+            "1.4 Finite arithmetic series",
+            "1.5 Finite geometric series",
+            "1.6 Infinite series",
+            "1.7 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Functions",
+        topics: [
+            "2.1 Revision",
+            "2.2 Functions and relations",
+            "2.3 Inverse functions",
+            "2.4 Linear functions",
+            "2.5 Quadratic functions",
+            "2.6 Exponential functions",
+            "2.7 Summary",
+            "2.8 Enrichment: more on logarithms",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Finance",
+        topics: [
+            "3.1 Calculating the period of an investment",
+            "3.2 Annuities",
+            "3.3 Future value annuities",
+            "3.4 Present value annuities",
+            "3.5 Analysing investment and loan options",
+            "3.6 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Trigonometry",
+        topics: [
+            "4.1 Revision",
+            "4.2 Compound angle identities",
+            "4.3 Double angle identities",
+            "4.4 Solving equations",
+            "4.5 Applications of trigonometric functions",
+            "4.6 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Polynomials",
+        topics: [
+            "5.1 Revision",
+            "5.2 Cubic polynomials",
+            "5.3 Remainder theorem",
+            "5.4 Factor theorem",
+            "5.5 Solving cubic equations",
+            "5.6 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Differential Calculus",
+        topics: [
+            "6.1 Limits",
+            "6.2 Differentiation from first principles",
+            "6.3 Rules for differentiation",
+            "6.4 Equation of a tangent to a curve",
+            "6.5 Second derivative",
+            "6.6 Sketching graphs",
+            "6.7 Applications of differential calculus",
+            "6.8 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Analytical Geometry",
+        topics: [
+            "7.1 Revision",
+            "7.2 Equation of a circle",
+            "7.3 Equation of a tangent to a circle",
+            "7.4 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Euclidean Geometry",
+        topics: [
+            "8.1 Revision",
+            "8.2 Ratio and proportion",
+            "8.3 Polygons",
+            "8.4 Triangles",
+            "8.5 Similarity",
+            "8.6 Pythagorean theorem",
+            "8.7 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Statistics",
+        topics: [
+            "9.1 Revision",
+            "9.2 Curve fitting",
+            "9.3 Correlation",
+            "9.4 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Probability",
+        topics: [
+            "10.1 Revision",
+            "10.2 Identities",
+            "10.3 Tools and Techniques",
+            "10.4 The fundamental counting principle",
+            "10.5 Factorial notation",
+            "10.6 Application to counting problems",
+            "10.7 Application to probability problems",
+            "10.8 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    }
+];
+
 export const studentData = {
     name: "Alex Johnson",
     activeSubscriptions: [

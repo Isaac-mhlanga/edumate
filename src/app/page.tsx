@@ -4,11 +4,16 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { instructorData } from "@/lib/data";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, BarChart2, User, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { instructorData, grade12Curriculum } from "@/lib/data";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+
 
 const courses = instructorData.courses;
 
@@ -328,6 +333,9 @@ const Hero = () => {
 
 export default function Home() {
   const [scrolled, setScrolled] = React.useState(false);
+  const [isCurriculumDialogOpen, setIsCurriculumDialogOpen] = useState(false);
+  const [selectedChapter, setSelectedChapter] = useState<typeof grade12Curriculum[0] | null>(null);
+
 
   React.useEffect(() => {
     const handleScroll = () => {
@@ -344,6 +352,11 @@ export default function Home() {
     if (element) {
       element.scrollIntoView({ behavior: 'smooth' });
     }
+  };
+
+  const handleChapterClick = (chapter: typeof grade12Curriculum[0]) => {
+    setSelectedChapter(chapter);
+    setIsCurriculumDialogOpen(true);
   };
 
   const allCourses = courses.slice(0, 6);
@@ -513,15 +526,18 @@ export default function Home() {
                     <p className="text-lg text-gray-300 max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics and prepare you for success.</p>
                 </div>
                 <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                    {curriculumChapters.map((chapter, index) => (
-                        <div key={index} className="group relative rounded-2xl p-4 text-center flex flex-col items-center justify-center aspect-square transition-all duration-300 overflow-hidden">
+                    {grade12Curriculum.map((chapter, index) => {
+                      const Icon = curriculumChapters.find(c => c.title === chapter.chapter)?.icon || BookOpen;
+                      return (
+                        <button key={index} onClick={() => handleChapterClick(chapter)} className="group relative rounded-2xl p-4 text-center flex flex-col items-center justify-center aspect-square transition-all duration-300 overflow-hidden">
                            <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-lg border border-white/10 rounded-2xl transition-all duration-300 group-hover:from-white/15 group-hover:to-white/10 group-hover:shadow-card-glow"></div>
                             <div className="relative z-10">
-                                <chapter.icon className="w-10 h-10 text-emerald-400 mb-3 transition-transform duration-300 group-hover:scale-110" />
-                                <h3 className="text-sm font-semibold text-white leading-tight">{chapter.title}</h3>
+                                <Icon className="w-10 h-10 text-emerald-400 mb-3 transition-transform duration-300 group-hover:scale-110" />
+                                <h3 className="text-sm font-semibold text-white leading-tight">{chapter.chapter}</h3>
                             </div>
-                        </div>
-                    ))}
+                        </button>
+                      )
+                    })}
                 </div>
                 <div className="text-center mt-12">
                      <Button asChild size="lg" className="bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
@@ -532,7 +548,7 @@ export default function Home() {
                     </Button>
                 </div>
             </div>
-        </section>
+          </section>
 
           {/* Courses Section with Distinct Background */}
           <section id="courses" className="py-20 relative">
@@ -579,6 +595,52 @@ export default function Home() {
           <div className="fixed bottom-1/4 left-1/4 w-1 h-1 bg-green-400 rounded-full animate-pulse opacity-50"></div>
         </div>
       </main>
+
+       <Dialog open={isCurriculumDialogOpen} onOpenChange={setIsCurriculumDialogOpen}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col">
+          <DialogHeader>
+            <DialogTitle className="text-2xl">{selectedChapter?.chapter}</DialogTitle>
+            <DialogDescription>
+              Explore the topics in this chapter. Click on a topic to see available courses.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex-1 overflow-y-auto -mx-6 px-6">
+            <Accordion type="single" collapsible className="w-full">
+              {selectedChapter?.topics.map((topic, index) => (
+                <AccordionItem value={`item-${index}`} key={index}>
+                  <AccordionTrigger className="text-lg hover:no-underline">
+                    {topic}
+                  </AccordionTrigger>
+                  <AccordionContent>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                       {courses.slice(0,2).map(course => (
+                           <Card key={course.id} className="overflow-hidden group flex flex-col h-full">
+                              <CardHeader className="p-0">
+                                  <div className="bg-primary/10 aspect-video flex items-center justify-center">
+                                      <Image src={course.thumbnail} alt={course.title} width={300} height={168} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
+                                  </div>
+                              </CardHeader>
+                              <CardContent className="p-4 flex-grow">
+                                  <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
+                                  <h3 className="font-semibold text-base line-clamp-2">{course.title}</h3>
+                              </CardContent>
+                              <CardFooter className="p-4 pt-0">
+                                  <Button variant="link" className="p-0 h-auto as-child">
+                                      <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
+                                          Enroll Now <ArrowRight className="ml-1 h-4 w-4"/>
+                                      </Link>
+                                  </Button>
+                              </CardFooter>
+                          </Card>
+                       ))}
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              ))}
+            </Accordion>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Footer />
     </div>
