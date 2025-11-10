@@ -4,11 +4,92 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { instructorData } from "@/lib/data";
 import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+
+const courses = instructorData.courses;
+
+const Hero = () => {
+  const scrollToSection = (id: string) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+     <section id="home" className="relative overflow-hidden">
+        <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-primary/10 rounded-full blur-3xl -z-10" />
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center py-24 md:py-32">
+            <div className="space-y-6 text-center md:text-left">
+                <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight text-white">
+                    Unlock Your Potential, Master Your Future.
+                </h1>
+                <p className="text-lg text-muted-foreground max-w-xl mx-auto md:mx-0">
+                    Edumate provides a universe of learning resources tailored for ambitious students. Dive into expert-led courses, get personalized tutoring, and conquer your assignments.
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
+                    <Button size="lg" asChild className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
+                        <Link href="/register">Start Learning Today <ArrowRight className="ml-2"/></Link>
+                    </Button>
+                </div>
+            </div>
+             <div className="relative">
+                <div className="absolute -inset-8 bg-secondary/10 rounded-full blur-3xl opacity-50"></div>
+                <Image 
+                    src="https://picsum.photos/seed/1/600/400"
+                    alt="Student interacting with a futuristic learning interface"
+                    width={600}
+                    height={400}
+                    className="rounded-2xl shadow-2xl relative"
+                    data-ai-hint="student futuristic learning"
+                />
+            </div>
+        </div>
+    </section>
+  )
+}
+
+const CoursesSection = ({ title, description, courses }: { title: string, description: string, courses: any[] }) => (
+  <section className="py-20 relative">
+    <div className="absolute inset-0 bg-gradient-to-br from-slate-800/80 via-emerald-900/40 to-slate-900/80 backdrop-blur-3xl"></div>
+    <div className="max-w-7xl mx-auto px-6 relative z-10">
+       <div className="text-center mb-12">
+        <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">{title}</h2>
+        <p className="text-lg text-gray-300 max-w-2xl mx-auto">{description}</p>
+      </div>
+      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {courses.map(course => (
+          <div key={course.id} className="group relative overflow-hidden rounded-2xl border border-white/10 bg-slate-800/50 backdrop-blur-md hover:border-white/20 transition-all duration-300">
+            <Image 
+              src={course.thumbnail}
+              alt={course.title}
+              width={400}
+              height={225}
+              className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
+              data-ai-hint="online course"
+            />
+            <div className="p-6">
+              <h3 className="font-bold text-xl text-white mb-2">{course.title}</h3>
+              <p className="text-gray-400 text-sm line-clamp-2">{course.description}</p>
+            </div>
+             <div className="p-6 pt-0">
+                <Button variant="link" className="p-0 h-auto as-child text-emerald-400">
+                  <Link href={`/instructor/courses/${course.id}`}>
+                      Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
+                  </Link>
+                </Button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+);
+
 
 export default function Home() {
   const [scrolled, setScrolled] = React.useState(false);
@@ -30,32 +111,49 @@ export default function Home() {
     }
   };
 
-  const services = [
+  const allCourses = courses.slice(0, 6); // Show 6 courses for 2 rows of 3
+
+  const features = [
     {
-      icon: <GraduationCap className="h-8 w-8 text-primary" />,
-      title: "Tutoring Services",
-      description: "One-on-One & Group Tutoring for high school and university subjects, led by qualified instructors.",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+        </svg>
+      ),
+      title: 'AI-Powered Learning',
+      description: 'Adaptive AI tutors that personalize your learning'
     },
     {
-      icon: <PenSquare className="h-8 w-8 text-primary" />,
-      title: "Assignment Help",
-      description: "Support for coding projects, essays, and research papers. Work is delivered professionally with academic integrity.",
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10.5a3 3 0 11-6 0 3 3 0 016 0z" />
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1115 0z" />
+        </svg>
+      ),
+      title: 'One-on-One Sessions',
+      description: 'Personal tutoring tailored to your needs'
     },
     {
-      icon: <BookOpen className="h-8 w-8 text-primary" />,
-      title: "Free & Paid Courses",
-      description: "Access high-quality video lessons for various topics. Premium courses offer in-depth explanations and exercises.",
-    },
-     {
-      icon: <Bot className="h-8 w-8 text-primary" />,
-      title: "Interactive Quizzes & Resources",
-      description: "Practice what you learn with interactive quizzes. Unlock all resources with a monthly or annual subscription.",
-    },
+      icon: (
+        <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        </svg>
+      ),
+      title: 'Exam Preparation',
+      description: 'Comprehensive test prep with expert guidance'
+    }
+  ];
+
+  const stats = [
+    { number: '95%', label: 'Improved Scores' },
+    { number: '2.3x', label: 'Faster Learning' },
+    { number: '24/7', label: 'AI Tutor' },
+    { number: '10k+', label: 'Students' }
   ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground animate-fade-in-up">
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
+       <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
         scrolled 
           ? 'bg-white/98 backdrop-blur-md shadow-lg dark:bg-gray-900/80' 
           : 'bg-white/95 backdrop-blur-md dark:bg-gray-900/80'
@@ -69,10 +167,10 @@ export default function Home() {
               </Link>
             </div>
             
-            <nav className="hidden md:flex space-x-8">
+             <nav className="hidden md:flex space-x-8">
               {[
                 { name: 'Home', id: 'home' },
-                { name: 'Courses', id: 'services' },
+                { name: 'Courses', id: 'courses' },
                 { name: 'About', id: 'about' },
                 { name: 'Contact', id: 'contact' }
               ].map((item) => (
@@ -100,73 +198,101 @@ export default function Home() {
       </header>
 
       <main className="flex-grow pt-20">
-        <section id="home" className="relative overflow-hidden">
-             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] bg-primary/10 rounded-full blur-3xl -z-10" />
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8 grid md:grid-cols-2 gap-12 items-center py-24 md:py-32">
-                <div className="space-y-6 text-center md:text-left">
-                    <h1 className="text-4xl md:text-6xl font-bold tracking-tighter leading-tight">
-                        Unlock Your Potential, Master Your Future.
-                    </h1>
-                    <p className="text-lg text-muted-foreground max-w-xl mx-auto md:mx-0">
-                        Edumate provides a universe of learning resources tailored for ambitious students. Dive into expert-led courses, get personalized tutoring, and conquer your assignments.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center md:justify-start">
-                        <Button size="lg" asChild className="shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow">
-                            <Link href="/register">Start Learning Today <ArrowRight className="ml-2"/></Link>
-                        </Button>
+        <div className="min-h-screen bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900">
+          <Hero />
+          
+          {/* Green Glass Stats Section */}
+          <section className="py-16 relative">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/10 to-teal-500/10 backdrop-blur-3xl"></div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                {stats.map((stat, index) => (
+                  <div key={index} className="text-center p-6 bg-white/5 backdrop-blur-md border border-white/10 rounded-2xl hover:bg-white/10 transition-all duration-500">
+                    <div className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-emerald-400 to-teal-400 bg-clip-text text-transparent mb-2">
+                      {stat.number}
                     </div>
-                </div>
-                 <div className="relative">
-                    <div className="absolute -inset-8 bg-secondary/10 rounded-full blur-3xl opacity-50"></div>
-                    <Image 
-                        src="https://placehold.co/600x400.png"
-                        alt="Student interacting with a futuristic learning interface"
-                        width={600}
-                        height={400}
-                        className="rounded-2xl shadow-2xl relative"
-                        data-ai-hint="student futuristic learning"
-                    />
-                </div>
+                    <div className="text-gray-300 font-medium text-sm">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-        </section>
+          </section>
 
+          {/* Green Glass Features Section */}
+          <section id="courses" className="py-20 relative">
+            <div className="absolute inset-0 bg-gradient-to-b from-transparent to-black/20"></div>
+            <div className="max-w-7xl mx-auto px-6 relative z-10">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
+                  The Future of Learning is Here
+                </h2>
+                <p className="text-xl text-gray-300 max-w-2xl mx-auto">
+                  Experience education powered by artificial intelligence
+                </p>
+              </div>
 
-        <section id="services" className="py-20 md:py-28">
-          <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="text-center mb-16">
-              <h2 className="text-3xl md:text-4xl font-bold">A Complete Learning Ecosystem</h2>
-              <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">From one-on-one tutoring to comprehensive assignment help, we provide the tools you need to excel.</p>
+              <div className="grid md:grid-cols-3 gap-8">
+                {features.map((feature, index) => (
+                  <div key={index} className="group relative">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-2xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative p-8 bg-slate-800/50 backdrop-blur-md border border-white/10 rounded-2xl hover:border-white/20 transition-all duration-500">
+                      <div className="text-emerald-400 mb-6 group-hover:scale-110 transition-transform duration-300">
+                        {feature.icon}
+                      </div>
+                      <h3 className="text-xl font-bold text-white mb-4">
+                        {feature.title}
+                      </h3>
+                      <p className="text-gray-300 leading-relaxed text-sm">
+                        {feature.description}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-              {services.map((service) => (
-                <Card key={service.title} className="text-center border-t-4 border-primary hover:-translate-y-2 hover:shadow-card-glow">
-                    <CardHeader className="items-center">
-                        <div className="bg-primary/10 p-4 rounded-full">
-                            {service.icon}
-                        </div>
-                    </CardHeader>
-                    <CardContent className="flex flex-col items-center">
-                        <h3 className="text-xl font-semibold mb-2">{service.title}</h3>
-                        <p className="text-muted-foreground flex-grow">{service.description}</p>
-                    </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-        
-        <section id="contact" className="py-20 md:py-28 bg-muted/20">
-            <div className="container mx-auto px-4 sm:px-6 lg:px-8">
-                <div className="text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold">Ready to Start?</h2>
-                    <p className="text-lg text-muted-foreground mt-3 max-w-2xl mx-auto">Join thousands of students who are achieving their academic goals with Edumate Pro.</p>
-                    <Button size="lg" className="mt-8 shadow-lg shadow-primary/20 hover:shadow-primary/40 transition-shadow" asChild>
-                        <Link href="/register">Sign Up for Free</Link>
-                    </Button>
+          </section>
+
+          {/* Courses Section with Distinct Background */}
+          <CoursesSection
+            title="Recently Added Courses"
+            description="Fresh content to keep you updated with the latest learning materials"
+            courses={allCourses}
+          />
+
+          {/* Green Glass CTA Section */}
+          <section className="py-20 relative" id="about">
+            <div className="absolute inset-0 bg-gradient-to-r from-emerald-500/20 to-teal-500/20 backdrop-blur-3xl"></div>
+            <div className="max-w-4xl mx-auto px-6 text-center relative z-10">
+              <div className="bg-white/5 backdrop-blur-md border border-white/10 rounded-3xl p-12 hover:border-white/20 transition-all duration-500">
+                <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">
+                  Start Your AI Learning Journey
+                </h2>
+                <p className="text-xl text-gray-300 mb-8 max-w-2xl mx-auto leading-relaxed">
+                  Join thousands of students transforming their education with AI
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button className="group relative px-8 py-4 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-xl font-semibold text-lg hover:from-emerald-500 hover:to-teal-500 transition-all duration-300 shadow-2xl hover:shadow-3xl">
+                    <div className="absolute -inset-0.5 bg-gradient-to-r from-emerald-600 to-teal-600 rounded-xl blur opacity-30 group-hover:opacity-100 transition duration-1000 group-hover:duration-200"></div>
+                    <span className="relative">Start Free Trial</span>
+                  </button>
+                  <button className="px-8 py-4 border-2 border-white/30 text-white rounded-xl font-semibold text-lg hover:border-white hover:bg-white/10 transition-all duration-300">
+                    Book Demo
+                  </button>
                 </div>
+                <p className="text-gray-400 mt-6 text-sm">
+                  No credit card required • AI tutor included
+                </p>
+              </div>
             </div>
-        </section>
+          </section>
 
+          {/* Green Floating AI Elements */}
+          <div className="fixed top-1/4 left-10 w-2 h-2 bg-emerald-400 rounded-full animate-pulse opacity-60"></div>
+          <div className="fixed top-1/3 right-20 w-1 h-1 bg-teal-400 rounded-full animate-pulse opacity-40"></div>
+          <div className="fixed bottom-1/4 left-1/4 w-1 h-1 bg-green-400 rounded-full animate-pulse opacity-50"></div>
+        </div>
       </main>
 
       <Footer />
