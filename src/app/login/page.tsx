@@ -147,7 +147,7 @@ export default function LoginPage() {
         <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-slate-900 via-emerald-900 to-slate-900 p-4">
             <div className="w-full max-w-md">
                 <form onSubmit={handleLogin}>
-                    <Card className="bg-slate-800/30 backdrop-blur-md border-white/10 text-white">
+                    <Card className="bg-slate-800/30 backdrop-blur-md border-white/10 text-white rounded-2xl">
                         <CardHeader className="text-center">
                             <div className="mb-4 flex justify-center">
                                 <Link href="/">
@@ -191,7 +191,7 @@ export default function LoginPage() {
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
-                            <Button type="submit" className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300" disabled={isLoading}>
+                            <Button type="submit" className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 text-white font-semibold hover:-translate-y-1 hover:shadow-lg transition-all duration-300 rounded-xl" disabled={isLoading}>
                                 {isLoading ? 'Signing in...' : 'Sign In'}
                             </Button>
                             <div className="text-center text-sm text-gray-300">
