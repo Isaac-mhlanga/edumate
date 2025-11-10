@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X, Users, Waves, CircuitBoard, Rocket, Dna, Wand2 } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X, Rocket, Dna, Wand2, Users } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -492,7 +492,4 @@ export default function Home() {
     </div>
   );
 }
-
-
-
 

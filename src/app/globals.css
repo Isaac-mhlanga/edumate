@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -78,3 +79,5 @@
     @apply bg-gray-700 rounded-full;
   }
 }
+
+    
