@@ -92,7 +92,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
 const Hero = () => {
   return (
     <section id="home" className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gray-850 opacity-80"></div>
+        <div className="absolute inset-0 bg-gray-900 opacity-80"></div>
         <div className="container mx-auto px-6 text-center relative z-10">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -335,14 +335,14 @@ export default function Home() {
                     </TabsList>
                 </Tabs>
 
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                <div className="flex justify-center gap-4">
                     {currentCurriculumData.map((chapter, index) => {
                       const Icon = currentChapterIcons.find(c => c.title === chapter.chapter)?.icon || BookOpen;
                       return (
                         <Card 
                             key={index} 
                             onClick={() => handleChapterClick(chapter)} 
-                            className="group p-4 text-center flex flex-col items-center justify-center aspect-square transition-all duration-300 bg-card border hover:border-primary hover:shadow-lg hover:shadow-primary/10 cursor-pointer hover:-translate-y-2"
+                            className="group p-4 text-center flex flex-col items-center justify-center aspect-square transition-all duration-300 bg-card border hover:border-primary hover:shadow-lg hover:shadow-primary/10 cursor-pointer hover:-translate-y-2 w-48"
                         >
                              <div className="p-3 bg-primary/10 rounded-full mb-3 transition-colors duration-300 group-hover:bg-primary/20">
                                 <Icon className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
@@ -491,5 +491,6 @@ export default function Home() {
     </div>
   );
 }
+
 
 
