@@ -1,0 +1,112 @@
+
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function getUserRole(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data.role;
+    }
+
+    function isInstructor() {
+      return isSignedIn() && getUserRole(request.auth.uid) == 'instructor';
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && getUserRole(request.auth.uid) == 'admin';
+    }
+
+    // Rules for the 'users' collection
+    match /users/{userId} {
+      // Users can read their own profile
+      // Admins can read any user profile
+      allow get: if isSignedIn() && (isOwner(userId) || isAdmin());
+      
+      // Users can only create their own user document
+      allow create: if isSignedIn() && isOwner(userId);
+
+      // Users can update their own profile
+      // Admins can update any user profile (e.g., to change roles)
+      allow update: if isSignedIn() && (isOwner(userId) || isAdmin());
+
+      // Only admins can delete users
+      allow delete: if isAdmin();
+    }
+
+    // Rules for the 'courses' collection
+    match /courses/{courseId} {
+      // Anyone can view a course
+      allow get: if true;
+
+      // Only instructors can create, update, and delete courses
+      allow create, update, delete: if isInstructor() || isAdmin();
+    }
+
+    // Rules for the 'assignments' collection
+    match /assignments/{assignmentId} {
+        // Students can create their own assignments
+        // Students can read their own assignments
+        // Instructors/Admins can read any assignment
+        allow get: if isSignedIn() && (isOwner(resource.data.studentId) || isInstructor() || isAdmin());
+        allow list: if isSignedIn() && (isInstructor() || isAdmin());
+        
+        allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+
+        // Students can update their own submissions (if not yet priced)
+        // Instructors can update any assignment (to add price/solution)
+        allow update: if (isSignedIn() && isOwner(resource.data.studentId) && resource.data.price == null) || isInstructor() || isAdmin();
+    }
+
+    // Rules for the 'transactions' collection
+    match /transactions/{transactionId} {
+        // Users can read their own transactions
+        allow get, list: if isSignedIn() && (isOwner(resource.data.studentId) || isOwner(resource.data.instructorId));
+        
+        // Creation is handled by secure backend webhook
+        allow create: if false; 
+        allow update, delete: if false;
+    }
+    
+    // Rules for quiz and quiz submissions
+    match /quizzes/{quizId} {
+      // Any authenticated user can read quizzes
+      allow get, list: if isSignedIn();
+      // Only instructors can create/update/delete quizzes
+      allow write: if isInstructor();
+    }
+    
+    match /quizSubmissions/{submissionId} {
+      // Users can create and read their own submissions
+      allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+      allow get, list: if isSignedIn() && isOwner(resource.data.studentId);
+    }
+    
+     // Rules for tutor profiles
+    match /tutors/{tutorId} {
+      // Anyone can view tutor profiles
+      allow get, list: if true;
+      // Only the tutor themselves can create or update their profile
+      allow create, update: if isSignedIn() && isOwner(tutorId);
+    }
+    
+    // Rules for bookings
+    match /bookings/{bookingId} {
+       // Students can create their own bookings.
+       // Tutors can read bookings associated with them.
+       allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+       allow get, list: if isSignedIn() && (isOwner(resource.data.studentId) || isOwner(resource.data.tutorId));
+       // Tutors can update booking status.
+       allow update: if isSignedIn() && isOwner(resource.data.tutorId);
+    }
+    
+  }
+}
