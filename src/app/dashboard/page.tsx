@@ -19,7 +19,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { studentData, instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -35,6 +35,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -94,6 +96,142 @@ type Transaction = {
     createdAt: Timestamp;
     date: string; // for display
 };
+
+const grade12Curriculum = [
+    {
+        chapter: "Chapter 1: Sequences and series",
+        topics: [
+            "1.1 Arithmetic sequences",
+            "1.2 Geometric sequences",
+            "1.3 Series",
+            "1.4 Finite arithmetic series",
+            "1.5 Finite geometric series",
+            "1.6 Infinite series",
+            "1.7 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 2: Functions",
+        topics: [
+            "2.1 Revision",
+            "2.2 Functions and relations",
+            "2.3 Inverse functions",
+            "2.4 Linear functions",
+            "2.5 Quadratic functions",
+            "2.6 Exponential functions",
+            "2.7 Summary",
+            "2.8 Enrichment: more on logarithms",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 3: Finance",
+        topics: [
+            "3.1 Calculating the period of an investment",
+            "3.2 Annuities",
+            "3.3 Future value annuities",
+            "3.4 Present value annuities",
+            "3.5 Analysing investment and loan options",
+            "3.6 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 4: Trigonometry",
+        topics: [
+            "4.1 Revision",
+            "4.2 Compound angle identities",
+            "4.3 Double angle identities",
+            "4.4 Solving equations",
+            "4.5 Applications of trigonometric functions",
+            "4.6 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 5: Polynomials",
+        topics: [
+            "5.1 Revision",
+            "5.2 Cubic polynomials",
+            "5.3 Remainder theorem",
+            "5.4 Factor theorem",
+            "5.5 Solving cubic equations",
+            "5.6 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 6: Differential calculus",
+        topics: [
+            "6.1 Limits",
+            "6.2 Differentiation from first principles",
+            "6.3 Rules for differentiation",
+            "6.4 Equation of a tangent to a curve",
+            "6.5 Second derivative",
+            "6.6 Sketching graphs",
+            "6.7 Applications of differential calculus",
+            "6.8 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 7: Analytical geometry",
+        topics: [
+            "7.1 Revision",
+            "7.2 Equation of a circle",
+            "7.3 Equation of a tangent to a circle",
+            "7.4 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 8: Euclidean geometry",
+        topics: [
+            "8.1 Revision",
+            "8.2 Ratio and proportion",
+            "8.3 Polygons",
+            "8.4 Triangles",
+            "8.5 Similarity",
+            "8.6 Pythagorean theorem",
+            "8.7 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 9: Statistics",
+        topics: [
+            "9.1 Revision",
+            "9.2 Curve fitting",
+            "9.3 Correlation",
+            "9.4 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    },
+    {
+        chapter: "Chapter 10: Probability",
+        topics: [
+            "10.1 Revision",
+            "10.2 Identities",
+            "10.3 Tools and Techniques",
+            "10.4 The fundamental counting principle",
+            "10.5 Factorial notation",
+            "10.6 Application to counting problems",
+            "10.7 Application to probability problems",
+            "10.8 Summary",
+            "End of chapter exercises",
+            "Practice this chapter",
+        ]
+    }
+];
 
 function DashboardPage() {
     const searchParams = useSearchParams();
@@ -635,151 +773,32 @@ function DashboardPage() {
             {currentTab === 'courses' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Course Catalog</CardTitle>
-                        <CardDescription>Browse our available courses and start your learning adventure.</CardDescription>
+                        <CardTitle>Grade 12 Curriculum</CardTitle>
+                        <CardDescription>Browse chapters and topics to start learning.</CardDescription>
                     </CardHeader>
-                    <div className="flex flex-col sm:flex-row items-center justify-between gap-2 p-4 border-y">
-                        <div className="relative flex-1 w-full">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search by course title..."
-                                className="pl-8"
-                                value={courseFilters.search}
-                                onChange={(e) => handleCourseFilterChange('search', e.target.value)}
-                            />
-                        </div>
-                        <Popover>
-                            <PopoverTrigger asChild>
-                                <Button variant="outline" className="gap-1 w-full sm:w-auto">
-                                    <SlidersHorizontal className="h-3.5 w-3.5" />
-                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                        Filter
-                                    </span>
-                                </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-80" align="end">
-                                <div className="space-y-4">
-                                    <h4 className="font-medium leading-none">Filter Courses</h4>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="status-filter">Status</Label>
-                                        <Select value={courseFilters.status} onValueChange={(value) => handleCourseFilterChange('status', value)}>
-                                            <SelectTrigger id="status-filter">
-                                                <SelectValue placeholder="Filter by Status" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="All">All Courses</SelectItem>
-                                                <SelectItem value="Purchased">My Courses</SelectItem>
-                                                <SelectItem value="Not Purchased">Not Purchased</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="subject-filter">Subject</Label>
-                                        <Select value={courseFilters.subject} onValueChange={(value) => handleCourseFilterChange('subject', value)}>
-                                            <SelectTrigger id="subject-filter">
-                                                <SelectValue placeholder="Filter by Subject" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="All">All Subjects</SelectItem>
-                                                <SelectItem value="Maths">Maths</SelectItem>
-                                                <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label htmlFor="grade-filter">Grade</Label>
-                                        <Select value={courseFilters.grade} onValueChange={(value) => handleCourseFilterChange('grade', value)}>
-                                            <SelectTrigger id="grade-filter">
-                                                <SelectValue placeholder="Filter by Grade" />
-                                            </SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="All">All Grades</SelectItem>
-                                                <SelectItem value="10">Grade 10</SelectItem>
-                                                <SelectItem value="11">Grade 11</SelectItem>
-                                                <SelectItem value="12">Grade 12</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
-                            </PopoverContent>
-                        </Popover>
-                    </div>
-                    <CardContent className="pt-6">
-                        {loadingCourses ? (
-                            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {Array.from({length: 3}).map((_, i) => (
-                                    <Card key={i}><Skeleton className="h-64 w-full" /></Card>
-                                ))}
-                            </div>
-                        ) : paginatedCourses.length > 0 ? (
-                        <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {paginatedCourses.map((course) => (
-                            <Card key={course.id} className="overflow-hidden group flex flex-col">
-                                <CardHeader className="p-0">
-                                    <div className="bg-primary/10 aspect-video flex items-center justify-center">
-                                        <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract"/>
-                                    </div>
-                                </CardHeader>
-                                <CardContent className="p-4 flex-grow">
-                                    <div className="flex justify-between items-start">
-                                        <Badge variant="secondary">{course.subject}</Badge>
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-500"/>
-                                            <span>4.8</span>
-                                        </div>
-                                    </div>
-                                    <h3 className="font-semibold text-lg mt-2">{course.title}</h3>
-                                    <p className="text-xs text-muted-foreground mt-1">By {instructorData.name}</p>
-                                    <p className="text-sm mt-2 text-muted-foreground line-clamp-2">{course.description}</p>
-                                </CardContent>
-                                <CardFooter className="flex-col items-stretch p-4 bg-muted/50">
-                                    {purchasedCourseIds.has(course.id) ? (
-                                        <Button asChild>
-                                            <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
-                                                Go to Course <ArrowRight className="ml-2 h-4 w-4"/>
-                                            </Link>
-                                        </Button>
-                                    ) : (
-                                        <>
-                                            <h4 className="text-xl font-bold text-center mb-2">
-                                                {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'By Subscription'}
-                                            </h4>
-                                            <Button onClick={() => handleFreeEnrollment(course)}>
-                                                Enroll for Free
-                                            </Button>
-                                        </>
-                                    )}
-                                </CardFooter>
-                            </Card>
-                        ))}
-                        </div>
-                        ) : (
-                            <div className="text-center py-16 text-muted-foreground">
-                                <h3 className="text-lg font-semibold">No Courses Found</h3>
-                                <p>Try adjusting your search or filter criteria.</p>
-                            </div>
-                        )}
+                    <CardContent>
+                        <Accordion type="single" collapsible className="w-full">
+                            {grade12Curriculum.map((item, index) => (
+                                <AccordionItem value={`item-${index}`} key={index}>
+                                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                                        {item.chapter}
+                                    </AccordionTrigger>
+                                    <AccordionContent>
+                                        <ul className="space-y-2 pl-4 pt-2">
+                                            {item.topics.map((topic, topicIndex) => (
+                                                <li key={topicIndex} className="flex items-center">
+                                                    <ChevronRightIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                                                        {topic}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </AccordionContent>
+                                </AccordionItem>
+                            ))}
+                        </Accordion>
                     </CardContent>
-                    <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                        <div className="text-xs text-muted-foreground">
-                            Showing{" "}
-                            <strong>
-                                {filteredCourses.length > 0 ? (currentCoursePage - 1) * coursesPerPage + 1 : 0}-
-                                {Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}
-                            </strong>{" "}
-                            of <strong>{filteredCourses.length}</strong> courses.
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}>
-                                <ChevronLeft className="h-4 w-4 mr-1" />
-                                Prev
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>
-                                Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
-                            </Button>
-                        </div>
-                    </CardFooter>
                 </Card>
             )}
 
@@ -1227,5 +1246,7 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+    
 
     
