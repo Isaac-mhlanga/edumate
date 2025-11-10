@@ -92,7 +92,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
 const Hero = () => {
   return (
     <section id="home" className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 opacity-80"></div>
+        <div className="absolute inset-0 bg-gray-850 opacity-80"></div>
         <div className="container mx-auto px-6 text-center relative z-10">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -189,31 +189,18 @@ export default function Home() {
   ];
 
   const mathsCurriculumChapters = [
-      { title: 'Sequences & Series', icon: Sigma },
-      { title: 'Functions', icon: FunctionSquare },
-      { title: 'Finance', icon: Percent },
-      { title: 'Trigonometry', icon: Compass },
-      { title: 'Polynomials', icon: Pi },
-      { title: 'Differential Calculus', icon: Calculator },
-      { title: 'Analytical Geometry', icon: Orbit },
-      { title: 'Euclidean Geometry', icon: BookCopy },
-      { title: 'Statistics', icon: BarChartHorizontal },
-      { title: 'Probability', icon: Dices },
+      { title: 'Paper 1', icon: BookOpen },
+      { title: 'Paper 2', icon: BookCopy },
   ];
   
   const physicsCurriculumChapters = [
-      { title: "Mechanics", icon: Rocket, category: "Physics" },
-      { title: "Waves and Sound", icon: Waves, category: "Physics" },
-      { title: "Electricity & Magnetism", icon: CircuitBoard, category: "Physics" },
-      { title: "Modern Physics", icon: Atom, category: "Physics" },
-      { title: "Organic Chemistry", icon: FlaskConical, category: "Chemistry" },
-      { title: "Chemical Change", icon: FlaskConical, category: "Chemistry" },
-      { title: "Chemical Systems", icon: FlaskConical, category: "Chemistry" },
+      { title: "Paper 1: Physics", icon: Rocket, category: "Physics" },
+      { title: "Paper 2: Chemistry", icon: FlaskConical, category: "Chemistry" },
   ];
   
   const lifeSciencesCurriculumChapters = [
-      { title: "Paper One", icon: Users },
-      { title: "Paper Two", icon: Dna },
+      { title: "Paper 1", icon: Users },
+      { title: "Paper 2", icon: Dna },
   ];
 
   let currentCurriculumData;
@@ -504,4 +491,5 @@ export default function Home() {
     </div>
   );
 }
+
 
