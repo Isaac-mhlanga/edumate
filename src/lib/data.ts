@@ -217,7 +217,7 @@ export const instructorData = {
             description: 'A deep dive into the fundamentals of calculus, from limits to derivatives.',
             subject: 'Maths',
             grade: '12',
-            thumbnail: 'https://picsum.photos/seed/10/600/400',
+            thumbnail: '/edumate_cover.png',
             pricing: {
                 type: 'purchase',
                 price: 499,
@@ -244,7 +244,7 @@ export const instructorData = {
             description: 'Explore the laws of motion and gravity as described by Sir Isaac Newton.',
             subject: 'Physical Sciences',
             grade: '11',
-            thumbnail: 'https://picsum.photos/seed/11/600/400',
+            thumbnail: '/edumate_cover.png',
             pricing: {
                 type: 'subscription',
             },
@@ -266,7 +266,7 @@ export const instructorData = {
             description: 'Learn the building blocks of organic chemistry, including nomenclature, structures, and basic reactions.',
             subject: 'Physical Sciences',
             grade: '12',
-            thumbnail: 'https://picsum.photos/seed/12/600/400',
+            thumbnail: '/edumate_cover.png',
             pricing: {
                 type: 'purchase',
                 price: 299,
@@ -288,7 +288,7 @@ export const instructorData = {
             description: 'Master trigonometric functions, identities, and their applications in problem-solving.',
             subject: 'Maths',
             grade: '11',
-            thumbnail: 'https://picsum.photos/seed/13/600/400',
+            thumbnail: '/edumate_cover.png',
             pricing: {
                 type: 'subscription',
             },
@@ -309,7 +309,7 @@ export const instructorData = {
             description: 'Introduction to Quantum Mechanics.', 
             subject: 'Physical Sciences', 
             grade: '12', 
-            thumbnail: 'https://picsum.photos/seed/14/600/400', 
+            thumbnail: '/edumate_cover.png', 
             pricing: { type: 'purchase', price: 599 }, 
             status: 'Pending Approval', 
             videos: [],
@@ -325,7 +325,7 @@ export const instructorData = {
             description: 'Deep dive into thermodynamics.', 
             subject: 'Physical Sciences', 
             grade: '12', 
-            thumbnail: 'https://picsum.photos/seed/15/600/400', 
+            thumbnail: '/edumate_cover.png', 
             pricing: { type: 'subscription' }, 
             status: 'Rejected', 
             videos: [],
@@ -391,11 +391,11 @@ const allUsers = [
 const allCourses = [
     ...instructorData.courses,
     {
-        id: 'C005', title: 'Quantum Physics Intro', description: 'Introduction to Quantum Mechanics.', subject: 'Physical Sciences', grade: '12', thumbnail: 'https://placehold.co/600x400.png', 
+        id: 'C005', title: 'Quantum Physics Intro', description: 'Introduction to Quantum Mechanics.', subject: 'Physical Sciences', grade: '12', thumbnail: '/edumate_cover.png', 
         pricing: { type: 'purchase', price: 599 }, status: 'Pending Approval', videos: [], instructor: 'Dr. Alan Grant'
     },
     {
-        id: 'C006', title: 'Advanced Thermodynamics', description: 'Deep dive into thermodynamics.', subject: 'Physical Sciences', grade: '12', thumbnail: 'https://placehold.co/600x400.png', 
+        id: 'C006', title: 'Advanced Thermodynamics', description: 'Deep dive into thermodynamics.', subject: 'Physical Sciences', grade: '12', thumbnail: '/edumate_cover.png', 
         pricing: { type: 'subscription' }, status: 'Rejected', videos: [], instructor: 'Dr. Alan Grant'
     }
 ].map(course => ({...course, instructor: course.instructor || instructorData.name}));
@@ -457,4 +457,5 @@ export const adminData = {
     ]
 };
 
+    
     
