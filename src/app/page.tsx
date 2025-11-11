@@ -86,6 +86,11 @@ export default function Home() {
   const [activeVideo, setActiveVideo] = useState<VideoData | undefined>(undefined);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [quality, setQuality] = useState('720p');
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const features = [
     {
@@ -300,10 +305,10 @@ export default function Home() {
                                             <TableCell>
                                                 <div className="font-medium">{event.title}</div>
                                                 <div className="text-sm text-muted-foreground md:hidden">
-                                                    {format(new Date(event.start), 'eee, MMM d, p')}
+                                                    {isClient ? format(new Date(event.start), 'eee, MMM d, p') : ''}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className="hidden md:table-cell">{format(new Date(event.start), 'eeee, MMMM d, yyyy')}</TableCell>
+                                            <TableCell className="hidden md:table-cell">{isClient ? format(new Date(event.start), 'eeee, MMMM d, yyyy') : ''}</TableCell>
                                             <TableCell className="hidden sm:table-cell"><Badge variant="outline">Grade {event.grade} {event.subject}</Badge></TableCell>
                                             <TableCell className="text-right">
                                                  <Button variant="ghost" size="sm">
@@ -539,5 +544,7 @@ export default function Home() {
     </div>
   );
 }
+
+    
 
     

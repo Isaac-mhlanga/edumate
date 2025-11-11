@@ -18,6 +18,7 @@ import { useReactToPrint } from 'react-to-print';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Icons } from './icons';
+import { format } from 'date-fns';
 
 interface EventDialogProps {
   event: UpcomingEvent | null;
@@ -27,50 +28,57 @@ interface EventDialogProps {
   onEventSelect: (event: UpcomingEvent) => void;
 }
 
-const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>(({ event }, ref) => (
-  <div ref={ref} className="bg-card text-card-foreground p-8 print:p-0 print:bg-white print:text-black">
-      <div className="border-4 border-primary p-6 rounded-lg relative bg-background print:border-black print:bg-gray-50">
-        <div className="text-center mb-6">
-            <div className="flex items-center justify-center gap-2 mb-2">
-                <Icons.logo className="h-8 w-8 text-primary print:text-black" />
-                <span className="text-xl font-bold print:text-black">EDUMATE</span>
-            </div>
-            <Badge variant="secondary" className="mb-2 print:bg-gray-200 print:text-black">{event.subject} - Grade {event.grade}</Badge>
-            <h1 className="text-4xl font-bold text-primary print:text-black">{event.title}</h1>
-            <p className="text-lg text-muted-foreground print:text-gray-600">An exclusive live session with {event.instructor}</p>
-        </div>
-        
-        <Separator className="my-6 print:bg-gray-300" />
+const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>(({ event }, ref) => {
+    const [isClient, setIsClient] = React.useState(false);
+    React.useEffect(() => {
+        setIsClient(true);
+    }, []);
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
-            <div className="flex items-center gap-3">
-                <Calendar className="h-6 w-6 text-primary print:text-black" />
-                <p>
-                    {new Date(event.start).toLocaleDateString('en-US', {
-                        weekday: 'long',
-                        month: 'long',
-                        day: 'numeric',
-                    })}
-                </p>
+    return (
+      <div ref={ref} className="bg-card text-card-foreground p-8 print:p-0 print:bg-white print:text-black">
+          <div className="border-4 border-primary p-6 rounded-lg relative bg-background print:border-black print:bg-gray-50">
+            <div className="text-center mb-6">
+                <div className="flex items-center justify-center gap-2 mb-2">
+                    <Icons.logo className="h-8 w-8 text-primary print:text-black" />
+                    <span className="text-xl font-bold print:text-black">EDUMATE</span>
+                </div>
+                <Badge variant="secondary" className="mb-2 print:bg-gray-200 print:text-black">{event.subject} - Grade {event.grade}</Badge>
+                <h1 className="text-4xl font-bold text-primary print:text-black">{event.title}</h1>
+                <p className="text-lg text-muted-foreground print:text-gray-600">An exclusive live session with {event.instructor}</p>
             </div>
-            <div className="flex items-center gap-3">
-                <Clock className="h-6 w-6 text-primary print:text-black" />
-                <p>
-                    {new Date(event.start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}
-                    {event.end && ` - ${new Date(event.end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`}
-                </p>
-            </div>
-        </div>
+            
+            <Separator className="my-6 print:bg-gray-300" />
 
-        <div className="mt-6">
-            <div className="flex items-start gap-3">
-                <Info className="h-6 w-6 text-primary shrink-0 mt-1 print:text-black" />
-                <p className="text-muted-foreground print:text-gray-700">{event.scope}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
+                <div className="flex items-center gap-3">
+                    <Calendar className="h-6 w-6 text-primary print:text-black" />
+                    <p>
+                        {isClient ? new Date(event.start).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                        }) : ''}
+                    </p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Clock className="h-6 w-6 text-primary print:text-black" />
+                    <p>
+                        {isClient ? new Date(event.start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : ''}
+                        {event.end && isClient && ` - ${new Date(event.end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`}
+                    </p>
+                </div>
+            </div>
+
+            <div className="mt-6">
+                <div className="flex items-start gap-3">
+                    <Info className="h-6 w-6 text-primary shrink-0 mt-1 print:text-black" />
+                    <p className="text-muted-foreground print:text-gray-700">{event.scope}</p>
+                </div>
             </div>
         </div>
-    </div>
-  </div>
-));
+      </div>
+    );
+});
 EventPoster.displayName = 'EventPoster';
 
 
@@ -78,10 +86,21 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
   const posterRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [isPrinting, setIsPrinting] = React.useState(false);
+  const [isClient, setIsClient] = React.useState(false);
+  
+  React.useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const handlePrint = useReactToPrint({
     content: () => posterRef.current,
     documentTitle: `EdumatePro-Event-${event?.title.replace(/ /g, '_')}`,
+     onBeforeGetContent: () => {
+      return new Promise<void>((resolve) => {
+        setIsPrinting(true);
+        resolve();
+      });
+    },
     onAfterPrint: () => {
       setIsPrinting(false);
       toast({ title: 'Poster Saved', description: 'Your event poster PDF has been generated.' });
@@ -92,13 +111,6 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
     },
   });
   
-  React.useEffect(() => {
-    if (isPrinting) {
-      handlePrint();
-    }
-  }, [isPrinting, handlePrint]);
-
-
   if (!event) return null;
 
   const shareOnSocial = (platform: 'twitter' | 'facebook' | 'linkedin') => {
@@ -140,7 +152,7 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
                   {otherEvents.map(otherEvent => (
                       <button key={otherEvent.id} onClick={() => onEventSelect(otherEvent)} className="text-left p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
                           <p className="font-semibold text-sm line-clamp-1">{otherEvent.title}</p>
-                          <p className="text-xs text-muted-foreground">{new Date(otherEvent.start).toLocaleDateString()}</p>
+                          <p className="text-xs text-muted-foreground">{isClient ? new Date(otherEvent.start).toLocaleDateString() : ''}</p>
                       </button>
                   ))}
               </div>
@@ -155,7 +167,7 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
             </div>
             <div className="flex items-center gap-2">
               <Button variant="secondary" onClick={onClose}>Close</Button>
-              <Button onClick={() => setIsPrinting(true)} disabled={isPrinting}>
+              <Button onClick={handlePrint} disabled={isPrinting}>
                 {isPrinting ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -174,3 +186,5 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
     </>
   );
 }
+
+    
