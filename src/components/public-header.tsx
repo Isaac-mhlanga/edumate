@@ -47,10 +47,7 @@ export const PublicHeader = () => {
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <Link href="/" className="flex items-center gap-2">
-                <Icons.logo className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold">
-                  EDUMATE
-                </span>
+                <Icons.logo className="w-auto h-8" />
               </Link>
             </div>
             
@@ -90,8 +87,7 @@ export const PublicHeader = () => {
                   <nav className="flex flex-col h-full">
                     <div className="flex items-center justify-between border-b pb-4">
                        <Link href="/" className="flex items-center gap-2">
-                          <Icons.logo className="h-8 w-8 text-primary" />
-                          <span className="text-xl font-bold">EDUMATE</span>
+                          <Icons.logo className="w-auto h-8" />
                         </Link>
                       <SheetClose asChild>
                         <Button variant="ghost" size="icon">

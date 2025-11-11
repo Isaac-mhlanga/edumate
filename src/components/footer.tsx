@@ -10,10 +10,7 @@ export function Footer() {
           {/* Brand Section */}
           <div className="lg:col-span-1 col-span-2 md:col-span-3 lg:col-span-1">
              <Link href="/" className="flex items-center gap-2.5 mb-4">
-              <Icons.logo className="h-8 w-8 text-primary" />
-              <h3 className="text-2xl font-bold">
-                EDUMATE
-              </h3>
+              <Icons.logo className="w-auto h-8" />
             </Link>
             <p className="text-muted-foreground leading-relaxed">
               Empowering students to excel in high school subjects through comprehensive video courses and interactive learning.

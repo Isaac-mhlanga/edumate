@@ -151,7 +151,7 @@ export default function LoginPage() {
                         <CardHeader className="text-center">
                             <div className="mb-4 flex justify-center">
                                 <Link href="/">
-                                    <Icons.logo className="h-12 w-12 text-primary" />
+                                    <Icons.logo className="w-auto h-12 text-primary" />
                                 </Link>
                             </div>
                             <CardTitle className="text-2xl">Welcome Back!</CardTitle>

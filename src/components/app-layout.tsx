@@ -101,7 +101,7 @@ const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=courses', label: 'Courses', icon: GraduationCap, basePath: '/instructor', tab: 'courses' },
   { href: '/instructor?tab=quizzes', label: 'Quizzes', icon: FileQuestion, basePath: '/instructor', tab: 'quizzes' },
   { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
-  { href: '/calendar', label: 'Calendar', icon: Calendar, basePath: '/calendar' },
+  { href: '/instructor?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/instructor', tab: 'calendar' },
   { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },
   { href: '/instructor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/instructor', tab: 'earnings' },
 ];
@@ -192,10 +192,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarContent>
           <SidebarHeader>
             <Link href="/" className="flex items-center gap-2.5">
-              <Icons.logo className="h-7 w-7 text-primary" />
-              <span className="font-bold text-lg group-data-[collapsible=icon]:hidden">
-                Edumate Pro
-              </span>
+              <Icons.logo className="w-auto h-7" />
             </Link>
           </SidebarHeader>
           <SidebarMenu>

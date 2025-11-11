@@ -39,8 +39,7 @@ const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>((
           <div className="border-4 border-primary p-6 rounded-lg relative bg-background">
             <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                    <Icons.logo className="h-8 w-8 text-primary" />
-                    <span className="text-xl font-bold">EDUMATE</span>
+                    <Icons.logo className="h-8 w-auto" />
                 </div>
                 <Badge variant="secondary" className="mb-2">{event.subject} - Grade {event.grade}</Badge>
                 <h1 className="text-4xl font-bold text-primary">{event.title}</h1>
@@ -155,8 +154,8 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-3xl">
           <DialogHeader>
-            <DialogTitle className="sr-only">Event Details: {event.title}</DialogTitle>
-            <DialogDescription className="sr-only">View the details for the upcoming event: {event.title}. You can download the poster or share it.</DialogDescription>
+            <DialogTitle>Event Details: {event.title}</DialogTitle>
+            <DialogDescription>View the details for the upcoming event: {event.title}. You can download the poster or share it.</DialogDescription>
           </DialogHeader>
 
           <EventPoster event={event} ref={posterRef} />

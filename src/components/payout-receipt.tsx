@@ -37,11 +37,7 @@ export const PayoutReceipt = React.forwardRef<HTMLDivElement, PayoutReceiptProps
                     <CardHeader className="bg-muted/30">
                         <div className="flex justify-between items-center">
                             <div className="flex items-center gap-3">
-                                <Icons.logo className="h-10 w-10 text-primary" />
-                                <div>
-                                    <h1 className="text-2xl font-bold text-primary">Edumate Pro</h1>
-                                    <p className="text-sm text-muted-foreground">Payout Receipt</p>
-                                </div>
+                                <Icons.logo className="h-10 w-auto" />
                             </div>
                             <div className="text-right">
                                 <p className="font-semibold text-lg">Receipt #{payout.id}</p>
