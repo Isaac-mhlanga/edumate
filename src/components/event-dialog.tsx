@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Tag, Info, User, Download, Clock, Share2, Twitter, Facebook, Linkedin, Link as LinkIcon, Paperclip, Users, BarChart } from 'lucide-react';
+import { Calendar, Tag, Info, User, Download, Clock, Share2, Twitter, Facebook, Linkedin, Link as LinkIcon, Paperclip, Users, BarChart, Loader2 } from 'lucide-react';
 import { type UpcomingEvent } from '@/lib/data';
 import { useReactToPrint } from 'react-to-print';
 import { Separator } from './ui/separator';
@@ -77,11 +77,25 @@ EventPoster.displayName = 'EventPoster';
 export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }: EventDialogProps) {
   const posterRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
+  const [isPrinting, setIsPrinting] = React.useState(false);
   
   const handlePrint = useReactToPrint({
     content: () => posterRef.current,
     documentTitle: `EdumatePro-Event-${event?.title.replace(/ /g, '_')}`,
-    onAfterPrint: () => toast({ title: "Poster Saved", description: "Your event poster PDF has been generated." }),
+    onBeforeGetContent: () => {
+      return new Promise<void>((resolve) => {
+        setIsPrinting(true);
+        resolve();
+      });
+    },
+    onAfterPrint: () => {
+        setIsPrinting(false);
+        toast({ title: "Poster Saved", description: "Your event poster PDF has been generated." });
+    },
+     onPrintError: () => {
+        setIsPrinting(false);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not generate PDF.' });
+    },
   });
 
   if (!event) return null;
@@ -136,8 +150,17 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
           </div>
           <div className="flex items-center gap-2">
             <Button variant="secondary" onClick={onClose}>Close</Button>
-            <Button onClick={handlePrint}>
-              <Download className="mr-2 h-4 w-4" /> Download as PDF
+            <Button onClick={handlePrint} disabled={isPrinting}>
+              {isPrinting ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                <>
+                  <Download className="mr-2 h-4 w-4" /> Download as PDF
+                </>
+              )}
             </Button>
           </div>
         </DialogFooter>
@@ -145,5 +168,3 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
     </Dialog>
   );
 }
-
-    
