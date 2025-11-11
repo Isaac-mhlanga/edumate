@@ -395,24 +395,24 @@ function InstructorPage() {
     };
     
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
-        setUser(currentUser);
-        if (currentUser) {
-            await fetchAllData(currentUser);
-        } else {
-            // Clear all data if user logs out
-            setCourses([]);
-            setQuizzes([]);
-            setQuizSubmissions([]);
-            setSubmittedAssignments([]);
-            setEnrolledStudents([]);
-            setTransactions([]);
-            setLoadingCourses(false);
-            setLoadingQuizzes(false);
-            setLoadingAssignments(false);
-            setLoadingTransactions(false);
-            setLoadingStudents(false);
-            setLoadingAiSummary(false);
-        }
+      setUser(currentUser);
+      if (currentUser) {
+        await fetchAllData(currentUser);
+      } else {
+        // Clear all data if user logs out
+        setCourses([]);
+        setQuizzes([]);
+        setQuizSubmissions([]);
+        setSubmittedAssignments([]);
+        setEnrolledStudents([]);
+        setTransactions([]);
+        setLoadingCourses(false);
+        setLoadingQuizzes(false);
+        setLoadingAssignments(false);
+        setLoadingTransactions(false);
+        setLoadingStudents(false);
+        setLoadingAiSummary(false);
+      }
     });
 
     return () => unsubscribe();
