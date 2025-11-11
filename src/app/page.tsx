@@ -268,40 +268,7 @@ export default function Home() {
     { number: '10k+', label: 'Happy Students' }
   ];
 
-  const mathsCurriculumChapters = [
-      { title: 'Paper 1', icon: BookOpen },
-      { title: 'Paper 2', icon: BookOpen },
-  ];
-  
-  const physicsCurriculumChapters = [
-      { title: "Paper 1: Physics", icon: Rocket, category: "Physics" },
-      { title: "Paper 2: Chemistry", icon: Clapperboard, category: "Chemistry" },
-  ];
-  
-  const lifeSciencesCurriculumChapters = [
-      { title: "Paper 1", icon: BookOpen },
-      { title: "Paper 2", icon: Dna },
-  ];
-
-  let currentCurriculumData;
-  let currentChapterIcons;
-
-  switch (activeCurriculum) {
-    case 'physical-sciences':
-      currentCurriculumData = grade12PhysicsCurriculum;
-      currentChapterIcons = physicsCurriculumChapters;
-      break;
-    case 'life-sciences':
-        currentCurriculumData = grade12LifeSciencesCurriculum;
-        currentChapterIcons = lifeSciencesCurriculumChapters;
-        break;
-    default:
-      currentCurriculumData = grade12MathsCurriculum;
-      currentChapterIcons = mathsCurriculumChapters;
-      break;
-  }
-  
-   const handleCourseClick = (course: Course) => {
+  const handleCourseClick = (course: Course) => {
     setSelectedCourseForPlayer(course);
     if (course.videos && course.videos.length > 0) {
       setActiveVideo(course.videos[0]);
@@ -371,41 +338,11 @@ export default function Home() {
 
           <section id="curriculum" className="py-20 bg-muted/20">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12">
+                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics and prepare you for success.</p>
                 </div>
-                 <Tabs value={activeCurriculum} onValueChange={setActiveCurriculum} className="w-full max-w-lg mx-auto mb-8">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="maths">Maths</TabsTrigger>
-                        <TabsTrigger value="physical-sciences">Physical Sciences</TabsTrigger>
-                        <TabsTrigger value="life-sciences">Life Sciences</TabsTrigger>
-                    </TabsList>
-                </Tabs>
-
-                <div className="flex justify-center flex-wrap gap-4">
-                    {currentCurriculumData.map((chapter, index) => {
-                      const Icon = currentChapterIcons.find(c => c.title === chapter.chapter)?.icon || BookOpen;
-                      return (
-                        <Card 
-                            key={index} 
-                            asChild
-                            className="group p-4 text-center flex flex-col items-center justify-center aspect-square transition-all duration-300 bg-card border hover:border-primary hover:shadow-lg hover:shadow-primary/10 cursor-pointer hover:-translate-y-2 w-48"
-                        >
-                            <Link href="#courses">
-                                <div className="p-3 bg-primary/10 rounded-full mb-3 transition-colors duration-300 group-hover:bg-primary/20">
-                                    <Icon className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
-                                </div>
-                                <h3 className="text-sm font-semibold leading-tight">{chapter.chapter}</h3>
-                                {'category' in chapter && (
-                                    <Badge variant="outline" className="mt-2 text-xs">{chapter.category}</Badge>
-                                )}
-                            </Link>
-                        </Card>
-                      )
-                    })}
-                </div>
-                <div className="text-center mt-12">
+                <div className="text-center">
                      <Button onClick={() => setIsCurriculumOpen(true)} size="lg">
                         View Full Curriculum 
                         <ArrowRight className="ml-2 h-4 w-4" />
@@ -533,11 +470,11 @@ export default function Home() {
                         ))}
                     </Accordion>
                   </div>
-                   <div className="p-6 border-t">
-                      <Button asChild size="lg" className="w-full">
-                        <Link href="/register">Enroll Now</Link>
-                      </Button>
-                  </div>
+                   <DialogFooter className="p-6 border-t">
+                     <Button asChild size="lg" className="w-full">
+                       <Link href={`/register`}>Enroll Now</Link>
+                     </Button>
+                  </DialogFooter>
                 </div>
               </div>
           </DialogContent>
@@ -548,3 +485,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
