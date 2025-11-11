@@ -12,9 +12,9 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { tutorData } from "@/lib/data";
-import { BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, MapPin, MessageSquare, Search, Star } from "lucide-react";
+import { BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, MapPin, MessageSquare, Search, Star, Loader2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 
 type Tutor = typeof tutorData;
@@ -28,13 +28,24 @@ const allTutors = [
     { ...tutorData, id: "T006", name: "Sarah Miller", avatar: "https://placehold.co/100x100.png", hourlyRate: 280, subjects: ["Physical Sciences"], grades: ["10", "11"], location: "Johannesburg, Gauteng", modes: ["In-person"] },
 ];
 
+// A mock function to simulate getting city from coordinates.
+// In a real app, this would be a call to a Geocoding API.
+const getCityFromCoords = (lat: number, lon: number) => {
+    // This is a simplified mock. It won't be accurate.
+    if (lat < -33 && lon > 18 && lon < 19) return "cape town";
+    if (lat > -27 && lat < -25 && lon > 27 && lon < 29) return "johannesburg";
+    if (lat > -30 && lat < -29 && lon > 30 && lon < 32) return "durban";
+    return null;
+}
+
 export default function TutorsPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
 
     const [subject, setSubject] = React.useState(searchParams.get('subject') || 'All');
     const [grade, setGrade] = React.useState(searchParams.get('grade') || 'All');
-    const [location, setLocation] = React.useState(searchParams.get('location') || '');
+    const [location, setLocation] = React.useState('');
+    const [locationStatus, setLocationStatus] = React.useState('Detecting your location...');
 
     const [selectedTutor, setSelectedTutor] = React.useState<Tutor | null>(null);
     const [selectedTimeSlot, setSelectedTimeSlot] = React.useState<string | null>(null);
@@ -44,6 +55,29 @@ export default function TutorsPage() {
     // Pagination state
     const [currentPage, setCurrentPage] = React.useState(1);
     const tutorsPerPage = 6;
+
+    useEffect(() => {
+        if ("geolocation" in navigator) {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const city = getCityFromCoords(latitude, longitude);
+                    if (city) {
+                        setLocation(city);
+                        setLocationStatus(`Showing tutors near you.`);
+                    } else {
+                        setLocationStatus("Could not determine city. Showing all tutors.");
+                    }
+                },
+                (error) => {
+                    console.error("Error getting location:", error);
+                    setLocationStatus("Location access denied. Showing all tutors.");
+                }
+            );
+        } else {
+             setLocationStatus("Geolocation is not supported by your browser.");
+        }
+    }, []);
 
 
     const filteredTutors = React.useMemo(() => {
@@ -88,114 +122,111 @@ export default function TutorsPage() {
 
     return (
         <div className="space-y-6">
-            <Card>
-                <CardHeader>
-                    <CardTitle className="text-2xl">Find the Perfect Tutor</CardTitle>
-                    <CardDescription>Filter by subject, grade, and location to find the best match for your needs.</CardDescription>
-                    <div className="mt-4 grid grid-cols-1 md:grid-cols-4 items-end gap-4 pt-4 border-t">
-                        <div className="md:col-span-3 grid grid-cols-1 sm:grid-cols-3 gap-4">
-                            <div>
-                                <Label>Subject</Label>
-                                <Select value={subject} onValueChange={setSubject}>
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">All Subjects</SelectItem>
-                                        <SelectItem value="Maths">Maths</SelectItem>
-                                        <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Grade</Label>
-                                <Select value={grade} onValueChange={setGrade}>
-                                    <SelectTrigger><SelectValue /></SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="All">All Grades</SelectItem>
-                                        <SelectItem value="10">Grade 10</SelectItem>
-                                        <SelectItem value="11">Grade 11</SelectItem>
-                                        <SelectItem value="12">Grade 12</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                            <div>
-                                <Label>Location</Label>
-                                <div className="relative">
-                                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="e.g. Cape Town" className="pl-10" />
+            <div>
+                <div className="mb-8">
+                    <h1 className="text-3xl font-bold">Find the Perfect Tutor</h1>
+                    <p className="text-muted-foreground">Filter by subject and grade to find the best match for your needs.</p>
+                </div>
+                <div className="flex flex-col md:flex-row items-start md:items-end gap-4 p-4 rounded-lg bg-muted/50 border">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
+                        <div>
+                            <Label>Subject</Label>
+                            <Select value={subject} onValueChange={setSubject}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="All">All Subjects</SelectItem>
+                                    <SelectItem value="Maths">Maths</SelectItem>
+                                    <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div>
+                            <Label>Grade</Label>
+                            <Select value={grade} onValueChange={setGrade}>
+                                <SelectTrigger><SelectValue /></SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="All">All Grades</SelectItem>
+                                    <SelectItem value="10">Grade 10</SelectItem>
+                                    <SelectItem value="11">Grade 11</SelectItem>
+                                    <SelectItem value="12">Grade 12</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+                     <Button size="lg" className="h-10 w-full md:w-auto" onClick={() => setCurrentPage(1)}>
+                        <Search className="mr-2 h-5 w-5" />
+                        Search
+                    </Button>
+                </div>
+            </div>
+            
+            <div className="space-y-4">
+                <div className="text-sm text-muted-foreground flex items-center gap-2">
+                    {locationStatus.startsWith('Detecting') ? <Loader2 className="h-4 w-4 animate-spin"/> : <MapPin className="h-4 w-4"/> }
+                    <span>{locationStatus}</span>
+                </div>
+                {paginatedTutors.length > 0 ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    {paginatedTutors.map(tutor => (
+                        <Card key={tutor.id} className="flex flex-col">
+                            <CardHeader className="flex-row gap-4 items-center">
+                                <Avatar className="w-16 h-16 border">
+                                    <AvatarImage src={tutor.avatar} alt={tutor.name} data-ai-hint="person profile" />
+                                    <AvatarFallback>{tutor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <CardTitle className="text-xl">{tutor.name}</CardTitle>
+                                    <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
+                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                                        <span>4.9 (82 reviews)</span>
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                        <Button size="lg" className="h-10">
-                            <Search className="mr-2 h-5 w-5" />
-                            Search
-                        </Button>
-                    </div>
-                </CardHeader>
-                <CardContent>
-                    <div className="text-sm text-muted-foreground mb-4">
-                        Showing {filteredTutors.length} tutor(s) matching your criteria.
-                    </div>
-                    {paginatedTutors.length > 0 ? (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                        {paginatedTutors.map(tutor => (
-                            <Card key={tutor.id} className="flex flex-col">
-                                <CardHeader className="flex-row gap-4 items-center">
-                                    <Avatar className="w-16 h-16 border">
-                                        <AvatarImage src={tutor.avatar} alt={tutor.name} data-ai-hint="person profile" />
-                                        <AvatarFallback>{tutor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                    </Avatar>
-                                    <div>
-                                        <CardTitle className="text-xl">{tutor.name}</CardTitle>
-                                        <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                                            <span>4.9 (82 reviews)</span>
-                                        </div>
+                            </CardHeader>
+                            <CardContent className="flex-grow space-y-4">
+                                <p className="text-sm text-muted-foreground line-clamp-3">{tutor.bio}</p>
+                                <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <BookOpen className="h-4 w-4 text-primary" />
+                                        <span>{tutor.subjects.join(', ')} (Grades {tutor.grades.join(', ')})</span>
                                     </div>
-                                </CardHeader>
-                                <CardContent className="flex-grow space-y-4">
-                                    <p className="text-sm text-muted-foreground line-clamp-3">{tutor.bio}</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <BookOpen className="h-4 w-4 text-primary" />
-                                            <span>{tutor.subjects.join(', ')} (Grades {tutor.grades.join(', ')})</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <MapPin className="h-4 w-4 text-primary" />
-                                            <span>{tutor.location}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <Computer className="h-4 w-4 text-primary" />
-                                            <span>{tutor.modes.join(' & ')}</span>
-                                        </div>
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <MapPin className="h-4 w-4 text-primary" />
+                                        <span>{tutor.location}</span>
                                     </div>
-                                    <div className="text-2xl font-bold">R{tutor.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hour</span></div>
-                                </CardContent>
-                                <CardFooter className="flex gap-2">
-                                    <Button className="w-full" onClick={() => handleBookTutor(tutor as Tutor)}><Calendar className="mr-2" /> Book Session</Button>
-                                    <Button variant="outline" className="w-full" onClick={() => handleMessageTutor(tutor as Tutor)}><MessageSquare className="mr-2" /> Message</Button>
-                                </CardFooter>
-                            </Card>
-                        ))}
+                                    <div className="flex items-center gap-2 text-sm">
+                                        <Computer className="h-4 w-4 text-primary" />
+                                        <span>{tutor.modes.join(' & ')}</span>
+                                    </div>
+                                </div>
+                                <div className="text-2xl font-bold">R{tutor.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hour</span></div>
+                            </CardContent>
+                            <CardFooter className="flex gap-2">
+                                <Button className="w-full" onClick={() => handleBookTutor(tutor as Tutor)}><Calendar className="mr-2" /> Book Session</Button>
+                                <Button variant="outline" className="w-full" onClick={() => handleMessageTutor(tutor as Tutor)}><MessageSquare className="mr-2" /> Message</Button>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+                ) : (
+                    <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <h3 className="text-lg font-semibold">No Tutors Found</h3>
+                        <p>Try adjusting your search criteria or broadening your location.</p>
                     </div>
-                    ) : (
-                        <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
-                            <h3 className="text-lg font-semibold">No Tutors Found</h3>
-                            <p>Try adjusting your search criteria or broadening your location.</p>
-                        </div>
-                    )}
-                </CardContent>
-                    {totalPages > 1 && (
-                    <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                        <div className="text-xs text-muted-foreground">
-                            Showing <strong>{(currentPage - 1) * tutorsPerPage + 1}-{Math.min(currentPage * tutorsPerPage, filteredTutors.length)}</strong> of <strong>{filteredTutors.length}</strong> tutors.
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                            <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                        </div>
-                    </CardFooter>
                 )}
-            </Card>
+            </div>
+
+            {totalPages > 1 && (
+                <div className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                    <div className="text-xs text-muted-foreground">
+                        Showing <strong>{(currentPage - 1) * tutorsPerPage + 1}-{Math.min(currentPage * tutorsPerPage, filteredTutors.length)}</strong> of <strong>{filteredTutors.length}</strong> tutors.
+                    </div>
+                    <div className="flex items-center gap-2">
+                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                    </div>
+                </div>
+            )}
+
 
             {/* Booking Dialog */}
             <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
@@ -290,3 +321,5 @@ export default function TutorsPage() {
         </div>
     );
 }
+
+    
