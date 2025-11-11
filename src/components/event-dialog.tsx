@@ -14,10 +14,11 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Info, Download, Clock, Share2, Twitter, Facebook, Linkedin, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { type UpcomingEvent } from '@/lib/data';
-import { useReactToPrint } from 'react-to-print';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Icons } from './icons';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 interface EventDialogProps {
   event: UpcomingEvent | null;
@@ -34,23 +35,23 @@ const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>((
     }, []);
 
     return (
-      <div ref={ref} className="bg-card text-card-foreground p-8 print:p-0 print:bg-white print:text-black">
-          <div className="border-4 border-primary p-6 rounded-lg relative bg-background print:border-black print:bg-gray-50">
+      <div ref={ref} className="bg-card text-card-foreground p-8">
+          <div className="border-4 border-primary p-6 rounded-lg relative bg-background">
             <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
-                    <Icons.logo className="h-8 w-8 text-primary print:text-black" />
-                    <span className="text-xl font-bold print:text-black">EDUMATE</span>
+                    <Icons.logo className="h-8 w-8 text-primary" />
+                    <span className="text-xl font-bold">EDUMATE</span>
                 </div>
-                <Badge variant="secondary" className="mb-2 print:bg-gray-200 print:text-black">{event.subject} - Grade {event.grade}</Badge>
-                <h1 className="text-4xl font-bold text-primary print:text-black">{event.title}</h1>
-                <p className="text-lg text-muted-foreground print:text-gray-600">An exclusive live session with {event.instructor}</p>
+                <Badge variant="secondary" className="mb-2">{event.subject} - Grade {event.grade}</Badge>
+                <h1 className="text-4xl font-bold text-primary">{event.title}</h1>
+                <p className="text-lg text-muted-foreground">An exclusive live session with {event.instructor}</p>
             </div>
             
-            <Separator className="my-6 print:bg-gray-300" />
+            <Separator className="my-6" />
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
                 <div className="flex items-center gap-3">
-                    <Calendar className="h-6 w-6 text-primary print:text-black" />
+                    <Calendar className="h-6 w-6 text-primary" />
                     <p>
                         {isClient ? new Date(event.start).toLocaleDateString('en-US', {
                             weekday: 'long',
@@ -60,7 +61,7 @@ const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>((
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-                    <Clock className="h-6 w-6 text-primary print:text-black" />
+                    <Clock className="h-6 w-6 text-primary" />
                     <p>
                         {isClient ? new Date(event.start).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true }) : ''}
                         {event.end && isClient && ` - ${new Date(event.end).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true })}`}
@@ -70,8 +71,8 @@ const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>((
 
             <div className="mt-6">
                 <div className="flex items-start gap-3">
-                    <Info className="h-6 w-6 text-primary shrink-0 mt-1 print:text-black" />
-                    <p className="text-muted-foreground print:text-gray-700">{event.scope}</p>
+                    <Info className="h-6 w-6 text-primary shrink-0 mt-1" />
+                    <p className="text-muted-foreground">{event.scope}</p>
                 </div>
             </div>
         </div>
@@ -84,32 +85,42 @@ EventPoster.displayName = 'EventPoster';
 export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }: EventDialogProps) {
   const posterRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  const [isPrinting, setIsPrinting] = React.useState(false);
+  const [isDownloading, setIsDownloading] = React.useState(false);
   const [isClient, setIsClient] = React.useState(false);
   
   React.useEffect(() => {
     setIsClient(true);
   }, []);
 
-  const handlePrint = useReactToPrint({
-    content: () => posterRef.current,
-    documentTitle: `EdumatePro-Event-${event?.title.replace(/ /g, '_')}`,
-    onBeforeGetContent: () => {
-      setIsPrinting(true);
-      return new Promise<void>((resolve) => {
-        setTimeout(() => {
-          resolve();
-        }, 500); 
+  const handleDownloadPdf = async () => {
+    if (!posterRef.current) return;
+    setIsDownloading(true);
+
+    try {
+      const canvas = await html2canvas(posterRef.current, {
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        backgroundColor: null,
       });
-    },
-    onAfterPrint: () => {
-      setIsPrinting(false);
-    },
-    onPrintError: () => {
-      setIsPrinting(false);
+
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'px',
+        format: [canvas.width, canvas.height],
+      });
+
+      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.save(`EdumatePro-Event-${event?.title.replace(/ /g, '_')}.pdf`);
+
+    } catch (error) {
+      console.error("Error generating PDF:", error);
       toast({ variant: 'destructive', title: 'Error', description: 'Could not generate PDF.' });
-    },
-  });
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   
   if (!event) return null;
 
@@ -164,8 +175,8 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
             </div>
             <div className="flex items-center gap-2">
               <Button variant="secondary" onClick={onClose}>Close</Button>
-              <Button onClick={handlePrint} disabled={isPrinting}>
-                {isPrinting ? (
+              <Button onClick={handleDownloadPdf} disabled={isDownloading}>
+                {isDownloading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                     Generating...
