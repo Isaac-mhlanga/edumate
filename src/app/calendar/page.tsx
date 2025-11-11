@@ -14,9 +14,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { createCalendarEvent, CreateCalendarEventOutput } from '@/ai/flows/create-calendar-event';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Sparkles, PlusCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 
 type CalendarEvent = {
@@ -35,13 +34,9 @@ export default function CalendarPage() {
         { id: '2', title: 'Physics Study Group', start: '2024-08-16', allDay: true, color: 'hsl(var(--secondary))', description: 'Collaborative session for Newtonian mechanics.' }
     ]);
     
-    const [isAiDialogOpen, setIsAiDialogOpen] = useState(false);
     const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-
-    const [aiPrompt, setAiPrompt] = useState('');
-    const [isAiLoading, setIsAiLoading] = useState(false);
     
     const [manualEvent, setManualEvent] = useState<Partial<CalendarEvent>>({});
 
@@ -76,36 +71,6 @@ export default function CalendarPage() {
         toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
         setIsManualDialogOpen(false);
         setManualEvent({});
-    };
-
-    const handleAiCreateEvent = async () => {
-        if (!aiPrompt) return;
-        setIsAiLoading(true);
-
-        try {
-            const result: CreateCalendarEventOutput = await createCalendarEvent({ prompt: aiPrompt });
-            if (result.title && result.start) {
-                const newEvent: CalendarEvent = {
-                    id: String(Date.now()),
-                    title: result.title,
-                    start: result.start,
-                    end: result.end || undefined,
-                    allDay: result.allDay,
-                    color: 'hsl(var(--accent))'
-                };
-                setEvents([...events, newEvent]);
-                toast({ title: 'Event Created!', description: `"${result.title}" has been added to the calendar.` });
-                setIsAiDialogOpen(false);
-                setAiPrompt('');
-            } else {
-                toast({ variant: 'destructive', title: 'Could not create event', description: 'The AI could not understand the event details. Please try being more specific.' });
-            }
-        } catch (error) {
-            console.error("Error creating AI event:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while creating the event.' });
-        } finally {
-            setIsAiLoading(false);
-        }
     };
 
     return (
@@ -157,9 +122,6 @@ export default function CalendarPage() {
                              <Button variant="outline" onClick={() => setIsManualDialogOpen(true)}>
                                  <PlusCircle className="mr-2 h-4 w-4" /> Add Event
                              </Button>
-                             <Button onClick={() => setIsAiDialogOpen(true)}>
-                                <Sparkles className="mr-2 h-4 w-4" /> Create with AI
-                            </Button>
                         </div>
                     </CardHeader>
                     <CardContent>
@@ -185,33 +147,6 @@ export default function CalendarPage() {
                         </div>
                     </CardContent>
                 </Card>
-
-                {/* AI Event Dialog */}
-                <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Create Event with AI</DialogTitle>
-                            <DialogDescription>
-                                Describe the event you want to create. For example, "Schedule a meeting with the team for next Friday at 2pm."
-                            </DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4">
-                            <Label htmlFor="ai-prompt" className="sr-only">AI Prompt</Label>
-                            <Textarea
-                                id="ai-prompt"
-                                placeholder="e.g. Set up a Maths study session for Grade 12s on Saturday from 10am to 12pm."
-                                value={aiPrompt}
-                                onChange={(e) => setAiPrompt(e.target.value)}
-                            />
-                        </div>
-                        <DialogFooter>
-                            <Button variant="ghost" onClick={() => setIsAiDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleAiCreateEvent} disabled={isAiLoading}>
-                                {isAiLoading ? "Creating..." : "Create Event"}
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
 
                 {/* Manual Event Dialog */}
                 <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
