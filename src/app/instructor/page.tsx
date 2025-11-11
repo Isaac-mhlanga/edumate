@@ -2145,7 +2145,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </Dialog>
+        </AlertDialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
@@ -2176,3 +2176,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
