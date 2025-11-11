@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,7 @@ import { PublicHeader } from "@/components/public-header";
 
 const courses = instructorData.courses;
 
-const CoursesSection = ({ title, description, courses }: { title: string, description: string, courses: any[] }) => {
+const CoursesSection = ({ title, description, courses, onCourseClick }: { title: string, description: string, courses: any[], onCourseClick: (course: any) => void }) => {
   const formatPrice = (price?: number | null) => {
     if (price === 0) return 'Free';
     if (price) return `R ${price.toFixed(2)}`;
@@ -36,7 +36,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map(course => (
            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
-            <Link href={`/courses/${course.id}`} className="relative h-48 overflow-hidden cursor-pointer block">
+            <div onClick={() => onCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer block">
               <Image 
                 src={course.thumbnail}
                 alt={course.title}
@@ -47,7 +47,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <Play className="w-12 h-12 text-white" />
                </div>
-            </Link>
+            </div>
 
             <CardHeader>
                 <div className="flex justify-between items-start">
@@ -126,6 +126,10 @@ export default function Home() {
   const [isCurriculumDialogOpen, setIsCurriculumDialogOpen] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState<(typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0] | typeof grade12LifeSciencesCurriculum[0]) | null>(null);
   const [activeCurriculum, setActiveCurriculum] = useState('maths');
+  
+  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
+  const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<any>(null);
+  const [activeVideo, setActiveVideo] = useState<any>(null);
 
 
   const formatPrice = (price?: number | null) => {
@@ -137,6 +141,14 @@ export default function Home() {
   const handleChapterClick = (chapter: (typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0] | typeof grade12LifeSciencesCurriculum[0])) => {
     setSelectedChapter(chapter);
     setIsCurriculumDialogOpen(true);
+  };
+
+  const handleCourseClick = (course: any) => {
+    setSelectedCourseForPlayer(course);
+    if(course.videos && course.videos.length > 0) {
+      setActiveVideo(course.videos[0]);
+    }
+    setIsVideoPlayerOpen(true);
   };
   
   const allCourses = courses.slice(0, 6);
@@ -304,6 +316,7 @@ export default function Home() {
                 title="Featured Courses"
                 description="Hand-picked courses to help you excel in your studies."
                 courses={allCourses}
+                onCourseClick={handleCourseClick}
               />
             </div>
           </section>
@@ -358,7 +371,7 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                        {courses.slice(0,2).map(course => (
                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-background shadow-lg hover:shadow-primary/20 transition-all duration-300">
-                           <Link href={`/courses/${course.id}`} className="relative h-40 overflow-hidden cursor-pointer block">
+                           <div onClick={() => { setIsCurriculumDialogOpen(false); handleCourseClick(course); }} className="relative h-40 overflow-hidden cursor-pointer block">
                               <Image 
                                 src={course.thumbnail}
                                 alt={course.title}
@@ -369,7 +382,7 @@ export default function Home() {
                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                                   <Play className="w-12 h-12 text-white" />
                                </div>
-                            </Link>
+                            </div>
                             <CardHeader>
                                 <CardTitle className="text-base">{course.title}</CardTitle>
                             </CardHeader>
@@ -410,6 +423,58 @@ export default function Home() {
         </DialogContent>
       </Dialog>
       
+      {selectedCourseForPlayer && (
+        <Dialog open={isVideoPlayerOpen} onOpenChange={setIsVideoPlayerOpen}>
+            <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 gap-0">
+                <div className="grid grid-cols-1 lg:grid-cols-3 h-full">
+                    <div className="lg:col-span-2 h-full flex flex-col">
+                      <div className="bg-black flex-grow flex items-center justify-center">
+                          {activeVideo ? (
+                              <video key={activeVideo.url} className="w-full h-full" controls autoPlay src={activeVideo.url}>
+                                  Your browser does not support the video tag.
+                              </video>
+                          ) : (
+                              <div className="text-center text-white">
+                                  <Play className="w-16 h-16 mx-auto mb-4" />
+                                  <p>Select a lesson to begin.</p>
+                              </div>
+                          )}
+                      </div>
+                    </div>
+                    <div className="lg:col-span-1 h-full flex flex-col bg-card">
+                       <DialogHeader className="p-6 pb-2">
+                            <DialogTitle className="text-xl">{selectedCourseForPlayer.title}</DialogTitle>
+                            <DialogDescription>{selectedCourseForPlayer.description}</DialogDescription>
+                        </DialogHeader>
+                        <div className="flex-1 overflow-y-auto px-6">
+                            <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
+                                {selectedCourseForPlayer.videos.map((video: any, index: number) => (
+                                    <AccordionItem value={`item-${index}`} key={video.id}>
+                                        <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
+                                            <div className="flex items-center gap-3">
+                                                <Clapperboard className="h-5 w-5 text-muted-foreground"/>
+                                                <span>{index + 1}. {video.title}</span>
+                                            </div>
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <p className="text-sm text-muted-foreground ml-8">Click to play this lesson.</p>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </div>
+                       <DialogFooter className="p-6 border-t">
+                          <Button variant="ghost" onClick={() => setIsVideoPlayerOpen(false)}>Close</Button>
+                          <Button asChild>
+                            <Link href={`/courses/${selectedCourseForPlayer.id}`}>Enroll Now</Link>
+                          </Button>
+                       </DialogFooter>
+                    </div>
+                </div>
+            </DialogContent>
+        </Dialog>
+      )}
+
       <Footer />
     </div>
   );
