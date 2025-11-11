@@ -102,7 +102,7 @@ export type UpcomingEvent = {
     scope: string;
 };
 
-export const upcomingEvents: UpcomingEvent[] = [
+export let upcomingEvents: UpcomingEvent[] = [
     {
         id: "EVT001",
         title: "Live Class: Final Exam Revision",
@@ -199,6 +199,10 @@ export const instructorData = {
         { title: "Uploaded Lessons", value: "82", icon: Book, change: "+5 this month" },
         { title: "Monthly Earnings", value: "R 4,820", icon: DollarSign, change: "+21%" },
         { title: "Pending Assignments", value: "14", icon: Clock, change: "3 new" },
+    ],
+    events: [
+        { id: '1', title: 'Calculus Webinar', start: '2024-08-15T10:30:00', end: '2024-08-15T12:30:00', allDay: false, color: 'hsl(var(--primary))', description: 'A deep dive into advanced calculus concepts.' },
+        { id: '2', title: 'Physics Study Group', start: '2024-08-16', allDay: true, color: 'hsl(var(--secondary))', description: 'Collaborative session for Newtonian mechanics.' }
     ],
     engagementData: [
         { month: 'Jan', engagement: 65, income: 3200 },
@@ -502,4 +506,6 @@ export const adminData = {
 };
 
     
+    
+
     
