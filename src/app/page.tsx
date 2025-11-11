@@ -332,7 +332,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {allCourses.slice(0, 6).map((course, index) => (
-                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg border-transparent hover:border-primary/50 hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                       <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                         <Image 
                           src={course.thumbnail}
