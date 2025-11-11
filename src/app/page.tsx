@@ -298,33 +298,36 @@ export default function Home() {
                                                 {chapter.chapter}
                                             </AccordionTrigger>
                                             <AccordionContent className="p-6">
-                                                <ul className="space-y-4">
+                                                <Accordion type="multiple" className="w-full space-y-2">
                                                     {chapter.topics.map((topic, topicIndex) => {
                                                         const relatedCourses = getCoursesForTopic(topic, subject as any);
                                                         return (
-                                                            <li key={topicIndex}>
-                                                                <div className="flex items-center">
-                                                                    <ChevronRightIcon className="h-4 w-4 mr-2 text-primary" />
-                                                                    <span className="font-medium text-muted-foreground">{topic}</span>
-                                                                </div>
-                                                                {relatedCourses.length > 0 && (
-                                                                    <div className="pl-6 mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                                        {relatedCourses.map(course => (
-                                                                            <Card key={course.id} className="flex items-center gap-4 p-3 bg-muted/50">
-                                                                                <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video" data-ai-hint="online course abstract" />
-                                                                                <div className="flex-1">
-                                                                                    <h4 className="font-semibold text-sm">{course.title}</h4>
-                                                                                    <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
-                                                                                </div>
-                                                                                <Button size="sm" variant="ghost" onClick={() => handleCourseClick(course)}>Preview</Button>
-                                                                            </Card>
-                                                                        ))}
-                                                                    </div>
-                                                                )}
-                                                            </li>
+                                                            <AccordionItem value={`topic-${topicIndex}`} key={topicIndex} className="border rounded-md bg-background/50">
+                                                                <AccordionTrigger className="text-base font-medium hover:no-underline px-4 py-3">
+                                                                    {topic}
+                                                                </AccordionTrigger>
+                                                                <AccordionContent className="px-4 pb-4">
+                                                                     {relatedCourses.length > 0 ? (
+                                                                        <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t">
+                                                                            {relatedCourses.map(course => (
+                                                                                <Card key={course.id} className="flex items-center gap-4 p-3 bg-muted/50">
+                                                                                    <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video" data-ai-hint="online course abstract" />
+                                                                                    <div className="flex-1">
+                                                                                        <h4 className="font-semibold text-sm">{course.title}</h4>
+                                                                                        <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
+                                                                                    </div>
+                                                                                    <Button size="sm" variant="ghost" onClick={() => handleCourseClick(course)}>Preview</Button>
+                                                                                </Card>
+                                                                            ))}
+                                                                        </div>
+                                                                    ) : (
+                                                                        <p className="text-sm text-muted-foreground pt-4 border-t">No courses available for this topic yet.</p>
+                                                                    )}
+                                                                </AccordionContent>
+                                                            </AccordionItem>
                                                         );
                                                     })}
-                                                </ul>
+                                                </Accordion>
                                             </AccordionContent>
                                         </AccordionItem>
                                     </Card>
