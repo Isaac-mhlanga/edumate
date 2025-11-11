@@ -30,7 +30,7 @@ type Course = {
     instructorId: string;
     title: string;
     description: string;
-    subject: 'Maths' | 'Physical Sciences';
+    subject: 'Maths' | 'Physical Sciences' | 'Life Sciences';
     grade: '10' | '11' | '12';
     thumbnail: string;
     pricing: {
@@ -132,7 +132,7 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
                 </p>
                 <div className="flex justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
                     <Button onClick={onExploreClick} size="lg">
-                        Explore Courses <ArrowRight className="ml-2" />
+                        Explore Curriculum <ArrowRight className="ml-2" />
                     </Button>
                     <Button asChild size="lg" variant="outline">
                         <Link href="/tutors">Find a Tutor</Link>
@@ -144,104 +144,15 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   );
 };
 
-const CurriculumDialog = ({ isOpen, onOpenChange, activeCurriculum, setActiveCurriculum }: { isOpen: boolean, onOpenChange: (open: boolean) => void, activeCurriculum: string, setActiveCurriculum: (value: string) => void }) => {
-  const mathsCurriculumChapters = [
-      { title: 'Paper 1', icon: BookOpen },
-      { title: 'Paper 2', icon: BookOpen },
-  ];
-
-  const physicsCurriculumChapters = [
-      { title: "Paper 1: Physics", icon: Rocket, category: "Physics" },
-      { title: "Paper 2: Chemistry", icon: Clapperboard, category: "Chemistry" },
-  ];
-  
-  const lifeSciencesCurriculumChapters = [
-      { title: "Paper 1", icon: BookOpen },
-      { title: "Paper 2", icon: Dna },
-  ];
-
-  let currentCurriculumData;
-  let currentChapterIcons;
-
-  switch (activeCurriculum) {
-      case 'physical-sciences':
-      currentCurriculumData = grade12PhysicsCurriculum;
-      currentChapterIcons = physicsCurriculumChapters;
-      break;
-      case 'life-sciences':
-          currentCurriculumData = grade12LifeSciencesCurriculum;
-          currentChapterIcons = lifeSciencesCurriculumChapters;
-          break;
-      default:
-      currentCurriculumData = grade12MathsCurriculum;
-      currentChapterIcons = mathsCurriculumChapters;
-      break;
-  }
-  
-  const scrollToCourses = () => {
-    onOpenChange(false); // Close dialog
-    const coursesSection = document.getElementById('courses');
-    if (coursesSection) {
-        coursesSection.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-
-  return (
-    <Dialog open={isOpen} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl">
-        <DialogHeader>
-          <DialogTitle className="text-2xl">Explore Our Comprehensive Curriculum</DialogTitle>
-          <DialogDescription>Our Grade 12 curriculum is expertly crafted to cover all essential topics and prepare you for success.</DialogDescription>
-        </DialogHeader>
-        <div className="py-4">
-          <Tabs value={activeCurriculum} onValueChange={setActiveCurriculum} className="w-full">
-            <TabsList className="grid w-full grid-cols-3 mb-4">
-              <TabsTrigger value="maths">Maths</TabsTrigger>
-              <TabsTrigger value="physical-sciences">Physical Sciences</TabsTrigger>
-              <TabsTrigger value="life-sciences">Life Sciences</TabsTrigger>
-            </TabsList>
-            
-            <Accordion type="single" collapsible className="w-full">
-              {currentCurriculumData.map((item, index) => (
-                <AccordionItem value={`item-${index}`} key={index}>
-                  <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                    {item.chapter}
-                  </AccordionTrigger>
-                  <AccordionContent>
-                    <ul className="space-y-2 pl-4 pt-2">
-                      {item.topics.map((topic, topicIndex) => (
-                        <li key={topicIndex} className="flex items-center">
-                          <ChevronRightIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                           <button onClick={scrollToCourses} className="text-muted-foreground hover:text-foreground transition-colors text-left">
-                            {topic}
-                          </button>
-                        </li>
-                      ))}
-                    </ul>
-                  </AccordionContent>
-                </AccordionItem>
-              ))}
-            </Accordion>
-          </Tabs>
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-};
-
 
 export default function Home() {
-  const [isCurriculumOpen, setIsCurriculumOpen] = useState(false);
-  const [activeCurriculum, setActiveCurriculum] = useState('maths');
+  const allCourses = instructorData.courses as Course[];
 
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<Course | null>(null);
   const [activeVideo, setActiveVideo] = useState<VideoData | undefined>(undefined);
   const videoRef = useRef<HTMLVideoElement>(null);
   const [quality, setQuality] = useState('720p');
-
-  const allCourses = instructorData.courses.slice(0, 6);
 
   const features = [
     {
@@ -267,6 +178,20 @@ export default function Home() {
     { number: '24/7', label: 'AI Tutor Access' },
     { number: '10k+', label: 'Happy Students' }
   ];
+  
+  const curriculumData = {
+    'Maths': grade12MathsCurriculum,
+    'Physical Sciences': grade12PhysicsCurriculum,
+    'Life Sciences': grade12LifeSciencesCurriculum,
+  };
+
+  const getCoursesForTopic = (topic: string, subject: 'Maths' | 'Physical Sciences' | 'Life Sciences') => {
+    return allCourses.filter(course => 
+      course.subject === subject && 
+      (course.title.toLowerCase().includes(topic.split(' ')[0].toLowerCase()) || 
+       course.description.toLowerCase().includes(topic.split(' ')[0].toLowerCase()))
+    );
+  };
 
   const handleCourseClick = (course: Course) => {
     setSelectedCourseForPlayer(course);
@@ -281,6 +206,14 @@ export default function Home() {
       setActiveVideo(selectedCourseForPlayer.videos[0]);
     }
   }, [selectedCourseForPlayer]);
+  
+  const scrollToCurriculum = () => {
+    const curriculumSection = document.getElementById('curriculum');
+    if (curriculumSection) {
+      curriculumSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -288,7 +221,7 @@ export default function Home() {
 
       <main className="flex-grow pt-20">
          <div>
-          <Hero onExploreClick={() => setIsCurriculumOpen(true)} />
+          <Hero onExploreClick={scrollToCurriculum} />
           
           <section className="py-16 bg-muted/20">
             <div className="max-w-7xl mx-auto px-6">
@@ -335,28 +268,76 @@ export default function Home() {
               </div>
             </div>
           </section>
-
-          <section id="curriculum" className="py-20 bg-muted/20">
+          
+           <section id="curriculum" className="py-20 bg-muted/20">
             <div className="max-w-7xl mx-auto px-6">
-                 <div className="text-center mb-12">
+                <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics and prepare you for success.</p>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics. Find courses that match your needs.</p>
                 </div>
-                <div className="text-center">
-                     <Button onClick={() => setIsCurriculumOpen(true)} size="lg">
-                        View Full Curriculum 
-                        <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                </div>
+                
+                <Tabs defaultValue="Maths" className="w-full">
+                    <TabsList className="grid w-full grid-cols-3 mb-8">
+                        <TabsTrigger value="Maths">Maths</TabsTrigger>
+                        <TabsTrigger value="Physical Sciences">Physical Sciences</TabsTrigger>
+                        <TabsTrigger value="Life Sciences">Life Sciences</TabsTrigger>
+                    </TabsList>
+                    
+                    {Object.entries(curriculumData).map(([subject, chapters]) => (
+                        <TabsContent key={subject} value={subject}>
+                             <Accordion type="multiple" className="w-full space-y-4">
+                                {chapters.map((chapter, index) => (
+                                    <Card key={index} className="overflow-hidden">
+                                        <AccordionItem value={`item-${index}`} className="border-b-0">
+                                            <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 bg-card">
+                                                {chapter.chapter}
+                                            </AccordionTrigger>
+                                            <AccordionContent className="p-6">
+                                                <ul className="space-y-4">
+                                                    {chapter.topics.map((topic, topicIndex) => {
+                                                        const relatedCourses = getCoursesForTopic(topic, subject as any);
+                                                        return (
+                                                            <li key={topicIndex}>
+                                                                <div className="flex items-center">
+                                                                    <ChevronRightIcon className="h-4 w-4 mr-2 text-primary" />
+                                                                    <span className="font-medium text-muted-foreground">{topic}</span>
+                                                                </div>
+                                                                {relatedCourses.length > 0 && (
+                                                                    <div className="pl-6 mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                                        {relatedCourses.map(course => (
+                                                                            <Card key={course.id} className="flex items-center gap-4 p-3 bg-muted/50">
+                                                                                <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video" />
+                                                                                <div className="flex-1">
+                                                                                    <h4 className="font-semibold text-sm">{course.title}</h4>
+                                                                                    <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
+                                                                                </div>
+                                                                                <Button size="sm" variant="ghost" onClick={() => handleCourseClick(course)}>Preview</Button>
+                                                                            </Card>
+                                                                        ))}
+                                                                    </div>
+                                                                )}
+                                                            </li>
+                                                        );
+                                                    })}
+                                                </ul>
+                                            </AccordionContent>
+                                        </AccordionItem>
+                                    </Card>
+                                ))}
+                            </Accordion>
+                        </TabsContent>
+                    ))}
+                </Tabs>
             </div>
           </section>
+
 
           <section id="courses" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
               <CoursesSection
                 title="Featured Courses"
                 description="Hand-picked courses to help you excel in your studies."
-                courses={allCourses}
+                courses={allCourses.slice(0, 6)}
                 onCourseClick={handleCourseClick}
               />
             </div>
@@ -390,9 +371,7 @@ export default function Home() {
         </div>
       </main>
 
-      <CurriculumDialog isOpen={isCurriculumOpen} onOpenChange={setIsCurriculumOpen} activeCurriculum={activeCurriculum} setActiveCurriculum={setActiveCurriculum} />
-      
-       {selectedCourseForPlayer && (
+      {selectedCourseForPlayer && (
         <Dialog open={isVideoPlayerOpen} onOpenChange={setIsVideoPlayerOpen}>
           <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
               <div className="grid md:grid-cols-3 h-full">
