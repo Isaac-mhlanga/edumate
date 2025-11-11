@@ -946,7 +946,6 @@ function InstructorPage() {
             setIsAiLoading(false);
         }
     };
-
   return (
       <div className="space-y-8">
            <style jsx global>{`
@@ -2318,7 +2317,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </Dialog>
+        </AlertDialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
