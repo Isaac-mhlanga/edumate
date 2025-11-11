@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -20,7 +20,7 @@ import { PublicHeader } from "@/components/public-header";
 
 const courses = instructorData.courses;
 
-const CoursesSection = ({ title, description, courses, onCourseClick }: { title: string, description: string, courses: any[], onCourseClick: (course: any) => void }) => {
+const CoursesSection = ({ title, description, courses }: { title: string, description: string, courses: any[] }) => {
   const formatPrice = (price?: number | null) => {
     if (price === 0) return 'Free';
     if (price) return `R ${price.toFixed(2)}`;
@@ -36,7 +36,7 @@ const CoursesSection = ({ title, description, courses, onCourseClick }: { title:
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map(course => (
            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
-            <div className="relative h-48 overflow-hidden cursor-pointer" onClick={() => onCourseClick(course)}>
+            <Link href={`/courses/${course.id}`} className="relative h-48 overflow-hidden cursor-pointer">
               <Image 
                 src={course.thumbnail}
                 alt={course.title}
@@ -47,7 +47,7 @@ const CoursesSection = ({ title, description, courses, onCourseClick }: { title:
                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <Play className="w-12 h-12 text-white" />
                </div>
-            </div>
+            </Link>
 
             <CardHeader>
                 <div className="flex justify-between items-start">
@@ -200,10 +200,6 @@ const CurriculumDialog = ({ isOpen, onOpenChange, activeCurriculum, setActiveCur
 export default function Home() {
   const [isCurriculumOpen, setIsCurriculumOpen] = useState(false);
   const [activeCurriculum, setActiveCurriculum] = useState('maths');
-  
-  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
-  const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<any>(null);
-  const [activeVideo, setActiveVideo] = useState<any>(null);
 
   const allCourses = courses.slice(0, 6);
 
@@ -264,12 +260,6 @@ export default function Home() {
       currentChapterIcons = mathsCurriculumChapters;
       break;
   }
-
-  const handleCourseClick = (course: any) => {
-    setSelectedCourseForPlayer(course);
-    setActiveVideo(course.videos[0]);
-    setIsVideoPlayerOpen(true);
-  };
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -376,7 +366,6 @@ export default function Home() {
                 title="Featured Courses"
                 description="Hand-picked courses to help you excel in your studies."
                 courses={allCourses}
-                onCourseClick={handleCourseClick}
               />
             </div>
           </section>
@@ -411,62 +400,6 @@ export default function Home() {
 
       <CurriculumDialog isOpen={isCurriculumOpen} onOpenChange={setIsCurriculumOpen} activeCurriculum={activeCurriculum} setActiveCurriculum={setActiveCurriculum} />
       
-      {selectedCourseForPlayer && (
-        <Dialog open={isVideoPlayerOpen} onOpenChange={setIsVideoPlayerOpen}>
-          <DialogContent className="sm:max-w-5xl p-0">
-            <div className="grid grid-cols-1 lg:grid-cols-3">
-              <div className="lg:col-span-2">
-                 <div className="relative aspect-video bg-black">
-                  {activeVideo && (
-                    <video key={activeVideo.url} className="w-full h-full" controls autoPlay src={activeVideo.url}>
-                      Your browser does not support the video tag.
-                    </video>
-                  )}
-                 </div>
-              </div>
-              <div className="lg:col-span-1 flex flex-col">
-                <div className="p-6">
-                    <Badge variant="secondary" className="mb-2">{selectedCourseForPlayer.subject} - Grade {selectedCourseForPlayer.grade}</Badge>
-                    <h3 className="text-2xl font-bold">{selectedCourseForPlayer.title}</h3>
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-1">
-                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                            <span>{selectedCourseForPlayer.rating || '4.8'}</span>
-                        </div>
-                        <span>by {selectedCourseForPlayer.instructor || 'Dr. Evelyn Reed'}</span>
-                    </div>
-                </div>
-                <div className="flex-grow p-6 pt-0 overflow-y-auto">
-                    <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
-                        {selectedCourseForPlayer.videos.map((video: any, index: number) => (
-                            <AccordionItem value={`item-${index}`} key={video.id}>
-                                <AccordionTrigger 
-                                    className="text-left hover:no-underline"
-                                    onClick={() => setActiveVideo(video)}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <Clapperboard className="h-5 w-5 text-muted-foreground"/>
-                                        <span>{index + 1}. {video.title}</span>
-                                    </div>
-                                </AccordionTrigger>
-                                <AccordionContent>
-                                    <p className="text-sm text-muted-foreground ml-8">Click to play this lesson.</p>
-                                </AccordionContent>
-                            </AccordionItem>
-                        ))}
-                    </Accordion>
-                </div>
-               <div className="p-6 border-t">
-                  <Button asChild size="lg" className="w-full">
-                    <Link href={`/courses/${selectedCourseForPlayer.id}`}>Enroll Now</Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </DialogContent>
-        </Dialog>
-      )}
-
       <Footer />
     </div>
   );
