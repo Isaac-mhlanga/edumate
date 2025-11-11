@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -45,86 +45,13 @@ type Course = {
 };
 
 
-const CoursesSection = ({ title, description, courses, onCourseClick }: { title: string, description: string, courses: any[], onCourseClick: (course: Course) => void }) => {
-  const formatPrice = (price?: number | null) => {
-    if (price === 0) return 'Free';
-    if (price) return `R ${price.toFixed(2)}`;
-    return 'By Subscription';
-  };
-  
-  return (
-    <>
-      <div className="text-center mb-12">
-        <h2 className="text-3xl md:text-4xl font-bold mb-4">{title}</h2>
-        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">{description}</p>
-      </div>
-      <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {courses.map(course => (
-           <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
-            <div onClick={() => onCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
-              <Image 
-                src={course.thumbnail}
-                alt={course.title}
-                fill
-                className="object-cover transition-transform duration-300 group-hover:scale-105"
-                data-ai-hint="online course"
-              />
-               <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                  <Play className="w-12 h-12 text-white" />
-               </div>
-            </div>
-
-            <CardHeader>
-                <div className="flex justify-between items-start">
-                    <Badge variant="secondary">{course.subject}</Badge>
-                    <div className="flex items-center gap-1 text-sm text-amber-400">
-                        <Star className="w-4 h-4 fill-current" />
-                        <span>{course.rating || 4.8}</span>
-                    </div>
-                </div>
-                <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
-            </CardHeader>
-            <CardContent className="flex-grow">
-              <p className="text-sm text-muted-foreground line-clamp-3">
-                {course.description}
-              </p>
-            </CardContent>
-            <CardFooter className="flex-col items-start gap-4">
-                <div className="flex justify-between w-full text-sm text-muted-foreground">
-                     <div className="flex items-center gap-2">
-                        <Play className="w-4 h-4" />
-                        <span>{course.videos.length} lessons</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <Clock className="w-4 h-4" />
-                        <span>{course.duration || '8h'}</span>
-                    </div>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between w-full">
-                    <span className="text-xl font-bold">
-                        {formatPrice(course.pricing.price)}
-                    </span>
-                     <Button asChild size="sm">
-                        <Link href="/register">Enroll Now</Link>
-                    </Button>
-                </div>
-            </CardFooter>
-          </Card>
-        ))}
-      </div>
-    </>
-  );
-};
-
-
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
-    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center">
-        <div className="absolute inset-0 bg-gradient-radial from-background to-transparent" />
+    <section id="home" className="relative py-24 md:py-32 overflow-hidden text-center bg-background">
+        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
         <div className="container mx-auto px-6 relative z-10">
             <div className="max-w-4xl mx-auto">
-                <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-red-400" style={{ animationDelay: '0.2s' }}>
                     Master Maths & Science
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
@@ -256,7 +183,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <Card key={index} className="text-center p-8 bg-card border shadow-lg hover:shadow-card-glow hover:border-primary/50 transition-all duration-300">
+                  <Card key={index} className="text-center p-8 bg-card border shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
                     <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6">
                         {feature.icon}
                     </div>
@@ -282,8 +209,8 @@ export default function Home() {
                 <Tabs defaultValue="Maths" className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-8">
                         {Object.entries(curriculumData).map(([subject, { icon: Icon }]) => (
-                            <TabsTrigger key={subject} value={subject} className="gap-2">
-                                <Icon /> {subject}
+                            <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3">
+                                <Icon className="h-5 w-5"/> {subject}
                             </TabsTrigger>
                         ))}
                     </TabsList>
@@ -292,12 +219,12 @@ export default function Home() {
                         <TabsContent key={subject} value={subject}>
                              <Accordion type="multiple" className="w-full space-y-4">
                                 {chapters.map((chapter, index) => (
-                                    <Card key={index} className="overflow-hidden">
+                                    <Card key={index} className="overflow-hidden bg-card shadow-md">
                                         <AccordionItem value={`item-${index}`} className="border-b-0">
-                                            <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 bg-card">
+                                            <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6">
                                                 {chapter.chapter}
                                             </AccordionTrigger>
-                                            <AccordionContent className="p-6">
+                                            <AccordionContent className="p-6 pt-0">
                                                 <Accordion type="multiple" className="w-full space-y-2">
                                                     {chapter.topics.map((topic, topicIndex) => {
                                                         const relatedCourses = getCoursesForTopic(topic, subject as any);
@@ -310,7 +237,7 @@ export default function Home() {
                                                                      {relatedCourses.length > 0 ? (
                                                                         <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t">
                                                                             {relatedCourses.map(course => (
-                                                                                <Card key={course.id} className="flex items-center gap-4 p-3 bg-muted/50">
+                                                                                <Card key={course.id} className="flex items-center gap-4 p-3 bg-muted/50 hover:bg-muted transition-colors">
                                                                                     <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video" data-ai-hint="online course abstract" />
                                                                                     <div className="flex-1">
                                                                                         <h4 className="font-semibold text-sm">{course.title}</h4>
@@ -339,21 +266,72 @@ export default function Home() {
             </div>
           </section>
 
-
           <section id="courses" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-              <CoursesSection
-                title="Featured Courses"
-                description="Hand-picked courses to help you excel in your studies."
-                courses={allCourses.slice(0, 6)}
-                onCourseClick={handleCourseClick}
-              />
+                <div className="text-center mb-12">
+                  <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Courses</h2>
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                  {allCourses.slice(0, 6).map(course => (
+                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
+                      <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
+                        <Image 
+                          src={course.thumbnail}
+                          alt={course.title}
+                          fill
+                          className="object-cover transition-transform duration-300 group-hover:scale-105"
+                          data-ai-hint="online course"
+                        />
+                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Play className="w-12 h-12 text-white" />
+                         </div>
+                      </div>
+                      <CardHeader>
+                          <div className="flex justify-between items-start">
+                              <Badge variant="secondary">{course.subject}</Badge>
+                              <div className="flex items-center gap-1 text-sm text-amber-400">
+                                  <Star className="w-4 h-4 fill-current" />
+                                  <span>{course.rating || 4.8}</span>
+                              </div>
+                          </div>
+                          <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
+                      </CardHeader>
+                      <CardContent className="flex-grow">
+                        <p className="text-sm text-muted-foreground line-clamp-3">
+                          {course.description}
+                        </p>
+                      </CardContent>
+                      <CardFooter className="flex-col items-start gap-4">
+                          <div className="flex justify-between w-full text-sm text-muted-foreground">
+                               <div className="flex items-center gap-2">
+                                  <Clapperboard className="w-4 h-4" />
+                                  <span>{course.videos.length} lessons</span>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                  <Clock className="w-4 h-4" />
+                                  <span>{course.duration || '8h'}</span>
+                              </div>
+                          </div>
+                          <Separator />
+                          <div className="flex items-center justify-between w-full">
+                              <span className="text-xl font-bold">
+                                  {course.pricing.type === 'purchase' ? `R ${course.pricing.price}`: 'Free'}
+                              </span>
+                               <Button asChild size="sm">
+                                  <Link href="/register">Enroll Now</Link>
+                              </Button>
+                          </div>
+                      </CardFooter>
+                    </Card>
+                  ))}
+                </div>
             </div>
           </section>
 
           <section id="contact" className="py-20 bg-muted/20">
             <div className="max-w-4xl mx-auto px-6 text-center">
-              <Card className="p-12 bg-card border">
+              <Card className="p-12 bg-card border shadow-xl">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
@@ -381,7 +359,7 @@ export default function Home() {
 
       {selectedCourseForPlayer && (
         <Dialog open={isVideoPlayerOpen} onOpenChange={setIsVideoPlayerOpen}>
-          <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
+          <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 gap-0">
               <div className="grid md:grid-cols-3 h-full">
                 <div className="md:col-span-2 h-full flex flex-col">
                   <div className="relative aspect-video bg-black rounded-tl-lg overflow-hidden">
@@ -457,11 +435,11 @@ export default function Home() {
                         ))}
                     </Accordion>
                   </div>
-                   <div className="p-6 border-t">
+                   <DialogFooter className="p-6 border-t">
                      <Button asChild size="lg" className="w-full">
                        <Link href="/register">Enroll Now</Link>
                      </Button>
-                  </div>
+                  </DialogFooter>
                 </div>
               </div>
           </DialogContent>
@@ -472,5 +450,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
