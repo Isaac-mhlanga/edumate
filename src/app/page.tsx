@@ -4,12 +4,12 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -186,10 +186,13 @@ export default function Home() {
   };
 
   const getCoursesForTopic = (topic: string, subject: 'Maths' | 'Physical Sciences' | 'Life Sciences') => {
+    const searchTerms = topic.toLowerCase().split(/[&, ]+/).filter(term => term.length > 2);
     return allCourses.filter(course => 
       course.subject === subject && 
-      (course.title.toLowerCase().includes(topic.split(' ')[0].toLowerCase()) || 
-       course.description.toLowerCase().includes(topic.split(' ')[0].toLowerCase()))
+      searchTerms.some(term => 
+        course.title.toLowerCase().includes(term) || 
+        course.description.toLowerCase().includes(term)
+      )
     );
   };
 
@@ -278,9 +281,9 @@ export default function Home() {
                 
                 <Tabs defaultValue="Maths" className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-8">
-                        <TabsTrigger value="Maths">Maths</TabsTrigger>
-                        <TabsTrigger value="Physical Sciences">Physical Sciences</TabsTrigger>
-                        <TabsTrigger value="Life Sciences">Life Sciences</TabsTrigger>
+                        <TabsTrigger value="Maths" className="gap-2"><FunctionSquare />Maths</TabsTrigger>
+                        <TabsTrigger value="Physical Sciences" className="gap-2"><Rocket />Physical Sciences</TabsTrigger>
+                        <TabsTrigger value="Life Sciences" className="gap-2"><Dna />Life Sciences</TabsTrigger>
                     </TabsList>
                     
                     {Object.entries(curriculumData).map(([subject, chapters]) => (
