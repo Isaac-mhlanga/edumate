@@ -472,7 +472,7 @@ export default function Home() {
                   </div>
                    <DialogFooter className="p-6 border-t">
                      <Button asChild size="lg" className="w-full">
-                       <Link href={`/register`}>Enroll Now</Link>
+                       <Link href="/register">Enroll Now</Link>
                      </Button>
                   </DialogFooter>
                 </div>
@@ -485,5 +485,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
