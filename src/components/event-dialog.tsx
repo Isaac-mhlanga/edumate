@@ -154,7 +154,11 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
   return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-3xl">
-          
+          <DialogHeader>
+            <DialogTitle className="sr-only">Event Details: {event.title}</DialogTitle>
+            <DialogDescription className="sr-only">View the details for the upcoming event: {event.title}. You can download the poster or share it.</DialogDescription>
+          </DialogHeader>
+
           <EventPoster event={event} ref={posterRef} />
           
           <Separator />
