@@ -180,13 +180,13 @@ export default function Home() {
   ];
   
   const curriculumData = {
-    'Maths': grade12MathsCurriculum,
-    'Physical Sciences': grade12PhysicsCurriculum,
-    'Life Sciences': grade12LifeSciencesCurriculum,
+    'Maths': { icon: FunctionSquare, data: grade12MathsCurriculum },
+    'Physical Sciences': { icon: Rocket, data: grade12PhysicsCurriculum },
+    'Life Sciences': { icon: Dna, data: grade12LifeSciencesCurriculum },
   };
 
   const getCoursesForTopic = (topic: string, subject: 'Maths' | 'Physical Sciences' | 'Life Sciences') => {
-    const searchTerms = topic.toLowerCase().split(/[&, ]+/).filter(term => term.length > 2);
+    const searchTerms = topic.toLowerCase().replace(/[-&,]/g, ' ').split(' ').filter(term => term.length > 2);
     return allCourses.filter(course => 
       course.subject === subject && 
       searchTerms.some(term => 
@@ -281,12 +281,14 @@ export default function Home() {
                 
                 <Tabs defaultValue="Maths" className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-8">
-                        <TabsTrigger value="Maths" className="gap-2"><FunctionSquare />Maths</TabsTrigger>
-                        <TabsTrigger value="Physical Sciences" className="gap-2"><Rocket />Physical Sciences</TabsTrigger>
-                        <TabsTrigger value="Life Sciences" className="gap-2"><Dna />Life Sciences</TabsTrigger>
+                        {Object.entries(curriculumData).map(([subject, { icon: Icon }]) => (
+                            <TabsTrigger key={subject} value={subject} className="gap-2">
+                                <Icon /> {subject}
+                            </TabsTrigger>
+                        ))}
                     </TabsList>
                     
-                    {Object.entries(curriculumData).map(([subject, chapters]) => (
+                    {Object.entries(curriculumData).map(([subject, { data: chapters }]) => (
                         <TabsContent key={subject} value={subject}>
                              <Accordion type="multiple" className="w-full space-y-4">
                                 {chapters.map((chapter, index) => (
@@ -467,3 +469,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
