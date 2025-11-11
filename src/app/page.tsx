@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -48,26 +48,26 @@ type Course = {
 
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
-    <section id="home" className="relative py-24 md:py-32 overflow-hidden text-center bg-background">
-        <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background" />
-        <div className="container mx-auto px-6 relative z-10">
-            <div className="max-w-4xl mx-auto">
-                <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-red-400" style={{ animationDelay: '0.2s' }}>
-                    Master Maths & Science
-                </h1>
-                <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                    Ace your exams with our comprehensive video lessons, AI-powered tutors, and expert-led tutorials.
-                </p>
-                <div className="flex justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-                    <Button onClick={onExploreClick} size="lg">
-                        Explore Curriculum <ArrowRight className="ml-2" />
-                    </Button>
-                    <Button asChild size="lg" variant="outline">
-                        <Link href="/tutors">Find a Tutor</Link>
-                    </Button>
-                </div>
-            </div>
+    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-background">
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background z-0"></div>
+      <div className="container mx-auto px-6 relative z-10">
+        <div className="max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-red-400" style={{ animationDelay: '0.2s' }}>
+            Master Maths & Science
+          </h1>
+          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            Ace your exams with our comprehensive video lessons, AI-powered tutors, and expert-led tutorials.
+          </p>
+          <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            <Button onClick={onExploreClick} size="lg" className="w-full sm:w-auto">
+              Explore Curriculum <ArrowRight className="ml-2" />
+            </Button>
+            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+              <Link href="/tutors">Find a Tutor</Link>
+            </Button>
+          </div>
         </div>
+      </div>
     </section>
   );
 };
@@ -150,11 +150,11 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <PublicHeader />
 
-      <main className="flex-grow pt-20">
+      <main className="flex-grow pt-16">
          <div>
           <Hero onExploreClick={scrollToCurriculum} />
           
-          <section className="py-16 bg-muted/20">
+          <section className="py-16 bg-muted/50">
             <div className="max-w-7xl mx-auto px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {stats.map((stat, index) => (
@@ -184,7 +184,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <Card key={index} className="text-center p-8 bg-card border shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                  <Card key={index} className="text-center p-8 bg-card border-transparent shadow-card-glow hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                     <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6">
                         {feature.icon}
                     </div>
@@ -200,7 +200,7 @@ export default function Home() {
             </div>
           </section>
           
-           <section id="curriculum" className="py-20 bg-muted/20">
+           <section id="curriculum" className="py-20 bg-muted/50">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
@@ -208,9 +208,9 @@ export default function Home() {
                 </div>
                 
                 <Tabs defaultValue="Maths" className="w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <TabsList className="grid w-full grid-cols-3 mb-8">
+                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8 h-auto sm:h-12">
                         {Object.entries(curriculumData).map(([subject, { icon: Icon }]) => (
-                            <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3">
+                            <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3 h-full">
                                 <Icon className="h-5 w-5"/> {subject}
                             </TabsTrigger>
                         ))}
@@ -231,16 +231,16 @@ export default function Home() {
                                                         const relatedCourses = getCoursesForTopic(topic, subject as any);
                                                         return (
                                                             <AccordionItem value={`topic-${topicIndex}`} key={topicIndex} className="border rounded-md bg-background/50">
-                                                                <AccordionTrigger className="text-base font-medium hover:no-underline px-4 py-3">
+                                                                <AccordionTrigger className="text-base font-medium hover:no-underline px-4 py-3 text-left">
                                                                     {topic}
                                                                 </AccordionTrigger>
                                                                 <AccordionContent className="px-4 pb-4">
                                                                      {relatedCourses.length > 0 ? (
                                                                         <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t">
                                                                             {relatedCourses.map(course => (
-                                                                                <Card key={course.id} className="flex items-center gap-4 p-3 bg-muted/50 hover:bg-muted transition-colors">
-                                                                                    <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video" data-ai-hint="online course abstract" />
-                                                                                    <div className="flex-1">
+                                                                                <Card key={course.id} className="flex flex-col sm:flex-row items-center gap-4 p-3 bg-muted/50 hover:bg-muted transition-colors">
+                                                                                    <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video w-full sm:w-[120px] shrink-0" data-ai-hint="online course abstract" />
+                                                                                    <div className="flex-1 text-left">
                                                                                         <h4 className="font-semibold text-sm">{course.title}</h4>
                                                                                         <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
                                                                                     </div>
@@ -275,7 +275,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                   {allCourses.slice(0, 6).map((course, index) => (
-                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg border-transparent hover:border-primary/50 hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                       <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                         <Image 
                           src={course.thumbnail}
@@ -330,7 +330,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="faq" className="py-20 bg-muted/20">
+          <section id="faq" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
@@ -355,7 +355,7 @@ export default function Home() {
 
           <section id="contact" className="py-20">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
-              <Card className="p-12 bg-card border shadow-xl">
+              <Card className="p-8 sm:p-12 bg-card border-transparent shadow-2xl shadow-primary/10">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
@@ -383,8 +383,8 @@ export default function Home() {
 
       {selectedCourseForPlayer && (
         <Dialog open={isVideoPlayerOpen} onOpenChange={setIsVideoPlayerOpen}>
-          <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0 gap-0">
-              <div className="grid md:grid-cols-3 h-full">
+          <DialogContent className="max-w-6xl w-[95vw] h-auto sm:h-[90vh] flex flex-col p-0 gap-0">
+              <div className="grid md:grid-cols-3 h-full overflow-hidden">
                 <div className="md:col-span-2 h-full flex flex-col">
                   <div className="relative aspect-video bg-black rounded-tl-lg overflow-hidden">
                       {activeVideo ? (
@@ -425,7 +425,7 @@ export default function Home() {
                           </div>
                       )}
                   </div>
-                   <div className="p-6 space-y-2">
+                   <div className="p-6 space-y-2 overflow-y-auto">
                         <Badge variant="secondary" className="mb-2">{selectedCourseForPlayer.subject} - Grade {selectedCourseForPlayer.grade}</Badge>
                         <h2 className="text-2xl font-bold">{selectedCourseForPlayer.title}</h2>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
@@ -438,7 +438,7 @@ export default function Home() {
                         <p className="text-sm text-muted-foreground pt-2">{selectedCourseForPlayer.description}</p>
                    </div>
                 </div>
-                <div className="md:col-span-1 bg-muted/50 flex flex-col h-full rounded-r-lg">
+                <div className="md:col-span-1 bg-muted/50 flex flex-col h-full rounded-r-lg max-h-[90vh] sm:max-h-none">
                   <div className="p-4 border-b">
                     <h3 className="font-semibold">Course Content</h3>
                   </div>

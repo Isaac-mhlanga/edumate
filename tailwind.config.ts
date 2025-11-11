@@ -62,19 +62,6 @@ export default {
           '4': 'hsl(var(--chart-4))',
           '5': 'hsl(var(--chart-5))',
         },
-         gray: {
-          850: '#111827',
-          900: '#111827',
-        },
-        blue: {
-          600: '#2563eb',
-        },
-        purple: {
-          600: '#7c3aed',
-        },
-        green: {
-            500: '#22c55e',
-        }
       },
       borderRadius: {
         lg: "var(--radius)",
