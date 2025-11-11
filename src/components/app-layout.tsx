@@ -90,7 +90,6 @@ type MenuItem = {
 
 const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
-  { href: '/ai-tutor', label: 'AI Tutor', icon: Wand2, basePath: '/ai-tutor' },
   { href: '/dashboard?tab=courses', label: 'Course Catalog', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
@@ -99,7 +98,6 @@ const studentMenuItems: MenuItem[] = [
 
 const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/instructor', tab: 'overview' },
-  { href: '/ai-tutor', label: 'AI Tutor', icon: Wand2, basePath: '/ai-tutor' },
   { href: '/instructor?tab=courses', label: 'Courses', icon: GraduationCap, basePath: '/instructor', tab: 'courses' },
   { href: '/instructor?tab=quizzes', label: 'Quizzes', icon: FileQuestion, basePath: '/instructor', tab: 'quizzes' },
   { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
@@ -110,7 +108,6 @@ const instructorMenuItems: MenuItem[] = [
 
 const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/admin', tab: 'overview' },
-  { href: '/ai-tutor', label: 'AI Tutor', icon: Wand2, basePath: '/ai-tutor' },
   { href: '/admin?tab=users', label: 'Users', icon: Users, basePath: '/admin', tab: 'users' },
   { href: '/admin?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/admin', tab: 'courses' },
   { href: '/admin?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/admin', tab: 'assignments' },
@@ -121,7 +118,6 @@ const adminMenuItems: MenuItem[] = [
 
 const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/tutor', tab: 'overview' },
-  { href: '/ai-tutor', label: 'AI Tutor', icon: Wand2, basePath: '/ai-tutor' },
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },

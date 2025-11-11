@@ -254,7 +254,6 @@ export default function Home() {
                   {item.name}
                 </button>
               ))}
-              <Link href="/ai-tutor" className="text-muted-foreground hover:text-primary font-medium transition-colors duration-300">AI Tutor</Link>
             </nav>
             
             <div className="flex items-center gap-2">
@@ -492,4 +491,3 @@ export default function Home() {
     </div>
   );
 }
-
