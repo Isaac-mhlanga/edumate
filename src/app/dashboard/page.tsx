@@ -17,9 +17,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { studentData, instructorData, grade12MathsCurriculum } from "@/lib/data";
+import { studentData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, ChevronRightIcon } from "lucide-react";
+import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud, ChevronRightIcon, Rocket, Clapperboard, Dna } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,6 +36,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 
 const firebaseConfig = {
@@ -68,6 +69,9 @@ type Course = {
         price?: number;
     };
     instructor: string;
+    videos: any[];
+    duration?: string;
+    rating?: number;
 };
 
 type SubmittedAssignment = {
@@ -103,6 +107,8 @@ function DashboardPage() {
     const [user, setUser] = React.useState<User | null>(null);
     
     const currentTab = searchParams.get('tab') || 'overview';
+    const [activeCurriculum, setActiveCurriculum] = React.useState('maths');
+
 
     const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
@@ -423,27 +429,6 @@ function DashboardPage() {
     
     const purchasedCourseIds = new Set(transactions.filter(t => t.itemType === 'course').map(t => t.itemId));
 
-    const filteredCourses = React.useMemo(() => {
-        return allCourses.filter(course => {
-            const searchMatch = courseFilters.search.trim().toLowerCase() === '' ||
-                course.title.toLowerCase().includes(courseFilters.search.trim().toLowerCase());
-
-            const subjectMatch = courseFilters.subject === 'All' || course.subject === courseFilters.subject;
-            
-            const gradeMatch = courseFilters.grade === 'All' || course.grade === courseFilters.grade;
-            
-            const purchased = purchasedCourseIds.has(course.id);
-            const statusMatch = courseFilters.status === 'All' ||
-                (courseFilters.status === 'Purchased' && purchased) ||
-                (courseFilters.status === 'Not Purchased' && !purchased);
-
-            return searchMatch && subjectMatch && gradeMatch && statusMatch;
-        });
-    }, [allCourses, courseFilters, purchasedCourseIds]);
-    
-    const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
-    const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
-
     const purchasedCoursesWithDetails = React.useMemo(() => {
         return allCourses.filter(c => purchasedCourseIds.has(c.id));
     }, [allCourses, purchasedCourseIds]);
@@ -483,6 +468,40 @@ function DashboardPage() {
             default: return 'outline';
         }
     };
+    
+    const mathsCurriculumChapters = [
+      { title: 'Paper 1', icon: BookOpen },
+      { title: 'Paper 2', icon: BookOpen },
+    ];
+
+    const physicsCurriculumChapters = [
+        { title: "Paper 1: Physics", icon: Rocket, category: "Physics" },
+        { title: "Paper 2: Chemistry", icon: Clapperboard, category: "Chemistry" },
+    ];
+    
+    const lifeSciencesCurriculumChapters = [
+        { title: "Paper 1", icon: BookOpen },
+        { title: "Paper 2", icon: Dna },
+    ];
+
+    let currentCurriculumData;
+    let currentChapterIcons;
+
+    switch (activeCurriculum) {
+        case 'physical-sciences':
+        currentCurriculumData = grade12PhysicsCurriculum;
+        currentChapterIcons = physicsCurriculumChapters;
+        break;
+        case 'life-sciences':
+            currentCurriculumData = grade12LifeSciencesCurriculum;
+            currentChapterIcons = lifeSciencesCurriculumChapters;
+            break;
+        default:
+        currentCurriculumData = grade12MathsCurriculum;
+        currentChapterIcons = mathsCurriculumChapters;
+        break;
+    }
+
 
     return (
         <div className="space-y-8">
@@ -527,7 +546,7 @@ function DashboardPage() {
                                             <Progress value={sub.progress} className="h-2"/>
                                         </div>
                                         <Button className="mt-4 w-full" asChild>
-                                            <Link href={`/instructor/courses/${allCourses.find(c => c.title.includes(sub.name.split(' - ')[1]))?.id || ''}?from=dashboard`}>
+                                            <Link href={`/courses/${allCourses.find(c => c.title.includes(sub.name.split(' - ')[1]))?.id || ''}?from=dashboard`}>
                                                 Continue Learning <ArrowRight className="ml-2 h-4 w-4"/>
                                             </Link>
                                         </Button>
@@ -594,7 +613,7 @@ function DashboardPage() {
                                                 </CardContent>
                                                 <CardFooter className="p-4 pt-0">
                                                     <Button variant="link" className="p-0 h-auto as-child">
-                                                        <Link href={`/instructor/courses/${course.id}?from=dashboard`}>
+                                                        <Link href={`/courses/${course.id}?from=dashboard`}>
                                                             Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
                                                         </Link>
                                                     </Button>
@@ -637,31 +656,39 @@ function DashboardPage() {
             {currentTab === 'courses' && (
                 <Card>
                     <CardHeader>
-                        <CardTitle>Grade 12 Curriculum</CardTitle>
+                        <CardTitle>Course Catalog</CardTitle>
                         <CardDescription>Browse chapters and topics to start learning.</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                        <Accordion type="single" collapsible className="w-full">
-                            {grade12MathsCurriculum.map((item, index) => (
-                                <AccordionItem value={`item-${index}`} key={index}>
-                                    <AccordionTrigger className="text-lg font-semibold hover:no-underline">
-                                        {item.chapter}
-                                    </AccordionTrigger>
-                                    <AccordionContent>
-                                        <ul className="space-y-2 pl-4 pt-2">
-                                            {item.topics.map((topic, topicIndex) => (
-                                                <li key={topicIndex} className="flex items-center">
-                                                    <ChevronRightIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                                                    <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
-                                                        {topic}
-                                                    </Link>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))}
-                        </Accordion>
+                     <CardContent>
+                        <Tabs value={activeCurriculum} onValueChange={setActiveCurriculum} className="w-full">
+                            <TabsList className="grid w-full grid-cols-3 mb-4">
+                                <TabsTrigger value="maths">Maths</TabsTrigger>
+                                <TabsTrigger value="physical-sciences">Physical Sciences</TabsTrigger>
+                                <TabsTrigger value="life-sciences">Life Sciences</TabsTrigger>
+                            </TabsList>
+                            
+                            <Accordion type="single" collapsible className="w-full">
+                                {currentCurriculumData.map((item, index) => (
+                                    <AccordionItem value={`item-${index}`} key={index}>
+                                        <AccordionTrigger className="text-lg font-semibold hover:no-underline">
+                                            {item.chapter}
+                                        </AccordionTrigger>
+                                        <AccordionContent>
+                                            <ul className="space-y-2 pl-4 pt-2">
+                                                {item.topics.map((topic, topicIndex) => (
+                                                    <li key={topicIndex} className="flex items-center">
+                                                        <ChevronRightIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                        <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                                                            {topic}
+                                                        </Link>
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        </AccordionContent>
+                                    </AccordionItem>
+                                ))}
+                            </Accordion>
+                        </Tabs>
                     </CardContent>
                 </Card>
             )}
@@ -1110,8 +1137,3 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
-
-    
-
-    
-
