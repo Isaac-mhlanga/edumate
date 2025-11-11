@@ -78,25 +78,26 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
   const posterRef = React.useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   const [isPrinting, setIsPrinting] = React.useState(false);
-  
+
   const handlePrint = useReactToPrint({
     content: () => posterRef.current,
     documentTitle: `EdumatePro-Event-${event?.title.replace(/ /g, '_')}`,
-    onBeforeGetContent: () => {
-      return new Promise<void>((resolve) => {
-        setIsPrinting(true);
-        resolve();
-      });
-    },
     onAfterPrint: () => {
-        setIsPrinting(false);
-        toast({ title: "Poster Saved", description: "Your event poster PDF has been generated." });
+      setIsPrinting(false);
+      toast({ title: 'Poster Saved', description: 'Your event poster PDF has been generated.' });
     },
-     onPrintError: () => {
-        setIsPrinting(false);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not generate PDF.' });
+    onPrintError: () => {
+      setIsPrinting(false);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not generate PDF.' });
     },
   });
+  
+  React.useEffect(() => {
+    if (isPrinting) {
+      handlePrint();
+    }
+  }, [isPrinting, handlePrint]);
+
 
   if (!event) return null;
 
@@ -123,48 +124,53 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
   const otherEvents = allEvents.filter(e => e.id !== event.id).slice(0, 3);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-3xl">
-        <EventPoster event={event} ref={posterRef} />
-        
-        <Separator />
+    <>
+      <div className="hidden">
+        {isPrinting && event && <EventPoster event={event} ref={posterRef} />}
+      </div>
+      <Dialog open={isOpen} onOpenChange={onClose}>
+        <DialogContent className="max-w-3xl">
+          <EventPoster event={event} />
+          
+          <Separator />
 
-        <div className="space-y-4">
-            <h4 className="font-semibold text-center">More Upcoming Events</h4>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                {otherEvents.map(otherEvent => (
-                    <button key={otherEvent.id} onClick={() => onEventSelect(otherEvent)} className="text-left p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
-                        <p className="font-semibold text-sm line-clamp-1">{otherEvent.title}</p>
-                        <p className="text-xs text-muted-foreground">{new Date(otherEvent.start).toLocaleDateString()}</p>
-                    </button>
-                ))}
+          <div className="space-y-4">
+              <h4 className="font-semibold text-center">More Upcoming Events</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  {otherEvents.map(otherEvent => (
+                      <button key={otherEvent.id} onClick={() => onEventSelect(otherEvent)} className="text-left p-3 bg-muted/50 rounded-lg hover:bg-muted transition-colors">
+                          <p className="font-semibold text-sm line-clamp-1">{otherEvent.title}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(otherEvent.start).toLocaleDateString()}</p>
+                      </button>
+                  ))}
+              </div>
+          </div>
+
+          <DialogFooter className="sm:justify-between flex-col-reverse sm:flex-row gap-4 pt-4 border-t">
+            <div className="flex items-center gap-2">
+              <Button variant="outline" size="icon" onClick={() => shareOnSocial('twitter')}><Twitter className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => shareOnSocial('facebook')}><Facebook className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => shareOnSocial('linkedin')}><Linkedin className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={copyLink}><LinkIcon className="h-4 w-4" /></Button>
             </div>
-        </div>
-
-        <DialogFooter className="sm:justify-between flex-col-reverse sm:flex-row gap-4 pt-4 border-t">
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="icon" onClick={() => shareOnSocial('twitter')}><Twitter className="h-4 w-4" /></Button>
-            <Button variant="outline" size="icon" onClick={() => shareOnSocial('facebook')}><Facebook className="h-4 w-4" /></Button>
-            <Button variant="outline" size="icon" onClick={() => shareOnSocial('linkedin')}><Linkedin className="h-4 w-4" /></Button>
-            <Button variant="outline" size="icon" onClick={copyLink}><LinkIcon className="h-4 w-4" /></Button>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button variant="secondary" onClick={onClose}>Close</Button>
-            <Button onClick={handlePrint} disabled={isPrinting}>
-              {isPrinting ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" /> Download as PDF
-                </>
-              )}
-            </Button>
-          </div>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+            <div className="flex items-center gap-2">
+              <Button variant="secondary" onClick={onClose}>Close</Button>
+              <Button onClick={() => setIsPrinting(true)} disabled={isPrinting}>
+                {isPrinting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Generating...
+                  </>
+                ) : (
+                  <>
+                    <Download className="mr-2 h-4 w-4" /> Download as PDF
+                  </>
+                )}
+              </Button>
+            </div>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 }
