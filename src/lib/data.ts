@@ -1,6 +1,29 @@
 
 import { BarChart, Book, BookOpen, CheckCircle, Clock, CreditCard, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote } from "lucide-react";
 
+export const faqData = [
+    {
+        question: "What subjects and grades do you cover?",
+        answer: "We primarily focus on Grade 10, 11, and 12 curricula for Mathematics, Physical Sciences, and Life Sciences. Our course catalog is always expanding, so be sure to check back for new subjects!"
+    },
+    {
+        question: "How does the AI tutor work?",
+        answer: "Our AI tutor provides personalized, 24/7 assistance. You can upload past papers or worksheets, and the AI will break down questions, provide step-by-step solutions, and simplify complex concepts, helping you learn at your own pace."
+    },
+    {
+        question: "Can I get help from a real person?",
+        answer: "Absolutely! Alongside our AI tutor, you can book one-on-one sessions with our expert human tutors. They provide personalized guidance and support tailored to your specific learning needs."
+    },
+    {
+        question: "What is the difference between a subscription and a one-time purchase?",
+        answer: "A one-time purchase gives you lifetime access to a single course. A subscription gives you access to all courses within a subject (or all subjects, depending on the plan) for the duration of your subscription."
+    },
+    {
+        question: "Do you offer a free trial?",
+        answer: "Yes, you can sign up for a free account to get a feel for our platform. While some content is free, full access to premium courses and features requires a subscription or purchase."
+    }
+];
+
 export const grade12MathsCurriculum = [
     {
         chapter: "Paper 1",

@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star,
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
+import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum, faqData } from "@/lib/data";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -18,6 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PublicHeader } from "@/components/public-header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Settings } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 type VideoData = {
     id: string;
@@ -157,7 +158,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {stats.map((stat, index) => (
-                  <div key={index} className="text-center">
+                  <div key={index} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
                     <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
                       {stat.number}
                     </div>
@@ -172,7 +173,7 @@ export default function Home() {
 
           <section id="about" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-              <div className="text-center mb-16">
+              <div className="text-center mb-16 animate-fade-in-up">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
                   The Future of Learning is Here
                 </h2>
@@ -183,7 +184,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <Card key={index} className="text-center p-8 bg-card border shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
+                  <Card key={index} className="text-center p-8 bg-card border shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                     <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6">
                         {feature.icon}
                     </div>
@@ -201,12 +202,12 @@ export default function Home() {
           
            <section id="curriculum" className="py-20 bg-muted/20">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12">
+                <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics. Find courses that match your needs.</p>
                 </div>
                 
-                <Tabs defaultValue="Maths" className="w-full">
+                <Tabs defaultValue="Maths" className="w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <TabsList className="grid w-full grid-cols-3 mb-8">
                         {Object.entries(curriculumData).map(([subject, { icon: Icon }]) => (
                             <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3">
@@ -268,13 +269,13 @@ export default function Home() {
 
           <section id="courses" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12">
+                <div className="text-center mb-12 animate-fade-in-up">
                   <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Courses</h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {allCourses.slice(0, 6).map(course => (
-                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
+                  {allCourses.slice(0, 6).map((course, index) => (
+                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                       <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                         <Image 
                           src={course.thumbnail}
@@ -329,8 +330,31 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="contact" className="py-20 bg-muted/20">
-            <div className="max-w-4xl mx-auto px-6 text-center">
+          <section id="faq" className="py-20 bg-muted/20">
+            <div className="max-w-4xl mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+                    <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
+                </div>
+                <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                    {faqData.map((item, index) => (
+                         <Card key={index} className="overflow-hidden bg-card shadow-md">
+                            <AccordionItem value={`faq-${index}`} className="border-b-0">
+                                <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
+                                    {item.question}
+                                </AccordionTrigger>
+                                <AccordionContent className="px-6 pb-6 text-muted-foreground text-base">
+                                    {item.answer}
+                                </AccordionContent>
+                            </AccordionItem>
+                        </Card>
+                    ))}
+                </Accordion>
+            </div>
+        </section>
+
+          <section id="contact" className="py-20">
+            <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
               <Card className="p-12 bg-card border shadow-xl">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Start Your Learning Journey Today
@@ -446,6 +470,11 @@ export default function Home() {
         </Dialog>
       )}
 
+      <Link href="https://wa.me/27123456789" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-transform hover:scale-110">
+        <FaWhatsapp className="w-7 h-7" />
+        <span className="sr-only">Chat on WhatsApp</span>
+      </Link>
+      
       <Footer />
     </div>
   );
