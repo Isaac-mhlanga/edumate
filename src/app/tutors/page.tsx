@@ -15,6 +15,7 @@ import { tutorData } from "@/lib/data";
 import { BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, MapPin, MessageSquare, Search, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React from "react";
+import { Textarea } from "@/components/ui/textarea";
 
 type Tutor = typeof tutorData;
 
