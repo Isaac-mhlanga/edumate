@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -78,7 +78,9 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
 
 export default function Home() {
   const allCourses = instructorData.courses as Course[];
-
+  const [currentCoursePage, setCurrentCoursePage] = useState(1);
+  const coursesPerPage = 6;
+  
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<Course | null>(null);
@@ -159,6 +161,13 @@ export default function Home() {
       curriculumSection.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  // Pagination logic for courses
+  const totalCoursePages = Math.ceil(allCourses.length / coursesPerPage);
+  const paginatedCourses = allCourses.slice(
+    (currentCoursePage - 1) * coursesPerPage,
+    currentCoursePage * coursesPerPage
+  );
 
 
   return (
@@ -331,7 +340,7 @@ export default function Home() {
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {allCourses.slice(0, 6).map((course, index) => (
+                  {paginatedCourses.map((course, index) => (
                      <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                       <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                         <Image 
@@ -384,6 +393,31 @@ export default function Home() {
                     </Card>
                   ))}
                 </div>
+                 {totalCoursePages > 1 && (
+                    <div className="flex items-center justify-center gap-2 mt-12">
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setCurrentCoursePage(p => p - 1)}
+                            disabled={currentCoursePage === 1}
+                        >
+                            <ChevronLeft className="h-4 w-4" />
+                            <span className="sr-only">Previous Page</span>
+                        </Button>
+                        <span className="text-sm text-muted-foreground">
+                            Page {currentCoursePage} of {totalCoursePages}
+                        </span>
+                        <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => setCurrentCoursePage(p => p + 1)}
+                            disabled={currentCoursePage >= totalCoursePages}
+                        >
+                            <ChevronRight className="h-4 w-4" />
+                            <span className="sr-only">Next Page</span>
+                        </Button>
+                    </div>
+                )}
             </div>
           </section>
 
@@ -548,4 +582,5 @@ export default function Home() {
     
 
     
+
 
