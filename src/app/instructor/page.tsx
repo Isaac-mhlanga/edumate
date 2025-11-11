@@ -947,7 +947,6 @@ function InstructorPage() {
         }
     };
 
-
   return (
       <div className="space-y-8">
            <style jsx global>{`
@@ -2450,5 +2449,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
