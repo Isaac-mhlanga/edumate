@@ -17,6 +17,7 @@ import { type UpcomingEvent } from '@/lib/data';
 import { useReactToPrint } from 'react-to-print';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
+import { Icons } from './icons';
 
 interface EventDialogProps {
   event: UpcomingEvent | null;
@@ -30,6 +31,10 @@ const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>((
   <div ref={ref} className="bg-card text-card-foreground p-8 print:p-0 print:bg-white print:text-black">
       <div className="border-4 border-primary p-6 rounded-lg relative bg-background print:border-black print:bg-gray-50">
         <div className="text-center mb-6">
+            <div className="flex items-center justify-center gap-2 mb-2">
+                <Icons.logo className="h-8 w-8 text-primary print:text-black" />
+                <span className="text-xl font-bold print:text-black">EDUMATE</span>
+            </div>
             <Badge variant="secondary" className="mb-2 print:bg-gray-200 print:text-black">{event.subject} - Grade {event.grade}</Badge>
             <h1 className="text-4xl font-bold text-primary print:text-black">{event.title}</h1>
             <p className="text-lg text-muted-foreground print:text-gray-600">An exclusive live session with {event.instructor}</p>
@@ -140,3 +145,5 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
     </Dialog>
   );
 }
+
+    
