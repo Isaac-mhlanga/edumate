@@ -13,7 +13,7 @@ import 'katex/dist/katex.min.css';
 //   description: 'A futuristic, professional, and student-focused multi-tenant educational web app offering video lessons, tutoring services, and paid assignments.',
 // };
 
-const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password'];
+const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors'];
 
 export default function RootLayout({
   children,
