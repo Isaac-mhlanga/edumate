@@ -98,19 +98,24 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
 
     try {
       const canvas = await html2canvas(posterRef.current, {
-        scale: 2, // Higher scale for better quality
+        scale: 2,
         useCORS: true,
         backgroundColor: null,
       });
 
       const imgData = canvas.toDataURL('image/png');
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+
+      const orientation = imgWidth > imgHeight ? 'l' : 'p';
+
       const pdf = new jsPDF({
-        orientation: 'portrait',
+        orientation,
         unit: 'px',
-        format: [canvas.width, canvas.height],
+        format: [imgWidth, imgHeight],
       });
 
-      pdf.addImage(imgData, 'PNG', 0, 0, canvas.width, canvas.height);
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
       pdf.save(`EdumatePro-Event-${event?.title.replace(/ /g, '_')}.pdf`);
 
     } catch (error) {
