@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useRef, useState } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,13 +12,12 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Tag, Info, User, Download, Clock, Share2, Twitter, Facebook, Linkedin, Link as LinkIcon, Paperclip, Users, BarChart, Loader2 } from 'lucide-react';
+import { Calendar, Info, Download, Clock, Share2, Twitter, Facebook, Linkedin, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { type UpcomingEvent } from '@/lib/data';
 import { useReactToPrint } from 'react-to-print';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Icons } from './icons';
-import { format } from 'date-fns';
 
 interface EventDialogProps {
   event: UpcomingEvent | null;
@@ -96,9 +95,11 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
     content: () => posterRef.current,
     documentTitle: `EdumatePro-Event-${event?.title.replace(/ /g, '_')}`,
     onBeforeGetContent: () => {
+      setIsPrinting(true);
       return new Promise<void>((resolve) => {
-        setIsPrinting(true);
-        resolve();
+        setTimeout(() => {
+          resolve();
+        }, 500); 
       });
     },
     onAfterPrint: () => {
@@ -137,11 +138,8 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
   return (
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-3xl">
-          <div className="hidden">
-            <EventPoster event={event} ref={posterRef} />
-          </div>
-
-          <EventPoster event={event} />
+          
+          <EventPoster event={event} ref={posterRef} />
           
           <Separator />
 
