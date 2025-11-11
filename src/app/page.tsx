@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -311,7 +311,7 @@ export default function Home() {
                                                                     <div className="pl-6 mt-2 grid grid-cols-1 md:grid-cols-2 gap-4">
                                                                         {relatedCourses.map(course => (
                                                                             <Card key={course.id} className="flex items-center gap-4 p-3 bg-muted/50">
-                                                                                <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video" />
+                                                                                <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video" data-ai-hint="online course abstract" />
                                                                                 <div className="flex-1">
                                                                                     <h4 className="font-semibold text-sm">{course.title}</h4>
                                                                                     <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
@@ -454,11 +454,11 @@ export default function Home() {
                         ))}
                     </Accordion>
                   </div>
-                   <DialogFooter className="p-6 border-t">
+                   <div className="p-6 border-t">
                      <Button asChild size="lg" className="w-full">
                        <Link href="/register">Enroll Now</Link>
                      </Button>
-                  </DialogFooter>
+                  </div>
                 </div>
               </div>
           </DialogContent>
