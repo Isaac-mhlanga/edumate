@@ -1,20 +1,19 @@
 
 'use client';
 
+import React from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
-import { instructorData } from "@/lib/data";
-import { ArrowLeft, ChevronLeft, ChevronRight, Clapperboard, PlayCircle, Settings, Sparkles, Star } from "lucide-react";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Skeleton } from "@/components/ui/skeleton";
+import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
-import React from "react";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { Skeleton } from "@/components/ui/skeleton";
 import { summarizeLesson } from "@/ai/flows/summarize-lesson";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
@@ -39,6 +38,8 @@ type Course = {
     };
     status: 'Draft' | 'Published' | 'Pending Approval' | 'Rejected';
     videos: VideoData[];
+    instructor?: string;
+    rating?: number;
 };
 
 const firebaseConfig = {
@@ -65,16 +66,6 @@ export default function CoursePreviewPage() {
     
     const [isSummarizing, setIsSummarizing] = React.useState(false);
     const [summary, setSummary] = React.useState<string | null>(null);
-
-
-    // Pagination for video list
-    const [currentVideoPage, setCurrentVideoPage] = React.useState(1);
-    const videosPerPage = 5;
-    const totalVideoPages = course ? Math.ceil(course.videos.length / videosPerPage) : 0;
-    const paginatedVideos = course?.videos.slice(
-        (currentVideoPage - 1) * videosPerPage,
-        currentVideoPage * videosPerPage
-    );
 
     React.useEffect(() => {
         const fetchCourse = async () => {
@@ -201,20 +192,11 @@ export default function CoursePreviewPage() {
                                                     </Button>
                                                 </DropdownMenuTrigger>
                                                 <DropdownMenuContent align="end">
-                                                    <DropdownMenuLabel>Quality</DropdownMenuLabel>
                                                     <DropdownMenuRadioGroup value={quality} onValueChange={setQuality}>
                                                         <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
                                                         <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
                                                         <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
                                                         <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
-                                                    </DropdownMenuRadioGroup>
-                                                    <DropdownMenuSeparator />
-                                                    <DropdownMenuLabel>Playback Speed</DropdownMenuLabel>
-                                                    <DropdownMenuRadioGroup value={playbackRate} onValueChange={setPlaybackRate}>
-                                                        <DropdownMenuRadioItem value="0.5">0.5x</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="1">1x</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="1.5">1.5x</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="2">2x</DropdownMenuRadioItem>
                                                     </DropdownMenuRadioGroup>
                                                 </DropdownMenuContent>
                                             </DropdownMenu>
@@ -240,9 +222,9 @@ export default function CoursePreviewPage() {
                             <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
                                 <div className="flex items-center gap-1">
                                     <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                                    <span>4.8 (24 reviews)</span>
+                                    <span>{course.rating || '4.8'} (24 reviews)</span>
                                 </div>
-                                <span>{instructorData.enrolledStudents.length} students</span>
+                                <span>{course.instructor || 'Dr. Evelyn Reed'}</span>
                             </div>
                             <CardDescription className="mt-4 text-base">
                                 {course.description}
@@ -281,8 +263,10 @@ export default function CoursePreviewPage() {
                            <h3 className="text-2xl font-bold mb-2">
                                 {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : course.pricing.type === 'free' ? 'Free' : 'Included in Subscription'}
                             </h3>
-                            <Button size="lg" className="w-full">
-                                {course.pricing.type === 'free' ? 'Enroll for Free' : 'Buy Now'}
+                            <Button size="lg" className="w-full" asChild>
+                                <Link href="/register">
+                                    {course.pricing.type === 'free' ? 'Enroll for Free' : 'Buy Now'}
+                                </Link>
                             </Button>
                             <p className="text-xs text-muted-foreground text-center mt-2">30-Day Money-Back Guarantee</p>
                         </CardContent>
@@ -296,45 +280,26 @@ export default function CoursePreviewPage() {
                         </CardHeader>
                         <CardContent className="p-0">
                             <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
-                                {paginatedVideos?.map((video, index) => (
+                                {course.videos.map((video, index) => (
                                     <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
                                         <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
                                             <div className="flex items-center gap-3">
                                                 <Clapperboard className="h-5 w-5 text-muted-foreground"/>
-                                                <span>{(currentVideoPage - 1) * videosPerPage + index + 1}. {video.title}</span>
+                                                <span>{index + 1}. {video.title}</span>
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent>
                                             <p className="text-sm text-muted-foreground ml-8">
-                                                This is a brief description of the video lesson. Click to play.
+                                                Click to play this lesson.
                                             </p>
                                         </AccordionContent>
                                     </AccordionItem>
                                 ))}
                             </Accordion>
                         </CardContent>
-                        {totalVideoPages > 1 && (
-                            <CardFooter className="flex items-center justify-between py-4">
-                                <div className="text-xs text-muted-foreground">
-                                    Page <strong>{currentVideoPage}</strong> of <strong>{totalVideoPages}</strong>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCurrentVideoPage(p => p - 1)} disabled={currentVideoPage === 1}>
-                                        <ChevronLeft className="h-4 w-4" />
-                                        <span className="sr-only">Previous Page</span>
-                                    </Button>
-                                    <Button variant="outline" size="icon" className="h-8 w-8" onClick={() => setCurrentVideoPage(p => p + 1)} disabled={currentVideoPage >= totalVideoPages}>
-                                        <ChevronRight className="h-4 w-4" />
-                                        <span className="sr-only">Next Page</span>
-                                    </Button>
-                                </div>
-                            </CardFooter>
-                        )}
                     </Card>
                 </div>
             </div>
         </div>
     );
 }
-
-    

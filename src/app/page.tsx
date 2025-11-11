@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X, Rocket, Dna, Users, Wand2, Clapperboard } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -15,6 +15,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { PublicHeader } from "@/components/public-header";
 
 
 const courses = instructorData.courses;
@@ -35,7 +36,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map(course => (
            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
-            <Link href={`/instructor/courses/${course.id}`} className="relative h-48 overflow-hidden cursor-pointer block">
+            <Link href={`/courses/${course.id}`} className="relative h-48 overflow-hidden cursor-pointer block">
               <Image 
                 src={course.thumbnail}
                 alt={course.title}
@@ -80,7 +81,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
                         {formatPrice(course.pricing.price)}
                     </span>
                     <Button asChild size="sm">
-                        <Link href={`/instructor/courses/${course.id}`}>Enroll Now</Link>
+                        <Link href={`/courses/${course.id}`}>Enroll Now</Link>
                     </Button>
                 </div>
             </CardFooter>
@@ -122,7 +123,6 @@ const Hero = () => {
 
 
 export default function Home() {
-  const [scrolled, setScrolled] = React.useState(false);
   const [isCurriculumDialogOpen, setIsCurriculumDialogOpen] = useState(false);
   const [selectedChapter, setSelectedChapter] = useState<(typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0] | typeof grade12LifeSciencesCurriculum[0]) | null>(null);
   const [activeCurriculum, setActiveCurriculum] = useState('maths');
@@ -132,23 +132,6 @@ export default function Home() {
     if (price === 0) return 'Free';
     if (price) return `R ${price.toFixed(2)}`;
     return 'By Subscription';
-  };
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
-
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth' });
-    }
   };
 
   const handleChapterClick = (chapter: (typeof grade12MathsCurriculum[0] | typeof grade12PhysicsCurriculum[0] | typeof grade12LifeSciencesCurriculum[0])) => {
@@ -185,12 +168,12 @@ export default function Home() {
 
   const mathsCurriculumChapters = [
       { title: 'Paper 1', icon: BookOpen },
-      { title: 'Paper 2', icon: BookCopy },
+      { title: 'Paper 2', icon: BookOpen },
   ];
   
   const physicsCurriculumChapters = [
       { title: "Paper 1: Physics", icon: Rocket, category: "Physics" },
-      { title: "Paper 2: Chemistry", icon: FlaskConical, category: "Chemistry" },
+      { title: "Paper 2: Chemistry", icon: Clapperboard, category: "Chemistry" },
   ];
   
   const lifeSciencesCurriculumChapters = [
@@ -218,53 +201,7 @@ export default function Home() {
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        scrolled 
-          ? 'bg-background/80 backdrop-blur-sm border-b border-border'
-          : 'bg-transparent'
-      }`}>
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
-              <Link href="/" className="flex items-center gap-2">
-                <Icons.logo className="h-8 w-8 text-primary" />
-                <span className="text-xl font-bold">
-                  EDUMATE
-                </span>
-              </Link>
-            </div>
-            
-             <nav className="hidden md:flex space-x-8">
-              {[
-                { name: 'Home', id: 'home' },
-                { name: 'Courses', id: 'courses' },
-                { name: 'About', id: 'about' },
-                { name: 'Contact', id: 'contact' }
-              ].map((item) => (
-                <button
-                  key={item.name}
-                  onClick={() => scrollToSection(item.id)}
-                  className="text-muted-foreground hover:text-primary font-medium transition-colors duration-300"
-                >
-                  {item.name}
-                </button>
-              ))}
-            </nav>
-            
-            <div className="flex items-center gap-2">
-                <Button variant="ghost" asChild>
-                    <Link href="/login">
-                      <LogIn className="mr-2 h-4 w-4" />
-                      Login
-                    </Link>
-                </Button>
-                <Button asChild>
-                    <Link href="/register">Register</Link>
-                </Button>
-            </div>
-          </div>
-        </div>
-      </header>
+      <PublicHeader />
 
       <main className="flex-grow pt-20">
          <div>
@@ -421,7 +358,7 @@ export default function Home() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4">
                        {courses.slice(0,2).map(course => (
                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-background shadow-lg hover:shadow-primary/20 transition-all duration-300">
-                           <Link href={`/instructor/courses/${course.id}`} className="relative h-40 overflow-hidden cursor-pointer block">
+                           <Link href={`/courses/${course.id}`} className="relative h-40 overflow-hidden cursor-pointer block">
                               <Image 
                                 src={course.thumbnail}
                                 alt={course.title}
@@ -455,7 +392,7 @@ export default function Home() {
                                     <span className="font-bold text-lg">
                                         {formatPrice(course.pricing.price)}
                                     </span>
-                                    <Link href={`/instructor/courses/${course.id}`} passHref>
+                                    <Link href={`/courses/${course.id}`} passHref>
                                     <Button size="sm">
                                         Enroll Now <ArrowRight className="ml-1 h-4 w-4" />
                                     </Button>

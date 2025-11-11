@@ -8,11 +8,6 @@ import { AppLayout } from '@/components/app-layout';
 import React from 'react';
 import 'katex/dist/katex.min.css';
 
-// export const metadata: Metadata = {
-//   title: 'Edumate Pro',
-//   description: 'A futuristic, professional, and student-focused multi-tenant educational web app offering video lessons, tutoring services, and paid assignments.',
-// };
-
 const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors'];
 
 export default function RootLayout({
@@ -21,7 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const showAppLayout = !noLayoutRoutes.includes(pathname);
+  const isCoursePage = /^\/courses\/.+/.test(pathname);
+  const showAppLayout = !noLayoutRoutes.includes(pathname) && !isCoursePage;
 
   return (
     <html lang="en" suppressHydrationWarning>
