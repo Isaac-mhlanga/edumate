@@ -7,20 +7,45 @@ import { Button } from "@/components/ui/button";
 import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum } from "@/lib/data";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PublicHeader } from "@/components/public-header";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { Settings } from "lucide-react";
+
+type VideoData = {
+    id: string;
+    title: string;
+    url:string;
+};
+
+type Course = {
+    id: string;
+    instructorId: string;
+    title: string;
+    description: string;
+    subject: 'Maths' | 'Physical Sciences';
+    grade: '10' | '11' | '12';
+    thumbnail: string;
+    pricing: {
+        type: 'free' | 'purchase' | 'subscription';
+        price?: number;
+    };
+    status: 'Draft' | 'Published' | 'Pending Approval' | 'Rejected';
+    videos: VideoData[];
+    duration?: string;
+    rating?: number;
+    instructor?: string;
+};
 
 
-const courses = instructorData.courses;
-
-const CoursesSection = ({ title, description, courses }: { title: string, description: string, courses: any[] }) => {
+const CoursesSection = ({ title, description, courses, onCourseClick }: { title: string, description: string, courses: any[], onCourseClick: (course: Course) => void }) => {
   const formatPrice = (price?: number | null) => {
     if (price === 0) return 'Free';
     if (price) return `R ${price.toFixed(2)}`;
@@ -36,7 +61,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map(course => (
            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
-            <Link href={`/courses/${course.id}`} className="relative h-48 overflow-hidden cursor-pointer">
+            <div onClick={() => onCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
               <Image 
                 src={course.thumbnail}
                 alt={course.title}
@@ -47,7 +72,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                   <Play className="w-12 h-12 text-white" />
                </div>
-            </Link>
+            </div>
 
             <CardHeader>
                 <div className="flex justify-between items-start">
@@ -80,8 +105,8 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
                     <span className="text-xl font-bold">
                         {formatPrice(course.pricing.price)}
                     </span>
-                    <Button asChild size="sm">
-                        <Link href={`/courses/${course.id}`}>Enroll Now</Link>
+                     <Button asChild size="sm">
+                        <Link href="/register">Enroll Now</Link>
                     </Button>
                 </div>
             </CardFooter>
@@ -152,6 +177,15 @@ const CurriculumDialog = ({ isOpen, onOpenChange, activeCurriculum, setActiveCur
       currentChapterIcons = mathsCurriculumChapters;
       break;
   }
+  
+  const scrollToCourses = () => {
+    onOpenChange(false); // Close dialog
+    const coursesSection = document.getElementById('courses');
+    if (coursesSection) {
+        coursesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
 
   return (
     <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -179,9 +213,9 @@ const CurriculumDialog = ({ isOpen, onOpenChange, activeCurriculum, setActiveCur
                       {item.topics.map((topic, topicIndex) => (
                         <li key={topicIndex} className="flex items-center">
                           <ChevronRightIcon className="h-4 w-4 mr-2 text-muted-foreground" />
-                          <Link href="#" className="text-muted-foreground hover:text-foreground transition-colors">
+                           <button onClick={scrollToCourses} className="text-muted-foreground hover:text-foreground transition-colors text-left">
                             {topic}
-                          </Link>
+                          </button>
                         </li>
                       ))}
                     </ul>
@@ -201,7 +235,13 @@ export default function Home() {
   const [isCurriculumOpen, setIsCurriculumOpen] = useState(false);
   const [activeCurriculum, setActiveCurriculum] = useState('maths');
 
-  const allCourses = courses.slice(0, 6);
+  const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
+  const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<Course | null>(null);
+  const [activeVideo, setActiveVideo] = useState<VideoData | undefined>(undefined);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [quality, setQuality] = useState('720p');
+
+  const allCourses = instructorData.courses.slice(0, 6);
 
   const features = [
     {
@@ -260,6 +300,20 @@ export default function Home() {
       currentChapterIcons = mathsCurriculumChapters;
       break;
   }
+  
+   const handleCourseClick = (course: Course) => {
+    setSelectedCourseForPlayer(course);
+    if (course.videos && course.videos.length > 0) {
+      setActiveVideo(course.videos[0]);
+    }
+    setIsVideoPlayerOpen(true);
+  };
+
+  useEffect(() => {
+    if (selectedCourseForPlayer && selectedCourseForPlayer.videos.length > 0) {
+      setActiveVideo(selectedCourseForPlayer.videos[0]);
+    }
+  }, [selectedCourseForPlayer]);
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -338,7 +392,7 @@ export default function Home() {
                             asChild
                             className="group p-4 text-center flex flex-col items-center justify-center aspect-square transition-all duration-300 bg-card border hover:border-primary hover:shadow-lg hover:shadow-primary/10 cursor-pointer hover:-translate-y-2 w-48"
                         >
-                            <Link href="/dashboard?tab=courses">
+                            <Link href="#courses">
                                 <div className="p-3 bg-primary/10 rounded-full mb-3 transition-colors duration-300 group-hover:bg-primary/20">
                                     <Icon className="w-8 h-8 text-primary transition-transform duration-300 group-hover:scale-110" />
                                 </div>
@@ -366,6 +420,7 @@ export default function Home() {
                 title="Featured Courses"
                 description="Hand-picked courses to help you excel in your studies."
                 courses={allCourses}
+                onCourseClick={handleCourseClick}
               />
             </div>
           </section>
@@ -400,6 +455,95 @@ export default function Home() {
 
       <CurriculumDialog isOpen={isCurriculumOpen} onOpenChange={setIsCurriculumOpen} activeCurriculum={activeCurriculum} setActiveCurriculum={setActiveCurriculum} />
       
+       {selectedCourseForPlayer && (
+        <Dialog open={isVideoPlayerOpen} onOpenChange={setIsVideoPlayerOpen}>
+          <DialogContent className="max-w-6xl h-[90vh] flex flex-col p-0">
+              <div className="grid md:grid-cols-3 h-full">
+                <div className="md:col-span-2 h-full flex flex-col">
+                  <div className="relative aspect-video bg-black rounded-tl-lg overflow-hidden">
+                      {activeVideo ? (
+                          <>
+                              <video
+                                  ref={videoRef}
+                                  key={activeVideo.url}
+                                  className="w-full h-full"
+                                  controls
+                                  autoPlay
+                                  src={activeVideo.url}
+                              >
+                                  Your browser does not support the video tag.
+                              </video>
+                              <div className="absolute bottom-4 right-4 z-10">
+                                  <DropdownMenu>
+                                      <DropdownMenuTrigger asChild>
+                                          <Button variant="secondary" size="icon" className="text-white bg-black/50 hover:bg-black/80 border-white/20">
+                                              <Settings className="h-5 w-5" />
+                                              <span className="sr-only">Video Settings</span>
+                                          </Button>
+                                      </DropdownMenuTrigger>
+                                      <DropdownMenuContent align="end">
+                                          <DropdownMenuRadioGroup value={quality} onValueChange={setQuality}>
+                                              <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
+                                              <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
+                                              <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
+                                              <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
+                                          </DropdownMenuRadioGroup>
+                                      </DropdownMenuContent>
+                                  </DropdownMenu>
+                              </div>
+                          </>
+                      ) : (
+                          <div className="w-full h-full bg-muted flex flex-col items-center justify-center text-center p-4">
+                              <Play className="h-16 w-16 text-muted-foreground/50" />
+                              <p className="mt-4 text-lg font-semibold">Select a video to play</p>
+                          </div>
+                      )}
+                  </div>
+                   <div className="p-6 space-y-2">
+                        <Badge variant="secondary" className="mb-2">{selectedCourseForPlayer.subject} - Grade {selectedCourseForPlayer.grade}</Badge>
+                        <h2 className="text-2xl font-bold">{selectedCourseForPlayer.title}</h2>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <div className="flex items-center gap-1">
+                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                                <span>{selectedCourseForPlayer.rating || '4.8'} (24 reviews)</span>
+                            </div>
+                            <span>{selectedCourseForPlayer.instructor || 'Dr. Evelyn Reed'}</span>
+                        </div>
+                        <p className="text-sm text-muted-foreground pt-2">{selectedCourseForPlayer.description}</p>
+                   </div>
+                </div>
+                <div className="md:col-span-1 bg-muted/50 flex flex-col h-full rounded-r-lg">
+                  <div className="p-4 border-b">
+                    <h3 className="font-semibold">Course Content</h3>
+                  </div>
+                   <div className="flex-1 overflow-y-auto">
+                    <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
+                        {selectedCourseForPlayer.videos.map((video, index) => (
+                            <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
+                                <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
+                                    <div className="flex items-start gap-3">
+                                        <Clapperboard className="h-5 w-5 text-muted-foreground mt-1"/>
+                                        <span>{index + 1}. {video.title}</span>
+                                    </div>
+                                </AccordionTrigger>
+                                <AccordionContent>
+                                    <p className="text-sm text-muted-foreground ml-8">Click to play this lesson.</p>
+                                </AccordionContent>
+                            </AccordionItem>
+                        ))}
+                    </Accordion>
+                  </div>
+                   <div className="p-6 border-t">
+                      <Button asChild size="lg" className="w-full">
+                        <Link href="/register">Enroll Now</Link>
+                      </Button>
+                  </div>
+                </div>
+              </div>
+          </DialogContent>
+        </Dialog>
+      )}
+
       <Footer />
     </div>
   );
