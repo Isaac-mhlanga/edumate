@@ -10,7 +10,7 @@ import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum, faqData, upcomingEvents, UpcomingEvent } from "@/lib/data";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
-import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
@@ -21,6 +21,7 @@ import { Settings } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
 import { format } from "date-fns";
 import { EventDialog } from "@/components/event-dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 type VideoData = {
     id: string;
@@ -282,33 +283,39 @@ export default function Home() {
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">Upcoming Events</h2>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
                     </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                        {upcomingEvents.map((event, index) => (
-                        <Card key={event.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg border-transparent hover:border-primary/50 hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
-                            <CardHeader className="flex-row items-center gap-4 bg-muted/50 p-4">
-                                <div className="flex flex-col items-center justify-center p-3 rounded-md bg-primary/10 text-primary w-20">
-                                    <span className="text-sm font-bold uppercase">{format(new Date(event.start), 'MMM')}</span>
-                                    <span className="text-4xl font-bold">{format(new Date(event.start), 'd')}</span>
-                                </div>
-                                <div>
-                                    <CardTitle className="text-lg">{event.title}</CardTitle>
-                                    <p className="text-sm text-muted-foreground">{format(new Date(event.start), 'eeee, p')}</p>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-4 flex-grow">
-                                <div className="space-y-2">
-                                    <div className="flex items-center gap-2 text-sm"><Badge variant="secondary">Grade {event.grade}</Badge><Badge variant="outline">{event.subject}</Badge></div>
-                                    <p className="text-sm text-muted-foreground line-clamp-3">{event.scope}</p>
-                                </div>
-                            </CardContent>
-                            <CardFooter>
-                                <Button className="w-full" onClick={() => handleEventClick(event)}>
-                                    <Calendar className="mr-2 h-4 w-4" /> View Details
-                                </Button>
-                            </CardFooter>
-                        </Card>
-                        ))}
-                    </div>
+                    <Card className="animate-fade-in-up shadow-lg" style={{ animationDelay: '0.2s' }}>
+                        <CardContent className="p-0">
+                             <Table>
+                                <TableHeader>
+                                    <TableRow>
+                                        <TableHead>Event</TableHead>
+                                        <TableHead className="hidden md:table-cell">Date</TableHead>
+                                        <TableHead className="hidden sm:table-cell">Subject</TableHead>
+                                        <TableHead className="text-right"></TableHead>
+                                    </TableRow>
+                                </TableHeader>
+                                <TableBody>
+                                    {upcomingEvents.map((event) => (
+                                        <TableRow key={event.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEventClick(event)}>
+                                            <TableCell>
+                                                <div className="font-medium">{event.title}</div>
+                                                <div className="text-sm text-muted-foreground md:hidden">
+                                                    {format(new Date(event.start), 'eee, MMM d, p')}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className="hidden md:table-cell">{format(new Date(event.start), 'eeee, MMMM d, yyyy')}</TableCell>
+                                            <TableCell className="hidden sm:table-cell"><Badge variant="outline">Grade {event.grade} {event.subject}</Badge></TableCell>
+                                            <TableCell className="text-right">
+                                                 <Button variant="ghost" size="sm">
+                                                    View Details <ChevronRightIcon className="ml-2 h-4 w-4" />
+                                                 </Button>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </CardContent>
+                    </Card>
                 </div>
             </section>
 
@@ -517,8 +524,10 @@ export default function Home() {
 
       <EventDialog
         event={selectedEvent}
+        allEvents={upcomingEvents}
         isOpen={isEventDialogOpen}
         onClose={() => setIsEventDialogOpen(false)}
+        onEventSelect={handleEventClick}
       />
 
       <Link href="https://wa.me/27123456789" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-transform hover:scale-110">

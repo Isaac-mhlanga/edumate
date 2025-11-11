@@ -73,4 +73,37 @@
   ::-webkit-scrollbar-thumb {
     @apply bg-gray-700 rounded-full;
   }
+  @media print {
+    body {
+        background-color: white;
+        color: black;
+    }
+    .print\:p-0 {
+        padding: 0 !important;
+    }
+    .print\:bg-white {
+        background-color: white !important;
+    }
+    .print\:text-black {
+        color: black !important;
+    }
+     .print\:bg-gray-50 {
+        background-color: #f9fafb !important;
+    }
+    .print\:border-black {
+        border-color: black !important;
+    }
+    .print\:text-gray-600 {
+        color: #4b5563 !important;
+    }
+     .print\:text-gray-700 {
+        color: #374151 !important;
+    }
+     .print\:bg-gray-200 {
+        background-color: #e5e7eb !important;
+    }
+     .print\:bg-gray-300 {
+        background-color: #d1d5db !important;
+    }
+  }
 }
