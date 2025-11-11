@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X, Rocket, Dna, Wand2, Users } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, BadgeCheck, LogIn, Sigma, FunctionSquare, Compass, Pi, BarChartHorizontal, Orbit, Percent, Dices, BookCopy, Calculator, FlaskConical, Atom, ChevronRightIcon, X, Rocket, Dna, Users, Wand2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -34,7 +34,7 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
       </div>
       <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map(course => (
-           <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300">
+           <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
             <div className="relative h-48 overflow-hidden">
               <Image 
                 src={course.thumbnail}
@@ -91,9 +91,9 @@ const CoursesSection = ({ title, description, courses }: { title: string, descri
 
 const Hero = () => {
   return (
-    <section id="home" className="relative py-20 md:py-32 overflow-hidden">
-        <div className="absolute inset-0 bg-gray-900 opacity-80"></div>
-        <div className="container mx-auto px-6 text-center relative z-10">
+    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center">
+        <div className="absolute inset-0 bg-gradient-radial from-background to-transparent" />
+        <div className="container mx-auto px-6 relative z-10">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     Master Maths & Science
@@ -305,7 +305,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <Card key={index} className="text-center p-8 bg-card border shadow-lg hover:shadow-primary/20 hover:border-primary/50 transition-all duration-300">
+                  <Card key={index} className="text-center p-8 bg-card border shadow-lg hover:shadow-card-glow hover:border-primary/50 transition-all duration-300">
                     <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6">
                         {feature.icon}
                     </div>
@@ -335,7 +335,7 @@ export default function Home() {
                     </TabsList>
                 </Tabs>
 
-                <div className="flex justify-center gap-4">
+                <div className="flex justify-center flex-wrap gap-4">
                     {currentCurriculumData.map((chapter, index) => {
                       const Icon = currentChapterIcons.find(c => c.title === chapter.chapter)?.icon || BookOpen;
                       return (
