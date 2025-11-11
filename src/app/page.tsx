@@ -324,7 +324,7 @@ export default function Home() {
                 </div>
             </section>
 
-          <section id="courses" className="py-20">
+          <section id="courses" className="py-20 bg-muted/50">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                   <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Courses</h2>
@@ -387,7 +387,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="faq" className="py-20 bg-muted/50">
+          <section id="faq" className="py-20">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
@@ -410,7 +410,7 @@ export default function Home() {
             </div>
         </section>
 
-          <section id="contact" className="py-20">
+          <section id="contact" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
               <Card className="p-8 sm:p-12 bg-card border-transparent shadow-2xl shadow-primary/10">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
