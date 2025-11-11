@@ -95,7 +95,7 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
   const handlePrint = useReactToPrint({
     content: () => posterRef.current,
     documentTitle: `EdumatePro-Event-${event?.title.replace(/ /g, '_')}`,
-     onBeforeGetContent: () => {
+    onBeforeGetContent: () => {
       return new Promise<void>((resolve) => {
         setIsPrinting(true);
         resolve();
@@ -103,7 +103,6 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
     },
     onAfterPrint: () => {
       setIsPrinting(false);
-      toast({ title: 'Poster Saved', description: 'Your event poster PDF has been generated.' });
     },
     onPrintError: () => {
       setIsPrinting(false);
@@ -136,12 +135,12 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
   const otherEvents = allEvents.filter(e => e.id !== event.id).slice(0, 3);
 
   return (
-    <>
-      <div className="hidden">
-        {isPrinting && event && <EventPoster event={event} ref={posterRef} />}
-      </div>
       <Dialog open={isOpen} onOpenChange={onClose}>
         <DialogContent className="max-w-3xl">
+          <div className="hidden">
+            <EventPoster event={event} ref={posterRef} />
+          </div>
+
           <EventPoster event={event} />
           
           <Separator />
@@ -183,8 +182,5 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
           </DialogFooter>
         </DialogContent>
       </Dialog>
-    </>
   );
 }
-
-    
