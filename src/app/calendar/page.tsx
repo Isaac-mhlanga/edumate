@@ -75,19 +75,20 @@ export default function CalendarPage() {
 
     return (
         <>
-            {/* Custom styles to mimic Google Calendar's look */}
             <style jsx global>{`
                 .fc {
                     font-family: var(--font-body), sans-serif;
+                    color: hsl(var(--foreground));
                 }
                 .fc .fc-toolbar-title {
                     font-size: 1.5rem;
                     font-weight: 500;
+                    color: hsl(var(--foreground));
                 }
                 .fc .fc-button {
-                    background-color: transparent !important;
+                    background-color: hsl(var(--card)) !important;
                     border-color: hsl(var(--border)) !important;
-                    color: hsl(var(--foreground)) !important;
+                    color: hsl(var(--card-foreground)) !important;
                     box-shadow: none !important;
                     text-transform: capitalize;
                 }
@@ -108,6 +109,12 @@ export default function CalendarPage() {
                     border: 0;
                     padding: 4px 6px;
                     cursor: pointer;
+                }
+                .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard .fc-list-table td {
+                    background-color: hsl(var(--card));
+                }
+                .fc .fc-list-event:hover td {
+                    background-color: hsl(var(--muted));
                 }
             `}</style>
 
