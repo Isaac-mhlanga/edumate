@@ -152,6 +152,8 @@ export default function PublicCoursePage() {
         notFound();
     }
 
+    const isYouTube = activeVideo?.url.includes('youtube.com/embed');
+
     return (
         <div className="bg-background text-foreground">
              <PublicHeader />
@@ -171,6 +173,15 @@ export default function PublicCoursePage() {
                             <CardHeader className="p-0">
                                 <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden">
                                     {activeVideo ? (
+                                        isYouTube ? (
+                                            <iframe
+                                                className="w-full h-full"
+                                                src={activeVideo.url}
+                                                title={activeVideo.title}
+                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                allowFullScreen
+                                            ></iframe>
+                                        ) : (
                                         <>
                                             <video
                                                 ref={videoRef}
@@ -201,6 +212,7 @@ export default function PublicCoursePage() {
                                                 </DropdownMenu>
                                             </div>
                                         </>
+                                        )
                                     ) : (
                                         <div className="w-full h-full bg-muted flex flex-col items-center justify-center text-center p-4">
                                             <PlayCircle className="h-16 w-16 text-muted-foreground/50" />

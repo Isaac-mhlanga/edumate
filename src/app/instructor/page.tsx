@@ -22,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar as CalendarIcon, Save, Wand2, Lightbulb, Image as ImageIcon, BookOpen, Printer, UserMinus } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar as CalendarIcon, Save, Wand2, Lightbulb, Image as ImageIcon, BookOpen, Printer, UserMinus, Youtube } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useReactToPrint } from "react-to-print";
@@ -163,7 +163,9 @@ type Transaction = {
 
 type VideoUpload = {
     title: string;
+    source: 'upload' | 'youtube';
     file: File | null;
+    youtubeUrl: string;
     fileName: string;
     quizId?: string;
 };
@@ -422,25 +424,21 @@ function InstructorPage() {
   const pricingModel = form.watch("pricingModel");
 
   const handleAddNewVideo = () => {
-    setVideoUploads([...videoUploads, { title: '', file: null, fileName: '' }]);
+    setVideoUploads([...videoUploads, { title: '', source: 'upload', file: null, youtubeUrl: '', fileName: '' }]);
   };
 
-  const handleVideoTitleChange = (index: number, title: string) => {
+  const handleVideoChange = (index: number, field: keyof VideoUpload, value: any) => {
     const newUploads = [...videoUploads];
-    newUploads[index].title = title;
+    (newUploads[index] as any)[field] = value;
+    if (field === 'file' && value instanceof File) {
+        newUploads[index].fileName = value.name;
+    }
     setVideoUploads(newUploads);
   };
   
   const handleVideoQuizChange = (index: number, quizId: string) => {
     const newUploads = [...videoUploads];
     newUploads[index].quizId = quizId;
-    setVideoUploads(newUploads);
-  };
-
-  const handleVideoFileChange = (index: number, file: File | null) => {
-    const newUploads = [...videoUploads];
-    newUploads[index].file = file;
-    newUploads[index].fileName = file?.name || '';
     setVideoUploads(newUploads);
   };
 
@@ -555,8 +553,11 @@ function InstructorPage() {
         // Delete video files from Storage
         const videoPromises = selectedCourse.videos.map(video => {
             try {
-                const videoFileRef = ref(storage, video.url);
-                return deleteObject(videoFileRef);
+                if (!video.url.includes('youtube.com')) {
+                    const videoFileRef = ref(storage, video.url);
+                    return deleteObject(videoFileRef);
+                }
+                return Promise.resolve();
             } catch (e) {
                 console.error("Could not delete video file:", video.url, e);
                 return Promise.resolve();
@@ -605,6 +606,17 @@ function InstructorPage() {
     }
   };
 
+  const getYouTubeEmbedUrl = (url: string) => {
+        let videoId;
+        const urlObj = new URL(url);
+        if (urlObj.hostname === 'youtu.be') {
+            videoId = urlObj.pathname.slice(1);
+        } else if (urlObj.hostname.includes('youtube.com')) {
+            videoId = urlObj.searchParams.get('v');
+        }
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+    };
+
   async function onCourseSubmit(data: CourseFormValues) {
     if (!user) return;
     setIsSubmitting(true);
@@ -623,10 +635,15 @@ function InstructorPage() {
 
         const uploadedVideos: VideoData[] = [];
         for (const videoUpload of videoUploads) {
-            if (videoUpload.file) {
+            let url = '';
+            if (videoUpload.source === 'youtube') {
+                 url = getYouTubeEmbedUrl(videoUpload.youtubeUrl);
+            } else if (videoUpload.file) {
                 const videoRef = ref(storage, `videos/${user.uid}/${Date.now()}-${videoUpload.file.name}`);
                 const snapshot = await uploadBytes(videoRef, videoUpload.file);
-                const url = await getDownloadURL(snapshot.ref);
+                url = await getDownloadURL(snapshot.ref);
+            }
+             if (url && videoUpload.title) {
                 uploadedVideos.push({ id: `V${Date.now()}-${videoUpload.title}`, title: videoUpload.title, url, quizId: videoUpload.quizId });
             }
         }
@@ -2050,20 +2067,46 @@ function InstructorPage() {
                             {videoUploads.map((upload, index) => (
                                 <Card key={index} className="p-4 bg-muted/50">
                                     <div className="flex items-start gap-4">
-                                        <Video className="h-5 w-5 text-muted-foreground mt-2" />
                                         <div className="flex-grow space-y-2">
                                             <Input
                                                 placeholder={`Video ${index + 1} Title`}
                                                 value={upload.title}
-                                                onChange={(e) => handleVideoTitleChange(index, e.target.value)}
+                                                onChange={(e) => handleVideoChange(index, 'title', e.target.value)}
                                             />
-                                            <label htmlFor={`video-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
-                                                <FileUp className="h-4 w-4 mr-2 text-muted-foreground" />
-                                                <span className="text-sm text-muted-foreground truncate">
-                                                    {upload.fileName || 'Choose a video file'}
-                                                </span>
-                                                <Input id={`video-upload-${index}`} type="file" accept="video/*" className="sr-only" onChange={(e) => handleVideoFileChange(index, e.target.files ? e.target.files[0] : null)} />
-                                            </label>
+
+                                            {pricingModel === 'free' && (
+                                                <RadioGroup value={upload.source} onValueChange={(value) => handleVideoChange(index, 'source', value)} className="flex gap-4 pt-2">
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem value="upload" id={`source-upload-${index}`} />
+                                                        <Label htmlFor={`source-upload-${index}`}>File Upload</Label>
+                                                    </div>
+                                                    <div className="flex items-center space-x-2">
+                                                        <RadioGroupItem value="youtube" id={`source-youtube-${index}`} />
+                                                        <Label htmlFor={`source-youtube-${index}`}>YouTube Link</Label>
+                                                    </div>
+                                                </RadioGroup>
+                                            )}
+
+                                            {upload.source === 'youtube' && pricingModel === 'free' ? (
+                                                 <div className="relative">
+                                                     <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                     <Input
+                                                        placeholder="https://www.youtube.com/watch?v=..."
+                                                        className="pl-9"
+                                                        value={upload.youtubeUrl}
+                                                        onChange={(e) => handleVideoChange(index, 'youtubeUrl', e.target.value)}
+                                                    />
+                                                 </div>
+                                            ) : (
+                                                <label htmlFor={`video-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
+                                                    <FileUp className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                    <span className="text-sm text-muted-foreground truncate">
+                                                        {upload.fileName || 'Choose a video file'}
+                                                    </span>
+                                                    <Input id={`video-upload-${index}`} type="file" accept="video/*" className="sr-only" onChange={(e) => handleVideoChange(index, 'file', e.target.files ? e.target.files[0] : null)} />
+                                                </label>
+                                            )}
+
                                             <Select onValueChange={(value) => handleVideoQuizChange(index, value)}>
                                                 <SelectTrigger>
                                                     <SelectValue placeholder="Link a quiz (optional)" />
