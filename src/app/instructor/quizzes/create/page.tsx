@@ -49,7 +49,7 @@ const questionSchema = z.object({
 
 const quizFormSchema = z.object({
   title: z.string().min(1, 'Quiz title is required.'),
-  subject: z.enum(['Maths', 'Physical Sciences', 'Life Sciences']),
+  subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences']),
   grade: z.enum(['10', '11', '12']),
   questions: z.array(questionSchema).min(1, 'At least one question is required.'),
 });
@@ -65,7 +65,7 @@ function CreateQuizPage() {
     resolver: zodResolver(quizFormSchema),
     defaultValues: {
       title: '',
-      subject: 'Maths',
+      subject: 'Mathematics',
       grade: '12',
       questions: [],
     },
@@ -149,7 +149,7 @@ function CreateQuizPage() {
                     <Select onValueChange={field.onChange} value={field.value}>
                       <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
                       <SelectContent>
-                        <SelectItem value="Maths">Maths</SelectItem>
+                        <SelectItem value="Mathematics">Mathematics</SelectItem>
                         <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
                         <SelectItem value="Life Sciences">Life Sciences</SelectItem>
                       </SelectContent>

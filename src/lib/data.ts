@@ -27,6 +27,7 @@ export const faqData = [
 export const grade12MathsCurriculum = [
     {
         chapter: "Paper 1",
+        paper: "P1",
         topics: [
             "Algebra, Equations & Inequalities - 25 marks (17%)",
             "Patterns & Sequences - 25 marks (17%)",
@@ -38,6 +39,7 @@ export const grade12MathsCurriculum = [
     },
     {
         chapter: "Paper 2",
+        paper: "P2",
         topics: [
             "Statistics - 20 marks (13%)",
             "Analytical Geometry - 40 marks (27%)",
@@ -50,6 +52,7 @@ export const grade12MathsCurriculum = [
 export const grade12PhysicsCurriculum = [
     {
         chapter: "Paper 1: Physics",
+        paper: "P1",
         topics: [
             "Mechanics - 63 marks (42%)",
             "Waves, Sound & Light - 17 marks (11%)",
@@ -60,6 +63,7 @@ export const grade12PhysicsCurriculum = [
     },
     {
         chapter: "Paper 2: Chemistry",
+        paper: "P2",
         topics: [
             "Chemical Change - 84 marks (56%)",
             "Chemical Systems - 18 marks (12%)",
@@ -72,6 +76,7 @@ export const grade12PhysicsCurriculum = [
 export const grade12LifeSciencesCurriculum = [
     {
         chapter: "Paper 1",
+        paper: "P1",
         topics: [
             "Reproduction in vertebrates - 8 marks (5%)",
             "Human reproduction - 41 marks (27%)",
@@ -82,6 +87,7 @@ export const grade12LifeSciencesCurriculum = [
     },
     {
         chapter: "Paper 2",
+        paper: "P2",
         topics: [
             "DNA code of life - 27 marks (18%)",
             "Meiosis - 21 marks (14%)",
@@ -90,6 +96,13 @@ export const grade12LifeSciencesCurriculum = [
         ]
     }
 ];
+
+export const curriculumData = {
+    'Mathematics': grade12MathsCurriculum,
+    'Physical Sciences': grade12PhysicsCurriculum,
+    'Life Sciences': grade12LifeSciencesCurriculum,
+};
+
 
 export type UpcomingEvent = {
     id: string;
@@ -263,7 +276,7 @@ export const instructorData = {
             id: 'C001',
             title: 'Calculus Fundamentals',
             description: 'A deep dive into the fundamentals of calculus, from limits to derivatives.',
-            subject: 'Maths',
+            subject: 'Mathematics',
             grade: '12',
             thumbnail: '/edumate_cover.png',
             pricing: {
@@ -334,7 +347,7 @@ export const instructorData = {
             id: 'C004',
             title: 'Trigonometry Masterclass',
             description: 'Master trigonometric functions, identities, and their applications in problem-solving.',
-            subject: 'Maths',
+            subject: 'Mathematics',
             grade: '11',
             thumbnail: '/edumate_cover.png',
             pricing: {

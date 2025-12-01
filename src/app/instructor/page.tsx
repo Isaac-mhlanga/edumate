@@ -20,7 +20,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { instructorData } from "@/lib/data";
+import { instructorData, curriculumData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar as CalendarIcon, Save, Wand2, Lightbulb, Image as ImageIcon, BookOpen, Printer, UserMinus, Youtube } from "lucide-react";
 import Image from "next/image";
@@ -67,7 +67,8 @@ const chartConfig = {
 const courseFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
-  subject: z.enum(["Maths", "Physical Sciences", "Life Sciences"]),
+  subject: z.enum(["Mathematics", "Physical Sciences", "Life Sciences"]),
+  paper: z.enum(["P1", "P2"]),
   grade: z.enum(["10", "11", "12"]),
   pricingModel: z.enum(["free", "purchase", "subscription"]),
   price: z.coerce.number().optional(),
@@ -96,7 +97,8 @@ type Course = {
     instructorId: string;
     title: string;
     description: string;
-    subject: 'Maths' | 'Physical Sciences' | 'Life Sciences';
+    subject: 'Mathematics' | 'Physical Sciences' | 'Life Sciences';
+    paper: 'P1' | 'P2';
     grade: '10' | '11' | '12';
     thumbnail: string;
     pricing: {
@@ -111,7 +113,7 @@ type Course = {
 type Quiz = {
     id: string;
     title: string;
-    subject: 'Maths' | 'Physical Sciences' | 'Life Sciences';
+    subject: 'Mathematics' | 'Physical Sciences' | 'Life Sciences';
     grade: '10' | '11' | '12';
 };
 
@@ -222,7 +224,7 @@ function InstructorPage() {
   const [isPayoutDialogOpen, setIsPayoutDialogOpen] = React.useState(false);
   
   // Calendar State
-  const [events, setEvents] = React.useState<CalendarEvent[]>(instructorData.events);
+  const [events, setEvents] = React.useState<CalendarEvent[]>([]);
   const [isAiDialogOpen, setIsAiDialogOpen] = React.useState(false);
   const [isManualDialogOpen, setIsManualDialogOpen] = React.useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
@@ -270,7 +272,8 @@ function InstructorPage() {
     defaultValues: {
       title: "",
       description: "",
-      subject: "Maths",
+      subject: "Mathematics",
+      paper: "P1",
       grade: "12",
       pricingModel: "free",
     },
@@ -422,6 +425,8 @@ function InstructorPage() {
 
 
   const pricingModel = form.watch("pricingModel");
+  const watchedSubject = form.watch("subject");
+  const watchedPaper = form.watch("paper");
 
   const handleAddNewVideo = () => {
     setVideoUploads([...videoUploads, { title: '', source: 'upload', file: null, youtubeUrl: '', fileName: '' }]);
@@ -456,6 +461,7 @@ function InstructorPage() {
             title: selectedCourse.title,
             description: selectedCourse.description,
             subject: selectedCourse.subject,
+            paper: selectedCourse.paper,
             grade: selectedCourse.grade,
             pricingModel: selectedCourse.pricing.type,
             price: selectedCourse.pricing.price || undefined,
@@ -466,7 +472,8 @@ function InstructorPage() {
           form.reset({
             title: "",
             description: "",
-            subject: "Maths",
+            subject: "Mathematics",
+            paper: "P1",
             grade: "12",
             pricingModel: "free",
             price: undefined,
@@ -608,13 +615,18 @@ function InstructorPage() {
 
   const getYouTubeEmbedUrl = (url: string) => {
         let videoId;
-        const urlObj = new URL(url);
-        if (urlObj.hostname === 'youtu.be') {
-            videoId = urlObj.pathname.slice(1);
-        } else if (urlObj.hostname.includes('youtube.com')) {
-            videoId = urlObj.searchParams.get('v');
+        try {
+            const urlObj = new URL(url);
+            if (urlObj.hostname === 'youtu.be') {
+                videoId = urlObj.pathname.slice(1);
+            } else if (urlObj.hostname.includes('youtube.com')) {
+                videoId = urlObj.searchParams.get('v');
+            }
+            return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
+        } catch (e) {
+            console.error("Invalid YouTube URL:", url);
+            return url;
         }
-        return videoId ? `https://www.youtube.com/embed/${videoId}` : url;
     };
 
   async function onCourseSubmit(data: CourseFormValues) {
@@ -653,6 +665,7 @@ function InstructorPage() {
             title: data.title,
             description: data.description,
             subject: data.subject,
+            paper: data.paper,
             grade: data.grade,
             pricing: {
                 type: data.pricingModel,
@@ -1380,7 +1393,7 @@ function InstructorPage() {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuRadioGroup value={quizFilters.subject} onValueChange={(value) => handleQuizFilterChange('subject', value)}>
                                     <DropdownMenuRadioItem value="All">All Subjects</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="Maths">Maths</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Mathematics">Mathematics</DropdownMenuRadioItem>
                                     <DropdownMenuRadioItem value="Physical Sciences">Physical Sciences</DropdownMenuRadioItem>
                                     <DropdownMenuRadioItem value="Life Sciences">Life Sciences</DropdownMenuRadioItem>
                                 </DropdownMenuRadioGroup>
@@ -1938,7 +1951,7 @@ function InstructorPage() {
           )}
 
        <Dialog open={isCourseDialogOpen} onOpenChange={handleCourseDialogOpenChange}>
-          <DialogContent className="sm:max-w-2xl">
+          <DialogContent className="sm:max-w-3xl">
               <DialogHeader>
                   <DialogTitle>{selectedCourse ? 'Edit' : 'Create New'} Course</DialogTitle>
                   <DialogDescription>
@@ -1971,13 +1984,51 @@ function InstructorPage() {
                                 )}
                             />
 
-                          <FormField control={form.control} name="title" render={({ field }) => (
-                              <FormItem className="col-span-1 md:col-span-2">
-                                  <FormLabel>Course Title</FormLabel>
-                                  <FormControl><Input placeholder="e.g. Advanced Calculus" {...field} /></FormControl>
+                            <FormField control={form.control} name="subject" render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Subject</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value}>
+                                      <FormControl><SelectTrigger><SelectValue placeholder="Select a subject" /></SelectTrigger></FormControl>
+                                      <SelectContent>
+                                          <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                          <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                          <SelectItem value="Life Sciences">Life Sciences</SelectItem>
+                                      </SelectContent>
+                                  </Select>
                                   <FormMessage />
                               </FormItem>
-                          )} />
+                            )} />
+
+                            <FormField control={form.control} name="paper" render={({ field }) => (
+                              <FormItem>
+                                  <FormLabel>Paper</FormLabel>
+                                  <Select onValueChange={field.onChange} value={field.value} disabled={!watchedSubject}>
+                                      <FormControl><SelectTrigger><SelectValue placeholder="Select a paper" /></SelectTrigger></FormControl>
+                                      <SelectContent>
+                                          <SelectItem value="P1">Paper 1</SelectItem>
+                                          <SelectItem value="P2">Paper 2</SelectItem>
+                                      </SelectContent>
+                                  </Select>
+                                  <FormMessage />
+                              </FormItem>
+                            )} />
+                            
+                            <FormField control={form.control} name="title" render={({ field }) => (
+                                <FormItem className="col-span-1 md:col-span-2">
+                                    <FormLabel>Course Title (Topic)</FormLabel>
+                                     <Select onValueChange={field.onChange} value={field.value} disabled={!watchedSubject || !watchedPaper}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select a topic" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            {watchedSubject && watchedPaper && (curriculumData[watchedSubject as keyof typeof curriculumData] || [])
+                                                .find(chapter => chapter.paper === watchedPaper)?.topics.map(topic => (
+                                                    <SelectItem key={topic} value={topic}>{topic}</SelectItem>
+                                                ))
+                                            }
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
                           
                           <FormField control={form.control} name="description" render={({ field }) => (
                               <FormItem className="col-span-1 md:col-span-2">
@@ -1987,21 +2038,6 @@ function InstructorPage() {
                               </FormItem>
                           )} />
 
-                          <FormField control={form.control} name="subject" render={({ field }) => (
-                              <FormItem>
-                                  <FormLabel>Subject</FormLabel>
-                                  <Select onValueChange={field.onChange} value={field.value}>
-                                      <FormControl><SelectTrigger><SelectValue placeholder="Select a subject" /></SelectTrigger></FormControl>
-                                      <SelectContent>
-                                          <SelectItem value="Maths">Maths</SelectItem>
-                                          <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                          <SelectItem value="Life Sciences">Life Sciences</SelectItem>
-                                      </SelectContent>
-                                  </Select>
-                                  <FormMessage />
-                              </FormItem>
-                          )} />
-                          
                           <FormField control={form.control} name="grade" render={({ field }) => (
                               <FormItem>
                                   <FormLabel>Grade</FormLabel>
@@ -2017,6 +2053,8 @@ function InstructorPage() {
                               </FormItem>
                           )} />
 
+                          <div className="col-span-1 md:col-span-2" />
+                          
                           <FormField control={form.control} name="pricingModel" render={({ field }) => (
                               <FormItem className="col-span-1 md:col-span-2">
                                   <FormLabel>Pricing Model</FormLabel>

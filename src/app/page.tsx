@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star,
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { instructorData, grade12MathsCurriculum, grade12PhysicsCurriculum, grade12LifeSciencesCurriculum, faqData, upcomingEvents, UpcomingEvent } from "@/lib/data";
+import { instructorData, faqData, upcomingEvents, UpcomingEvent, curriculumData } from "@/lib/data";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -34,7 +34,7 @@ type Course = {
     instructorId: string;
     title: string;
     description: string;
-    subject: 'Maths' | 'Physical Sciences' | 'Life Sciences';
+    subject: 'Mathematics' | 'Physical Sciences' | 'Life Sciences';
     grade: '10' | '11' | '12';
     thumbnail: string;
     pricing: {
@@ -119,13 +119,13 @@ export default function Home() {
     { number: '10k+', label: 'Happy Students' }
   ];
   
-  const curriculumData = {
-    'Maths': { icon: FunctionSquare, data: grade12MathsCurriculum },
-    'Physical Sciences': { icon: Rocket, data: grade12PhysicsCurriculum },
-    'Life Sciences': { icon: Dna, data: grade12LifeSciencesCurriculum },
+  const curriculumIcons = {
+    'Mathematics': FunctionSquare,
+    'Physical Sciences': Rocket,
+    'Life Sciences': Dna,
   };
 
-  const getCoursesForTopic = (topic: string, subject: 'Maths' | 'Physical Sciences' | 'Life Sciences') => {
+  const getCoursesForTopic = (topic: string, subject: keyof typeof curriculumData) => {
     const searchTerms = topic.toLowerCase().replace(/[-&,]/g, ' ').split(' ').filter(term => term.length > 2);
     return allCourses.filter(course => 
       course.subject === subject && 
@@ -231,16 +231,19 @@ export default function Home() {
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics. Find courses that match your needs.</p>
                 </div>
                 
-                <Tabs defaultValue="Maths" className="w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                <Tabs defaultValue="Mathematics" className="w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8 h-auto sm:h-12">
-                        {Object.entries(curriculumData).map(([subject, { icon: Icon }]) => (
-                            <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3 h-full">
-                                <Icon className="h-5 w-5"/> {subject}
-                            </TabsTrigger>
-                        ))}
+                        {Object.entries(curriculumData).map(([subject, data]) => {
+                            const Icon = curriculumIcons[subject as keyof typeof curriculumIcons];
+                            return (
+                                <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3 h-full">
+                                    {Icon && <Icon className="h-5 w-5"/>} {subject}
+                                </TabsTrigger>
+                            )
+                        })}
                     </TabsList>
                     
-                    {Object.entries(curriculumData).map(([subject, { data: chapters }]) => (
+                    {Object.entries(curriculumData).map(([subject, chapters]) => (
                         <TabsContent key={subject} value={subject}>
                              <Accordion type="multiple" className="w-full space-y-4">
                                 {chapters.map((chapter, index) => (
