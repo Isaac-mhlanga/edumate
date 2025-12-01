@@ -4,11 +4,11 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { instructorData, faqData, upcomingEvents, UpcomingEvent, curriculumData } from "@/lib/data";
+import { faqData, upcomingEvents, UpcomingEvent, curriculumData } from "@/lib/data";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -22,6 +22,18 @@ import { FaWhatsapp } from "react-icons/fa";
 import { format } from "date-fns";
 import { EventDialog } from "@/components/event-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { Skeleton } from "@/components/ui/skeleton";
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 type VideoData = {
     id: string;
@@ -77,7 +89,8 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
 
 
 export default function Home() {
-  const allCourses = instructorData.courses as Course[];
+  const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [loadingCourses, setLoadingCourses] = useState(true);
   const [currentCoursePage, setCurrentCoursePage] = useState(1);
   const coursesPerPage = 6;
   
@@ -92,6 +105,25 @@ export default function Home() {
 
   useEffect(() => {
     setIsClient(true);
+    
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+
+    const fetchCourses = async () => {
+        setLoadingCourses(true);
+        try {
+            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'));
+            const querySnapshot = await getDocs(coursesQuery);
+            const fetchedCourses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
+            setAllCourses(fetchedCourses);
+        } catch (error) {
+            console.error("Error fetching published courses: ", error);
+        } finally {
+            setLoadingCourses(false);
+        }
+    };
+    
+    fetchCourses();
   }, []);
 
   const features = [
@@ -208,7 +240,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <Card key={index} className="text-center p-8 bg-card border-transparent shadow-card-glow hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                  <Card key={index} className="text-center p-8 bg-card border-transparent shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                     <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6">
                         {feature.icon}
                     </div>
@@ -342,60 +374,83 @@ export default function Home() {
                   <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Courses</h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                  {paginatedCourses.map((course, index) => (
-                     <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
-                      <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
-                        <Image 
-                          src={course.thumbnail}
-                          alt={course.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-105"
-                          data-ai-hint="online course"
-                        />
-                         <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Play className="w-12 h-12 text-white" />
-                         </div>
-                      </div>
-                      <CardHeader>
-                          <div className="flex justify-between items-start">
-                              <Badge variant="secondary">{course.subject}</Badge>
-                              <div className="flex items-center gap-1 text-sm text-amber-400">
-                                  <Star className="w-4 h-4 fill-current" />
-                                  <span>{course.rating || 4.8}</span>
-                              </div>
-                          </div>
-                          <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
-                      </CardHeader>
-                      <CardContent className="flex-grow">
-                        <p className="text-sm text-muted-foreground line-clamp-3">
-                          {course.description}
-                        </p>
-                      </CardContent>
-                      <CardFooter className="flex-col items-start gap-4">
-                          <div className="flex justify-between w-full text-sm text-muted-foreground">
-                               <div className="flex items-center gap-2">
-                                  <Clapperboard className="w-4 h-4" />
-                                  <span>{course.videos.length} lessons</span>
-                              </div>
-                              <div className="flex items-center gap-2">
-                                  <Clock className="w-4 h-4" />
-                                  <span>{course.duration || '8h'}</span>
-                              </div>
-                          </div>
-                          <Separator />
-                          <div className="flex items-center justify-between w-full">
-                              <span className="text-xl font-bold">
-                                  {course.pricing.type === 'purchase' ? `R ${course.pricing.price}`: 'Free'}
-                              </span>
-                               <Button asChild size="sm">
-                                  <Link href="/register">Enroll Now</Link>
-                              </Button>
-                          </div>
-                      </CardFooter>
-                    </Card>
-                  ))}
-                </div>
+                 {loadingCourses ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                       {Array.from({ length: 6 }).map((_, i) => (
+                           <Card key={i} className="bg-card shadow-lg animate-fade-in-up">
+                               <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
+                               <CardContent className="pt-4 space-y-2">
+                                   <Skeleton className="h-4 w-1/4"/>
+                                   <Skeleton className="h-5 w-3/4"/>
+                                   <Skeleton className="h-10 w-full"/>
+                               </CardContent>
+                               <CardFooter className="flex-col items-start gap-4">
+                                   <Skeleton className="h-4 w-full"/>
+                                   <Separator/>
+                                   <div className="flex justify-between w-full">
+                                       <Skeleton className="h-8 w-1/4"/>
+                                       <Skeleton className="h-8 w-1/3"/>
+                                   </div>
+                               </CardFooter>
+                           </Card>
+                       ))}
+                    </div>
+                 ) : (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {paginatedCourses.map((course, index) => (
+                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                            <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
+                                <Image 
+                                src={course.thumbnail}
+                                alt={course.title}
+                                fill
+                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                data-ai-hint="online course"
+                                />
+                                <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <Play className="w-12 h-12 text-white" />
+                                </div>
+                            </div>
+                            <CardHeader>
+                                <div className="flex justify-between items-start">
+                                    <Badge variant="secondary">{course.subject}</Badge>
+                                    <div className="flex items-center gap-1 text-sm text-amber-400">
+                                        <Star className="w-4 h-4 fill-current" />
+                                        <span>{course.rating || 4.8}</span>
+                                    </div>
+                                </div>
+                                <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                                <p className="text-sm text-muted-foreground line-clamp-3">
+                                {course.description}
+                                </p>
+                            </CardContent>
+                            <CardFooter className="flex-col items-start gap-4">
+                                <div className="flex justify-between w-full text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-2">
+                                        <Clapperboard className="w-4 h-4" />
+                                        <span>{course.videos.length} lessons</span>
+                                    </div>
+                                    <div className="flex items-center gap-2">
+                                        <Clock className="w-4 h-4" />
+                                        <span>{course.duration || '8h'}</span>
+                                    </div>
+                                </div>
+                                <Separator />
+                                <div className="flex items-center justify-between w-full">
+                                    <span className="text-xl font-bold">
+                                        {course.pricing.type === 'purchase' ? `R ${course.pricing.price}`: 'Free'}
+                                    </span>
+                                    <Button asChild size="sm">
+                                        <Link href="/register">Enroll Now</Link>
+                                    </Button>
+                                </div>
+                            </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                )}
                  {totalCoursePages > 1 && (
                     <div className="flex items-center justify-center gap-2 mt-12">
                         <Button
