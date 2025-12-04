@@ -402,10 +402,10 @@ function InstructorPage() {
       }
     };
     
-    const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       setUser(currentUser);
       if (currentUser) {
-        await fetchAllData(currentUser);
+        fetchAllData(currentUser);
       } else {
         // Clear all data if user logs out
         setCourses([]);
@@ -996,6 +996,7 @@ function InstructorPage() {
             setIsAiLoading(false);
         }
     };
+  
   return (
       <div className="space-y-8">
            <style jsx global>{`
@@ -2557,5 +2558,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
