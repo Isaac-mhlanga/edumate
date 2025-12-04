@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -677,6 +676,8 @@ function InstructorPage() {
         };
 
         if (selectedCourse) {
+            // Log the data for debugging
+            console.log("Updating course with data:", courseData);
             const courseRef = doc(firestore, 'courses', selectedCourse.id);
             await updateDoc(courseRef, courseData);
             setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...courseData } as Course : c));
@@ -688,6 +689,8 @@ function InstructorPage() {
                 status: 'Draft' as const,
                 createdAt: serverTimestamp(),
             };
+            // Log the data for debugging
+            console.log("Creating new course with data:", newCoursePayload);
             const newDocRef = await addDoc(collection(firestore, 'courses'), newCoursePayload);
             setCourses(prev => [{ id: newDocRef.id, ...newCoursePayload, createdAt: Timestamp.now() } as Course, ...prev]);
             toast({ title: "Course Created!", description: `"${data.title}" has been created as a draft.` });
@@ -2591,3 +2594,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
