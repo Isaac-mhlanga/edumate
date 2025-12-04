@@ -243,13 +243,6 @@ export default function PublicCoursePage() {
                                 </CardDescription>
                                 <div className="mt-4 pt-4 border-t space-y-4">
                                     <div className="flex items-center gap-2">
-                                        <Button onClick={handleSummarize} disabled={isSummarizing || !activeVideo}>
-                                            {isSummarizing ? (
-                                                <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Summarizing...</>
-                                            ) : (
-                                                <><Sparkles className="mr-2 h-4 w-4" /> Summarize with AI</>
-                                            )}
-                                        </Button>
                                         {activeVideo?.notesUrl && (
                                             <Button variant="outline" asChild>
                                                 <a href={activeVideo.notesUrl} target="_blank" rel="noopener noreferrer">
@@ -310,7 +303,16 @@ export default function PublicCoursePage() {
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent>
-                                                <p className="text-sm text-muted-foreground ml-8">Click to play this lesson.</p>
+                                                <div className="pl-8 flex flex-col items-start gap-2">
+                                                     <p className="text-sm text-muted-foreground">Click the trigger above to play this lesson.</p>
+                                                     <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize} disabled={isSummarizing}>
+                                                        {isSummarizing ? (
+                                                            <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Summarizing...</>
+                                                        ) : (
+                                                            <><Sparkles className="mr-2 h-4 w-4" /> Summarize with AI</>
+                                                        )}
+                                                    </Button>
+                                                </div>
                                             </AccordionContent>
                                         </AccordionItem>
                                     ))}
