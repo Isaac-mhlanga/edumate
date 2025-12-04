@@ -44,13 +44,13 @@ Your output should be a concise summary that includes:
 3.  Helpful tricks or alternative ways to approach the problem.
 4.  Keep the language simple and easy for a high school student to understand.
 
-**Video to Analyze:**
-{{media url=videoUrl}}
-
-**Lesson Context:**
+This video is from a course with the following context:
 - Course: {{{courseContext}}}
 - Lesson Title: {{{lessonTitle}}}
 - Student's Past Activity: {{{studentPreviousActivity}}}
+
+Please analyze the following video:
+{{media url=videoUrl}}
 
 Generate the summary now.
 `, 
