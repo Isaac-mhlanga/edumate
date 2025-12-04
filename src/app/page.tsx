@@ -298,7 +298,7 @@ export default function Home() {
                         {Object.keys(curriculumData['12']).map((subject) => {
                             const Icon = curriculumIcons[subject as keyof typeof curriculumIcons];
                             return (
-                                <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3 h-full">
+                                <TabsTrigger key={subject} value={subject} className="gap-2">
                                     {Icon && <Icon className="h-5 w-5"/>} {subject}
                                 </TabsTrigger>
                             )
@@ -322,7 +322,7 @@ export default function Home() {
                                             <AccordionTrigger className="font-semibold hover:no-underline p-6">
                                                 <div className="flex items-center gap-3">
                                                     <BookOpen className="h-6 w-6 text-primary/80"/>
-                                                    {chapter.chapter}
+                                                    <span>{chapter.chapter}</span>
                                                 </div>
                                             </AccordionTrigger>
                                             <AccordionContent className="p-6 pt-0">
