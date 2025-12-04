@@ -624,7 +624,6 @@ function InstructorPage() {
     const storage = getStorage(app);
 
     try {
-        // 1. Handle Thumbnail Upload
         let thumbnailUrl = selectedCourse?.thumbnail;
         if (data.thumbnail) {
             const thumbnailRef = ref(storage, `courses/${user.uid}/thumbnails/${Date.now()}-${data.thumbnail.name}`);
@@ -633,9 +632,7 @@ function InstructorPage() {
         } else if (!selectedCourse) {
             thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`;
         }
-        if (!thumbnailUrl) throw new Error("Thumbnail is required.");
 
-        // 2. Handle Video and Notes Uploads
         const uploadedVideosData: VideoData[] = [];
         for (const video of data.videos) {
             let videoUrl = '';
@@ -665,7 +662,6 @@ function InstructorPage() {
             }
         }
         
-        // 3. Prepare Firestore Data Object
         const courseData = {
             title: data.title,
             description: data.description,
@@ -674,13 +670,12 @@ function InstructorPage() {
             grade: data.grade,
             pricing: {
                 type: data.pricingModel,
-                price: data.price, // Already transformed to null if not applicable
+                price: data.price,
             },
             thumbnail: thumbnailUrl,
             videos: [...(selectedCourse?.videos || []), ...uploadedVideosData],
         };
 
-        // 4. Save to Firestore
         if (selectedCourse) {
             const courseRef = doc(firestore, 'courses', selectedCourse.id);
             await updateDoc(courseRef, courseData);
