@@ -642,28 +642,29 @@ function InstructorPage() {
     async function onCourseSubmit(data: CourseFormValues) {
         if (!user) return;
         setIsSubmitting(true);
-
+    
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const firestore = getFirestore(app);
         const storage = getStorage(app);
-
+    
         try {
+            // Handle thumbnail upload
             let thumbnailUrl = selectedCourse?.thumbnail;
             if (data.thumbnail) {
                 const thumbnailRef = ref(storage, `courses/${user.uid}/${Date.now()}-${data.thumbnail.name}`);
                 const snapshot = await uploadBytes(thumbnailRef, data.thumbnail);
                 thumbnailUrl = await getDownloadURL(snapshot.ref);
             } else if (!selectedCourse) {
-                 thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`
+                 thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`;
             }
-
+    
             if (!thumbnailUrl) {
                 toast({ variant: 'destructive', title: 'Error', description: 'Course thumbnail is required.' });
                 setIsSubmitting(false);
                 return;
             }
-
-
+    
+            // Handle video uploads
             const uploadedVideos: VideoData[] = [];
             for (const videoUpload of videoUploads) {
                 let url = '';
@@ -674,14 +675,14 @@ function InstructorPage() {
                     const snapshot = await uploadBytes(videoRef, videoUpload.file);
                     url = await getDownloadURL(snapshot.ref);
                 }
-
+    
                 let notesUrl: string | undefined = undefined;
                 if (videoUpload.notesFile) {
                     const notesRef = ref(storage, `notes/${user.uid}/${Date.now()}-${videoUpload.notesFile.name}`);
                     const notesSnapshot = await uploadBytes(notesRef, videoUpload.notesFile);
                     notesUrl = await getDownloadURL(notesSnapshot.ref);
                 }
-
+    
                 if (url && videoUpload.title) {
                     uploadedVideos.push({
                         id: `V${Date.now()}-${videoUpload.title}`,
@@ -692,7 +693,8 @@ function InstructorPage() {
                     });
                 }
             }
-
+    
+            // Prepare course data for Firestore
             const courseData = {
                 instructorId: user.uid,
                 title: data.title,
@@ -705,31 +707,37 @@ function InstructorPage() {
                     price: data.pricingModel === 'purchase' ? data.price : null,
                 },
                 thumbnail: thumbnailUrl,
-                status: 'Draft' as const,
             };
-
-            if (selectedCourse) {
+    
+            if (selectedCourse) { // --- UPDATE EXISTING COURSE ---
                 const courseRef = doc(firestore, 'courses', selectedCourse.id);
-                // Create a new object for update to avoid modifying original state object
-                const updateData: Partial<Course> & { videos: VideoData[] } = {
+                const updateData: Partial<Course> = {
                     ...courseData,
                     videos: [...selectedCourse.videos, ...uploadedVideos],
+                    status: selectedCourse.status, // Preserve current status
                 };
-                delete (updateData as any).createdAt; // Do not update createdAt timestamp
-
+                
                 await updateDoc(courseRef, updateData);
-                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...updateData, id: c.id, createdAt: c.createdAt } as Course : c));
+    
+                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...updateData } as Course : c));
                 toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
-            } else {
-                 const newCourseData = { ...courseData, videos: uploadedVideos, createdAt: serverTimestamp() };
+    
+            } else { // --- CREATE NEW COURSE ---
+                const newCourseData = {
+                    ...courseData,
+                    status: 'Draft' as const,
+                    videos: uploadedVideos,
+                    createdAt: serverTimestamp(),
+                };
+                
                 const newDocRef = await addDoc(collection(firestore, 'courses'), newCourseData);
                 setCourses([{ id: newDocRef.id, ...newCourseData, createdAt: Timestamp.now() } as Course, ...courses]);
                 toast({ title: "Course Created!", description: `The course "${data.title}" has been created.` });
             }
-
+    
             setIsCourseDialogOpen(false);
             setSelectedCourse(null);
-
+    
         } catch (error) {
             console.error("Error saving course: ", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to save course.' });
