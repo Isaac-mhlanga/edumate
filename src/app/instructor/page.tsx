@@ -58,12 +58,6 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-
-const chartConfig = {
-  engagement: { label: "Engagement", color: "hsl(var(--primary))" },
-  income: { label: "Income (R)", color: "hsl(var(--secondary))" }
-} satisfies ChartConfig;
-
 const videoFormSchema = z.object({
   title: z.string().min(1, "Video title is required"),
   source: z.enum(['upload', 'youtube']),
@@ -631,7 +625,7 @@ function InstructorPage() {
         } else if (!selectedCourse) {
             thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`;
         }
-
+        
         const uploadedVideosData: VideoData[] = [];
         for (const video of data.videos) {
             let videoUrl = '';
@@ -649,15 +643,20 @@ function InstructorPage() {
                 const notesSnapshot = await uploadBytes(notesRef, video.notesFile);
                 notesUrl = await getDownloadURL(notesSnapshot.ref);
             }
-
+            
             if (videoUrl) {
-                uploadedVideosData.push({
+                const videoData: VideoData = {
                     id: `vid_${Date.now()}_${Math.random()}`,
                     title: video.title,
                     url: videoUrl,
                     notesUrl: notesUrl,
-                    quizId: video.quizId || undefined,
-                });
+                };
+
+                if (video.quizId) {
+                    videoData.quizId = video.quizId;
+                }
+                
+                uploadedVideosData.push(videoData);
             }
         }
         
@@ -676,8 +675,6 @@ function InstructorPage() {
         };
 
         if (selectedCourse) {
-            // Log the data for debugging
-            console.log("Updating course with data:", courseData);
             const courseRef = doc(firestore, 'courses', selectedCourse.id);
             await updateDoc(courseRef, courseData);
             setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...courseData } as Course : c));
@@ -689,8 +686,6 @@ function InstructorPage() {
                 status: 'Draft' as const,
                 createdAt: serverTimestamp(),
             };
-            // Log the data for debugging
-            console.log("Creating new course with data:", newCoursePayload);
             const newDocRef = await addDoc(collection(firestore, 'courses'), newCoursePayload);
             setCourses(prev => [{ id: newDocRef.id, ...newCoursePayload, createdAt: Timestamp.now() } as Course, ...prev]);
             toast({ title: "Course Created!", description: `"${data.title}" has been created as a draft.` });
@@ -2463,7 +2458,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </AlertDialog>
+        </Dialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
@@ -2594,5 +2589,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
