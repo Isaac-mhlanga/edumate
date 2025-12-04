@@ -1,22 +1,22 @@
 
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, Youtube, Upload, Paperclip, Loader2 } from 'lucide-react';
+import { PlusCircle, Trash2, Youtube, Upload, Paperclip, Loader2, Link as LinkIcon, FileText } from 'lucide-react';
 import { type Course, type VideoData, type Quiz } from '@/app/instructor/page';
 import { Progress } from '../ui/progress';
+import { Label } from '../ui/label';
 
 const courseFormSchema = z.object({
   title: z.string().min(1, "Course title is required."),
@@ -52,12 +52,14 @@ interface CourseDialogProps {
     setIsOpen: (open: boolean) => void;
     selectedCourse: Course | null;
     quizzes: Quiz[];
-    onSubmit: (data: CourseFormValues) => void;
+    onSubmit: (data: any) => void; // Allow 'any' to accommodate existing videos
     isSubmitting: boolean;
     submissionProgress: number;
 }
 
 export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSubmit, isSubmitting, submissionProgress }: CourseDialogProps) {
+    const [existingVideos, setExistingVideos] = useState<VideoData[]>([]);
+
     const form = useForm<CourseFormValues>({
         resolver: zodResolver(courseFormSchema),
         defaultValues: {
@@ -80,7 +82,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
     const pricingModel = form.watch('pricingModel');
 
     useEffect(() => {
-        if (selectedCourse) {
+        if (isOpen && selectedCourse) {
             form.reset({
                 title: selectedCourse.title,
                 description: selectedCourse.description,
@@ -91,6 +93,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                 price: selectedCourse.pricing.price,
                 videoUploads: [],
             });
+            setExistingVideos(selectedCourse.videos || []);
         } else {
             form.reset({
                 title: '',
@@ -102,11 +105,24 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                 price: null,
                 videoUploads: [],
             });
+            setExistingVideos([]);
         }
     }, [selectedCourse, form, isOpen]);
 
+    const handleExistingVideoChange = (videoId: string, field: 'notesFile' | 'quizId', value: any) => {
+        setExistingVideos(prevVideos => 
+            prevVideos.map(video => 
+                video.id === videoId ? { ...video, [field]: value } : video
+            )
+        );
+    };
+
     const handleFormSubmit = (data: CourseFormValues) => {
-        onSubmit(data);
+        const submissionData = {
+            ...data,
+            existingVideos,
+        };
+        onSubmit(submissionData);
     };
 
     return (
@@ -114,7 +130,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>{selectedCourse ? 'Edit' : 'Create New'} Course</DialogTitle>
-                    <DialogDescription>Fill in the details for your course. You can add videos later.</DialogDescription>
+                    <DialogDescription>Fill in the details for your course. You can add or edit videos below.</DialogDescription>
                 </DialogHeader>
                 {isSubmitting ? (
                     <div className="flex flex-col items-center justify-center gap-4 py-16">
@@ -204,7 +220,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                             <FormItem>
                                                 <FormLabel>Price (R)</FormLabel>
                                                 <FormControl>
-                                                    <Input type="number" placeholder="e.g. 499" onChange={e => field.onChange(parseFloat(e.target.value))} />
+                                                    <Input type="number" placeholder="e.g. 499" value={field.value ?? ''} onChange={e => field.onChange(e.target.value === '' ? null : parseFloat(e.target.value))} />
                                                 </FormControl><FormMessage />
                                             </FormItem>
                                         )}/>
@@ -213,9 +229,47 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                             </div>
 
                             <Separator />
-                            
+
+                            {selectedCourse && existingVideos.length > 0 && (
+                                <div>
+                                    <h3 className="text-lg font-medium mb-4">Existing Videos</h3>
+                                    <div className="space-y-4">
+                                        {existingVideos.map((video) => (
+                                            <div key={video.id} className="p-4 border rounded-lg space-y-3 bg-muted/30">
+                                                <p className="font-semibold">{video.title}</p>
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    <FormItem>
+                                                        <FormLabel className="flex items-center gap-2 text-sm"><Paperclip className="h-4 w-4"/> Lesson Notes</FormLabel>
+                                                        {video.notesUrl && (
+                                                            <div className="flex items-center gap-2 text-xs">
+                                                                <FileText className="h-4 w-4 text-primary"/>
+                                                                <a href={video.notesUrl} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">{video.notesUrl.split('%2F').pop()?.split('?')[0]}</a>
+                                                            </div>
+                                                        )}
+                                                        <FormControl>
+                                                            <Input type="file" accept=".pdf" className="text-xs" onChange={e => handleExistingVideoChange(video.id, 'notesFile', e.target.files?.[0])} />
+                                                        </FormControl>
+                                                    </FormItem>
+                                                    <FormItem>
+                                                        <FormLabel className="flex items-center gap-2 text-sm"><LinkIcon className="h-4 w-4"/> Linked Quiz</FormLabel>
+                                                        <Select onValueChange={(value) => handleExistingVideoChange(video.id, 'quizId', value)} defaultValue={video.quizId}>
+                                                            <FormControl><SelectTrigger><SelectValue placeholder="Select a quiz to link..." /></SelectTrigger></FormControl>
+                                                            <SelectContent>
+                                                                <SelectItem value="none">No Quiz</SelectItem>
+                                                                {quizzes.map(quiz => <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>)}
+                                                            </SelectContent>
+                                                        </Select>
+                                                    </FormItem>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <Separator className="my-6" />
+                                </div>
+                            )}
+
                             <div>
-                                <h3 className="text-lg font-medium mb-4">Course Videos</h3>
+                                <h3 className="text-lg font-medium mb-4">Add New Videos</h3>
                                 <div className="space-y-4">
                                     {fields.map((field, index) => (
                                         <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
@@ -259,7 +313,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                             )}/>
                                         </div>
                                     ))}
-                                    <Button type="button" variant="outline" onClick={() => append({ title: '', source: 'upload' })}>
+                                    <Button type="button" variant="outline" onClick={() => append({ title: '', source: 'upload', file: undefined, youtubeUrl: '', notesFile: undefined, quizId: undefined })}>
                                         <PlusCircle className="mr-2" />Add Video
                                     </Button>
                                 </div>
