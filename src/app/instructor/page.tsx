@@ -27,7 +27,7 @@ import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, Chevron
 import Image from "next/image";
 import React from "react";
 import { useReactToPrint } from "react-to-print";
-import { useForm } from "react-hook-form";
+import { useForm, useFieldArray } from "react-hook-form";
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { z } from "zod";
 import Link from "next/link";
@@ -65,6 +65,15 @@ const chartConfig = {
   income: { label: "Income (R)", color: "hsl(var(--secondary))" }
 } satisfies ChartConfig;
 
+const videoFormSchema = z.object({
+  title: z.string().min(1, "Video title is required"),
+  source: z.enum(['upload', 'youtube']),
+  file: z.instanceof(File).optional(),
+  youtubeUrl: z.string().optional(),
+  notesFile: z.instanceof(File).optional(),
+  quizId: z.string().optional(),
+});
+
 const courseFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -72,11 +81,12 @@ const courseFormSchema = z.object({
   paper: z.enum(["P1", "P2"]),
   grade: z.enum(["10", "11", "12"]),
   pricingModel: z.enum(["free", "purchase", "subscription"]),
-  price: z.coerce.number().optional(),
+  price: z.coerce.number().optional().transform(val => val || null),
   thumbnail: z.instanceof(File).optional(),
+  videos: z.array(videoFormSchema),
 }).refine(data => {
     if (data.pricingModel === 'purchase') {
-        return data.price !== undefined && data.price > 0;
+        return data.price !== null && data.price > 0;
     }
     return true;
 }, {
@@ -165,17 +175,6 @@ type Transaction = {
     date: string; // for display
 };
 
-type VideoUpload = {
-    title: string;
-    source: 'upload' | 'youtube';
-    file: File | null;
-    youtubeUrl: string;
-    fileName: string;
-    notesFile: File | null;
-    notesFileName: string;
-    quizId?: string;
-};
-
 type CalendarEvent = {
   id: string;
   title: string;
@@ -201,7 +200,6 @@ function InstructorPage() {
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>([]);
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
-  const [videoUploads, setVideoUploads] = React.useState<VideoUpload[]>([]);
   const [aiSummary, setAiSummary] = React.useState('');
   const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
 
@@ -280,9 +278,15 @@ function InstructorPage() {
       paper: "P1",
       grade: "12",
       pricingModel: "free",
-      price: undefined,
+      price: null,
       thumbnail: undefined,
+      videos: [],
     },
+  });
+
+  const { fields: videoFields, append: appendVideo, remove: removeVideo } = useFieldArray({
+    control: form.control,
+    name: "videos",
   });
   
   const generatePerformanceSummary = React.useCallback(async (instructor: User, courses: Course[], students: EnrolledStudent[], assignments: SubmittedAssignment[], transactions: Transaction[]) => {
@@ -436,33 +440,15 @@ function InstructorPage() {
   const watchedPaper = form.watch("paper");
 
   const handleAddNewVideo = () => {
-    setVideoUploads([...videoUploads, { title: '', source: 'upload', file: null, youtubeUrl: '', fileName: '', notesFile: null, notesFileName: '' }]);
+    appendVideo({
+        title: '',
+        source: 'upload',
+        file: undefined,
+        youtubeUrl: '',
+        notesFile: undefined,
+        quizId: '',
+    });
   };
-
-  const handleVideoChange = (index: number, field: keyof VideoUpload, value: any) => {
-    const newUploads = [...videoUploads];
-    (newUploads[index] as any)[field] = value;
-    if (field === 'file' && value instanceof File) {
-        newUploads[index].fileName = value.name;
-    }
-    if (field === 'notesFile' && value instanceof File) {
-        newUploads[index].notesFileName = value.name;
-    }
-    setVideoUploads(newUploads);
-  };
-  
-  const handleVideoQuizChange = (index: number, quizId: string) => {
-    const newUploads = [...videoUploads];
-    newUploads[index].quizId = quizId;
-    setVideoUploads(newUploads);
-  };
-
-  const handleRemoveVideo = (index: number) => {
-    const newUploads = [...videoUploads];
-    newUploads.splice(index, 1);
-    setVideoUploads(newUploads);
-  };
-
   
   React.useEffect(() => {
     if (isCourseDialogOpen) {
@@ -474,22 +460,12 @@ function InstructorPage() {
             paper: selectedCourse.paper,
             grade: selectedCourse.grade,
             pricingModel: selectedCourse.pricing.type,
-            price: selectedCourse.pricing.price || undefined,
+            price: selectedCourse.pricing.price || null,
             thumbnail: undefined,
+            videos: [],
           });
-          setVideoUploads([]);
         } else {
-          form.reset({
-            title: "",
-            description: "",
-            subject: "Mathematics",
-            paper: "P1",
-            grade: "12",
-            pricingModel: "free",
-            price: undefined,
-            thumbnail: undefined,
-          });
-          setVideoUploads([]);
+          form.reset();
         }
     }
   }, [selectedCourse, form, isCourseDialogOpen]);
@@ -640,116 +616,100 @@ function InstructorPage() {
     };
 
     async function onCourseSubmit(data: CourseFormValues) {
-        if (!user) return;
-        setIsSubmitting(true);
-    
-        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-        const firestore = getFirestore(app);
-        const storage = getStorage(app);
-    
-        try {
-            let thumbnailUrl = selectedCourse?.thumbnail;
-            if (data.thumbnail) {
-                const thumbnailRef = ref(storage, `courses/${user.uid}/${Date.now()}-${data.thumbnail.name}`);
-                const snapshot = await uploadBytes(thumbnailRef, data.thumbnail);
-                thumbnailUrl = await getDownloadURL(snapshot.ref);
-            } else if (!selectedCourse) {
-                 thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`;
-            }
-    
-            if (!thumbnailUrl) {
-                toast({ variant: 'destructive', title: 'Error', description: 'Course thumbnail is required.' });
-                setIsSubmitting(false);
-                return;
-            }
-    
-            const uploadedVideos: VideoData[] = [];
-            for (const videoUpload of videoUploads) {
-                let videoUrl = '';
-                if (videoUpload.source === 'youtube') {
-                    videoUrl = getYouTubeEmbedUrl(videoUpload.youtubeUrl);
-                } else if (videoUpload.file) {
-                    const videoRef = ref(storage, `videos/${user.uid}/${Date.now()}-${videoUpload.file.name}`);
-                    const snapshot = await uploadBytes(videoRef, videoUpload.file);
-                    videoUrl = await getDownloadURL(snapshot.ref);
-                }
-    
-                let notesUrlValue: string | null = null;
-                if (videoUpload.notesFile) {
-                    const notesRef = ref(storage, `notes/${user.uid}/${Date.now()}-${videoUpload.notesFile.name}`);
-                    const notesSnapshot = await uploadBytes(notesRef, videoUpload.notesFile);
-                    notesUrlValue = await getDownloadURL(notesSnapshot.ref);
-                }
-    
-                if (videoUrl && videoUpload.title) {
-                    uploadedVideos.push({
-                        id: `V${Date.now()}-${videoUpload.title.replace(/\s+/g, '')}`,
-                        title: videoUpload.title,
-                        url: videoUrl,
-                        quizId: videoUpload.quizId || undefined,
-                        notesUrl: notesUrlValue,
-                    });
-                }
-            }
-    
-            if (selectedCourse) { // --- UPDATE EXISTING COURSE ---
-                const courseRef = doc(firestore, 'courses', selectedCourse.id);
-                const updatedData: Partial<Omit<Course, 'id' | 'createdAt'>> = {
-                    title: data.title,
-                    description: data.description,
-                    subject: data.subject,
-                    paper: data.paper,
-                    grade: data.grade,
-                    pricing: {
-                        type: data.pricingModel,
-                        price: data.pricingModel === 'purchase' ? data.price : null,
-                    },
-                    thumbnail: thumbnailUrl,
-                    videos: [...selectedCourse.videos, ...uploadedVideos],
-                };
-                
-                await updateDoc(courseRef, updatedData);
-    
-                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...updatedData } as Course : c));
-                toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
-    
-            } else { // --- CREATE NEW COURSE ---
-                 const newCourseData: Omit<Course, 'id' | 'createdAt'> & { createdAt: any } = {
-                    instructorId: user.uid,
-                    title: data.title,
-                    description: data.description,
-                    subject: data.subject,
-                    paper: data.paper,
-                    grade: data.grade,
-                    pricing: {
-                        type: data.pricingModel,
-                        price: data.pricingModel === 'purchase' ? data.price : null,
-                    },
-                    thumbnail: thumbnailUrl,
-                    status: 'Draft',
-                    videos: uploadedVideos,
-                    createdAt: serverTimestamp(),
-                };
-                
-                const newDocRef = await addDoc(collection(firestore, 'courses'), newCourseData);
-                setCourses([{ id: newDocRef.id, ...newCourseData, createdAt: Timestamp.now() } as Course, ...courses]);
-                toast({ title: "Course Created!", description: `The course "${data.title}" has been created as a draft.` });
-            }
-    
-            setIsCourseDialogOpen(false);
-            setSelectedCourse(null);
-    
-        } catch (error) {
-            console.error("Error saving course: ", error);
-            if (error instanceof FirebaseError) {
-                toast({ variant: 'destructive', title: 'Firebase Error', description: error.message });
-            } else {
-                toast({ variant: 'destructive', title: 'Error', description: 'Failed to save course. Please check all fields and try again.' });
-            }
-        } finally {
-            setIsSubmitting(false);
+    if (!user) return;
+    setIsSubmitting(true);
+
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const storage = getStorage(app);
+
+    try {
+        // 1. Handle Thumbnail Upload
+        let thumbnailUrl = selectedCourse?.thumbnail;
+        if (data.thumbnail) {
+            const thumbnailRef = ref(storage, `courses/${user.uid}/thumbnails/${Date.now()}-${data.thumbnail.name}`);
+            const snapshot = await uploadBytes(thumbnailRef, data.thumbnail);
+            thumbnailUrl = await getDownloadURL(snapshot.ref);
+        } else if (!selectedCourse) {
+            thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`;
         }
+        if (!thumbnailUrl) throw new Error("Thumbnail is required.");
+
+        // 2. Handle Video and Notes Uploads
+        const uploadedVideosData: VideoData[] = [];
+        for (const video of data.videos) {
+            let videoUrl = '';
+            if (video.source === 'youtube' && video.youtubeUrl) {
+                videoUrl = getYouTubeEmbedUrl(video.youtubeUrl);
+            } else if (video.source === 'upload' && video.file) {
+                const videoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.file.name}`);
+                const snapshot = await uploadBytes(videoRef, video.file);
+                videoUrl = await getDownloadURL(snapshot.ref);
+            }
+
+            let notesUrl: string | null = null;
+            if (video.notesFile) {
+                const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${video.notesFile.name}`);
+                const notesSnapshot = await uploadBytes(notesRef, video.notesFile);
+                notesUrl = await getDownloadURL(notesSnapshot.ref);
+            }
+
+            if (videoUrl) {
+                uploadedVideosData.push({
+                    id: `vid_${Date.now()}_${Math.random()}`,
+                    title: video.title,
+                    url: videoUrl,
+                    notesUrl: notesUrl,
+                    quizId: video.quizId || undefined,
+                });
+            }
+        }
+        
+        // 3. Prepare Firestore Data Object
+        const courseData = {
+            title: data.title,
+            description: data.description,
+            subject: data.subject,
+            paper: data.paper,
+            grade: data.grade,
+            pricing: {
+                type: data.pricingModel,
+                price: data.price, // Already transformed to null if not applicable
+            },
+            thumbnail: thumbnailUrl,
+            videos: [...(selectedCourse?.videos || []), ...uploadedVideosData],
+        };
+
+        // 4. Save to Firestore
+        if (selectedCourse) {
+            const courseRef = doc(firestore, 'courses', selectedCourse.id);
+            await updateDoc(courseRef, courseData);
+            setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...courseData } as Course : c));
+            toast({ title: "Course Updated!", description: `"${data.title}" has been saved.` });
+        } else {
+            const newCoursePayload = {
+                ...courseData,
+                instructorId: user.uid,
+                status: 'Draft' as const,
+                createdAt: serverTimestamp(),
+            };
+            const newDocRef = await addDoc(collection(firestore, 'courses'), newCoursePayload);
+            setCourses(prev => [{ id: newDocRef.id, ...newCoursePayload, createdAt: Timestamp.now() } as Course, ...prev]);
+            toast({ title: "Course Created!", description: `"${data.title}" has been created as a draft.` });
+        }
+
+        setIsCourseDialogOpen(false);
+        setSelectedCourse(null);
+        form.reset();
+
+    } catch (error) {
+        console.error("Error saving course: ", error);
+        toast({ variant: 'destructive', title: 'Error', description: `Failed to save course. ${error instanceof Error ? error.message : ''}` });
+    } finally {
+        setIsSubmitting(false);
     }
+}
+
 
   async function handleSaveSolution(assignmentId: string, price: number) {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -2028,13 +1988,7 @@ function InstructorPage() {
                                                   <p className="mb-2 text-sm text-muted-foreground">
                                                     <span className="font-semibold">Click to upload</span> or drag and drop
                                                   </p>
-                                                  {field.value?.name ? (
-                                                    <p className="text-xs text-primary">{field.value.name}</p>
-                                                  ) : selectedCourse?.thumbnail ? (
-                                                    <p className="text-xs text-primary">{selectedCourse.thumbnail.split('/').pop()?.split('?')[0].slice(14) || 'Current image'}</p>
-                                                  ): (
-                                                    <p className="text-xs text-muted-foreground">PNG or JPG (MAX. 800x400px)</p>
-                                                  )}
+                                                   <p className="text-xs text-primary">{form.watch('thumbnail')?.name || (selectedCourse?.thumbnail ? 'Current image uploaded' : 'PNG or JPG')}</p>
                                               </div>
                                               <Input id="dropzone-file-course" type="file" className="hidden" onChange={(e) => field.onChange(e.target.files?.[0])} />
                                           </label>
@@ -2163,69 +2117,113 @@ function InstructorPage() {
                                 </div>
                             )}
                             <div className="space-y-4">
-                            {videoUploads.map((upload, index) => (
-                                <Card key={index} className="p-4 bg-muted/50">
+                            {videoFields.map((field, index) => (
+                                <Card key={field.id} className="p-4 bg-muted/50">
                                     <div className="flex items-start gap-4">
                                         <div className="flex-grow space-y-2">
-                                            <Input
-                                                placeholder={`Video ${index + 1} Title`}
-                                                value={upload.title}
-                                                onChange={(e) => handleVideoChange(index, 'title', e.target.value)}
+                                            <FormField
+                                                control={form.control}
+                                                name={`videos.${index}.title`}
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <FormControl><Input placeholder={`Video ${index + 1} Title`} {...field} /></FormControl>
+                                                    <FormMessage />
+                                                </FormItem>
+                                                )}
+                                            />
+                                            <FormField
+                                                control={form.control}
+                                                name={`videos.${index}.source`}
+                                                render={({ field }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <RadioGroup onValueChange={field.onChange} defaultValue={field.value} className="flex gap-4 pt-2">
+                                                                <FormItem className="flex items-center space-x-2 space-y-0">
+                                                                    <FormControl><RadioGroupItem value="upload" /></FormControl>
+                                                                    <FormLabel className="font-normal">File Upload</FormLabel>
+                                                                </FormItem>
+                                                                {pricingModel === 'free' && (
+                                                                <FormItem className="flex items-center space-x-2 space-y-0">
+                                                                    <FormControl><RadioGroupItem value="youtube" /></FormControl>
+                                                                    <FormLabel className="font-normal">YouTube</FormLabel>
+                                                                </FormItem>
+                                                                )}
+                                                            </RadioGroup>
+                                                        </FormControl>
+                                                    </FormItem>
+                                                )}
                                             />
 
-                                            {pricingModel === 'free' ? (
-                                                <RadioGroup value={upload.source} onValueChange={(value) => handleVideoChange(index, 'source', value)} className="flex gap-4 pt-2">
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="upload" id={`source-upload-${index}`} />
-                                                        <Label htmlFor={`source-upload-${index}`}>File Upload</Label>
-                                                    </div>
-                                                    <div className="flex items-center space-x-2">
-                                                        <RadioGroupItem value="youtube" id={`source-youtube-${index}`} />
-                                                        <Label htmlFor={`source-youtube-${index}`}>YouTube Link</Label>
-                                                    </div>
-                                                </RadioGroup>
-                                            ) : null}
-
-                                            {upload.source === 'youtube' && pricingModel === 'free' ? (
-                                                 <div className="relative">
-                                                     <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                                     <Input
-                                                        placeholder="https://www.youtube.com/watch?v=..."
-                                                        className="pl-9"
-                                                        value={upload.youtubeUrl}
-                                                        onChange={(e) => handleVideoChange(index, 'youtubeUrl', e.target.value)}
-                                                    />
-                                                 </div>
+                                            {form.watch(`videos.${index}.source`) === 'youtube' ? (
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`videos.${index}.youtubeUrl`}
+                                                    render={({ field }) => (
+                                                        <FormItem>
+                                                            <FormControl>
+                                                                <div className="relative">
+                                                                    <Youtube className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                                    <Input placeholder="https://www.youtube.com/watch?v=..." className="pl-9" {...field} />
+                                                                </div>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
                                             ) : (
-                                                <label htmlFor={`video-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
-                                                    <Video className="h-4 w-4 mr-2 text-muted-foreground" />
-                                                    <span className="text-sm text-muted-foreground truncate">
-                                                        {upload.fileName || 'Choose a video file'}
-                                                    </span>
-                                                    <Input id={`video-upload-${index}`} type="file" accept="video/*" className="sr-only" onChange={(e) => handleVideoChange(index, 'file', e.target.files ? e.target.files[0] : null)} />
-                                                </label>
+                                                <FormField
+                                                    control={form.control}
+                                                    name={`videos.${index}.file`}
+                                                    render={({ field: { onChange, value, ...rest } }) => (
+                                                        <FormItem>
+                                                            <FormControl>
+                                                                <label htmlFor={`video-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
+                                                                    <Video className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                                    <span className="text-sm text-muted-foreground truncate">{value?.name || 'Choose a video file'}</span>
+                                                                    <Input id={`video-upload-${index}`} type="file" accept="video/*" className="sr-only" onChange={(e) => onChange(e.target.files?.[0])} {...rest} />
+                                                                </label>
+                                                            </FormControl>
+                                                            <FormMessage />
+                                                        </FormItem>
+                                                    )}
+                                                />
                                             )}
                                             
-                                             <label htmlFor={`notes-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
-                                                <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
-                                                <span className="text-sm text-muted-foreground truncate">
-                                                    {upload.notesFileName || 'Upload optional notes (PDF)'}
-                                                </span>
-                                                <Input id={`notes-upload-${index}`} type="file" accept=".pdf" className="sr-only" onChange={(e) => handleVideoChange(index, 'notesFile', e.target.files ? e.target.files[0] : null)} />
-                                            </label>
+                                             <FormField
+                                                control={form.control}
+                                                name={`videos.${index}.notesFile`}
+                                                render={({ field: { onChange, value, ...rest } }) => (
+                                                    <FormItem>
+                                                        <FormControl>
+                                                            <label htmlFor={`notes-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
+                                                                <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                                <span className="text-sm text-muted-foreground truncate">{value?.name || 'Upload optional notes (PDF)'}</span>
+                                                                <Input id={`notes-upload-${index}`} type="file" accept=".pdf" className="sr-only" onChange={(e) => onChange(e.target.files?.[0])} {...rest} />
+                                                            </label>
+                                                        </FormControl>
+                                                        <FormMessage />
+                                                    </FormItem>
+                                                )}
+                                            />
 
-                                            <Select onValueChange={(value) => handleVideoQuizChange(index, value)}>
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Link a quiz (optional)" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {quizzes.map(quiz => (
-                                                        <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
+                                            <FormField
+                                                control={form.control}
+                                                name={`videos.${index}.quizId`}
+                                                render={({ field }) => (
+                                                <FormItem>
+                                                    <Select onValueChange={field.onChange} value={field.value}>
+                                                        <FormControl><SelectTrigger><SelectValue placeholder="Link a quiz (optional)" /></SelectTrigger></FormControl>
+                                                        <SelectContent>
+                                                            {quizzes.map(quiz => (
+                                                                <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>
+                                                            ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                <FormMessage />
+                                                </FormItem>
+                                            )} />
                                         </div>
-                                        <Button type="button" variant="ghost" size="icon" onClick={() => handleRemoveVideo(index)}>
+                                        <Button type="button" variant="ghost" size="icon" onClick={() => removeVideo(index)}>
                                             <Trash2 className="h-4 w-4 text-destructive" />
                                         </Button>
                                     </div>
