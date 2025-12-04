@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -17,6 +18,19 @@ import { type Course, type VideoData, type Quiz } from '@/app/instructor/page';
 import { Progress } from '../ui/progress';
 import { Label } from '../ui/label';
 
+const getVideoDuration = (file: File): Promise<number> => {
+    return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.preload = 'metadata';
+        video.onloadedmetadata = () => {
+            window.URL.revokeObjectURL(video.src);
+            resolve(video.duration);
+        };
+        video.onerror = reject;
+        video.src = window.URL.createObjectURL(file);
+    });
+};
+
 const courseFormSchema = z.object({
   title: z.string().min(1, "Course title is required."),
   description: z.string().min(1, "Description is required."),
@@ -30,6 +44,7 @@ const courseFormSchema = z.object({
     title: z.string().min(1, "Video title is required."),
     source: z.enum(['upload', 'youtube']),
     file: z.any().optional(),
+    fileDuration: z.number().optional(),
     youtubeUrl: z.string().optional(),
     notesFile: z.any().optional(),
     quizId: z.string().optional(),
@@ -49,6 +64,7 @@ type CourseFormValues = z.infer<typeof courseFormSchema>;
 // Extend VideoData to include local file references for replacement
 type EditableVideoData = VideoData & {
     newVideoFile?: File;
+    newVideoDuration?: number;
     newYoutubeUrl?: string;
     newVideoSource?: 'upload' | 'youtube';
 };
@@ -80,7 +96,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         },
     });
 
-    const { fields, append, remove } = useFieldArray({
+    const { fields, append, remove, control } = useFieldArray({
         control: form.control,
         name: 'videoUploads',
     });
@@ -115,7 +131,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         }
     }, [selectedCourse, form, isOpen]);
 
-    const handleExistingVideoChange = (videoId: string, field: 'notesFile' | 'quizId' | 'newVideoFile' | 'newYoutubeUrl' | 'newVideoSource', value: any) => {
+    const handleExistingVideoChange = (videoId: string, field: 'notesFile' | 'quizId' | 'newVideoFile' | 'newYoutubeUrl' | 'newVideoSource' | 'newVideoDuration', value: any) => {
         setExistingVideos(prevVideos => 
             prevVideos.map(video => 
                 video.id === videoId ? { ...video, [field]: value } : video
@@ -257,7 +273,14 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                         {video.newVideoSource === 'upload' ? (
                                                              <FormItem>
                                                                 <FormLabel>New Video File</FormLabel>
-                                                                <FormControl><Input type="file" accept="video/*" onChange={e => handleExistingVideoChange(video.id, 'newVideoFile', e.target.files?.[0])} /></FormControl>
+                                                                <FormControl><Input type="file" accept="video/*" onChange={async (e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    handleExistingVideoChange(video.id, 'newVideoFile', file);
+                                                                    if (file) {
+                                                                        const duration = await getVideoDuration(file);
+                                                                        handleExistingVideoChange(video.id, 'newVideoDuration', duration);
+                                                                    }
+                                                                }} /></FormControl>
                                                             </FormItem>
                                                         ) : (
                                                             <FormItem>
@@ -321,8 +344,15 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                             )}/>
                                             
                                             {form.watch(`videoUploads.${index}.source`) === 'upload' && (
-                                                <FormField control={form.control} name={`videoUploads.${index}.file`} render={({ field }) => (
-                                                    <FormItem><FormLabel>Video File</FormLabel><FormControl><Input type="file" accept="video/*" onChange={e => field.onChange(e.target.files?.[0])} /></FormControl><FormMessage /></FormItem>
+                                                <FormField control={control} name={`videoUploads.${index}.file`} render={({ field: { onChange, ...fieldProps } }) => (
+                                                    <FormItem><FormLabel>Video File</FormLabel><FormControl><Input type="file" accept="video/*" {...fieldProps} onChange={async (e) => {
+                                                        const file = e.target.files?.[0];
+                                                        onChange(file);
+                                                        if (file) {
+                                                            const duration = await getVideoDuration(file);
+                                                            form.setValue(`videoUploads.${index}.fileDuration`, duration);
+                                                        }
+                                                    }} /></FormControl><FormMessage /></FormItem>
                                                 )}/>
                                             )}
                                             {form.watch(`videoUploads.${index}.source`) === 'youtube' && (

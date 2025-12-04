@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -41,6 +42,7 @@ export type VideoData = {
     id: string;
     title: string;
     url: string;
+    duration?: number; // Duration in seconds
     quizId?: string | null;
     notesUrl: string | null;
 };
@@ -501,12 +503,14 @@ function InstructorPage() {
         for (const video of videosToUpload) {
             let videoUrl = video.url || '';
             let notesUrl = video.notesUrl || null;
+            let duration = video.duration || 0;
 
             // New Video Upload
             if (video.file instanceof File) {
                 const videoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.file.name}`);
                 await uploadBytes(videoRef, video.file);
                 videoUrl = await getDownloadURL(videoRef);
+                duration = video.fileDuration;
             } else if (video.youtubeUrl) {
                 videoUrl = video.youtubeUrl.replace("watch?v=", "embed/");
             }
@@ -519,6 +523,7 @@ function InstructorPage() {
                 const newVideoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.newVideoFile.name}`);
                 await uploadBytes(newVideoRef, video.newVideoFile);
                 videoUrl = await getDownloadURL(newVideoRef);
+                duration = video.newVideoDuration;
             } else if (video.id && video.newYoutubeUrl) {
                 if (video.url && !video.url.includes('youtube.com')) {
                    await deleteObject(ref(storage, video.url));
@@ -541,6 +546,7 @@ function InstructorPage() {
                     id: video.id || `vid_${Date.now()}_${Math.random()}`,
                     title: video.title,
                     url: videoUrl,
+                    duration: duration,
                     notesUrl: notesUrl,
                     quizId: video.quizId === 'none' ? null : video.quizId || null,
                 });

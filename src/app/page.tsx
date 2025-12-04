@@ -39,6 +39,7 @@ type VideoData = {
     id: string;
     title: string;
     url:string;
+    duration?: number;
 };
 
 type Course = {
@@ -55,7 +56,6 @@ type Course = {
     };
     status: 'Draft' | 'Published' | 'Pending Approval' | 'Rejected';
     videos: VideoData[];
-    duration?: string;
     rating?: number;
     instructor?: string;
 };
@@ -200,6 +200,22 @@ export default function Home() {
     (currentCoursePage - 1) * coursesPerPage,
     currentCoursePage * coursesPerPage
   );
+
+  const formatDuration = (videos: VideoData[] = []) => {
+      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
+      if (totalSeconds === 0) return null;
+
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+      if (hours > 0) {
+          return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
+      }
+      if (minutes > 0) {
+          return `${minutes}m`;
+      }
+      return `${Math.round(totalSeconds)}s`;
+  };
 
 
   return (
@@ -434,7 +450,7 @@ export default function Home() {
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <Clock className="w-4 h-4" />
-                                        <span>{course.duration || '8h'}</span>
+                                        <span>{formatDuration(course.videos) || 'N/A'}</span>
                                     </div>
                                 </div>
                                 <Separator />

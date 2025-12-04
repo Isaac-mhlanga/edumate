@@ -25,6 +25,7 @@ type VideoData = {
     title: string;
     url:string;
     notesUrl?: string;
+    duration?: number;
 };
 
 type Course = {
@@ -41,7 +42,6 @@ type Course = {
     };
     status: 'Draft' | 'Published' | 'Pending Approval' | 'Rejected';
     videos: VideoData[];
-    duration?: string;
     rating?: number;
     instructor?: string;
 };
