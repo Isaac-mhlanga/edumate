@@ -156,6 +156,8 @@ function InstructorPage() {
   const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
   
   const [isCourseDialogOpen, setIsCourseDialogOpen] = React.useState(false);
+  const [isSubmittingCourse, setIsSubmittingCourse] = React.useState(false);
+  const [submissionProgress, setSubmissionProgress] = React.useState(0);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = React.useState(false);
   const [isReviewDialogOpen, setIsReviewDialogOpen] = React.useState(false);
   const [isStudentDetailsDialogOpen, setIsStudentDetailsDialogOpen] = React.useState(false);
@@ -241,10 +243,7 @@ function InstructorPage() {
         setSubmittedAssignments(fetchedAssignments);
         setLoadingAssignments(false);
         
-        const transactionsQuery = query(
-            collection(firestore, 'transactions'),
-            where('instructorId', '==', currentUser.uid)
-        );
+        const transactionsQuery = query(collection(firestore, 'transactions'), where('instructorId', '==', currentUser.uid));
         const transactionsSnapshot = await getDocs(transactionsQuery);
         const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
             const data = doc.data();
@@ -438,6 +437,9 @@ function InstructorPage() {
 
   const onCourseSubmit = async (data: any) => {
       if (!user) return;
+      setIsSubmittingCourse(true);
+      setSubmissionProgress(0);
+
       const { videoUploads, ...courseDetails } = data;
       
       const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -446,15 +448,19 @@ function InstructorPage() {
 
       let thumbnailUrl = selectedCourse?.thumbnail || '';
       if (courseDetails.thumbnail) {
+          setSubmissionProgress(10);
           const thumbnailRef = ref(storage, `courses/${user.uid}/thumbnails/${Date.now()}-${courseDetails.thumbnail.name}`);
           await uploadBytes(thumbnailRef, courseDetails.thumbnail);
           thumbnailUrl = await getDownloadURL(thumbnailRef);
+          setSubmissionProgress(25);
       } else if (!selectedCourse) {
           thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`;
       }
       
       const uploadedVideosData: VideoData[] = [];
-      if (videoUploads) {
+      if (videoUploads && videoUploads.length > 0) {
+          const totalFiles = videoUploads.length;
+          let filesUploaded = 0;
           for (const video of videoUploads) {
               let videoUrl = '';
               let notesUrl: string | null = null;
@@ -479,13 +485,15 @@ function InstructorPage() {
                       title: video.title,
                       url: videoUrl,
                       notesUrl: notesUrl,
+                      quizId: video.quizId || null,
                   };
-                  if (video.quizId) {
-                      videoData.quizId = video.quizId;
-                  }
                   uploadedVideosData.push(videoData as VideoData);
               }
+              filesUploaded++;
+              setSubmissionProgress(25 + Math.round((filesUploaded / totalFiles) * 65));
           }
+      } else {
+         setSubmissionProgress(90);
       }
 
       const courseData = {
@@ -498,29 +506,41 @@ function InstructorPage() {
       };
       delete courseData.pricingModel;
 
-      console.log('Submitting Course Data:', courseData);
-      
-      if (selectedCourse) {
-          const courseRef = doc(firestore, 'courses', selectedCourse.id);
-          await updateDoc(courseRef, {
-              ...courseData,
-              videos: [...selectedCourse.videos, ...uploadedVideosData]
-          });
-          toast({ title: "Course Updated!" });
-          setCourses(prev => prev.map(c => c.id === selectedCourse.id ? { ...c, ...courseData, videos: [...c.videos, ...uploadedVideosData] } as Course : c));
-      } else {
-          const coursePayload = {
-              ...courseData,
-              videos: uploadedVideosData,
-              instructorId: user.uid,
-              status: 'Draft' as const,
-              createdAt: serverTimestamp(),
-          };
-          await addDoc(collection(firestore, 'courses'), coursePayload);
-          toast({ title: "Course Created!" });
-      }
+      try {
+        if (selectedCourse) {
+            const courseRef = doc(firestore, 'courses', selectedCourse.id);
+            await updateDoc(courseRef, {
+                ...courseData,
+                videos: [...selectedCourse.videos, ...uploadedVideosData]
+            });
+            toast({ title: "Course Updated!" });
+            // This part needs a refetch or a more careful state update
+            const updatedCourses = courses.map(c => c.id === selectedCourse.id ? { ...c, ...courseData, videos: [...c.videos, ...uploadedVideosData] } as Course : c)
+            setCourses(updatedCourses);
 
-      setIsCourseDialogOpen(false);
+        } else {
+            const coursePayload = {
+                ...courseData,
+                videos: uploadedVideosData,
+                instructorId: user.uid,
+                status: 'Draft' as const,
+                createdAt: serverTimestamp(),
+            };
+            const newDocRef = await addDoc(collection(firestore, 'courses'), coursePayload);
+            toast({ title: "Course Created!" });
+            const newCourse = { ...coursePayload, id: newDocRef.id, createdAt: Timestamp.now() } as Course;
+            setCourses([newCourse, ...courses]);
+        }
+      } catch (error) {
+         console.error("Error saving course:", error);
+         toast({ variant: 'destructive', title: 'Save Failed', description: 'Could not save the course.'});
+      } finally {
+          setSubmissionProgress(100);
+          setTimeout(() => {
+              setIsSubmittingCourse(false);
+              setIsCourseDialogOpen(false);
+          }, 500);
+      }
   }
 
   async function handleSaveSolution(assignmentId: string, price: number) {
@@ -782,6 +802,8 @@ function InstructorPage() {
         selectedCourse={selectedCourse}
         quizzes={quizzes}
         onSubmit={onCourseSubmit}
+        isSubmitting={isSubmittingCourse}
+        submissionProgress={submissionProgress}
       />
     
       <DeleteCourseDialog
