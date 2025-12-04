@@ -27,7 +27,6 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { summarizeLesson } from "@/ai/flows/summarize-lesson";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -105,6 +104,7 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [quality, setQuality] = useState('720p');
   const [isClient, setIsClient] = useState(false);
+  const [selectedGrade, setSelectedGrade] = useState<'10' | '11' | '12'>('12');
   
   const { toast } = useToast();
 
@@ -162,10 +162,11 @@ export default function Home() {
     'Life Sciences': Dna,
   };
 
-  const getCoursesForTopic = (topic: string, subject: keyof typeof curriculumData) => {
+  const getCoursesForTopic = (topic: string, subject: keyof (typeof curriculumData)[typeof selectedGrade]) => {
     const searchTerms = topic.toLowerCase().replace(/[-&,]/g, ' ').split(' ').filter(term => term.length > 2);
     return allCourses.filter(course => 
       course.subject === subject && 
+      course.grade === selectedGrade &&
       searchTerms.some(term => 
         course.title.toLowerCase().includes(term) || 
         course.description.toLowerCase().includes(term)
@@ -289,12 +290,12 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our Grade 12 curriculum is expertly crafted to cover all essential topics. Find courses that match your needs.</p>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted to cover all essential topics. Find courses that match your needs.</p>
                 </div>
                 
                 <Tabs defaultValue="Mathematics" className="w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-8 h-auto sm:h-12">
-                        {Object.entries(curriculumData).map(([subject, data]) => {
+                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4 h-auto sm:h-12">
+                        {Object.keys(curriculumData['12']).map((subject) => {
                             const Icon = curriculumIcons[subject as keyof typeof curriculumIcons];
                             return (
                                 <TabsTrigger key={subject} value={subject} className="gap-2 text-base py-3 h-full">
@@ -303,9 +304,17 @@ export default function Home() {
                             )
                         })}
                     </TabsList>
+
+                     <Tabs defaultValue={selectedGrade} onValueChange={(value) => setSelectedGrade(value as '10' | '11' | '12')} className="w-full animate-fade-in-up mb-8" style={{ animationDelay: '0.3s' }}>
+                        <TabsList className="grid w-full grid-cols-3 max-w-sm mx-auto">
+                            <TabsTrigger value="10">Grade 10</TabsTrigger>
+                            <TabsTrigger value="11">Grade 11</TabsTrigger>
+                            <TabsTrigger value="12">Grade 12</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
                     
-                    {Object.entries(curriculumData).map(([subject, chapters]) => (
-                        <TabsContent key={subject} value={subject}>
+                    {Object.entries(curriculumData[selectedGrade]).map(([subject, chapters]) => (
+                        <TabsContent key={`${selectedGrade}-${subject}`} value={subject}>
                              <Accordion type="multiple" className="w-full space-y-4">
                                 {chapters.map((chapter, index) => (
                                     <Card key={index} className="overflow-hidden bg-card shadow-md">

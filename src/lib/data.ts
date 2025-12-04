@@ -24,40 +24,56 @@ export const faqData = [
     }
 ];
 
-export const grade12MathsCurriculum = [
+const grade10MathsCurriculum = [
+    { chapter: "Paper 1", topics: ["Algebra and Exponents", "Number Patterns", "Finance and Growth"] },
+    { chapter: "Paper 2", topics: ["Statistics", "Analytical Geometry", "Trigonometry"] },
+];
+const grade11MathsCurriculum = [
+    { chapter: "Paper 1", topics: ["Exponents and Surds", "Quadratic Equations", "Functions"] },
+    { chapter: "Paper 2", topics: ["Statistics", "Euclidean Geometry", "Trigonometry"] },
+];
+const grade12MathsCurriculum = [
     {
         chapter: "Paper 1",
         paper: "P1",
         topics: [
-            "Algebra, Equations & Inequalities - 25 marks (17%)",
-            "Patterns & Sequences - 25 marks (17%)",
-            "Finance, Growth & Decay - 15 marks (10%)",
-            "Functions & Graphs - 35 marks (23%)",
-            "Differential Calculus - 35 marks (23%)",
-            "Probability - 15 marks (10%)"
+            "Algebra, Equations & Inequalities",
+            "Patterns & Sequences",
+            "Finance, Growth & Decay",
+            "Functions & Graphs",
+            "Differential Calculus",
+            "Probability"
         ]
     },
     {
         chapter: "Paper 2",
         paper: "P2",
         topics: [
-            "Statistics - 20 marks (13%)",
-            "Analytical Geometry - 40 marks (27%)",
-            "Trigonometry - 40 marks (27%)",
-            "Euclidean Geometry - 50 marks (33%)"
+            "Statistics",
+            "Analytical Geometry",
+            "Trigonometry",
+            "Euclidean Geometry"
         ]
     }
 ];
 
-export const grade12PhysicsCurriculum = [
+const grade10PhysicsCurriculum = [
+    { chapter: "Paper 1", topics: ["Mechanics", "Waves and Sound"] },
+    { chapter: "Paper 2", topics: ["Matter and Materials", "Chemical Change"] },
+];
+const grade11PhysicsCurriculum = [
+    { chapter: "Paper 1", topics: ["Newton's Laws", "Geometrical Optics"] },
+    { chapter: "Paper 2", topics: ["Stoichiometry", "Intermolecular Forces"] },
+];
+const grade12PhysicsCurriculum = [
     {
         chapter: "Paper 1: Physics",
         paper: "P1",
         topics: [
-            "Mechanics - 63 marks (42%)",
-            "Waves, Sound & Light - 17 marks (11%)",
-            "Electricity & Magnetism - 55 marks (37%)",
-            "Matter & Materials - 15 marks (10%)"
+            "Mechanics",
+            "Waves, Sound & Light",
+            "Electricity & Magnetism",
+            "Matter & Materials"
         ],
         category: "Physics"
     },
@@ -65,42 +81,62 @@ export const grade12PhysicsCurriculum = [
         chapter: "Paper 2: Chemistry",
         paper: "P2",
         topics: [
-            "Chemical Change - 84 marks (56%)",
-            "Chemical Systems - 18 marks (12%)",
-            "Organic Chemistry - 48 marks (32%)",
+            "Chemical Change",
+            "Chemical Systems",
+            "Organic Chemistry",
         ],
         category: "Chemistry"
     }
 ];
 
-export const grade12LifeSciencesCurriculum = [
+const grade10LifeSciencesCurriculum = [
+    { chapter: "Strand 1", topics: ["The Chemistry of Life", "Cells"] },
+    { chapter: "Strand 2", topics: ["Support Systems in Plants", "Support Systems in Animals"] },
+];
+const grade11LifeSciencesCurriculum = [
+    { chapter: "Strand 1", topics: ["Biodiversity", "Photosynthesis"] },
+    { chapter: "Strand 2", topics: ["Gaseous Exchange", "Excretion"] },
+];
+const grade12LifeSciencesCurriculum = [
     {
         chapter: "Paper 1",
         paper: "P1",
         topics: [
-            "Reproduction in vertebrates - 8 marks (5%)",
-            "Human reproduction - 41 marks (27%)",
-            "Responding to the environment (humans) - 54 marks (36%)",
-            "Responding to the environment (plants) - 13 marks (9%)",
-            "Endocrine and homeostasis (humans) - 34 marks (23%)",
+            "Reproduction in vertebrates",
+            "Human reproduction",
+            "Responding to the environment (humans)",
+            "Responding to the environment (plants)",
+            "Endocrine and homeostasis (humans)",
         ]
     },
     {
         chapter: "Paper 2",
         paper: "P2",
         topics: [
-            "DNA code of life - 27 marks (18%)",
-            "Meiosis - 21 marks (14%)",
-            "Genetics and inheritance - 48 marks (32%)",
-            "Evolution - 54 marks (36%)",
+            "DNA code of life",
+            "Meiosis",
+            "Genetics and inheritance",
+            "Evolution",
         ]
     }
 ];
 
 export const curriculumData = {
-    'Mathematics': grade12MathsCurriculum,
-    'Physical Sciences': grade12PhysicsCurriculum,
-    'Life Sciences': grade12LifeSciencesCurriculum,
+    '10': {
+        'Mathematics': grade10MathsCurriculum,
+        'Physical Sciences': grade10PhysicsCurriculum,
+        'Life Sciences': grade10LifeSciencesCurriculum,
+    },
+    '11': {
+        'Mathematics': grade11MathsCurriculum,
+        'Physical Sciences': grade11PhysicsCurriculum,
+        'Life Sciences': grade11LifeSciencesCurriculum,
+    },
+    '12': {
+        'Mathematics': grade12MathsCurriculum,
+        'Physical Sciences': grade12PhysicsCurriculum,
+        'Life Sciences': grade12LifeSciencesCurriculum,
+    }
 };
 
 
