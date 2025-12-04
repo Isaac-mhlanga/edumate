@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -435,6 +434,21 @@ function InstructorPage() {
     }
   };
 
+  const handleUnpublishCourse = async (course: Course) => {
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const courseRef = doc(firestore, 'courses', course.id);
+
+    try {
+        await updateDoc(courseRef, { status: 'Draft' });
+        setCourses(courses.map(c => c.id === course.id ? { ...c, status: 'Draft' } : c));
+        toast({ title: "Course Unpublished", description: `"${course.title}" is now a draft.` });
+    } catch (error) {
+        console.error("Error unpublishing course: ", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Failed to unpublish course.' });
+    }
+  };
+
   const onCourseSubmit = async (data: any) => {
     if (!user) return;
     setIsSubmittingCourse(true);
@@ -499,14 +513,14 @@ function InstructorPage() {
 
             // Existing Video Replacement
             if (video.id && video.newVideoFile instanceof File) {
-                if (!video.url.includes('youtube.com')) {
+                if (video.url && !video.url.includes('youtube.com')) {
                     await deleteObject(ref(storage, video.url));
                 }
                 const newVideoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.newVideoFile.name}`);
                 await uploadBytes(newVideoRef, video.newVideoFile);
                 videoUrl = await getDownloadURL(newVideoRef);
             } else if (video.id && video.newYoutubeUrl) {
-                if (!video.url.includes('youtube.com')) {
+                if (video.url && !video.url.includes('youtube.com')) {
                    await deleteObject(ref(storage, video.url));
                 }
                 videoUrl = video.newYoutubeUrl.replace("watch?v=", "embed/");
@@ -781,6 +795,7 @@ function InstructorPage() {
           onEditCourse={handleEditCourse}
           onDeleteCourse={handleDeleteCourseClick}
           onPublishCourse={handlePublishCourse}
+          onUnpublishCourse={handleUnpublishCourse}
         />
       )}
 

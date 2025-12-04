@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -10,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MoreVertical, PlusCircle, CheckCircle, XCircle, Clock, Edit, Trash2, Eye } from 'lucide-react';
+import { MoreVertical, PlusCircle, CheckCircle, XCircle, Clock, Edit, Trash2, Eye, Upload, Download } from 'lucide-react';
 import { type Course } from '@/app/instructor/page';
 
 interface InstructorCoursesTabProps {
@@ -20,6 +19,7 @@ interface InstructorCoursesTabProps {
     onEditCourse: (course: Course) => void;
     onDeleteCourse: (course: Course) => void;
     onPublishCourse: (course: Course) => void;
+    onUnpublishCourse: (course: Course) => void;
 }
 
 export function InstructorCoursesTab({
@@ -29,6 +29,7 @@ export function InstructorCoursesTab({
     onEditCourse,
     onDeleteCourse,
     onPublishCourse,
+    onUnpublishCourse,
 }: InstructorCoursesTabProps) {
     const getStatusBadge = (status: Course['status']) => {
         switch (status) {
@@ -109,11 +110,12 @@ export function InstructorCoursesTab({
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem asChild><Link href={`/instructor/courses/${course.id}`}><Eye className="mr-2 h-4 w-4"/>Preview</Link></DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => onEditCourse(course)}><Edit className="mr-2 h-4 w-4"/>Edit</DropdownMenuItem>
-                                                {course.status === 'Draft' && <DropdownMenuItem onClick={() => onPublishCourse(course)}><CheckCircle className="mr-2 h-4 w-4"/>Publish</DropdownMenuItem>}
+                                                <DropdownMenuItem asChild><Link href={`/instructor/courses/${course.id}`} className="text-xs"><Eye className="mr-2 h-4 w-4"/>Preview</Link></DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => onEditCourse(course)} className="text-xs"><Edit className="mr-2 h-4 w-4"/>Edit</DropdownMenuItem>
+                                                {course.status === 'Draft' && <DropdownMenuItem onClick={() => onPublishCourse(course)} className="text-xs"><CheckCircle className="mr-2 h-4 w-4"/>Publish</DropdownMenuItem>}
+                                                {course.status === 'Published' && <DropdownMenuItem onClick={() => onUnpublishCourse(course)} className="text-xs"><Download className="mr-2 h-4 w-4"/>Unpublish</DropdownMenuItem>}
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDeleteCourse(course)}><Trash2 className="mr-2 h-4 w-4"/>Delete</DropdownMenuItem>
+                                                <DropdownMenuItem className="text-destructive focus:text-destructive text-xs" onClick={() => onDeleteCourse(course)}><Trash2 className="mr-2 h-4 w-4"/>Delete</DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>
