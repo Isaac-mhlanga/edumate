@@ -69,7 +69,7 @@ const courseFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   subject: z.enum(["Mathematics", "Physical Sciences", "Life Sciences"]),
-  paper: z.enum(["P1", "P2"], { required_error: "Please select a paper." }),
+  paper: z.enum(["P1", "P2"]),
   grade: z.enum(["10", "11", "12"]),
   pricingModel: z.enum(["free", "purchase", "subscription"]),
   price: z.coerce.number().optional(),
@@ -280,6 +280,8 @@ function InstructorPage() {
       paper: "P1",
       grade: "12",
       pricingModel: "free",
+      price: undefined,
+      thumbnail: undefined,
     },
   });
   
@@ -646,12 +648,21 @@ function InstructorPage() {
         const storage = getStorage(app);
 
         try {
-            let thumbnailUrl = selectedCourse?.thumbnail || '';
+            let thumbnailUrl = selectedCourse?.thumbnail;
             if (data.thumbnail) {
                 const thumbnailRef = ref(storage, `courses/${user.uid}/${Date.now()}-${data.thumbnail.name}`);
                 const snapshot = await uploadBytes(thumbnailRef, data.thumbnail);
                 thumbnailUrl = await getDownloadURL(snapshot.ref);
+            } else if (!selectedCourse) {
+                 thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`
             }
+
+            if (!thumbnailUrl) {
+                toast({ variant: 'destructive', title: 'Error', description: 'Course thumbnail is required.' });
+                setIsSubmitting(false);
+                return;
+            }
+
 
             const uploadedVideos: VideoData[] = [];
             for (const videoUpload of videoUploads) {
@@ -682,7 +693,7 @@ function InstructorPage() {
                 }
             }
 
-            const baseData = {
+            const courseData = {
                 instructorId: user.uid,
                 title: data.title,
                 description: data.description,
@@ -695,21 +706,21 @@ function InstructorPage() {
                 },
                 thumbnail: thumbnailUrl,
                 status: 'Draft' as const,
-                videos: selectedCourse ? [...selectedCourse.videos, ...uploadedVideos] : uploadedVideos,
+                videos: uploadedVideos,
             };
 
             if (selectedCourse) {
                 const courseRef = doc(firestore, 'courses', selectedCourse.id);
-                await updateDoc(courseRef, baseData);
-                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...baseData, id: c.id, createdAt: c.createdAt } as Course : c));
+                const updateData = {
+                    ...courseData,
+                    videos: [...selectedCourse.videos, ...uploadedVideos],
+                }
+                await updateDoc(courseRef, updateData);
+                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...updateData, id: c.id, createdAt: c.createdAt } as Course : c));
                 toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
             } else {
-                const courseDataForCreation = {
-                    ...baseData,
-                    createdAt: serverTimestamp(),
-                };
-                const newDocRef = await addDoc(collection(firestore, 'courses'), courseDataForCreation);
-                setCourses([{ id: newDocRef.id, ...baseData, createdAt: Timestamp.now() } as Course, ...courses]);
+                const newDocRef = await addDoc(collection(firestore, 'courses'), { ...courseData, createdAt: serverTimestamp() });
+                setCourses([{ id: newDocRef.id, ...courseData, createdAt: Timestamp.now() } as Course, ...courses]);
                 toast({ title: "Course Created!", description: `The course "${data.title}" has been created.` });
             }
 
@@ -1998,8 +2009,14 @@ function InstructorPage() {
                                           <label htmlFor="dropzone-file-course" className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
                                               <div className="flex flex-col items-center justify-center pt-5 pb-6">
                                                   <UploadCloud className="w-8 h-8 mb-2 text-muted-foreground" />
-                                                  <p className="mb-2 text-sm text-muted-foreground"><span className="font-medium">Click to upload</span> or drag and drop</p>
-                                                  <p className="text-xs text-muted-foreground">PNG or JPG (MAX. 800x400px)</p>
+                                                  <p className="mb-2 text-sm text-muted-foreground">
+                                                    <span className="font-semibold">Click to upload</span> or drag and drop
+                                                  </p>
+                                                  {field.value?.name ? (
+                                                    <p className="text-xs text-primary">{field.value.name}</p>
+                                                  ) : (
+                                                    <p className="text-xs text-muted-foreground">PNG or JPG (MAX. 800x400px)</p>
+                                                  )}
                                               </div>
                                               <Input id="dropzone-file-course" type="file" className="hidden" onChange={(e) => field.onChange(e.target.files?.[0])} />
                                           </label>
@@ -2432,7 +2449,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </AlertDialog>
+        </Dialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
