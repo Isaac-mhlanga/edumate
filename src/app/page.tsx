@@ -319,9 +319,9 @@ export default function Home() {
                                 {chapters.map((chapter, index) => (
                                     <Card key={index} className="overflow-hidden bg-card shadow-md">
                                         <AccordionItem value={`item-${index}`} className="border-b-0">
-                                            <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6">
+                                            <AccordionTrigger className="font-semibold hover:no-underline p-6">
                                                 <div className="flex items-center gap-3">
-                                                    {chapter.chapter.includes('1') ? <BookOpen className="h-6 w-6 text-primary/80"/> : <PenSquare className="h-6 w-6 text-primary/80"/>}
+                                                    <BookOpen className="h-6 w-6 text-primary/80"/>
                                                     {chapter.chapter}
                                                 </div>
                                             </AccordionTrigger>
