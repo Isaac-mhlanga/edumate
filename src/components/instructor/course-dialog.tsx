@@ -1,0 +1,264 @@
+
+'use client';
+
+import React, { useEffect } from 'react';
+import { useForm, useFieldArray, Controller } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { PlusCircle, Trash2, Youtube, Upload, Paperclip } from 'lucide-react';
+import { type Course, type VideoData, type Quiz } from '@/app/instructor/page';
+
+const courseFormSchema = z.object({
+  title: z.string().min(1, "Course title is required."),
+  description: z.string().min(1, "Description is required."),
+  subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences']),
+  paper: z.enum(['P1', 'P2']),
+  grade: z.enum(['10', '11', '12']),
+  pricingModel: z.enum(['free', 'purchase']),
+  price: z.number().nullable().optional(),
+  thumbnail: z.any().optional(),
+  videoUploads: z.array(z.object({
+    title: z.string().min(1, "Video title is required."),
+    source: z.enum(['upload', 'youtube']),
+    file: z.any().optional(),
+    youtubeUrl: z.string().optional(),
+    notesFile: z.any().optional(),
+    quizId: z.string().optional(),
+  })).optional(),
+}).refine(data => {
+    if (data.pricingModel === 'purchase') {
+        return data.price !== null && data.price !== undefined && data.price > 0;
+    }
+    return true;
+}, {
+    message: "Price is required for purchasable courses.",
+    path: ["price"],
+});
+
+type CourseFormValues = z.infer<typeof courseFormSchema>;
+
+interface CourseDialogProps {
+    isOpen: boolean;
+    setIsOpen: (open: boolean) => void;
+    selectedCourse: Course | null;
+    quizzes: Quiz[];
+    onSubmit: (data: CourseFormValues) => void;
+}
+
+export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSubmit }: CourseDialogProps) {
+    const form = useForm<CourseFormValues>({
+        resolver: zodResolver(courseFormSchema),
+        defaultValues: {
+            title: '',
+            description: '',
+            subject: 'Mathematics',
+            paper: 'P1',
+            grade: '12',
+            pricingModel: 'free',
+            price: null,
+            videoUploads: [],
+        },
+    });
+
+    const { fields, append, remove } = useFieldArray({
+        control: form.control,
+        name: 'videoUploads',
+    });
+
+    const pricingModel = form.watch('pricingModel');
+
+    useEffect(() => {
+        if (selectedCourse) {
+            form.reset({
+                title: selectedCourse.title,
+                description: selectedCourse.description,
+                subject: selectedCourse.subject,
+                paper: selectedCourse.paper,
+                grade: selectedCourse.grade,
+                pricingModel: selectedCourse.pricing.type,
+                price: selectedCourse.pricing.price,
+                videoUploads: [],
+            });
+        } else {
+            form.reset({
+                title: '',
+                description: '',
+                subject: 'Mathematics',
+                paper: 'P1',
+                grade: '12',
+                pricingModel: 'free',
+                price: null,
+                videoUploads: [],
+            });
+        }
+    }, [selectedCourse, form, isOpen]);
+
+    const handleFormSubmit = (data: CourseFormValues) => {
+        onSubmit(data);
+        form.reset();
+    };
+
+    return (
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                    <DialogTitle>{selectedCourse ? 'Edit' : 'Create New'} Course</DialogTitle>
+                    <DialogDescription>Fill in the details for your course. You can add videos later.</DialogDescription>
+                </DialogHeader>
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(handleFormSubmit)} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <FormField control={form.control} name="title" render={({ field }) => (
+                                    <FormItem><FormLabel>Course Title</FormLabel><FormControl><Input placeholder="e.g. Grade 12 Calculus" {...field} /></FormControl><FormMessage /></FormItem>
+                                )}/>
+                                <FormField control={form.control} name="description" render={({ field }) => (
+                                    <FormItem><FormLabel>Course Description</FormLabel><FormControl><Textarea placeholder="Describe what students will learn in this course." {...field} /></FormControl><FormMessage /></FormItem>
+                                )}/>
+                                <FormField control={form.control} name="thumbnail" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Course Thumbnail {selectedCourse ? '(Leave blank to keep current)' : ''}</FormLabel>
+                                        <FormControl>
+                                            <Input type="file" accept="image/*" onChange={e => field.onChange(e.target.files?.[0])} />
+                                        </FormControl>
+                                        <FormMessage />
+                                    </FormItem>
+                                )}/>
+                            </div>
+                            <div className="space-y-4">
+                                <div className="grid grid-cols-3 gap-4">
+                                    <FormField control={form.control} name="subject" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Subject</FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                                    <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                                    <SelectItem value="Life Sciences">Life Sciences</SelectItem>
+                                                </SelectContent>
+                                            </Select><FormMessage />
+                                        </FormItem>
+                                    )}/>
+                                     <FormField control={form.control} name="paper" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Paper</FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="P1">P1</SelectItem>
+                                                    <SelectItem value="P2">P2</SelectItem>
+                                                </SelectContent>
+                                            </Select><FormMessage />
+                                        </FormItem>
+                                    )}/>
+                                    <FormField control={form.control} name="grade" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Grade</FormLabel>
+                                            <Select onValueChange={field.onChange} value={field.value}>
+                                                <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                                                <SelectContent>
+                                                    <SelectItem value="10">Grade 10</SelectItem>
+                                                    <SelectItem value="11">Grade 11</SelectItem>
+                                                    <SelectItem value="12">Grade 12</SelectItem>
+                                                </SelectContent>
+                                            </Select><FormMessage />
+                                        </FormItem>
+                                    )}/>
+                                </div>
+                                <FormField control={form.control} name="pricingModel" render={({ field }) => (
+                                    <FormItem>
+                                        <FormLabel>Pricing Model</FormLabel>
+                                        <FormControl>
+                                            <RadioGroup onValueChange={field.onChange} value={field.value} className="grid grid-cols-2 gap-4">
+                                                <Label className="flex items-center gap-2 rounded-md border p-4 cursor-pointer has-[:checked]:border-primary"><RadioGroupItem value="free" /> Free</Label>
+                                                <Label className="flex items-center gap-2 rounded-md border p-4 cursor-pointer has-[:checked]:border-primary"><RadioGroupItem value="purchase" /> One-Time Purchase</Label>
+                                            </RadioGroup>
+                                        </FormControl><FormMessage />
+                                    </FormItem>
+                                )}/>
+                                {pricingModel === 'purchase' && (
+                                    <FormField control={form.control} name="price" render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Price (R)</FormLabel>
+                                            <FormControl>
+                                                <Input type="number" placeholder="e.g. 499" onChange={e => field.onChange(parseFloat(e.target.value))} />
+                                            </FormControl><FormMessage />
+                                        </FormItem>
+                                    )}/>
+                                )}
+                            </div>
+                        </div>
+
+                        <Separator />
+                        
+                        <div>
+                            <h3 className="text-lg font-medium mb-4">Course Videos</h3>
+                            <div className="space-y-4">
+                                {fields.map((field, index) => (
+                                    <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
+                                        <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                        <FormField control={form.control} name={`videoUploads.${index}.title`} render={({ field }) => (
+                                            <FormItem><FormLabel>Video Title</FormLabel><FormControl><Input placeholder={`Lesson ${index + 1}`} {...field} /></FormControl><FormMessage /></FormItem>
+                                        )}/>
+                                        <Controller control={form.control} name={`videoUploads.${index}.source`} render={({ field: { onChange, value } }) => (
+                                            <RadioGroup onValueChange={onChange} value={value} className="grid grid-cols-2 gap-2">
+                                                <Label className="flex items-center justify-center gap-2 rounded-md border p-3 cursor-pointer has-[:checked]:border-primary text-sm"><RadioGroupItem value="upload" /><Upload className="h-4 w-4 mr-1"/>Upload File</Label>
+                                                <Label className="flex items-center justify-center gap-2 rounded-md border p-3 cursor-pointer has-[:checked]:border-primary text-sm"><RadioGroupItem value="youtube" /><Youtube className="h-4 w-4 mr-1"/>YouTube Link</Label>
+                                            </RadioGroup>
+                                        )}/>
+                                        
+                                        {form.watch(`videoUploads.${index}.source`) === 'upload' && (
+                                            <FormField control={form.control} name={`videoUploads.${index}.file`} render={({ field }) => (
+                                                <FormItem><FormLabel>Video File</FormLabel><FormControl><Input type="file" accept="video/*" onChange={e => field.onChange(e.target.files?.[0])} /></FormControl><FormMessage /></FormItem>
+                                            )}/>
+                                        )}
+                                        {form.watch(`videoUploads.${index}.source`) === 'youtube' && (
+                                            <FormField control={form.control} name={`videoUploads.${index}.youtubeUrl`} render={({ field }) => (
+                                                <FormItem><FormLabel>YouTube URL</FormLabel><FormControl><Input placeholder="https://www.youtube.com/watch?v=..." {...field} /></FormControl><FormMessage /></FormItem>
+                                            )}/>
+                                        )}
+                                        <FormField control={form.control} name={`videoUploads.${index}.notesFile`} render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="flex items-center gap-2"><Paperclip className="h-4 w-4"/> Lesson Notes (Optional)</FormLabel>
+                                                <FormControl><Input type="file" accept=".pdf" onChange={e => field.onChange(e.target.files?.[0])} /></FormControl><FormMessage />
+                                            </FormItem>
+                                        )}/>
+                                        <FormField control={form.control} name={`videoUploads.${index}.quizId`} render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Link Quiz (Optional)</FormLabel>
+                                                <Select onValueChange={field.onChange} value={field.value}>
+                                                    <FormControl><SelectTrigger><SelectValue placeholder="Select a quiz to link..."/></SelectTrigger></FormControl>
+                                                    <SelectContent>
+                                                        {quizzes.map(quiz => <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>)}
+                                                    </SelectContent>
+                                                </Select>
+                                            </FormItem>
+                                        )}/>
+                                    </div>
+                                ))}
+                                <Button type="button" variant="outline" onClick={() => append({ title: '', source: 'upload' })}>
+                                    <PlusCircle className="mr-2" />Add Video
+                                </Button>
+                            </div>
+                        </div>
+
+                        <div className="flex justify-end gap-2 pt-4">
+                            <Button type="button" variant="ghost" onClick={() => setIsOpen(false)}>Cancel</Button>
+                            <Button type="submit">{selectedCourse ? 'Save Changes' : 'Create Course'}</Button>
+                        </div>
+                    </form>
+                </Form>
+            </DialogContent>
+        </Dialog>
+    );
+}
+
