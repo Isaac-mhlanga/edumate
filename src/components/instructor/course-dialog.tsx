@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -13,7 +12,7 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, Youtube, Upload, Paperclip, Loader2, Link as LinkIcon, FileText } from 'lucide-react';
+import { PlusCircle, Trash2, Youtube, Upload, Paperclip, Loader2, Link as LinkIcon, FileText, Replace } from 'lucide-react';
 import { type Course, type VideoData, type Quiz } from '@/app/instructor/page';
 import { Progress } from '../ui/progress';
 import { Label } from '../ui/label';
@@ -47,18 +46,25 @@ const courseFormSchema = z.object({
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
 
+// Extend VideoData to include local file references for replacement
+type EditableVideoData = VideoData & {
+    newVideoFile?: File;
+    newYoutubeUrl?: string;
+    newVideoSource?: 'upload' | 'youtube';
+};
+
 interface CourseDialogProps {
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
     selectedCourse: Course | null;
     quizzes: Quiz[];
-    onSubmit: (data: any) => void; // Allow 'any' to accommodate existing videos
+    onSubmit: (data: any) => void;
     isSubmitting: boolean;
     submissionProgress: number;
 }
 
 export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSubmit, isSubmitting, submissionProgress }: CourseDialogProps) {
-    const [existingVideos, setExistingVideos] = useState<VideoData[]>([]);
+    const [existingVideos, setExistingVideos] = useState<EditableVideoData[]>([]);
 
     const form = useForm<CourseFormValues>({
         resolver: zodResolver(courseFormSchema),
@@ -109,7 +115,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         }
     }, [selectedCourse, form, isOpen]);
 
-    const handleExistingVideoChange = (videoId: string, field: 'notesFile' | 'quizId', value: any) => {
+    const handleExistingVideoChange = (videoId: string, field: 'notesFile' | 'quizId' | 'newVideoFile' | 'newYoutubeUrl' | 'newVideoSource', value: any) => {
         setExistingVideos(prevVideos => 
             prevVideos.map(video => 
                 video.id === videoId ? { ...video, [field]: value } : video
@@ -117,10 +123,15 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         );
     };
 
+    const handleDeleteExistingVideo = (videoId: string) => {
+        setExistingVideos(prevVideos => prevVideos.filter(video => video.id !== videoId));
+    };
+
     const handleFormSubmit = (data: CourseFormValues) => {
         const submissionData = {
             ...data,
             existingVideos,
+            originalVideos: selectedCourse?.videos || []
         };
         onSubmit(submissionData);
     };
@@ -235,9 +246,34 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                     <h3 className="text-lg font-medium mb-4">Existing Videos</h3>
                                     <div className="space-y-4">
                                         {existingVideos.map((video) => (
-                                            <div key={video.id} className="p-4 border rounded-lg space-y-3 bg-muted/30">
-                                                <p className="font-semibold">{video.title}</p>
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div key={video.id} className="p-4 border rounded-lg space-y-3 bg-muted/30 relative">
+                                                <div className="flex justify-between items-start">
+                                                    <p className="font-semibold pr-10">{video.title}</p>
+                                                    <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-7 w-7" onClick={() => handleDeleteExistingVideo(video.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                                </div>
+                                                
+                                                {video.newVideoSource ? (
+                                                    <div className='space-y-2'>
+                                                        {video.newVideoSource === 'upload' ? (
+                                                             <FormItem>
+                                                                <FormLabel>New Video File</FormLabel>
+                                                                <FormControl><Input type="file" accept="video/*" onChange={e => handleExistingVideoChange(video.id, 'newVideoFile', e.target.files?.[0])} /></FormControl>
+                                                            </FormItem>
+                                                        ) : (
+                                                            <FormItem>
+                                                                <FormLabel>New YouTube URL</FormLabel>
+                                                                <FormControl><Input placeholder="https://www.youtube.com/watch?v=..." onChange={e => handleExistingVideoChange(video.id, 'newYoutubeUrl', e.target.value)} /></FormControl>
+                                                            </FormItem>
+                                                        )}
+                                                         <Button type="button" size="sm" variant="ghost" onClick={() => handleExistingVideoChange(video.id, 'newVideoSource', undefined)}>Cancel Replace</Button>
+                                                    </div>
+                                                ) : (
+                                                    <Button type="button" size="sm" variant="outline" onClick={() => handleExistingVideoChange(video.id, 'newVideoSource', video.url.includes('youtube') ? 'youtube' : 'upload')}>
+                                                        <Replace className="mr-2 h-4 w-4" /> Replace Video
+                                                    </Button>
+                                                )}
+
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t mt-3">
                                                     <FormItem>
                                                         <FormLabel className="flex items-center gap-2 text-sm"><Paperclip className="h-4 w-4"/> Lesson Notes</FormLabel>
                                                         {video.notesUrl && (
@@ -252,7 +288,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                     </FormItem>
                                                     <FormItem>
                                                         <FormLabel className="flex items-center gap-2 text-sm"><LinkIcon className="h-4 w-4"/> Linked Quiz</FormLabel>
-                                                        <Select onValueChange={(value) => handleExistingVideoChange(video.id, 'quizId', value)} defaultValue={video.quizId}>
+                                                        <Select onValueChange={(value) => handleExistingVideoChange(video.id, 'quizId', value)} defaultValue={video.quizId || undefined}>
                                                             <FormControl><SelectTrigger><SelectValue placeholder="Select a quiz to link..." /></SelectTrigger></FormControl>
                                                             <SelectContent>
                                                                 <SelectItem value="none">No Quiz</SelectItem>

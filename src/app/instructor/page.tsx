@@ -440,88 +440,98 @@ function InstructorPage() {
     setIsSubmittingCourse(true);
     setSubmissionProgress(0);
 
-    const { videoUploads, existingVideos, ...courseDetails } = data;
+    const { videoUploads, existingVideos, originalVideos, ...courseDetails } = data;
     
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
     const storage = getStorage(app);
 
     try {
-        // 1. Upload Thumbnail if new one is provided
+        // Handle thumbnail
         let thumbnailUrl = selectedCourse?.thumbnail || '';
         if (courseDetails.thumbnail instanceof File) {
             setSubmissionProgress(5);
             const thumbnailRef = ref(storage, `courses/${user.uid}/thumbnails/${Date.now()}-${courseDetails.thumbnail.name}`);
             await uploadBytes(thumbnailRef, courseDetails.thumbnail);
             thumbnailUrl = await getDownloadURL(thumbnailRef);
-            setSubmissionProgress(15);
+            setSubmissionProgress(10);
         } else if (!selectedCourse) {
             thumbnailUrl = `https://picsum.photos/seed/${Math.random()}/600/400`;
         }
 
-        // 2. Process existing videos for updates
-        let updatedExistingVideos = [...(selectedCourse?.videos || [])];
-        const existingVideoUpdates = existingVideos.filter((ev: any) => ev.notesFile || (selectedCourse?.videos.find(v => v.id === ev.id)?.quizId !== ev.quizId));
-
-        if (existingVideoUpdates.length > 0) {
-            let processedUpdates = 0;
-            const totalUpdates = existingVideoUpdates.length;
-            for (const videoToUpdate of existingVideoUpdates) {
-                let notesUrl = updatedExistingVideos.find(v => v.id === videoToUpdate.id)?.notesUrl || null;
-                if (videoToUpdate.notesFile instanceof File) {
-                    const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${videoToUpdate.notesFile.name}`);
-                    await uploadBytes(notesRef, videoToUpdate.notesFile);
-                    notesUrl = await getDownloadURL(notesRef);
+        const finalVideos: VideoData[] = [];
+        const videosToUpload = [...(videoUploads || []), ...(existingVideos || [])];
+        const totalFilesToProcess = videosToUpload.length + (originalVideos?.length || 0);
+        let filesProcessed = 0;
+        
+        const updateProgress = () => {
+            filesProcessed++;
+            setSubmissionProgress(10 + Math.round((filesProcessed / totalFilesToProcess) * 80));
+        };
+        
+        // Handle deletions and replacements
+        if (originalVideos) {
+            const existingVideoIds = new Set(existingVideos.map((v: any) => v.id));
+            for (const originalVideo of originalVideos) {
+                if (!existingVideoIds.has(originalVideo.id)) {
+                    // Video was deleted
+                    if (!originalVideo.url.includes('youtube.com')) {
+                        await deleteObject(ref(storage, originalVideo.url));
+                    }
                 }
-                
-                updatedExistingVideos = updatedExistingVideos.map(v => 
-                    v.id === videoToUpdate.id ? { ...v, notesUrl, quizId: videoToUpdate.quizId === 'none' ? null : videoToUpdate.quizId } : v
-                );
-                processedUpdates++;
-                setSubmissionProgress(15 + Math.round((processedUpdates / totalUpdates) * 35));
+                updateProgress();
             }
-        } else {
-            setSubmissionProgress(50);
         }
+        
+        // Handle new and existing videos
+        for (const video of videosToUpload) {
+            let videoUrl = video.url || '';
+            let notesUrl = video.notesUrl || null;
 
-        // 3. Process new video uploads
-        const newlyUploadedVideosData: VideoData[] = [];
-        if (videoUploads && videoUploads.length > 0) {
-            const totalFiles = videoUploads.length;
-            let filesUploaded = 0;
-            for (const video of videoUploads) {
-                let videoUrl = '';
-                let notesUrl: string | null = null;
-                
-                if (video.source === 'youtube' && video.youtubeUrl) {
-                    videoUrl = video.youtubeUrl.replace("watch?v=", "embed/");
-                } else if (video.source === 'upload' && video.file instanceof File) {
-                    const videoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.file.name}`);
-                    await uploadBytes(videoRef, video.file);
-                    videoUrl = await getDownloadURL(videoRef);
-                }
-
-                if (video.notesFile instanceof File) {
-                    const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${video.notesFile.name}`);
-                    await uploadBytes(notesRef, video.notesFile);
-                    notesUrl = await getDownloadURL(notesRef);
-                }
-                
-                if (videoUrl) {
-                    const videoData: VideoData = {
-                        id: `vid_${Date.now()}_${Math.random()}`,
-                        title: video.title,
-                        url: videoUrl,
-                        notesUrl: notesUrl,
-                        quizId: video.quizId === 'none' ? null : video.quizId || null,
-                    };
-                    newlyUploadedVideosData.push(videoData);
-                }
-                filesUploaded++;
-                setSubmissionProgress(50 + Math.round((filesUploaded / totalFiles) * 40));
+            // New Video Upload
+            if (video.file instanceof File) {
+                const videoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.file.name}`);
+                await uploadBytes(videoRef, video.file);
+                videoUrl = await getDownloadURL(videoRef);
+            } else if (video.youtubeUrl) {
+                videoUrl = video.youtubeUrl.replace("watch?v=", "embed/");
             }
-        } else {
-            setSubmissionProgress(90);
+
+            // Existing Video Replacement
+            if (video.id && video.newVideoFile instanceof File) {
+                if (!video.url.includes('youtube.com')) {
+                    await deleteObject(ref(storage, video.url));
+                }
+                const newVideoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.newVideoFile.name}`);
+                await uploadBytes(newVideoRef, video.newVideoFile);
+                videoUrl = await getDownloadURL(newVideoRef);
+            } else if (video.id && video.newYoutubeUrl) {
+                if (!video.url.includes('youtube.com')) {
+                   await deleteObject(ref(storage, video.url));
+                }
+                videoUrl = video.newYoutubeUrl.replace("watch?v=", "embed/");
+            }
+
+            // Notes Upload (for new or existing)
+            if (video.notesFile instanceof File) {
+                 if (video.notesUrl) { // Delete old notes if they exist
+                    await deleteObject(ref(storage, video.notesUrl));
+                 }
+                const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${video.notesFile.name}`);
+                await uploadBytes(notesRef, video.notesFile);
+                notesUrl = await getDownloadURL(notesRef);
+            }
+            
+            if (videoUrl) {
+                 finalVideos.push({
+                    id: video.id || `vid_${Date.now()}_${Math.random()}`,
+                    title: video.title,
+                    url: videoUrl,
+                    notesUrl: notesUrl,
+                    quizId: video.quizId === 'none' ? null : video.quizId || null,
+                });
+            }
+            updateProgress();
         }
 
         const finalCourseData = {
@@ -531,11 +541,10 @@ function InstructorPage() {
                 price: courseDetails.price || null,
             },
             thumbnail: thumbnailUrl,
-            videos: [...updatedExistingVideos, ...newlyUploadedVideosData],
+            videos: finalVideos,
         };
         delete finalCourseData.pricingModel;
 
-        // 4. Save to Firestore
         if (selectedCourse) {
             const courseRef = doc(firestore, 'courses', selectedCourse.id);
             await updateDoc(courseRef, finalCourseData);
@@ -564,6 +573,7 @@ function InstructorPage() {
         }, 500);
     }
   }
+
 
   async function handleSaveSolution(assignmentId: string, price: number) {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
