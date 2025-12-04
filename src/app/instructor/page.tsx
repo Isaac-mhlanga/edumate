@@ -706,21 +706,24 @@ function InstructorPage() {
                 },
                 thumbnail: thumbnailUrl,
                 status: 'Draft' as const,
-                videos: uploadedVideos,
             };
 
             if (selectedCourse) {
                 const courseRef = doc(firestore, 'courses', selectedCourse.id);
-                const updateData = {
+                // Create a new object for update to avoid modifying original state object
+                const updateData: Partial<Course> & { videos: VideoData[] } = {
                     ...courseData,
                     videos: [...selectedCourse.videos, ...uploadedVideos],
-                }
+                };
+                delete (updateData as any).createdAt; // Do not update createdAt timestamp
+
                 await updateDoc(courseRef, updateData);
                 setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...updateData, id: c.id, createdAt: c.createdAt } as Course : c));
                 toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
             } else {
-                const newDocRef = await addDoc(collection(firestore, 'courses'), { ...courseData, createdAt: serverTimestamp() });
-                setCourses([{ id: newDocRef.id, ...courseData, createdAt: Timestamp.now() } as Course, ...courses]);
+                 const newCourseData = { ...courseData, videos: uploadedVideos, createdAt: serverTimestamp() };
+                const newDocRef = await addDoc(collection(firestore, 'courses'), newCourseData);
+                setCourses([{ id: newDocRef.id, ...newCourseData, createdAt: Timestamp.now() } as Course, ...courses]);
                 toast({ title: "Course Created!", description: `The course "${data.title}" has been created.` });
             }
 
@@ -2014,7 +2017,9 @@ function InstructorPage() {
                                                   </p>
                                                   {field.value?.name ? (
                                                     <p className="text-xs text-primary">{field.value.name}</p>
-                                                  ) : (
+                                                  ) : selectedCourse?.thumbnail ? (
+                                                    <p className="text-xs text-primary">{selectedCourse.thumbnail.split('/').pop()?.split('?')[0].slice(14) || 'Current image'}</p>
+                                                  ): (
                                                     <p className="text-xs text-muted-foreground">PNG or JPG (MAX. 800x400px)</p>
                                                   )}
                                               </div>
@@ -2449,7 +2454,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </Dialog>
+        </AlertDialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
