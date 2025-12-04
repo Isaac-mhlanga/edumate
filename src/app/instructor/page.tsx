@@ -22,7 +22,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { instructorData, curriculumData } from "@/lib/data";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar as CalendarIcon, Save, Wand2, Lightbulb, Image as ImageIcon, BookOpen, Printer, UserMinus, Youtube } from "lucide-react";
+import { ArrowUpRight, Banknote, CalendarDays, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, Clock, DollarSign, Edit, Eye, GraduationCap, Hourglass, ListFilter, MoreVertical, PlusCircle, ReceiptText, Search, ShieldCheck, Trash2, Undo2, UploadCloud, Users, Video, XCircle, Download, FileUp, FileQuestion, Send, Check, Sparkles, RefreshCw, Calendar as CalendarIcon, Save, Wand2, Lightbulb, Image as ImageIcon, BookOpen, Printer, UserMinus, Youtube, FileText } from "lucide-react";
 import Image from "next/image";
 import React from "react";
 import { useReactToPrint } from "react-to-print";
@@ -90,6 +90,7 @@ type VideoData = {
     title: string;
     url: string;
     quizId?: string;
+    notesUrl?: string;
 };
 
 type Course = {
@@ -169,6 +170,8 @@ type VideoUpload = {
     file: File | null;
     youtubeUrl: string;
     fileName: string;
+    notesFile: File | null;
+    notesFileName: string;
     quizId?: string;
 };
 
@@ -429,7 +432,7 @@ function InstructorPage() {
   const watchedPaper = form.watch("paper");
 
   const handleAddNewVideo = () => {
-    setVideoUploads([...videoUploads, { title: '', source: 'upload', file: null, youtubeUrl: '', fileName: '' }]);
+    setVideoUploads([...videoUploads, { title: '', source: 'upload', file: null, youtubeUrl: '', fileName: '', notesFile: null, notesFileName: '' }]);
   };
 
   const handleVideoChange = (index: number, field: keyof VideoUpload, value: any) => {
@@ -437,6 +440,9 @@ function InstructorPage() {
     (newUploads[index] as any)[field] = value;
     if (field === 'file' && value instanceof File) {
         newUploads[index].fileName = value.name;
+    }
+    if (field === 'notesFile' && value instanceof File) {
+        newUploads[index].notesFileName = value.name;
     }
     setVideoUploads(newUploads);
   };
@@ -655,8 +661,22 @@ function InstructorPage() {
                 const snapshot = await uploadBytes(videoRef, videoUpload.file);
                 url = await getDownloadURL(snapshot.ref);
             }
+            
+            let notesUrl: string | undefined = undefined;
+            if (videoUpload.notesFile) {
+                const notesRef = ref(storage, `notes/${user.uid}/${Date.now()}-${videoUpload.notesFile.name}`);
+                const notesSnapshot = await uploadBytes(notesRef, videoUpload.notesFile);
+                notesUrl = await getDownloadURL(notesSnapshot.ref);
+            }
+
              if (url && videoUpload.title) {
-                uploadedVideos.push({ id: `V${Date.now()}-${videoUpload.title}`, title: videoUpload.title, url, quizId: videoUpload.quizId });
+                uploadedVideos.push({ 
+                    id: `V${Date.now()}-${videoUpload.title}`, 
+                    title: videoUpload.title, 
+                    url, 
+                    quizId: videoUpload.quizId,
+                    notesUrl,
+                });
             }
         }
         
@@ -2112,7 +2132,7 @@ function InstructorPage() {
                                                 onChange={(e) => handleVideoChange(index, 'title', e.target.value)}
                                             />
 
-                                            {pricingModel === 'free' && (
+                                            {pricingModel === 'free' ? (
                                                 <RadioGroup value={upload.source} onValueChange={(value) => handleVideoChange(index, 'source', value)} className="flex gap-4 pt-2">
                                                     <div className="flex items-center space-x-2">
                                                         <RadioGroupItem value="upload" id={`source-upload-${index}`} />
@@ -2123,7 +2143,7 @@ function InstructorPage() {
                                                         <Label htmlFor={`source-youtube-${index}`}>YouTube Link</Label>
                                                     </div>
                                                 </RadioGroup>
-                                            )}
+                                            ) : null}
 
                                             {upload.source === 'youtube' && pricingModel === 'free' ? (
                                                  <div className="relative">
@@ -2137,13 +2157,21 @@ function InstructorPage() {
                                                  </div>
                                             ) : (
                                                 <label htmlFor={`video-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
-                                                    <FileUp className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                    <Video className="h-4 w-4 mr-2 text-muted-foreground" />
                                                     <span className="text-sm text-muted-foreground truncate">
                                                         {upload.fileName || 'Choose a video file'}
                                                     </span>
                                                     <Input id={`video-upload-${index}`} type="file" accept="video/*" className="sr-only" onChange={(e) => handleVideoChange(index, 'file', e.target.files ? e.target.files[0] : null)} />
                                                 </label>
                                             )}
+                                            
+                                             <label htmlFor={`notes-upload-${index}`} className="relative flex items-center justify-center w-full h-10 border-2 border-dashed rounded-md cursor-pointer hover:bg-muted">
+                                                <FileText className="h-4 w-4 mr-2 text-muted-foreground" />
+                                                <span className="text-sm text-muted-foreground truncate">
+                                                    {upload.notesFileName || 'Upload optional notes (PDF)'}
+                                                </span>
+                                                <Input id={`notes-upload-${index}`} type="file" accept=".pdf" className="sr-only" onChange={(e) => handleVideoChange(index, 'notesFile', e.target.files ? e.target.files[0] : null)} />
+                                            </label>
 
                                             <Select onValueChange={(value) => handleVideoQuizChange(index, value)}>
                                                 <SelectTrigger>
@@ -2398,7 +2426,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </AlertDialog>
+        </Dialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
@@ -2529,3 +2557,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    

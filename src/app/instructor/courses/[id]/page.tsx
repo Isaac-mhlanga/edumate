@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star } from "lucide-react";
+import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star, Download } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
@@ -22,6 +22,7 @@ type VideoData = {
     id: string;
     title: string;
     url: string;
+    notesUrl?: string;
 };
 
 type Course = {
@@ -241,11 +242,19 @@ export default function CoursePreviewPage() {
                             <CardDescription className="mt-4 text-base">
                                 {course.description}
                             </CardDescription>
-                            <div className="mt-4 pt-4 border-t">
+                            <div className="mt-4 pt-4 border-t flex items-center gap-2">
                                 <Button onClick={handleSummarize} disabled={isSummarizing || !activeVideo}>
                                     <Sparkles className="mr-2 h-4 w-4" />
                                     {isSummarizing ? 'Summarizing...' : 'Summarize with AI'}
                                 </Button>
+                                 {activeVideo?.notesUrl && (
+                                    <Button variant="outline" asChild>
+                                        <a href={activeVideo.notesUrl} target="_blank" rel="noopener noreferrer">
+                                            <Download className="mr-2 h-4 w-4" />
+                                            Download Notes
+                                        </a>
+                                    </Button>
+                                )}
                                 {isSummarizing && <Skeleton className="h-20 w-full mt-2" />}
                                 {summary && (
                                     <Alert className="mt-4">
@@ -315,3 +324,5 @@ export default function CoursePreviewPage() {
         </div>
     );
 }
+
+    
