@@ -277,6 +277,7 @@ function InstructorPage() {
       title: "",
       description: "",
       subject: "Mathematics",
+      paper: "P1",
       grade: "12",
       pricingModel: "free",
     },
@@ -636,89 +637,92 @@ function InstructorPage() {
         }
     };
 
-  async function onCourseSubmit(data: CourseFormValues) {
-    if (!user) return;
-    setIsSubmitting(true);
-    
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    const firestore = getFirestore(app);
-    const storage = getStorage(app);
+    async function onCourseSubmit(data: CourseFormValues) {
+        if (!user) return;
+        setIsSubmitting(true);
 
-    try {
-        let thumbnailUrl = selectedCourse?.thumbnail || '';
-        if (data.thumbnail) {
-            const thumbnailRef = ref(storage, `courses/${user.uid}/${Date.now()}-${data.thumbnail.name}`);
-            const snapshot = await uploadBytes(thumbnailRef, data.thumbnail);
-            thumbnailUrl = await getDownloadURL(snapshot.ref);
-        }
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const storage = getStorage(app);
 
-        const uploadedVideos: VideoData[] = [];
-        for (const videoUpload of videoUploads) {
-            let url = '';
-            if (videoUpload.source === 'youtube') {
-                 url = getYouTubeEmbedUrl(videoUpload.youtubeUrl);
-            } else if (videoUpload.file) {
-                const videoRef = ref(storage, `videos/${user.uid}/${Date.now()}-${videoUpload.file.name}`);
-                const snapshot = await uploadBytes(videoRef, videoUpload.file);
-                url = await getDownloadURL(snapshot.ref);
-            }
-            
-            let notesUrl: string | undefined = undefined;
-            if (videoUpload.notesFile) {
-                const notesRef = ref(storage, `notes/${user.uid}/${Date.now()}-${videoUpload.notesFile.name}`);
-                const notesSnapshot = await uploadBytes(notesRef, videoUpload.notesFile);
-                notesUrl = await getDownloadURL(notesSnapshot.ref);
+        try {
+            let thumbnailUrl = selectedCourse?.thumbnail || '';
+            if (data.thumbnail) {
+                const thumbnailRef = ref(storage, `courses/${user.uid}/${Date.now()}-${data.thumbnail.name}`);
+                const snapshot = await uploadBytes(thumbnailRef, data.thumbnail);
+                thumbnailUrl = await getDownloadURL(snapshot.ref);
             }
 
-             if (url && videoUpload.title) {
-                uploadedVideos.push({ 
-                    id: `V${Date.now()}-${videoUpload.title}`, 
-                    title: videoUpload.title, 
-                    url, 
-                    quizId: videoUpload.quizId,
-                    notesUrl,
-                });
+            const uploadedVideos: VideoData[] = [];
+            for (const videoUpload of videoUploads) {
+                let url = '';
+                if (videoUpload.source === 'youtube') {
+                    url = getYouTubeEmbedUrl(videoUpload.youtubeUrl);
+                } else if (videoUpload.file) {
+                    const videoRef = ref(storage, `videos/${user.uid}/${Date.now()}-${videoUpload.file.name}`);
+                    const snapshot = await uploadBytes(videoRef, videoUpload.file);
+                    url = await getDownloadURL(snapshot.ref);
+                }
+
+                let notesUrl: string | undefined = undefined;
+                if (videoUpload.notesFile) {
+                    const notesRef = ref(storage, `notes/${user.uid}/${Date.now()}-${videoUpload.notesFile.name}`);
+                    const notesSnapshot = await uploadBytes(notesRef, videoUpload.notesFile);
+                    notesUrl = await getDownloadURL(notesSnapshot.ref);
+                }
+
+                if (url && videoUpload.title) {
+                    uploadedVideos.push({
+                        id: `V${Date.now()}-${videoUpload.title}`,
+                        title: videoUpload.title,
+                        url,
+                        quizId: videoUpload.quizId,
+                        notesUrl,
+                    });
+                }
             }
+
+            const baseData = {
+                instructorId: user.uid,
+                title: data.title,
+                description: data.description,
+                subject: data.subject,
+                paper: data.paper,
+                grade: data.grade,
+                pricing: {
+                    type: data.pricingModel,
+                    price: data.pricingModel === 'purchase' ? data.price : null,
+                },
+                thumbnail: thumbnailUrl,
+                status: 'Draft' as const,
+                videos: selectedCourse ? [...selectedCourse.videos, ...uploadedVideos] : uploadedVideos,
+            };
+
+            if (selectedCourse) {
+                const courseRef = doc(firestore, 'courses', selectedCourse.id);
+                await updateDoc(courseRef, baseData);
+                setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...baseData, id: c.id, createdAt: c.createdAt } as Course : c));
+                toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
+            } else {
+                const courseDataForCreation = {
+                    ...baseData,
+                    createdAt: serverTimestamp(),
+                };
+                const newDocRef = await addDoc(collection(firestore, 'courses'), courseDataForCreation);
+                setCourses([{ id: newDocRef.id, ...baseData, createdAt: Timestamp.now() } as Course, ...courses]);
+                toast({ title: "Course Created!", description: `The course "${data.title}" has been created.` });
+            }
+
+            setIsCourseDialogOpen(false);
+            setSelectedCourse(null);
+
+        } catch (error) {
+            console.error("Error saving course: ", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to save course.' });
+        } finally {
+            setIsSubmitting(false);
         }
-        
-        const courseData = {
-            instructorId: user.uid,
-            title: data.title,
-            description: data.description,
-            subject: data.subject,
-            paper: data.paper,
-            grade: data.grade,
-            pricing: {
-                type: data.pricingModel,
-                price: data.pricingModel === 'purchase' ? data.price : null,
-            },
-            thumbnail: thumbnailUrl,
-            status: 'Draft' as const,
-            videos: selectedCourse ? [...selectedCourse.videos, ...uploadedVideos] : uploadedVideos,
-            createdAt: selectedCourse?.createdAt || serverTimestamp(),
-        };
-
-        if (selectedCourse) {
-            const courseRef = doc(firestore, 'courses', selectedCourse.id);
-            await updateDoc(courseRef, courseData);
-            setCourses(courses.map(c => c.id === selectedCourse.id ? { ...c, ...courseData, id: c.id, createdAt: c.createdAt } as Course : c));
-            toast({ title: "Course Updated!", description: `The course "${data.title}" has been updated.` });
-        } else {
-            const newDocRef = await addDoc(collection(firestore, 'courses'), courseData);
-            setCourses([{ id: newDocRef.id, ...courseData, createdAt: Timestamp.now() } as Course, ...courses]);
-            toast({ title: "Course Created!", description: `The course "${data.title}" has been created.` });
-        }
-
-        setIsCourseDialogOpen(false);
-        setSelectedCourse(null);
-
-    } catch (error) {
-        console.error("Error saving course: ", error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Failed to save course.' });
-    } finally {
-        setIsSubmitting(false);
     }
-  }
 
   async function handleSaveSolution(assignmentId: string, price: number) {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -2559,5 +2563,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
