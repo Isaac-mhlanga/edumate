@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2 } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -25,6 +25,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
+import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
+import { useToast } from "@/hooks/use-toast";
+import { summarizeLesson } from "@/ai/flows/summarize-lesson";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -102,6 +105,11 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [quality, setQuality] = useState('720p');
   const [isClient, setIsClient] = useState(false);
+  
+  const [isSummarizing, setIsSummarizing] = useState(false);
+  const [summary, setSummary] = useState<string | null>(null);
+  const [summarizedVideoId, setSummarizedVideoId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     setIsClient(true);
@@ -173,6 +181,8 @@ export default function Home() {
     if (course.videos && course.videos.length > 0) {
       setActiveVideo(course.videos[0]);
     }
+    setSummary(null);
+    setSummarizedVideoId(null);
     setIsVideoPlayerOpen(true);
   };
 
@@ -180,6 +190,38 @@ export default function Home() {
     setSelectedEvent(event);
     setIsEventDialogOpen(true);
   };
+
+  const handleSummarize = async (video: VideoData, course: Course) => {
+      if (!video || !course) return;
+      setIsSummarizing(true);
+      setSummary(null);
+      setSummarizedVideoId(video.id);
+
+      try {
+          const result = await summarizeLesson({
+              lessonTitle: video.title,
+              lessonDescription: 'A video about ' + video.title, // Placeholder
+              transcript: '...', // Placeholder for transcript
+              courseContext: course.description,
+              studentPreviousActivity: 'Watched introduction', // Placeholder
+          });
+          setSummary(result.summary);
+          toast({
+              title: 'Summary Generated!',
+              description: 'The AI-powered summary is now available.',
+          });
+      } catch (error) {
+          console.error("Error summarizing lesson:", error);
+          toast({
+              variant: 'destructive',
+              title: 'Summarization Failed',
+              description: 'Could not generate a summary for this lesson.',
+          });
+      } finally {
+          setIsSummarizing(false);
+      }
+  };
+
 
   useEffect(() => {
     if (selectedCourseForPlayer && selectedCourseForPlayer.videos.length > 0) {
@@ -618,7 +660,23 @@ export default function Home() {
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
-                                    <p className="text-sm text-muted-foreground ml-8">Click to play this lesson.</p>
+                                    <div className="pl-8 flex flex-col items-start gap-3">
+                                      <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={() => handleSummarize(video, selectedCourseForPlayer)} disabled={isSummarizing && summarizedVideoId === video.id}>
+                                          {isSummarizing && summarizedVideoId === video.id ? (
+                                              <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Summarizing...</>
+                                          ) : (
+                                              <><Sparkles className="mr-2 h-4 w-4" /> Summarize with AI</>
+                                          )}
+                                      </Button>
+                                      {summarizedVideoId === video.id && isSummarizing && <Skeleton className="h-16 w-full" />}
+                                      {summarizedVideoId === video.id && summary && (
+                                        <Alert>
+                                            <Sparkles className="h-4 w-4" />
+                                            <AlertTitle>AI Summary</AlertTitle>
+                                            <AlertDescription>{summary}</AlertDescription>
+                                        </Alert>
+                                      )}
+                                    </div>
                                 </AccordionContent>
                             </AccordionItem>
                         ))}
