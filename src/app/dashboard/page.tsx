@@ -1,41 +1,23 @@
 
 'use client';
 
-import { AppLayout } from "@/components/app-layout";
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
-import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Progress } from "@/components/ui/progress";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
-import { studentData } from "@/lib/data";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { ArrowRight, Award, Banknote, BookOpen, Calendar as CalendarLucide, CheckCircle, ChevronLeft, ChevronRight, CircleDollarSign, CreditCard, Download, Edit, FilePenLine, Filter, GraduationCap, Hourglass, ListFilter, MoreVertical, ReceiptText, Search, ShieldCheck, SlidersHorizontal, Star, Undo2, UploadCloud } from "lucide-react";
-import Image from "next/image";
-import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
-import React from "react";
 import withAuth from "@/components/with-auth";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
+import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useToast } from "@/hooks/use-toast";
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, collection, addDoc, serverTimestamp, query, where, getDocs, orderBy, Timestamp, doc, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp, FirebaseError } from 'firebase/app';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar } from "@/components/ui/calendar";
-import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 
+import { OverviewTab } from "@/components/dashboard/overview-tab";
+import { CoursesTab } from "@/components/dashboard/courses-tab";
+import { AssignmentsTab } from "@/components/dashboard/assignments-tab";
+import { TransactionsTab } from "@/components/dashboard/transactions-tab";
+import { SubscriptionsTab } from "@/components/dashboard/subscriptions-tab";
+import { AssignmentDialog } from "@/components/dashboard/assignment-dialog";
+import { RefundDialog } from "@/components/dashboard/refund-dialog";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -46,16 +28,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-const assignmentFormSchema = z.object({
-  title: z.string().min(1, "Assignment title is required."),
-  course: z.string().min(1, "Course name is required."),
-  dueDate: z.date({ required_error: "A due date is required." }),
-  instructions: z.string().optional(),
-  file: z.instanceof(File).refine(file => file.name.endsWith('.zip'), 'File must be a .zip archive.').optional(),
-});
-type AssignmentFormValues = z.infer<typeof assignmentFormSchema>;
-
-type Course = {
+export type Course = {
     id: string;
     title: string;
     description: string;
@@ -72,7 +45,7 @@ type Course = {
     rating?: number;
 };
 
-type SubmittedAssignment = {
+export type SubmittedAssignment = {
     id: string;
     studentId: string;
     studentName: string;
@@ -87,7 +60,7 @@ type SubmittedAssignment = {
     dueDate?: Timestamp;
 };
 
-type Transaction = {
+export type Transaction = {
     id: string;
     itemId: string;
     itemTitle: string;
@@ -112,51 +85,12 @@ function DashboardPage() {
     const [loadingAssignments, setLoadingAssignments] = React.useState(true);
     const [loadingTransactions, setLoadingTransactions] = React.useState(true);
     const [loadingCourses, setLoadingCourses] = React.useState(true);
-
-    const completedAssignmentsCount = submittedAssignments.filter(a => a.status === 'Paid').length;
-    const certificatesEarned = 1; 
-
-    const stats = [
-        { title: "Courses in Progress", value: studentData.activeSubscriptions.length, icon: BookOpen },
-        { title: "Completed Assignments", value: completedAssignmentsCount, icon: CheckCircle },
-        { title: "Certificates Earned", value: certificatesEarned, icon: Award },
-    ];
     
-    // State for assignments filtering and pagination
-    const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', status: 'All' });
-    const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
-    const assignmentsPerPage = 5;
-
-    // State for transactions filtering and pagination
-    const [transactionFilters, setTransactionFilters] = React.useState({ search: '', type: 'All' });
-    const [currentTransactionPage, setCurrentTransactionPage] = React.useState(1);
-    const transactionsPerPage = 5;
     const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
     const [isAssignmentDialogOpen, setIsAssignmentDialogOpen] = React.useState(false);
-    const [isSubmitting, setIsSubmitting] = React.useState(false);
     const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
 
-
-    // State for courses filtering and pagination
-    const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All', status: 'All' });
-    const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
-    const coursesPerPage = 6;
-    
-    // State for "My Purchased Courses" section on Overview tab
-    const [purchasedCourseFilters, setPurchasedCourseFilters] = React.useState({ search: '', subject: 'All' });
-    const [currentPurchasedCoursePage, setCurrentPurchasedCoursePage] = React.useState(1);
-    const purchasedCoursesPerPage = 3;
-
-    const assignmentForm = useForm<AssignmentFormValues>({
-      resolver: zodResolver(assignmentFormSchema),
-      defaultValues: {
-        title: '',
-        course: '',
-        instructions: '',
-        file: undefined,
-      },
-    });
 
     React.useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -168,35 +102,28 @@ function DashboardPage() {
             setLoadingTransactions(true);
             setLoadingCourses(true);
             try {
-                // Fetch assignments
                 const assignmentsQuery = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
                 const assignmentsSnapshot = await getDocs(assignmentsQuery);
                 const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
                 setSubmittedAssignments(assignments);
 
-                // Fetch transactions
                 const transactionsQuery = query(collection(firestore, 'transactions'), where('studentId', '==', user.uid), orderBy('createdAt', 'desc'));
                 const transactionsSnapshot = await getDocs(transactionsQuery);
                 const transactions = transactionsSnapshot.docs.map(doc => {
                     const data = doc.data();
                     return {
-                        id: doc.id,
-                        ...data,
-                        date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A'
+                        id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A'
                     }
                 }) as Transaction[];
                 setTransactions(transactions);
 
-                // Fetch all courses
                 const coursesSnapshot = await getDocs(collection(firestore, 'courses'));
                 setAllCourses(coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[]);
 
             } catch (error: any) {
                 console.error("Error fetching student data: ", error);
                 let errorMessage = 'Could not fetch your data. This can happen if the required database index is not set up.';
-                if (error instanceof FirebaseError) {
-                    errorMessage = error.message;
-                }
+                if (error instanceof FirebaseError) { errorMessage = error.message; }
                 toast({ variant: 'destructive', title: 'Error', description: errorMessage });
             } finally {
                 setLoadingAssignments(false);
@@ -235,22 +162,14 @@ function DashboardPage() {
                 itemId: course.id,
                 itemTitle: course.title,
                 itemType: 'course',
-                amount: 0, // Free enrollment
+                amount: 0,
                 status: 'Completed',
                 currency: 'ZAR',
                 createdAt: serverTimestamp(),
             });
 
-            // Optimistically update UI
             setTransactions(prev => [{
-                id: `temp-${Date.now()}`,
-                itemId: course.id,
-                itemTitle: course.title,
-                itemType: 'course',
-                status: 'Completed',
-                amount: 0,
-                createdAt: Timestamp.now(),
-                date: format(new Date(), 'PPP'),
+                id: `temp-${Date.now()}`, itemId: course.id, itemTitle: course.title, itemType: 'course', status: 'Completed', amount: 0, createdAt: Timestamp.now(), date: format(new Date(), 'PPP'),
             } as Transaction, ...prev]);
 
             toast({ title: 'Enrollment Successful!', description: `You have enrolled in "${course.title}".` });
@@ -259,126 +178,7 @@ function DashboardPage() {
             toast({ variant: 'destructive', title: 'Enrollment Failed', description: 'Could not enroll in the course. Please try again.' });
         }
     };
-
-
-    const handleAssignmentSubmit = async (data: AssignmentFormValues) => {
-        setIsSubmitting(true);
-        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const firestore = getFirestore(app);
-        const storage = getStorage(app);
-        
-        const user = auth.currentUser;
-        if (!user) {
-            toast({ variant: 'destructive', title: 'Error', description: 'You must be logged in to submit an assignment.' });
-            setIsSubmitting(false);
-            return;
-        }
-
-        try {
-            let downloadURL = selectedAssignment?.fileUrl; // Keep existing URL if not changing file
-            // If a new file is provided, upload it
-            if (data.file) {
-                 const storageRef = ref(storage, `assignments/${user.uid}/${Date.now()}-${data.file.name}`);
-                 const uploadResult = await uploadBytes(storageRef, data.file);
-                 downloadURL = await getDownloadURL(uploadResult.ref);
-            }
-
-            const assignmentData: Omit<SubmittedAssignment, 'id' | 'submittedAt'> & { submittedAt: any } = {
-                studentId: user.uid,
-                studentName: user.displayName || 'Anonymous',
-                title: data.title,
-                course: data.course,
-                instructions: data.instructions,
-                dueDate: Timestamp.fromDate(data.dueDate),
-                fileUrl: downloadURL!,
-                status: 'Pending Review',
-                price: selectedAssignment ? selectedAssignment.price : null,
-                solutionUrl: selectedAssignment ? selectedAssignment.solutionUrl : null,
-                submittedAt: serverTimestamp(),
-            };
-
-            if (selectedAssignment) { // Update existing assignment
-                const assignmentRef = doc(firestore, 'assignments', selectedAssignment.id);
-                // Don't update submittedAt on edit
-                const { submittedAt, ...updateData } = assignmentData;
-                await updateDoc(assignmentRef, {
-                    ...updateData,
-                    status: "Pending Review", // Reset status on re-submission
-                    dueDate: Timestamp.fromDate(data.dueDate)
-                });
-
-                // Update local state
-                setSubmittedAssignments(prev => prev.map(a => a.id === selectedAssignment.id ? { ...a, ...updateData, status: "Pending Review", dueDate: Timestamp.fromDate(data.dueDate), submittedAt: a.submittedAt } : a));
-                toast({ title: 'Success', description: 'Your assignment has been updated.' });
-
-            } else { // Add new assignment
-                const newAssignmentRef = await addDoc(collection(firestore, 'assignments'), assignmentData);
-                 // Add new assignment to local state
-                setSubmittedAssignments(prev => [{
-                    id: newAssignmentRef.id,
-                    ...assignmentData,
-                    submittedAt: Timestamp.now(),
-                    dueDate: Timestamp.fromDate(data.dueDate),
-                }, ...prev]);
-                toast({ title: 'Success', description: 'Your assignment has been submitted successfully.' });
-            }
-
-            setIsAssignmentDialogOpen(false);
-            setSelectedAssignment(null);
-            assignmentForm.reset();
-        } catch (error) {
-            console.error("Error submitting assignment: ", error);
-            toast({ variant: 'destructive', title: 'Submission Failed', description: 'There was an error submitting your assignment. Please try again.' });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    const handleOpenAssignmentDialog = (assignment: SubmittedAssignment | null) => {
-        setSelectedAssignment(assignment);
-        if (assignment) {
-            assignmentForm.reset({
-                title: assignment.title,
-                course: assignment.course,
-                dueDate: assignment.dueDate?.toDate(),
-                instructions: assignment.instructions || '',
-                file: undefined, // Don't pre-fill file input
-            });
-             assignmentForm.clearErrors();
-        } else {
-            assignmentForm.reset({
-                title: '',
-                course: '',
-                dueDate: undefined,
-                instructions: '',
-                file: undefined,
-            });
-             assignmentForm.clearErrors();
-        }
-        setIsAssignmentDialogOpen(true);
-    };
-
-    const handleAssignmentFilterChange = (key: 'search' | 'status', value: string) => {
-        setAssignmentFilters(prev => ({ ...prev, [key]: value }));
-        setCurrentAssignmentPage(1);
-    };
-
-     const handleTransactionFilterChange = (key: 'search' | 'type', value: string) => {
-        setTransactionFilters(prev => ({ ...prev, [key]: value }));
-        setCurrentTransactionPage(1);
-    };
     
-    const handleCourseFilterChange = (key: 'search' | 'subject' | 'grade' | 'status', value: string) => {
-        setCourseFilters(prev => ({ ...prev, [key]: value }));
-        setCurrentCoursePage(1);
-    };
-    
-    const handlePurchasedCourseFilterChange = (key: 'search' | 'subject', value: string) => {
-        setPurchasedCourseFilters(prev => ({ ...prev, [key]: value }));
-        setCurrentPurchasedCoursePage(1);
-    };
-
     const handleRefundRequest = (transaction: Transaction) => {
         setSelectedTransaction(transaction);
         setIsRefundDialogOpen(true);
@@ -394,785 +194,66 @@ function DashboardPage() {
         setSelectedTransaction(null);
     };
 
-    const filteredAssignments = React.useMemo(() => {
-        return submittedAssignments.filter(assignment => {
-            const searchMatch = assignmentFilters.search.trim().toLowerCase() === '' ||
-                assignment.title.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase()) ||
-                assignment.course.toLowerCase().includes(assignmentFilters.search.trim().toLowerCase());
-            
-            const statusMatch = assignmentFilters.status === 'All' || assignment.status === assignmentFilters.status;
-
-            return searchMatch && statusMatch;
-        });
-    }, [submittedAssignments, assignmentFilters]);
-
-    const totalAssignmentPages = Math.ceil(filteredAssignments.length / assignmentsPerPage);
-    const paginatedAssignments = filteredAssignments.slice((currentAssignmentPage - 1) * assignmentsPerPage, currentAssignmentPage * assignmentsPerPage);
-
-    const filteredTransactions = React.useMemo(() => {
-        return transactions.filter(transaction => {
-            const searchMatch = transactionFilters.search.trim().toLowerCase() === '' ||
-                transaction.itemTitle.toLowerCase().includes(transactionFilters.search.trim().toLowerCase());
-            
-            const typeMatch = transactionFilters.type === 'All' || transaction.itemType === transactionFilters.type;
-
-            return searchMatch && typeMatch;
-        });
-    }, [transactions, transactionFilters]);
-
-    const totalTransactionPages = Math.ceil(filteredTransactions.length / transactionsPerPage);
-    const paginatedTransactions = filteredTransactions.slice((currentTransactionPage - 1) * transactionsPerPage, currentTransactionPage * assignmentsPerPage);
-    
     const purchasedCourseIds = new Set(transactions.filter(t => t.itemType === 'course').map(t => t.itemId));
-
-    const purchasedCoursesWithDetails = React.useMemo(() => {
-        return allCourses.filter(c => purchasedCourseIds.has(c.id));
-    }, [allCourses, purchasedCourseIds]);
-
-    const filteredPurchasedCourses = React.useMemo(() => {
-        return purchasedCoursesWithDetails.filter(course => {
-            const searchMatch = purchasedCourseFilters.search.trim().toLowerCase() === '' ||
-                course.title.toLowerCase().includes(purchasedCourseFilters.search.trim().toLowerCase());
-            const subjectMatch = purchasedCourseFilters.subject === 'All' || course.subject === purchasedCourseFilters.subject;
-            return searchMatch && subjectMatch;
-        });
-    }, [purchasedCoursesWithDetails, purchasedCourseFilters]);
-
-    const totalPurchasedCoursePages = Math.ceil(filteredPurchasedCourses.length / purchasedCoursesPerPage);
-    const paginatedPurchasedCourses = filteredPurchasedCourses.slice((currentPurchasedCoursePage - 1) * purchasedCoursesPerPage, currentPurchasedCoursePage * purchasedCoursesPerPage);
-    const purchasedSubjects = ['All', ...Array.from(new Set(purchasedCoursesWithDetails.map(c => c.subject)))];
-
-    const filteredCourses = React.useMemo(() => {
-        return allCourses.filter(course => {
-            const searchMatch = courseFilters.search.trim().toLowerCase() === '' ||
-                course.title.toLowerCase().includes(courseFilters.search.trim().toLowerCase());
-            const subjectMatch = courseFilters.subject === 'All' || course.subject === courseFilters.subject;
-            const gradeMatch = courseFilters.grade === 'All' || course.grade === courseFilters.grade;
-            return searchMatch && subjectMatch && gradeMatch;
-        });
-    }, [allCourses, courseFilters]);
-
-    const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
-    const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
-    const allSubjects = ['All', 'Maths', 'Physical Sciences'];
-    const allGrades = ['All', '10', '11', '12'];
-
-
-    const getStatusIcon = (status: SubmittedAssignment['status']) => {
-        switch (status) {
-            case 'Paid': return <CheckCircle className="mr-1 h-3 w-3" />;
-            case 'Awaiting Payment': return <CircleDollarSign className="mr-1 h-3 w-3" />;
-            case 'Pending Review': return <Hourglass className="mr-1 h-3 w-3" />;
-            case 'Submitted': return <Hourglass className="mr-1 h-3 w-3" />;
-            case 'Pending Submission': return <FilePenLine className="mr-1 h-3 w-3" />;
-            default: return null;
-        }
-    };
-    
-    const getStatusBadgeVariant = (status: SubmittedAssignment['status']) => {
-        switch (status) {
-            case 'Paid': return 'bg-green-500/20 text-green-700 border-green-500/30 dark:text-green-400';
-            case 'Awaiting Payment': return 'bg-blue-500/20 text-blue-700 border-blue-500/30 dark:text-blue-400';
-            case 'Pending Review': return 'bg-yellow-500/20 text-yellow-700 border-yellow-500/30 dark:text-yellow-400';
-            case 'Submitted': return 'bg-purple-500/20 text-purple-700 border-purple-500/30 dark:text-purple-400';
-            case 'Pending Submission': return 'bg-slate-500/20 text-slate-700 border-slate-500/30 dark:text-slate-400';
-            default: return 'outline';
-        }
-    };
-
 
     return (
         <div className="space-y-8">
             {currentTab === 'overview' && (
-                <div className="space-y-8">
-                    <section className="grid gap-6 md:grid-cols-3">
-                        {stats.map((stat) => (
-                            <Card key={stat.title}>
-                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
-                                    <stat.icon className="h-5 w-5 text-muted-foreground" />
-                                </CardHeader>
-                                <CardContent>
-                                    <div className="text-2xl font-bold">{stat.value}</div>
-                                    <p className="text-xs text-muted-foreground">Keep up the great work!</p>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </section>
-                    
-                    <section>
-                        <h2 className="text-xl font-semibold mb-4">Continue Learning</h2>
-                        <div className="grid md:grid-cols-2 gap-6">
-                            {studentData.activeSubscriptions.map((sub) => (
-                                <Card key={sub.id} className="flex flex-col">
-                                    <CardHeader>
-                                        <div className="flex justify-between items-start">
-                                            <CardTitle>{sub.name}</CardTitle>
-                                            <Badge>Subscribed</Badge>
-                                        </div>
-                                        <CardDescription>Expires on: {sub.expires}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="flex-grow">
-                                    <p className="text-sm text-muted-foreground">You're making great progress. Keep going to master the material and achieve your goals.</p>
-                                    </CardContent>
-                                    <CardFooter className="flex-col items-start pt-4 border-t">
-                                        <div className="w-full">
-                                            <div className="flex items-center justify-between mb-2">
-                                                <span className="text-sm font-medium">Progress</span>
-                                                <span className="text-sm font-bold text-primary">{sub.progress}%</span>
-                                            </div>
-                                            <Progress value={sub.progress} className="h-2"/>
-                                        </div>
-                                        <Button className="mt-4 w-full" asChild>
-                                            <Link href={`/courses/${allCourses.find(c => c.title.includes(sub.name.split(' - ')[1]))?.id || ''}?from=dashboard`}>
-                                                Continue Learning <ArrowRight className="ml-2 h-4 w-4"/>
-                                            </Link>
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </div>
-                    </section>
-
-                    <section>
-                        <Card>
-                            <CardHeader>
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                    <div>
-                                        <CardTitle>My Purchased Courses</CardTitle>
-                                        <CardDescription>Courses you have enrolled in. Find all courses in the catalog.</CardDescription>
-                                    </div>
-                                    <Button variant="outline" asChild><Link href="/dashboard?tab=courses">View Full Catalog</Link></Button>
-                                </div>
-                                <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-4">
-                                    <div className="relative flex-1 w-full">
-                                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                        <Input
-                                            placeholder="Search my courses..."
-                                            className="pl-8"
-                                            value={purchasedCourseFilters.search}
-                                            onChange={(e) => handlePurchasedCourseFilterChange('search', e.target.value)}
-                                        />
-                                    </div>
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="outline" className="gap-1 w-full sm:w-auto">
-                                                <Filter className="h-3.5 w-3.5" />
-                                                <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">
-                                                    Subject
-                                                </span>
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            <DropdownMenuLabel>Filter by Subject</DropdownMenuLabel>
-                                            <DropdownMenuSeparator />
-                                            <DropdownMenuRadioGroup value={purchasedCourseFilters.subject} onValueChange={(value) => handlePurchasedCourseFilterChange('subject', value)}>
-                                                {purchasedSubjects.map(subject => (
-                                                    <DropdownMenuRadioItem key={subject} value={subject}>{subject}</DropdownMenuRadioItem>
-                                                ))}
-                                            </DropdownMenuRadioGroup>
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                {paginatedPurchasedCourses.length > 0 ? (
-                                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                        {paginatedPurchasedCourses.map((course) => (
-                                            <Card key={course.id} className="overflow-hidden group flex flex-col h-full">
-                                                <CardHeader className="p-0">
-                                                    <div className="bg-primary/10 aspect-video flex items-center justify-center">
-                                                        <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
-                                                    </div>
-                                                </CardHeader>
-                                                <CardContent className="p-4 flex-grow">
-                                                    <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
-                                                    <h3 className="font-semibold text-lg">{course.title}</h3>
-                                                </CardContent>
-                                                <CardFooter className="p-4 pt-0">
-                                                    <Button variant="link" className="p-0 h-auto as-child">
-                                                        <Link href={`/courses/${course.id}?from=dashboard`}>
-                                                            Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
-                                                        </Link>
-                                                    </Button>
-                                                </CardFooter>
-                                            </Card>
-                                        ))}
-                                    </div>
-                                ) : (
-                                    <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
-                                        <h3 className="text-lg font-semibold">No Courses Found</h3>
-                                        <p className="max-w-md mx-auto">{purchasedCourseFilters.search || purchasedCourseFilters.subject !== 'All' ? 'Try adjusting your search or filters.' : 'You haven\'t purchased any courses yet. Browse the catalog to start learning!'}</p>
-                                    </div>
-                                )}
-                            </CardContent>
-                            <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                                <div className="text-xs text-muted-foreground">
-                                    Showing{" "}
-                                    <strong>
-                                        {filteredPurchasedCourses.length > 0 ? (currentPurchasedCoursePage - 1) * purchasedCoursesPerPage + 1 : 0}-
-                                        {Math.min(currentPurchasedCoursePage * purchasedCoursesPerPage, filteredPurchasedCourses.length)}
-                                    </strong>{" "}
-                                    of <strong>{filteredPurchasedCourses.length}</strong> courses.
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p - 1)} disabled={currentPurchasedCoursePage === 1}>
-                                        <ChevronLeft className="h-4 w-4 mr-1" />
-                                        Prev
-                                    </Button>
-                                    <Button variant="outline" size="sm" onClick={() => setCurrentPurchasedCoursePage(p => p + 1)} disabled={currentPurchasedCoursePage >= totalPurchasedCoursePages}>
-                                        Next
-                                        <ChevronRight className="h-4 w-4 ml-1" />
-                                    </Button>
-                                </div>
-                            </CardFooter>
-                        </Card>
-                    </section>
-                </div>
+                <OverviewTab 
+                    submittedAssignments={submittedAssignments} 
+                    allCourses={allCourses} 
+                    purchasedCourseIds={purchasedCourseIds}
+                />
             )}
 
             {currentTab === 'courses' && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Course Catalog</CardTitle>
-                        <CardDescription>Browse our full library of expert-led courses.</CardDescription>
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-2 pt-4 border-t">
-                            <div className="relative flex-1 w-full">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder="Search courses..."
-                                    className="pl-8"
-                                    value={courseFilters.search}
-                                    onChange={(e) => handleCourseFilterChange('search', e.target.value)}
-                                />
-                            </div>
-                            <div className="flex items-center gap-2 w-full md:w-auto">
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="gap-1 w-full">
-                                            <ListFilter className="h-3.5 w-3.5" />
-                                            <span>Subject</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Filter by Subject</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuRadioGroup value={courseFilters.subject} onValueChange={(value) => handleCourseFilterChange('subject', value)}>
-                                            {allSubjects.map(subject => <DropdownMenuRadioItem key={subject} value={subject}>{subject}</DropdownMenuRadioItem>)}
-                                        </DropdownMenuRadioGroup>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                                <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                        <Button variant="outline" className="gap-1 w-full">
-                                            <ListFilter className="h-3.5 w-3.5" />
-                                            <span>Grade</span>
-                                        </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end">
-                                        <DropdownMenuLabel>Filter by Grade</DropdownMenuLabel>
-                                        <DropdownMenuSeparator />
-                                        <DropdownMenuRadioGroup value={courseFilters.grade} onValueChange={(value) => handleCourseFilterChange('grade', value)}>
-                                            {allGrades.map(grade => <DropdownMenuRadioItem key={grade} value={grade}>{grade === 'All' ? 'All' : `Grade ${grade}`}</DropdownMenuRadioItem>)}
-                                        </DropdownMenuRadioGroup>
-                                    </DropdownMenuContent>
-                                </DropdownMenu>
-                            </div>
-                        </div>
-                    </CardHeader>
-                    <CardContent>
-                        {loadingCourses ? (
-                           <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {Array.from({length: 6}).map((_, i) => (
-                                    <Card key={i}><CardHeader><Skeleton className="h-40 w-full" /></CardHeader><CardContent className="space-y-2 pt-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /></CardContent><CardFooter><Skeleton className="h-10 w-full" /></CardFooter></Card>
-                                ))}
-                            </div>
-                        ) : paginatedCourses.length > 0 ? (
-                            <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {paginatedCourses.map((course) => (
-                                    <Card key={course.id} className="overflow-hidden group flex flex-col">
-                                        <CardHeader className="p-0">
-                                            <Link href={`/courses/${course.id}?from=dashboard`}>
-                                                <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="aspect-video object-cover transition-transform group-hover:scale-105" data-ai-hint="online course" />
-                                            </Link>
-                                        </CardHeader>
-                                        <CardContent className="p-4 flex-grow">
-                                            <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
-                                            <h3 className="font-semibold text-lg">{course.title}</h3>
-                                            <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{course.description}</p>
-                                        </CardContent>
-                                        <CardFooter className="p-4 pt-0">
-                                            {course.pricing.type === 'free' ? (
-                                                <Button className="w-full" variant="secondary" onClick={() => handleFreeEnrollment(course)}>Enroll for Free</Button>
-                                            ) : (
-                                                <Button className="w-full" asChild>
-                                                    <Link href={`/payment?type=course&id=${course.id}&title=${course.title}&price=${course.pricing.price}`}>
-                                                        {`Buy for R ${course.pricing.price}`}
-                                                    </Link>
-                                                </Button>
-                                            )}
-                                        </CardFooter>
-                                    </Card>
-                                ))}
-                            </div>
-                        ) : (
-                             <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
-                                <h3 className="text-lg font-semibold">No Courses Found</h3>
-                                <p>Try adjusting your filters.</p>
-                            </div>
-                        )}
-                    </CardContent>
-                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                        <div className="text-xs text-muted-foreground">
-                            Showing <strong>{paginatedCourses.length > 0 ? (currentCoursePage - 1) * coursesPerPage + 1 : 0}-{Math.min(currentCoursePage * coursesPerPage, filteredCourses.length)}</strong> of <strong>{filteredCourses.length}</strong> courses.
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p - 1)} disabled={currentCoursePage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                            <Button variant="outline" size="sm" onClick={() => setCurrentCoursePage(p => p + 1)} disabled={currentCoursePage >= totalCoursePages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                        </div>
-                    </CardFooter>
-                </Card>
+                <CoursesTab 
+                    allCourses={allCourses} 
+                    loadingCourses={loadingCourses}
+                    onFreeEnrollment={handleFreeEnrollment}
+                />
             )}
 
             {currentTab === 'assignments' && (
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>My Assignments</CardTitle>
-                        <CardDescription>Upload your work, track instructor feedback, and access paid solutions.</CardDescription>
-                    </CardHeader>
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                        <div className="relative flex-1 w-full">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search by title or course..."
-                                className="pl-8"
-                                value={assignmentFilters.search}
-                                onChange={(e) => handleAssignmentFilterChange('search', e.target.value)}
-                            />
-                        </div>
-                        <div className="flex items-center gap-2 w-full md:w-auto">
-                            <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                    <Button variant="outline" className="gap-1 w-full">
-                                        <ListFilter className="h-3.5 w-3.5" />
-                                        <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter</span>
-                                    </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                    <DropdownMenuLabel>Filter by status</DropdownMenuLabel>
-                                    <DropdownMenuSeparator />
-                                    <DropdownMenuRadioGroup value={assignmentFilters.status} onValueChange={(value) => handleAssignmentFilterChange('status', value)}>
-                                        <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Pending Submission">Pending Submission</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Pending Review">Pending Review</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Awaiting Payment">Awaiting Payment</DropdownMenuRadioItem>
-                                        <DropdownMenuRadioItem value="Paid">Paid</DropdownMenuRadioItem>
-                                    </DropdownMenuRadioGroup>
-                                </DropdownMenuContent>
-                            </DropdownMenu>
-                            <Button className="w-full" onClick={() => handleOpenAssignmentDialog(null)}>
-                                <UploadCloud className="mr-2"/>Upload
-                            </Button>
-                        </div>
-                    </div>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Assignment</TableHead>
-                                <TableHead className="hidden sm:table-cell">Due Date</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="hidden md:table-cell">Price (R)</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loadingAssignments ? (
-                                Array.from({ length: 3 }).map((_, i) => (
-                                    <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
-                                        <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                                        <TableCell><Skeleton className="h-6 w-28" /></TableCell>
-                                        <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-16" /></TableCell>
-                                        <TableCell className="text-right"><Skeleton className="h-8 w-24 ml-auto" /></TableCell>
-                                    </TableRow>
-                                ))
-                            ) : paginatedAssignments.length > 0 ? (
-                                paginatedAssignments.map((assignment) => (
-                                    <TableRow key={assignment.id}>
-                                        <TableCell>
-                                            <div className="font-medium">{assignment.title}</div>
-                                            <div className="text-xs text-muted-foreground">{assignment.course}</div>
-                                        </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{assignment.dueDate ? format(assignment.dueDate.toDate(), 'PPP') : 'N/A'}</TableCell>
-                                        <TableCell>
-                                            <Badge variant={"outline"} className={getStatusBadgeVariant(assignment.status)}>
-                                                {getStatusIcon(assignment.status)}
-                                                {assignment.status}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? `R ${assignment.price.toFixed(2)}` : 'N/A'}</TableCell>
-                                        <TableCell className="text-right">
-                                            {assignment.status === 'Pending Review' && <Button variant="secondary" size="sm" onClick={() => handleOpenAssignmentDialog(assignment)}><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Edit</span></Button>}
-                                            {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
-                                            {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href={`/payment?type=assignment&id=${assignment.id}&title=${encodeURIComponent(assignment.title)}&price=${assignment.price}`}><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
-                                            {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl!} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                        You haven't submitted any assignments yet.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                    <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                        <div className="text-xs text-muted-foreground">
-                            Showing{" "}
-                            <strong>
-                                {filteredAssignments.length > 0 ? (currentAssignmentPage - 1) * assignmentsPerPage + 1 : 0}-
-                                {Math.min(currentAssignmentPage * assignmentsPerPage, filteredAssignments.length)}
-                            </strong>{" "}
-                            of <strong>{filteredAssignments.length}</strong> assignments.
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p - 1)} disabled={currentAssignmentPage === 1}>
-                                <ChevronLeft className="h-4 w-4 mr-1" />
-                                Prev
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => setCurrentAssignmentPage(p => p + 1)} disabled={currentAssignmentPage >= totalAssignmentPages}>
-                                Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
-                            </Button>
-                        </div>
-                    </CardFooter>
-                </Card>
+                <AssignmentsTab 
+                    submittedAssignments={submittedAssignments} 
+                    loadingAssignments={loadingAssignments}
+                    onOpenAssignmentDialog={(assignment) => {
+                        setSelectedAssignment(assignment);
+                        setIsAssignmentDialogOpen(true);
+                    }}
+                />
             )}
 
             {currentTab === 'transactions' && (
-                <Card>
-                    <CardHeader>
-                        <CardTitle>Transaction History</CardTitle>
-                        <CardDescription>A log of all your purchases and refunds.</CardDescription>
-                    </CardHeader>
-                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
-                        <div className="relative flex-1 w-full">
-                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                            <Input
-                                placeholder="Search by item..."
-                                className="pl-8"
-                                value={transactionFilters.search}
-                                onChange={(e) => handleTransactionFilterChange('search', e.target.value)}
-                            />
-                        </div>
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="outline" className="gap-1 w-full md:w-auto">
-                                    <ListFilter className="h-3.5 w-3.5" />
-                                    <span className="sr-only sm:not-sr-only sm:whitespace-nowrap">Filter by Type</span>
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                                <DropdownMenuLabel>Filter by Type</DropdownMenuLabel>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuRadioGroup value={transactionFilters.type} onValueChange={(value) => handleTransactionFilterChange('type', value)}>
-                                    <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="course">Course</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="assignment">Assignment</DropdownMenuRadioItem>
-                                    <DropdownMenuRadioItem value="subscription">Subscription</DropdownMenuRadioItem>
-                                </DropdownMenuRadioGroup>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
-                    </div>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Item</TableHead>
-                                <TableHead className="hidden sm:table-cell">Type</TableHead>
-                                <TableHead className="hidden md:table-cell">Date</TableHead>
-                                <TableHead>Amount (R)</TableHead>
-                                <TableHead className="text-right">Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {loadingTransactions ? (
-                                Array.from({ length: 3 }).map((_, i) => (
-                                <TableRow key={i}>
-                                    <TableCell><Skeleton className="h-5 w-3/4" /></TableCell>
-                                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
-                                    <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
-                                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                                    <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
-                                </TableRow>
-                                ))
-                            ) : paginatedTransactions.length > 0 ? (
-                                paginatedTransactions.map((transaction) => (
-                                    <TableRow key={transaction.id}>
-                                        <TableCell className="font-medium">{transaction.itemTitle}</TableCell>
-                                        <TableCell className="hidden sm:table-cell">
-                                            <Badge variant="outline" className="gap-1.5 capitalize">
-                                                {transaction.itemType === 'course' && <GraduationCap className="h-3 w-3" />}
-                                                {transaction.itemType === 'assignment' && <ReceiptText className="h-3 w-3" />}
-                                                {transaction.itemType === 'subscription' && <Banknote className="h-3 w-3" />}
-                                                {transaction.itemType}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="hidden md:table-cell">{transaction.date}</TableCell>
-                                        <TableCell className={`font-semibold ${transaction.status === 'Refunded' ? 'text-red-600' : ''}`}>
-                                            {transaction.amount.toFixed(2)}
-                                        </TableCell>
-                                        <TableCell className="text-right">
-                                            {transaction.status !== 'Refunded' && transaction.amount > 0 && (
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuItem>
-                                                            <ReceiptText className="mr-2 h-4 w-4"/>View Receipt
-                                                        </DropdownMenuItem>
-                                                        <DropdownMenuItem onClick={() => handleRefundRequest(transaction)} className="text-destructive focus:text-destructive">
-                                                            <Undo2 className="mr-2 h-4 w-4"/>Request Refund
-                                                        </DropdownMenuItem>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
-                                            )}
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            ) : (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                        You have no transaction history yet.
-                                    </TableCell>
-                                </TableRow>
-                            )}
-                        </TableBody>
-                    </Table>
-                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                        <div className="text-xs text-muted-foreground">
-                            Showing{" "}
-                            <strong>
-                                {filteredTransactions.length > 0 ? (currentTransactionPage - 1) * transactionsPerPage + 1 : 0}-
-                                {Math.min(currentTransactionPage * transactionsPerPage, filteredTransactions.length)}
-                            </strong>{" "}
-                            of <strong>{filteredTransactions.length}</strong> transactions.
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p - 1)} disabled={currentTransactionPage === 1}>
-                                <ChevronLeft className="h-4 w-4 mr-1" />
-                                Prev
-                            </Button>
-                            <Button variant="outline" size="sm" onClick={() => setCurrentTransactionPage(p => p + 1)} disabled={currentTransactionPage >= totalTransactionPages}>
-                                Next
-                                <ChevronRight className="h-4 w-4 ml-1" />
-                            </Button>
-                        </div>
-                    </CardFooter>
-                </Card>
+                <TransactionsTab 
+                    transactions={transactions} 
+                    loadingTransactions={loadingTransactions}
+                    onRefundRequest={handleRefundRequest}
+                />
             )}
             
             {currentTab === 'subscriptions' && (
-                <div className="space-y-6">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>My Current Plan</CardTitle>
-                            <CardDescription>Your primary subscription for accessing course content.</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            <Card className="bg-primary/5 border-primary">
-                                <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
-                                    <div>
-                                        <CardTitle className="text-2xl">{studentData.currentSubscription.planName}</CardTitle>
-                                        <CardDescription>Next payment on {studentData.currentSubscription.nextBillingDate}</CardDescription>
-                                    </div>
-                                    <div className="text-right mt-4 sm:mt-0">
-                                        <p className="text-3xl font-bold">R{studentData.currentSubscription.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                                    </div>
-                                </CardHeader>
-                                <CardFooter className="flex justify-end gap-2">
-                                    <Button variant="destructive">Cancel Subscription</Button>
-                                </CardFooter>
-                            </Card>
-                        </CardContent>
-                    </Card>
-                    <Card>
-                         <CardHeader>
-                            <CardTitle>Available Plans</CardTitle>
-                            <CardDescription>Choose a plan that best fits your learning needs.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="grid md:grid-cols-2 gap-6">
-                            {studentData.availablePlans.map(plan => (
-                                <Card key={plan.id} className="flex flex-col">
-                                    <CardHeader>
-                                        <div className="flex justify-between items-center">
-                                            <CardTitle>{plan.name}</CardTitle>
-                                            <ShieldCheck className="w-6 h-6 text-secondary"/>
-                                        </div>
-                                        <p className="text-3xl font-bold pt-4">R{plan.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
-                                    </CardHeader>
-                                    <CardContent className="flex-grow">
-                                        <ul className="space-y-2 text-sm text-muted-foreground">
-                                            {plan.features.map((feature, i) => (
-                                                <li key={i} className="flex items-center gap-2">
-                                                    <CheckCircle className="h-4 w-4 text-green-500"/>
-                                                    <span>{feature}</span>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </CardContent>
-                                    <CardFooter>
-                                        <Button className="w-full" disabled={plan.id === studentData.currentSubscription.planId}>
-                                            {plan.id === studentData.currentSubscription.planId ? 'Current Plan' : 'Change Plan'}
-                                        </Button>
-                                    </CardFooter>
-                                </Card>
-                            ))}
-                        </CardContent>
-                    </Card>
-                </div>
+                <SubscriptionsTab />
             )}
 
-            <Dialog open={isAssignmentDialogOpen} onOpenChange={(open) => {
-                if (!open) {
-                    setSelectedAssignment(null);
-                    assignmentForm.reset();
-                }
-                setIsAssignmentDialogOpen(open)
-            }}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle>{selectedAssignment ? 'Edit' : 'Upload New'} Assignment</DialogTitle>
-                        <DialogDescription>Fill in the details and upload your assignment file (must be a .zip).</DialogDescription>
-                    </DialogHeader>
-                    <Form {...assignmentForm}>
-                        <form onSubmit={assignmentForm.handleSubmit(handleAssignmentSubmit)} className="space-y-4 py-4">
-                            <FormField
-                                control={assignmentForm.control}
-                                name="title"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Assignment Title</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="e.g. Chapter 5 Problem Set" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={assignmentForm.control}
-                                name="course"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Course Name</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="e.g. Grade 12 Maths" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={assignmentForm.control}
-                                name="dueDate"
-                                render={({ field }) => (
-                                    <FormItem className="flex flex-col">
-                                        <FormLabel>Due Date</FormLabel>
-                                        <Popover>
-                                            <PopoverTrigger asChild>
-                                                <FormControl>
-                                                    <Button
-                                                        variant={"outline"}
-                                                        className={cn(
-                                                            "w-full pl-3 text-left font-normal",
-                                                            !field.value && "text-muted-foreground"
-                                                        )}
-                                                    >
-                                                        {field.value ? (
-                                                            format(field.value, "PPP")
-                                                        ) : (
-                                                            <span>Pick a date</span>
-                                                        )}
-                                                        <CalendarLucide className="ml-auto h-4 w-4 opacity-50" />
-                                                    </Button>
-                                                </FormControl>
-                                            </PopoverTrigger>
-                                            <PopoverContent className="w-auto p-0" align="start">
-                                                <Calendar
-                                                    mode="single"
-                                                    selected={field.value}
-                                                    onSelect={field.onChange}
-                                                    disabled={(date) => date < new Date() || date < new Date("1900-01-01")}
-                                                    initialFocus
-                                                />
-                                            </PopoverContent>
-                                        </Popover>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={assignmentForm.control}
-                                name="instructions"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Extra Instructions</FormLabel>
-                                        <FormControl>
-                                            <Textarea placeholder="Any specific notes for the instructor?" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <FormField
-                                control={assignmentForm.control}
-                                name="file"
-                                render={({ field: { onChange, value, ...rest } }) => (
-                                    <FormItem>
-                                        <FormLabel>Assignment File (.zip) {selectedAssignment ? '(Optional: leave blank to keep existing file)' : ''}</FormLabel>
-                                        <FormControl>
-                                            <Input 
-                                                type="file" 
-                                                accept=".zip" 
-                                                onChange={(e) => onChange(e.target.files?.[0])} 
-                                                {...rest} 
-                                            />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                            <DialogFooter>
-                                <Button type="button" variant="ghost" onClick={() => setIsAssignmentDialogOpen(false)}>Cancel</Button>
-                                <Button type="submit" disabled={isSubmitting}>
-                                    {isSubmitting ? (selectedAssignment ? 'Updating...' : 'Submitting...') : (selectedAssignment ? 'Update Assignment' : 'Submit Assignment')}
-                                </Button>
-                            </DialogFooter>
-                        </form>
-                    </Form>
-                </DialogContent>
-            </Dialog>
+            <AssignmentDialog 
+                isOpen={isAssignmentDialogOpen}
+                setIsOpen={setIsAssignmentDialogOpen}
+                selectedAssignment={selectedAssignment}
+                onSuccess={() => {
+                     // In a real app, you'd refetch assignments here. For now, just close.
+                     setIsAssignmentDialogOpen(false);
+                     setSelectedAssignment(null);
+                }}
+            />
 
-            <AlertDialog open={isRefundDialogOpen} onOpenChange={setIsRefundDialogOpen}>
-                <AlertDialogContent>
-                    <AlertDialogHeader>
-                        <AlertDialogTitle>Request a Refund</AlertDialogTitle>
-                        <AlertDialogDescription>
-                            Please provide a reason for your refund request for <strong>"{selectedTransaction?.itemTitle}"</strong>. Our team will review it shortly.
-                        </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <div className="py-2">
-                        <Textarea placeholder="Type your reason here..." />
-                    </div>
-                    <AlertDialogFooter>
-                        <AlertDialogCancel onClick={() => setSelectedTransaction(null)}>Cancel</AlertDialogCancel>
-                        <AlertDialogAction onClick={confirmRefundRequest}>Submit Request</AlertDialogAction>
-                    </AlertDialogFooter>
-                </AlertDialogContent>
-            </AlertDialog>
+            <RefundDialog
+                isOpen={isRefundDialogOpen}
+                setIsOpen={setIsRefundDialogOpen}
+                selectedTransaction={selectedTransaction}
+                onConfirm={confirmRefundRequest}
+            />
         </div>
     );
 }
