@@ -26,6 +26,7 @@ import { CalendarDialogs } from "@/components/instructor/calendar-dialogs";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { createCalendarEvent, CreateCalendarEventOutput } from '@/ai/flows/create-calendar-event';
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
+import { format } from "date-fns";
 
 
 const firebaseConfig = {
@@ -242,8 +243,7 @@ function InstructorPage() {
         
         const transactionsQuery = query(
             collection(firestore, 'transactions'),
-            where('instructorId', '==', currentUser.uid),
-            orderBy('createdAt', 'desc')
+            where('instructorId', '==', currentUser.uid)
         );
         const transactionsSnapshot = await getDocs(transactionsQuery);
         const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
@@ -803,7 +803,7 @@ function InstructorPage() {
       <StudentActionDialogs
         isDetailsOpen={isStudentDetailsDialogOpen}
         setIsDetailsOpen={setIsStudentDetailsDialogOpen}
-        isUnenrollOpen={isUnenrollDialogOpen}
+        isUnenrollOpen={isUnenrollOpen}
         setIsUnenrollOpen={setIsUnenrollDialogOpen}
         isDeleteOpen={isDeleteStudentDialogOpen}
         setIsDeleteOpen={setIsDeleteStudentDialogOpen}
