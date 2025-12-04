@@ -106,9 +106,6 @@ export default function Home() {
   const [quality, setQuality] = useState('720p');
   const [isClient, setIsClient] = useState(false);
   
-  const [isSummarizing, setIsSummarizing] = useState(false);
-  const [summary, setSummary] = useState<string | null>(null);
-  const [summarizedVideoId, setSummarizedVideoId] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -181,8 +178,6 @@ export default function Home() {
     if (course.videos && course.videos.length > 0) {
       setActiveVideo(course.videos[0]);
     }
-    setSummary(null);
-    setSummarizedVideoId(null);
     setIsVideoPlayerOpen(true);
   };
 
@@ -191,44 +186,11 @@ export default function Home() {
     setIsEventDialogOpen(true);
   };
 
-  const handleSummarize = async (video: VideoData, course: Course) => {
-      if (!video || !course) return;
-      setIsSummarizing(true);
-      setSummary(null);
-      setSummarizedVideoId(video.id);
-
-      try {
-          // This is a simplified example. In a real-world scenario,
-          // you would need a mechanism to get a publicly accessible URL,
-          // even for videos stored in Firebase Storage. For now, we assume `video.url` is public.
-          if (!video.url) {
-              throw new Error("Video URL is not available.");
-          }
-          const result = await summarizeLesson({
-              lessonTitle: video.title,
-              videoUrl: video.url,
-              courseContext: course.description,
-              studentPreviousActivity: 'Exploring courses on the homepage',
-          });
-          setSummary(result.summary);
-          toast({
-              title: 'Summary Generated!',
-              description: 'The AI-powered summary is now available.',
-          });
-      } catch (error) {
-          console.error("Error summarizing lesson:", error);
-          let errorMessage = 'Could not generate a summary for this lesson.';
-          if (error instanceof Error && error.message.includes('permission')) {
-              errorMessage = 'Could not access the video file for analysis. This feature may require the video to be publicly accessible.';
-          }
-          toast({
-              variant: 'destructive',
-              title: 'Summarization Failed',
-              description: errorMessage,
-          });
-      } finally {
-          setIsSummarizing(false);
-      }
+  const handleSummarize = async () => {
+    toast({
+        title: 'Feature Coming Soon!',
+        description: 'Our team is hard at work on this AI-powered video analysis feature. Stay tuned!',
+    });
   };
 
 
@@ -670,21 +632,9 @@ export default function Home() {
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pl-8 flex flex-col items-start gap-3">
-                                      <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={() => handleSummarize(video, selectedCourseForPlayer)} disabled={isSummarizing && summarizedVideoId === video.id}>
-                                          {isSummarizing && summarizedVideoId === video.id ? (
-                                              <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Summarizing...</>
-                                          ) : (
-                                              <><Sparkles className="mr-2 h-4 w-4" /> Summarize with AI</>
-                                          )}
+                                      <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
+                                        <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
                                       </Button>
-                                      {summarizedVideoId === video.id && isSummarizing && <Skeleton className="h-16 w-full" />}
-                                      {summarizedVideoId === video.id && summary && (
-                                        <Alert>
-                                            <Sparkles className="h-4 w-4" />
-                                            <AlertTitle>AI Summary</AlertTitle>
-                                            <AlertDescription dangerouslySetInnerHTML={{ __html: summary }} />
-                                        </Alert>
-                                      )}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>

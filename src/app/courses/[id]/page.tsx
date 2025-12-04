@@ -67,9 +67,6 @@ export default function PublicCoursePage() {
     const [playbackRate, setPlaybackRate] = React.useState('1');
     const videoRef = React.useRef<HTMLVideoElement>(null);
 
-    const [isSummarizing, setIsSummarizing] = React.useState(false);
-    const [summary, setSummary] = React.useState<string | null>(null);
-
     React.useEffect(() => {
         const fetchCourse = async () => {
             if (!courseId) return;
@@ -100,42 +97,10 @@ export default function PublicCoursePage() {
     }, [playbackRate]);
 
     const handleSummarize = async () => {
-        if (!activeVideo || !course) return;
-        setIsSummarizing(true);
-        setSummary(null);
-
-        try {
-            // This is a simplified example. In a real-world scenario,
-            // you would need a mechanism to get a publicly accessible URL,
-            // even for videos stored in Firebase Storage. For now, we assume `activeVideo.url` is public.
-             if (!activeVideo.url) {
-                throw new Error("Video URL is not available.");
-            }
-            const result = await summarizeLesson({
-                lessonTitle: activeVideo.title,
-                videoUrl: activeVideo.url,
-                courseContext: course.description,
-                studentPreviousActivity: 'Watching a lesson from the course page',
-            });
-            setSummary(result.summary);
-            toast({
-                title: 'Summary Generated!',
-                description: 'The AI-powered summary is now available.',
-            });
-        } catch (error) {
-            console.error("Error summarizing lesson:", error);
-            let errorMessage = 'Could not generate a summary for this lesson.';
-            if (error instanceof Error && error.message.includes('permission')) {
-                errorMessage = 'Could not access the video file for analysis. This feature may require the video to be publicly accessible.';
-            }
-            toast({
-                variant: 'destructive',
-                title: 'Summarization Failed',
-                description: errorMessage,
-            });
-        } finally {
-            setIsSummarizing(false);
-        }
+        toast({
+            title: 'Feature Coming Soon!',
+            description: 'Our team is hard at work on this AI-powered video analysis feature. Stay tuned!',
+        });
     };
     
     if (loading) {
@@ -163,6 +128,22 @@ export default function PublicCoursePage() {
     }
 
     const isYouTube = activeVideo?.url.includes('youtube.com/embed');
+    
+    const formatDuration = (videos: VideoData[] = []) => {
+      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
+      if (totalSeconds === 0) return null;
+
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+      if (hours > 0) {
+          return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
+      }
+      if (minutes > 0) {
+          return `${minutes}m`;
+      }
+      return `${Math.round(totalSeconds)}s`;
+    };
 
     return (
         <div className="bg-background text-foreground">
@@ -261,14 +242,6 @@ export default function PublicCoursePage() {
                                             </Button>
                                         )}
                                     </div>
-                                    {isSummarizing && <Skeleton className="h-20 w-full" />}
-                                    {summary && (
-                                        <Alert>
-                                            <Sparkles className="h-4 w-4" />
-                                            <AlertTitle>AI Summary</AlertTitle>
-                                            <AlertDescription dangerouslySetInnerHTML={{ __html: summary }} />
-                                        </Alert>
-                                    )}
                                 </div>
                             </CardContent>
                         </Card>
@@ -314,12 +287,8 @@ export default function PublicCoursePage() {
                                             <AccordionContent>
                                                 <div className="pl-8 flex flex-col items-start gap-2">
                                                      <p className="text-sm text-muted-foreground">Click the trigger above to play this lesson.</p>
-                                                     <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize} disabled={isSummarizing}>
-                                                        {isSummarizing ? (
-                                                            <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Summarizing...</>
-                                                        ) : (
-                                                            <><Sparkles className="mr-2 h-4 w-4" /> Summarize with AI</>
-                                                        )}
+                                                     <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
+                                                        <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
                                                     </Button>
                                                 </div>
                                             </AccordionContent>
