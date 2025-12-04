@@ -403,11 +403,12 @@ function InstructorPage() {
     };
     
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
       if (currentUser) {
+        setUser(currentUser);
         fetchAllData(currentUser);
       } else {
         // Clear all data if user logs out
+        setUser(null);
         setCourses([]);
         setQuizzes([]);
         setQuizSubmissions([]);
@@ -2427,7 +2428,7 @@ function InstructorPage() {
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
-        </Dialog>
+        </AlertDialog>
 
         <Dialog open={isPayoutDialogOpen} onOpenChange={setIsPayoutDialogOpen}>
             <DialogContent>
