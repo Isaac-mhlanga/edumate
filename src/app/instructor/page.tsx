@@ -862,7 +862,7 @@ function InstructorPage() {
         isRefundOpen={isRefundDialogOpen}
         setIsRefundOpen={setIsRefundDialogOpen}
         isPayoutOpen={isPayoutDialogOpen}
-        setIsPayoutOpen={setIsPayoutOpen}
+        setIsPayoutOpen={setIsPayoutDialogOpen}
         selectedTransaction={selectedTransaction}
         onConfirmRefund={confirmRefundTransaction}
         onPayoutRequest={handlePayoutRequest}
