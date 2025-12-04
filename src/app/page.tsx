@@ -294,7 +294,7 @@ export default function Home() {
                 </div>
                 
                 <Tabs defaultValue="Mathematics" className="w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4 h-auto sm:h-12">
+                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4">
                         {Object.keys(curriculumData['12']).map((subject) => {
                             const Icon = curriculumIcons[subject as keyof typeof curriculumIcons];
                             return (
@@ -644,6 +644,7 @@ export default function Home() {
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pl-8 flex flex-col items-start gap-3">
+                                      <p className="text-sm text-muted-foreground">Click the trigger above to play this lesson.</p>
                                       <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
                                         <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
                                       </Button>

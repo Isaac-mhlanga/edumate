@@ -1,5 +1,5 @@
 
-import { BarChart, Book, BookOpen, CheckCircle, Clock, CreditCard, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote } from "lucide-react";
+import { BarChart, Book, BookOpen, CheckCircle, Clock, CreditCard, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote, PenSquare } from "lucide-react";
 
 export const faqData = [
     {
