@@ -104,12 +104,17 @@ export default function CoursePreviewPage() {
         setSummary(null);
 
         try {
+            // This is a simplified example. In a real-world scenario,
+            // you would need a mechanism to get a publicly accessible URL,
+            // even for videos stored in Firebase Storage. For now, we assume `activeVideo.url` is public.
+            if (!activeVideo.url) {
+                throw new Error("Video URL is not available.");
+            }
             const result = await summarizeLesson({
                 lessonTitle: activeVideo.title,
-                lessonDescription: 'A video about ' + activeVideo.title, // Placeholder
-                transcript: '...', // Placeholder for transcript
+                videoUrl: activeVideo.url,
                 courseContext: course.description,
-                studentPreviousActivity: 'Watched introduction', // Placeholder
+                studentPreviousActivity: 'Previewing a lesson in the instructor dashboard',
             });
             setSummary(result.summary);
             toast({
@@ -118,10 +123,14 @@ export default function CoursePreviewPage() {
             });
         } catch (error) {
             console.error("Error summarizing lesson:", error);
+            let errorMessage = 'Could not generate a summary for this lesson.';
+            if (error instanceof Error && error.message.includes('permission')) {
+                errorMessage = 'Could not access the video file for analysis. This feature may require the video to be publicly accessible.';
+            }
             toast({
                 variant: 'destructive',
                 title: 'Summarization Failed',
-                description: 'Could not generate a summary for this lesson.',
+                description: errorMessage,
             });
         } finally {
             setIsSummarizing(false);
@@ -259,9 +268,7 @@ export default function CoursePreviewPage() {
                                     <Alert>
                                         <Sparkles className="h-4 w-4" />
                                         <AlertTitle>AI Summary</AlertTitle>
-                                        <AlertDescription>
-                                            {summary}
-                                        </AlertDescription>
+                                        <AlertDescription dangerouslySetInnerHTML={{ __html: summary }} />
                                     </Alert>
                                 )}
                             </div>

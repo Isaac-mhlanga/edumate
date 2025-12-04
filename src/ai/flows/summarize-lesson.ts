@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -13,15 +14,14 @@ import {z} from 'genkit';
 
 const SummarizeLessonInputSchema = z.object({
   lessonTitle: z.string().describe('The title of the video lesson.'),
-  lessonDescription: z.string().describe('The description of the video lesson.'),
-  transcript: z.string().describe('The transcript of the video lesson.'),
+  videoUrl: z.string().url().describe('The public URL of the video to be analyzed.'),
   courseContext: z.string().describe('The context of the course the lesson belongs to.'),
   studentPreviousActivity: z.string().describe('The previous activity of the student in the course.'),
 });
 export type SummarizeLessonInput = z.infer<typeof SummarizeLessonInputSchema>;
 
 const SummarizeLessonOutputSchema = z.object({
-  summary: z.string().describe('A short summary of the video lesson.'),
+  summary: z.string().describe('A short, helpful summary and explanation of the video content, including tips and tricks for the concepts shown. This should be formatted as simple HTML (e.g., using <p>, <ul>, <li>, <strong>).'),
   progress: z.string().describe('Shows the summarization progress')
 });
 export type SummarizeLessonOutput = z.infer<typeof SummarizeLessonOutputSchema>;
@@ -34,17 +34,27 @@ const prompt = ai.definePrompt({
   name: 'summarizeLessonPrompt',
   input: {schema: SummarizeLessonInputSchema},
   output: {schema: SummarizeLessonOutputSchema},
-  prompt: `You are an AI assistant that summarizes video lessons for students. You will receive the lesson title, description, transcript, course context, and the student's previous activity in the course.
+  prompt: `You are an expert AI Tutor for high school students. Your task is to analyze the provided video lesson and generate helpful notes and explanations.
 
-  Based on all of this information, provide a concise summary of the video lesson. The summary should give the student a quick understanding of the lesson's relevance to their learning needs. Keep the summary very short.
+Analyze the video content from the URL. Identify the key concepts, especially any mathematical equations, scientific diagrams, or step-by-step processes being shown.
 
-  Lesson Title: {{{lessonTitle}}}
-  Lesson Description: {{{lessonDescription}}}
-  Transcript: {{{transcript}}}
-  Course Context: {{{courseContext}}}
-  Student Previous Activity: {{{studentPreviousActivity}}}
+Your output should be a concise summary that includes:
+1.  A brief overview of the main topic in the video.
+2.  Simple, step-by-step explanations for any problems or equations being solved.
+3.  Helpful tricks or alternative ways to approach the problem.
+4.  Keep the language simple and easy for a high school student to understand.
 
-  Summary:`, config: {
+**Video to Analyze:**
+{{media url=videoUrl}}
+
+**Lesson Context:**
+- Course: {{{courseContext}}}
+- Lesson Title: {{{lessonTitle}}}
+- Student's Past Activity: {{{studentPreviousActivity}}}
+
+Generate the summary now.
+`, 
+  config: {
     safetySettings: [
       {
         category: 'HARM_CATEGORY_HATE_SPEECH',
