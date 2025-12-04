@@ -320,7 +320,10 @@ export default function Home() {
                                     <Card key={index} className="overflow-hidden bg-card shadow-md">
                                         <AccordionItem value={`item-${index}`} className="border-b-0">
                                             <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6">
-                                                {chapter.chapter}
+                                                <div className="flex items-center gap-3">
+                                                    {chapter.chapter.includes('1') ? <BookOpen className="h-6 w-6 text-primary/80"/> : <PenSquare className="h-6 w-6 text-primary/80"/>}
+                                                    {chapter.chapter}
+                                                </div>
                                             </AccordionTrigger>
                                             <AccordionContent className="p-6 pt-0">
                                                 <Accordion type="multiple" className="w-full space-y-2">
