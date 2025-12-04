@@ -657,133 +657,133 @@ function InstructorPage() {
   };
 
   return (
-      <div className="space-y-8">
-           <style jsx global>{`
-                .fc {
-                    font-family: var(--font-body), sans-serif;
-                    color: hsl(var(--foreground));
-                }
-                .fc .fc-toolbar-title {
-                    font-size: 1.25rem;
-                    font-weight: 600;
-                    color: hsl(var(--foreground));
-                }
-                .fc .fc-button {
-                    background-color: hsl(var(--card)) !important;
-                    border-color: hsl(var(--border)) !important;
-                    color: hsl(var(--card-foreground)) !important;
-                    box-shadow: none !important;
-                    text-transform: capitalize;
-                }
-                 .fc .fc-button:hover {
-                    background-color: hsl(var(--muted)) !important;
-                 }
-                .fc .fc-button-primary:not(:disabled).fc-button-active, 
-                .fc .fc-button-primary:not(:disabled):active {
-                    background-color: hsl(var(--primary)) !important;
-                    border-color: hsl(var(--primary)) !important;
-                    color: hsl(var(--primary-foreground)) !important;
-                }
-                .fc-daygrid-day.fc-day-today {
-                    background-color: hsla(var(--primary), 0.05) !important;
-                }
-                .fc-event {
-                    border-radius: 4px;
-                    border: 0;
-                    padding: 4px 6px;
-                    cursor: pointer;
-                }
-                .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard .fc-list-table td {
-                    background-color: hsl(var(--card));
-                }
-                .fc .fc-list-event:hover td {
-                    background-color: hsl(var(--muted));
-                }
-            `}</style>
+    <div className="space-y-8">
+      <style jsx global>{`
+        .fc {
+          font-family: var(--font-body), sans-serif;
+          color: hsl(var(--foreground));
+        }
+        .fc .fc-toolbar-title {
+          font-size: 1.25rem;
+          font-weight: 600;
+          color: hsl(var(--foreground));
+        }
+        .fc .fc-button {
+          background-color: hsl(var(--card)) !important;
+          border-color: hsl(var(--border)) !important;
+          color: hsl(var(--card-foreground)) !important;
+          box-shadow: none !important;
+          text-transform: capitalize;
+        }
+          .fc .fc-button:hover {
+          background-color: hsl(var(--muted)) !important;
+          }
+        .fc .fc-button-primary:not(:disabled).fc-button-active, 
+        .fc .fc-button-primary:not(:disabled):active {
+          background-color: hsl(var(--primary)) !important;
+          border-color: hsl(var(--primary)) !important;
+          color: hsl(var(--primary-foreground)) !important;
+        }
+        .fc-daygrid-day.fc-day-today {
+          background-color: hsla(var(--primary), 0.05) !important;
+        }
+        .fc-event {
+          border-radius: 4px;
+          border: 0;
+          padding: 4px 6px;
+          cursor: pointer;
+        }
+        .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard .fc-list-table td {
+          background-color: hsl(var(--card));
+        }
+        .fc .fc-list-event:hover td {
+          background-color: hsl(var(--muted));
+        }
+      `}</style>
 
-          {currentTab === 'overview' && (
-              <InstructorOverviewTab 
-                user={user}
-                courses={courses}
-                students={enrolledStudents}
-                assignments={submittedAssignments}
-                transactions={transactions}
-                aiSummary={aiSummary}
-                loading={{
-                    courses: loadingCourses,
-                    students: loadingStudents,
-                    assignments: loadingAssignments,
-                    transactions: loadingTransactions,
-                    aiSummary: loadingAiSummary
-                }}
-                onRegenerateSummary={() => user && generatePerformanceSummary(user, courses, enrolledStudents, submittedAssignments, transactions)}
-                onReviewAssignment={handleReviewAssignment}
-              />
-          )}
-
-          {currentTab === 'courses' && (
-            <InstructorCoursesTab
-                courses={courses}
-                loading={loadingCourses}
-                onAddNewCourse={handleAddNewCourse}
-                onEditCourse={handleEditCourse}
-                onDeleteCourse={handleDeleteCourseClick}
-                onPublishCourse={handlePublishCourse}
-            />
-          )}
-
-          {currentTab === 'quizzes' && (
-            <InstructorQuizzesTab
-                quizzes={quizzes}
-                quizSubmissions={quizSubmissions}
-                loading={loadingQuizzes}
-            />
-          )}
-          
-          {currentTab === 'calendar' && (
-              <InstructorCalendarTab 
-                events={events}
-                onDateClick={handleDateClick}
-                onEventClick={handleEventClick}
-                onAddEventClick={() => setIsManualDialogOpen(true)}
-                onAiCreateClick={() => setIsAiDialogOpen(true)}
-              />
-          )}
-
-          {currentTab === 'assignments' && (
-             <InstructorAssignmentsTab
-                assignments={submittedAssignments}
-                loading={loadingAssignments}
-                onReviewAssignment={handleReviewAssignment}
-                user={user}
-             />
-          )}
-
-          {currentTab === 'students' && (
-             <InstructorStudentsTab
-                students={enrolledStudents}
-                loading={loadingStudents}
-                onStudentAction={handleStudentAction}
-             />
-          )}
-
-          {currentTab === 'earnings' && (
-             <InstructorEarningsTab
-                transactions={transactions}
-                loading={loadingTransactions}
-                onTransactionAction={handleTransactionAction}
-                onPayoutRequest={() => setIsPayoutDialogOpen(true)}
-             />
-          )}
-
-        <CourseDialog
-            isOpen={isCourseDialogOpen}
-            setIsOpen={handleCourseDialogOpenChange}
-            selectedCourse={selectedCourse}
-            quizzes={quizzes}
-            onSubmit={onCourseSubmit}
+      {currentTab === 'overview' && (
+        <InstructorOverviewTab 
+          user={user}
+          courses={courses}
+          students={enrolledStudents}
+          assignments={submittedAssignments}
+          transactions={transactions}
+          aiSummary={aiSummary}
+          loading={{
+            courses: loadingCourses,
+            students: loadingStudents,
+            assignments: loadingAssignments,
+            transactions: loadingTransactions,
+            aiSummary: loadingAiSummary
+          }}
+          onRegenerateSummary={() => user && generatePerformanceSummary(user, courses, enrolledStudents, submittedAssignments, transactions)}
+          onReviewAssignment={handleReviewAssignment}
         />
+      )}
+
+      {currentTab === 'courses' && (
+        <InstructorCoursesTab
+          courses={courses}
+          loading={loadingCourses}
+          onAddNewCourse={handleAddNewCourse}
+          onEditCourse={handleEditCourse}
+          onDeleteCourse={handleDeleteCourseClick}
+          onPublishCourse={handlePublishCourse}
+        />
+      )}
+
+      {currentTab === 'quizzes' && (
+        <InstructorQuizzesTab
+          quizzes={quizzes}
+          quizSubmissions={quizSubmissions}
+          loading={loadingQuizzes}
+        />
+      )}
       
+      {currentTab === 'calendar' && (
+        <InstructorCalendarTab 
+          events={events}
+          onDateClick={handleDateClick}
+          onEventClick={handleEventClick}
+          onAddEventClick={() => setIsManualDialogOpen(true)}
+          onAiCreateClick={() => setIsAiDialogOpen(true)}
+        />
+      )}
+
+      {currentTab === 'assignments' && (
+        <InstructorAssignmentsTab
+          assignments={submittedAssignments}
+          loading={loadingAssignments}
+          onReviewAssignment={handleReviewAssignment}
+          user={user}
+        />
+      )}
+
+      {currentTab === 'students' && (
+        <InstructorStudentsTab
+          students={enrolledStudents}
+          loading={loadingStudents}
+          onStudentAction={handleStudentAction}
+        />
+      )}
+
+      {currentTab === 'earnings' && (
+        <InstructorEarningsTab
+          transactions={transactions}
+          loading={loadingTransactions}
+          onTransactionAction={handleTransactionAction}
+          onPayoutRequest={() => setIsPayoutDialogOpen(true)}
+        />
+      )}
+
+      <CourseDialog
+        isOpen={isCourseDialogOpen}
+        setIsOpen={handleCourseDialogOpenChange}
+        selectedCourse={selectedCourse}
+        quizzes={quizzes}
+        onSubmit={onCourseSubmit}
+      />
+    
       <DeleteCourseDialog
         isOpen={isDeleteDialogOpen}
         setIsOpen={setIsDeleteDialogOpen}
@@ -803,7 +803,7 @@ function InstructorPage() {
       <StudentActionDialogs
         isDetailsOpen={isStudentDetailsDialogOpen}
         setIsDetailsOpen={setIsStudentDetailsDialogOpen}
-        isUnenrollOpen={isUnenrollOpen}
+        isUnenrollOpen={isUnenrollDialogOpen}
         setIsUnenrollOpen={setIsUnenrollDialogOpen}
         isDeleteOpen={isDeleteStudentDialogOpen}
         setIsDeleteOpen={setIsDeleteStudentDialogOpen}
@@ -825,22 +825,22 @@ function InstructorPage() {
         availableForPayout={transactions.reduce((acc, t) => acc + t.amount, 0)}
       />
       
-        <CalendarDialogs
-            isAiDialogOpen={isAiDialogOpen}
-            setIsAiDialogOpen={setIsAiDialogOpen}
-            isManualDialogOpen={isManualDialogOpen}
-            setIsManualDialogOpen={setIsManualDialogOpen}
-            isDetailDialogOpen={isDetailDialogOpen}
-            setIsDetailDialogOpen={setIsDetailDialogOpen}
-            selectedEvent={selectedEvent}
-            manualEvent={manualEvent}
-            setManualEvent={setManualEvent}
-            aiPrompt={aiPrompt}
-            setAiPrompt={setAiPrompt}
-            isAiLoading={isAiLoading}
-            onAiCreate={handleAiCreateEvent}
-            onManualCreate={handleAddManualEvent}
-        />
+      <CalendarDialogs
+        isAiDialogOpen={isAiDialogOpen}
+        setIsAiDialogOpen={setIsAiDialogOpen}
+        isManualDialogOpen={isManualDialogOpen}
+        setIsManualDialogOpen={setIsManualDialogOpen}
+        isDetailDialogOpen={isDetailDialogOpen}
+        setIsDetailDialogOpen={setIsDetailDialogOpen}
+        selectedEvent={selectedEvent}
+        manualEvent={manualEvent}
+        setManualEvent={setManualEvent}
+        aiPrompt={aiPrompt}
+        setAiPrompt={setAiPrompt}
+        isAiLoading={isAiLoading}
+        onAiCreate={handleAiCreateEvent}
+        onManualCreate={handleAddManualEvent}
+      />
     </div>
   );
 }
