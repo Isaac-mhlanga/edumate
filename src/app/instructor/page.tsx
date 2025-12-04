@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -68,7 +69,7 @@ const courseFormSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   subject: z.enum(["Mathematics", "Physical Sciences", "Life Sciences"]),
-  paper: z.enum(["P1", "P2"]),
+  paper: z.enum(["P1", "P2"], { required_error: "Please select a paper." }),
   grade: z.enum(["10", "11", "12"]),
   pricingModel: z.enum(["free", "purchase", "subscription"]),
   price: z.coerce.number().optional(),
@@ -276,7 +277,6 @@ function InstructorPage() {
       title: "",
       description: "",
       subject: "Mathematics",
-      paper: "P1",
       grade: "12",
       pricingModel: "free",
     },
