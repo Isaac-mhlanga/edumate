@@ -180,11 +180,11 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                     <FormField control={form.control} name="description" render={({ field }) => (
                                         <FormItem><FormLabel>Course Description</FormLabel><FormControl><Textarea placeholder="Describe what students will learn in this course." {...field} /></FormControl><FormMessage /></FormItem>
                                     )}/>
-                                    <FormField control={form.control} name="thumbnail" render={({ field }) => (
+                                    <FormField control={form.control} name="thumbnail" render={({ field: { onChange, ...fieldProps } }) => (
                                         <FormItem>
                                             <FormLabel>Course Thumbnail {selectedCourse ? '(Leave blank to keep current)' : ''}</FormLabel>
                                             <FormControl>
-                                                <Input type="file" accept="image/*" onChange={e => field.onChange(e.target.files?.[0])} />
+                                                <Input type="file" accept="image/*" onChange={e => onChange(e.target.files?.[0])} {...fieldProps} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -306,7 +306,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                             </div>
                                                         )}
                                                         <FormControl>
-                                                            <Input type="file" accept=".pdf" className="text-xs" onChange={e => handleExistingVideoChange(video.id, 'notesFile', e.target.files?.[0])} />
+                                                            <Input type="file" accept=".pdf" className="text-xs" defaultValue="" onChange={e => handleExistingVideoChange(video.id, 'notesFile', e.target.files?.[0])} />
                                                         </FormControl>
                                                     </FormItem>
                                                     <FormItem>
@@ -345,7 +345,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                             
                                             {form.watch(`videoUploads.${index}.source`) === 'upload' && (
                                                 <FormField control={control} name={`videoUploads.${index}.file`} render={({ field: { onChange, ...fieldProps } }) => (
-                                                    <FormItem><FormLabel>Video File</FormLabel><FormControl><Input type="file" accept="video/*" {...fieldProps} onChange={async (e) => {
+                                                    <FormItem><FormLabel>Video File</FormLabel><FormControl><Input type="file" accept="video/*" {...fieldProps} value={undefined} onChange={async (e) => {
                                                         const file = e.target.files?.[0];
                                                         onChange(file);
                                                         if (file) {
@@ -360,10 +360,10 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                     <FormItem><FormLabel>YouTube URL</FormLabel><FormControl><Input placeholder="https://www.youtube.com/watch?v=..." {...field} /></FormControl><FormMessage /></FormItem>
                                                 )}/>
                                             )}
-                                            <FormField control={form.control} name={`videoUploads.${index}.notesFile`} render={({ field }) => (
+                                            <FormField control={form.control} name={`videoUploads.${index}.notesFile`} render={({ field: { onChange, value, ...fieldProps } }) => (
                                                 <FormItem>
                                                     <FormLabel className="flex items-center gap-2"><Paperclip className="h-4 w-4"/> Lesson Notes (Optional PDF)</FormLabel>
-                                                    <FormControl><Input type="file" accept=".pdf" onChange={e => field.onChange(e.target.files?.[0])} /></FormControl><FormMessage />
+                                                    <FormControl><Input type="file" accept=".pdf" {...fieldProps} value={undefined} onChange={e => onChange(e.target.files?.[0])} /></FormControl><FormMessage />
                                                 </FormItem>
                                             )}/>
                                             <FormField control={form.control} name={`videoUploads.${index}.quizId`} render={({ field }) => (
