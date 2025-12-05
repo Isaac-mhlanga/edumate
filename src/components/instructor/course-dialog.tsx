@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { useForm, useFieldArray, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -13,10 +13,11 @@ import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { PlusCircle, Trash2, Youtube, Upload, Paperclip, Loader2, Link as LinkIcon, FileText, Replace } from 'lucide-react';
+import { PlusCircle, Trash2, Youtube, Upload, Paperclip, Loader2, Link as LinkIcon, FileText, Replace, GripVertical } from 'lucide-react';
 import { type Course, type VideoData, type Quiz } from '@/app/instructor/page';
 import { Progress } from '../ui/progress';
 import { Label } from '../ui/label';
+import { cn } from '@/lib/utils';
 
 const getVideoDuration = (file: File): Promise<number> => {
     return new Promise((resolve, reject) => {
@@ -81,6 +82,8 @@ interface CourseDialogProps {
 
 export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSubmit, isSubmitting, submissionProgress }: CourseDialogProps) {
     const [existingVideos, setExistingVideos] = useState<EditableVideoData[]>([]);
+    const dragVideo = useRef<number | null>(null);
+    const dragOverVideo = useRef<number | null>(null);
 
     const form = useForm<CourseFormValues>({
         resolver: zodResolver(courseFormSchema),
@@ -152,6 +155,16 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         onSubmit(submissionData);
     };
 
+    const handleDragSort = () => {
+        if (dragVideo.current === null || dragOverVideo.current === null) return;
+        const videosClone = [...existingVideos];
+        const draggedItem = videosClone.splice(dragVideo.current, 1)[0];
+        videosClone.splice(dragOverVideo.current, 0, draggedItem);
+        setExistingVideos(videosClone);
+        dragVideo.current = null;
+        dragOverVideo.current = null;
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -184,7 +197,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                         <FormItem>
                                             <FormLabel>Course Thumbnail {selectedCourse ? '(Leave blank to keep current)' : ''}</FormLabel>
                                             <FormControl>
-                                                <Input type="file" accept="image/*" defaultValue={''} {...fieldProps} onChange={e => onChange(e.target.files?.[0])} />
+                                                <Input type="file" accept="image/*" {...fieldProps} onChange={e => onChange(e.target.files?.[0])} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>
@@ -261,64 +274,77 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                 <div>
                                     <h3 className="text-lg font-medium mb-4">Existing Videos</h3>
                                     <div className="space-y-4">
-                                        {existingVideos.map((video) => (
-                                            <div key={video.id} className="p-4 border rounded-lg space-y-3 bg-muted/30 relative">
-                                                <div className="flex justify-between items-start">
-                                                    <p className="font-semibold pr-10">{video.title}</p>
-                                                    <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-7 w-7" onClick={() => handleDeleteExistingVideo(video.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                                        {existingVideos.map((video, index) => (
+                                            <div 
+                                                key={video.id} 
+                                                className="p-4 border rounded-lg space-y-3 bg-muted/30 relative flex items-start gap-2"
+                                                draggable
+                                                onDragStart={() => (dragVideo.current = index)}
+                                                onDragEnter={() => (dragOverVideo.current = index)}
+                                                onDragEnd={handleDragSort}
+                                                onDragOver={(e) => e.preventDefault()}
+                                            >
+                                                <div className="cursor-move pt-1 text-muted-foreground">
+                                                    <GripVertical className="h-5 w-5" />
                                                 </div>
-                                                
-                                                {video.newVideoSource ? (
-                                                    <div className='space-y-2'>
-                                                        {video.newVideoSource === 'upload' ? (
-                                                             <FormItem>
-                                                                <FormLabel>New Video File</FormLabel>
-                                                                <FormControl><Input type="file" accept="video/*" onChange={async (e) => {
-                                                                    const file = e.target.files?.[0];
-                                                                    handleExistingVideoChange(video.id, 'newVideoFile', file);
-                                                                    if (file) {
-                                                                        const duration = await getVideoDuration(file);
-                                                                        handleExistingVideoChange(video.id, 'newVideoDuration', duration);
-                                                                    }
-                                                                }} /></FormControl>
-                                                            </FormItem>
-                                                        ) : (
-                                                            <FormItem>
-                                                                <FormLabel>New YouTube URL</FormLabel>
-                                                                <FormControl><Input placeholder="https://www.youtube.com/watch?v=..." onChange={e => handleExistingVideoChange(video.id, 'newYoutubeUrl', e.target.value)} /></FormControl>
-                                                            </FormItem>
-                                                        )}
-                                                         <Button type="button" size="sm" variant="ghost" onClick={() => handleExistingVideoChange(video.id, 'newVideoSource', undefined)}>Cancel Replace</Button>
+                                                <div className='flex-1'>
+                                                    <div className="flex justify-between items-start">
+                                                        <p className="font-semibold pr-10">{video.title}</p>
+                                                        <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-7 w-7" onClick={() => handleDeleteExistingVideo(video.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                                                     </div>
-                                                ) : (
-                                                    <Button type="button" size="sm" variant="outline" onClick={() => handleExistingVideoChange(video.id, 'newVideoSource', video.url.includes('youtube') ? 'youtube' : 'upload')}>
-                                                        <Replace className="mr-2 h-4 w-4" /> Replace Video
-                                                    </Button>
-                                                )}
+                                                    
+                                                    {video.newVideoSource ? (
+                                                        <div className='space-y-2'>
+                                                            {video.newVideoSource === 'upload' ? (
+                                                                <FormItem>
+                                                                    <FormLabel>New Video File</FormLabel>
+                                                                    <FormControl><Input type="file" accept="video/*" onChange={async (e) => {
+                                                                        const file = e.target.files?.[0];
+                                                                        handleExistingVideoChange(video.id, 'newVideoFile', file);
+                                                                        if (file) {
+                                                                            const duration = await getVideoDuration(file);
+                                                                            handleExistingVideoChange(video.id, 'newVideoDuration', duration);
+                                                                        }
+                                                                    }} /></FormControl>
+                                                                </FormItem>
+                                                            ) : (
+                                                                <FormItem>
+                                                                    <FormLabel>New YouTube URL</FormLabel>
+                                                                    <FormControl><Input placeholder="https://www.youtube.com/watch?v=..." onChange={e => handleExistingVideoChange(video.id, 'newYoutubeUrl', e.target.value)} /></FormControl>
+                                                                </FormItem>
+                                                            )}
+                                                            <Button type="button" size="sm" variant="ghost" onClick={() => handleExistingVideoChange(video.id, 'newVideoSource', undefined)}>Cancel Replace</Button>
+                                                        </div>
+                                                    ) : (
+                                                        <Button type="button" size="sm" variant="outline" onClick={() => handleExistingVideoChange(video.id, 'newVideoSource', video.url.includes('youtube') ? 'youtube' : 'upload')}>
+                                                            <Replace className="mr-2 h-4 w-4" /> Replace Video
+                                                        </Button>
+                                                    )}
 
-                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t mt-3">
-                                                    <FormItem>
-                                                        <FormLabel className="flex items-center gap-2 text-sm"><Paperclip className="h-4 w-4"/> Lesson Notes</FormLabel>
-                                                        {video.notesUrl && (
-                                                            <div className="flex items-center gap-2 text-xs">
-                                                                <FileText className="h-4 w-4 text-primary"/>
-                                                                <a href={video.notesUrl} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">{video.notesUrl.split('%2F').pop()?.split('?')[0]}</a>
-                                                            </div>
-                                                        )}
-                                                        <FormControl>
-                                                            <Input type="file" accept=".pdf" className="text-xs" defaultValue={''} onChange={e => handleExistingVideoChange(video.id, 'notesFile', e.target.files?.[0])} />
-                                                        </FormControl>
-                                                    </FormItem>
-                                                    <FormItem>
-                                                        <FormLabel className="flex items-center gap-2 text-sm"><LinkIcon className="h-4 w-4"/> Linked Quiz</FormLabel>
-                                                        <Select onValueChange={(value) => handleExistingVideoChange(video.id, 'quizId', value)} defaultValue={video.quizId || undefined}>
-                                                            <FormControl><SelectTrigger><SelectValue placeholder="Select a quiz to link..." /></SelectTrigger></FormControl>
-                                                            <SelectContent>
-                                                                <SelectItem value="none">No Quiz</SelectItem>
-                                                                {quizzes.map(quiz => <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>)}
-                                                            </SelectContent>
-                                                        </Select>
-                                                    </FormItem>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t mt-3">
+                                                        <FormItem>
+                                                            <FormLabel className="flex items-center gap-2 text-sm"><Paperclip className="h-4 w-4"/> Lesson Notes</FormLabel>
+                                                            {video.notesUrl && (
+                                                                <div className="flex items-center gap-2 text-xs">
+                                                                    <FileText className="h-4 w-4 text-primary"/>
+                                                                    <a href={video.notesUrl} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">{video.notesUrl.split('%2F').pop()?.split('?')[0]}</a>
+                                                                </div>
+                                                            )}
+                                                            <FormControl>
+                                                                <Input type="file" accept=".pdf" className="text-xs" onChange={e => handleExistingVideoChange(video.id, 'notesFile', e.target.files?.[0])} />
+                                                            </FormControl>
+                                                        </FormItem>
+                                                        <FormItem>
+                                                            <FormLabel className="flex items-center gap-2 text-sm"><LinkIcon className="h-4 w-4"/> Linked Quiz</FormLabel>
+                                                            <Select onValueChange={(value) => handleExistingVideoChange(video.id, 'quizId', value)} defaultValue={video.quizId || undefined}>
+                                                                <FormControl><SelectTrigger><SelectValue placeholder="Select a quiz to link..." /></SelectTrigger></FormControl>
+                                                                <SelectContent>
+                                                                    <SelectItem value="none">No Quiz</SelectItem>
+                                                                    {quizzes.map(quiz => <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>)}
+                                                                </SelectContent>
+                                                            </Select>
+                                                        </FormItem>
+                                                    </div>
                                                 </div>
                                             </div>
                                         ))}
@@ -334,7 +360,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                         <div key={field.id} className="p-4 border rounded-lg space-y-4 relative">
                                             <Button type="button" variant="ghost" size="icon" className="absolute top-2 right-2" onClick={() => remove(index)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                                             <FormField control={form.control} name={`videoUploads.${index}.title`} render={({ field }) => (
-                                                <FormItem><FormLabel>Video Title</FormLabel><FormControl><Input placeholder={`Lesson ${index + 1}`} {...field} /></FormControl><FormMessage /></FormItem>
+                                                <FormItem><FormLabel>Video Title</FormLabel><FormControl><Input placeholder={`Lesson ${existingVideos.length + index + 1}`} {...field} /></FormControl><FormMessage /></FormItem>
                                             )}/>
                                             <Controller control={form.control} name={`videoUploads.${index}.source`} render={({ field: { onChange, value } }) => (
                                                 <RadioGroup onValueChange={onChange} value={value} className="grid grid-cols-2 gap-2">
@@ -345,7 +371,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                             
                                             {form.watch(`videoUploads.${index}.source`) === 'upload' && (
                                                 <FormField control={control} name={`videoUploads.${index}.file`} render={({ field: { onChange, ...fieldProps } }) => (
-                                                    <FormItem><FormLabel>Video File</FormLabel><FormControl><Input type="file" accept="video/*" defaultValue={''} {...fieldProps} onChange={async (e) => {
+                                                    <FormItem><FormLabel>Video File</FormLabel><FormControl><Input type="file" accept="video/*" {...fieldProps} onChange={async (e) => {
                                                         const file = e.target.files?.[0];
                                                         onChange(file);
                                                         if (file) {
@@ -360,10 +386,10 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                     <FormItem><FormLabel>YouTube URL</FormLabel><FormControl><Input placeholder="https://www.youtube.com/watch?v=..." {...field} /></FormControl><FormMessage /></FormItem>
                                                 )}/>
                                             )}
-                                            <FormField control={form.control} name={`videoUploads.${index}.notesFile`} render={({ field: { onChange, value, ...fieldProps } }) => (
+                                            <FormField control={form.control} name={`videoUploads.${index}.notesFile`} render={({ field: { onChange, ...fieldProps } }) => (
                                                 <FormItem>
                                                     <FormLabel className="flex items-center gap-2"><Paperclip className="h-4 w-4"/> Lesson Notes (Optional PDF)</FormLabel>
-                                                    <FormControl><Input type="file" accept=".pdf" defaultValue={''} {...fieldProps} onChange={e => onChange(e.target.files?.[0])} /></FormControl><FormMessage />
+                                                    <FormControl><Input type="file" accept=".pdf" {...fieldProps} onChange={e => onChange(e.target.files?.[0])} /></FormControl><FormMessage />
                                                 </FormItem>
                                             )}/>
                                             <FormField control={form.control} name={`videoUploads.${index}.quizId`} render={({ field }) => (
