@@ -15,10 +15,11 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
-import { PlusCircle, Calendar as CalendarIcon } from 'lucide-react';
+import { PlusCircle, Calendar as CalendarIcon, User, BookOpen, GraduationCap, ExternalLink, Info } from 'lucide-react';
 import { format } from 'date-fns';
 import { getFirestore, doc, getDocs, collection } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
+import { Badge } from '@/components/ui/badge';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -38,16 +39,25 @@ type CalendarEvent = {
   allDay: boolean;
   color?: string;
   description?: string;
+  instructor?: string;
+  grade?: string;
+  subject?: string;
+  scope?: string;
+  platforms?: string[];
 };
+
+const platforms = [
+    { value: 'youtube', label: 'YouTube' },
+    { value: 'tiktok', label: 'TikTok' },
+    { value: 'zoom', label: 'Zoom' },
+]
 
 export default function CalendarPage() {
     const [events, setEvents] = useState<CalendarEvent[]>([]);
     
-    const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     
-    const [manualEvent, setManualEvent] = useState<Partial<CalendarEvent>>({});
 
     const { toast } = useToast();
 
@@ -68,14 +78,20 @@ export default function CalendarPage() {
     
     const handleEventClick = (clickInfo: any) => {
         const event = clickInfo.event;
+        const extendedProps = event.extendedProps;
         setSelectedEvent({
             id: event.id,
             title: event.title,
             start: event.startStr,
             end: event.endStr,
             allDay: event.allDay,
-            description: event.extendedProps.description,
+            description: extendedProps.scope || extendedProps.description,
             color: event.backgroundColor,
+            instructor: extendedProps.instructor,
+            grade: extendedProps.grade,
+            subject: extendedProps.subject,
+            scope: extendedProps.scope,
+            platforms: extendedProps.platforms,
         });
         setIsDetailDialogOpen(true);
     };
@@ -166,27 +182,57 @@ export default function CalendarPage() {
                         {selectedEvent && (
                             <>
                                 <DialogHeader>
-                                    <DialogTitle className="flex items-center">
+                                    <DialogTitle className="flex items-center text-xl">
                                          <span className="w-3 h-3 rounded-full mr-3" style={{ backgroundColor: selectedEvent.color || 'hsl(var(--primary))' }}></span>
                                         {selectedEvent.title}
                                     </DialogTitle>
                                 </DialogHeader>
-                                <div className="py-4 space-y-4">
-                                    <div className="flex items-start gap-4 text-muted-foreground">
-                                        <CalendarIcon className="h-5 w-5 mt-1" />
-                                        <div className="text-sm">
+                                <div className="py-4 space-y-4 text-sm">
+                                    <div className="flex items-center gap-4">
+                                        <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                                        <div>
                                             {selectedEvent.allDay ? (
                                                 <p>{format(new Date(selectedEvent.start), 'eeee, MMMM d, yyyy')}</p>
                                             ) : (
                                                 <>
                                                     <p>{format(new Date(selectedEvent.start), 'eeee, MMMM d, yyyy')}</p>
-                                                    <p>{format(new Date(selectedEvent.start), 'p')} {selectedEvent.end ? ` - ${format(new Date(selectedEvent.end), 'p')}` : ''}</p>
+                                                    <p className="text-muted-foreground">{format(new Date(selectedEvent.start), 'p')} {selectedEvent.end ? ` - ${format(new Date(selectedEvent.end), 'p')}` : ''}</p>
                                                 </>
                                             )}
                                         </div>
                                     </div>
+                                    <div className="flex items-center gap-4">
+                                        <User className="h-5 w-5 text-muted-foreground" />
+                                        <div>
+                                            <p>Hosted by <span className="font-semibold">{selectedEvent.instructor}</span></p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <BookOpen className="h-5 w-5 text-muted-foreground" />
+                                        <div>
+                                            <p>{selectedEvent.subject}</p>
+                                        </div>
+                                    </div>
+                                    <div className="flex items-center gap-4">
+                                        <GraduationCap className="h-5 w-5 text-muted-foreground" />
+                                        <div>
+                                            <p>Grade {selectedEvent.grade}</p>
+                                        </div>
+                                    </div>
+
                                     {selectedEvent.description && (
-                                        <p className="text-sm">{selectedEvent.description}</p>
+                                        <div className="flex items-start gap-4">
+                                            <Info className="h-5 w-5 text-muted-foreground mt-0.5" />
+                                            <p className="text-muted-foreground">{selectedEvent.description}</p>
+                                        </div>
+                                    )}
+                                    {selectedEvent.platforms && selectedEvent.platforms.length > 0 && (
+                                        <div className="flex items-center gap-4">
+                                            <ExternalLink className="h-5 w-5 text-muted-foreground" />
+                                            <div className="flex flex-wrap gap-2">
+                                                {selectedEvent.platforms.map(p => <Badge key={p} variant="secondary">{platforms.find(pl=> pl.value === p)?.label}</Badge>)}
+                                            </div>
+                                        </div>
                                     )}
                                 </div>
                                 <DialogFooter>
@@ -200,5 +246,3 @@ export default function CalendarPage() {
         </>
     );
 }
-
-    

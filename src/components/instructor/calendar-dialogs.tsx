@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar as CalendarIcon, Loader2 } from "lucide-react";
+import { Calendar as CalendarIcon, Loader2, Save, X } from "lucide-react";
 import { format } from 'date-fns';
 import { type CalendarEvent } from "@/app/instructor/page";
 
@@ -98,8 +98,12 @@ export function CalendarDialogs({
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsManualDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={onManualCreate}>Add Event</Button>
+                        <Button variant="ghost" onClick={() => setIsManualDialogOpen(false)}>
+                            <X className="mr-2 h-4 w-4"/>Cancel
+                        </Button>
+                        <Button onClick={onManualCreate}>
+                            <Save className="mr-2 h-4 w-4"/>Add Event
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

@@ -8,13 +8,14 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar as CalendarIcon, Check } from "lucide-react";
+import { Calendar as CalendarIcon, Check, PlusCircle, X, Save, User, BookOpen, GraduationCap, Info, ExternalLink } from "lucide-react";
 import { format } from 'date-fns';
 import { type CalendarEvent } from "@/app/admin/page";
 import { cn } from "@/lib/utils";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from "../ui/command";
 import { Popover, PopoverContent, PopoverTrigger } from "../ui/popover";
+import { Badge } from "../ui/badge";
 
 
 interface CalendarDialogsProps {
@@ -173,8 +174,12 @@ export function CalendarDialogs({
                         </div>
                     </div>
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsManualDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={onManualCreate}>Add Event</Button>
+                        <Button variant="ghost" onClick={() => setIsManualDialogOpen(false)}>
+                            <X className="mr-2 h-4 w-4"/>Cancel
+                        </Button>
+                        <Button onClick={onManualCreate}>
+                            <Save className="mr-2 h-4 w-4"/>Add Event
+                        </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -190,22 +195,52 @@ export function CalendarDialogs({
                                     {selectedEvent.title}
                                 </DialogTitle>
                             </DialogHeader>
-                            <div className="py-4 space-y-4">
-                                <div className="flex items-start gap-4 text-muted-foreground">
-                                    <CalendarIcon className="h-5 w-5 mt-1" />
-                                    <div className="text-sm">
+                            <div className="py-4 space-y-4 text-sm">
+                                <div className="flex items-center gap-4">
+                                    <CalendarIcon className="h-5 w-5 text-muted-foreground" />
+                                    <div>
                                         {selectedEvent.allDay ? (
                                             <p>{format(new Date(selectedEvent.start), 'eeee, MMMM d, yyyy')}</p>
                                         ) : (
                                             <>
                                                 <p>{format(new Date(selectedEvent.start), 'eeee, MMMM d, yyyy')}</p>
-                                                <p>{format(new Date(selectedEvent.start), 'p')} {selectedEvent.end ? ` - ${format(new Date(selectedEvent.end), 'p')}` : ''}</p>
+                                                <p className="text-muted-foreground">{format(new Date(selectedEvent.start), 'p')} {selectedEvent.end ? ` - ${format(new Date(selectedEvent.end), 'p')}` : ''}</p>
                                             </>
                                         )}
                                     </div>
                                 </div>
+                                 <div className="flex items-center gap-4">
+                                    <User className="h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <p>Hosted by <span className="font-semibold">{selectedEvent.instructor}</span></p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <BookOpen className="h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <p>{selectedEvent.subject}</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <GraduationCap className="h-5 w-5 text-muted-foreground" />
+                                    <div>
+                                        <p>Grade {selectedEvent.grade}</p>
+                                    </div>
+                                </div>
+
                                 {selectedEvent.description && (
-                                    <p className="text-sm">{selectedEvent.description}</p>
+                                    <div className="flex items-start gap-4">
+                                        <Info className="h-5 w-5 text-muted-foreground mt-0.5" />
+                                        <p className="text-muted-foreground">{selectedEvent.description}</p>
+                                    </div>
+                                )}
+                                {selectedEvent.platforms && selectedEvent.platforms.length > 0 && (
+                                     <div className="flex items-center gap-4">
+                                        <ExternalLink className="h-5 w-5 text-muted-foreground" />
+                                        <div className="flex flex-wrap gap-2">
+                                            {selectedEvent.platforms.map(p => <Badge key={p} variant="secondary">{platforms.find(pl=> pl.value === p)?.label}</Badge>)}
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                             <DialogFooter>
@@ -218,5 +253,3 @@ export function CalendarDialogs({
         </>
     );
 }
-
-    
