@@ -173,10 +173,10 @@ export default function Home() {
     'Life Sciences': Dna,
   };
 
-  const platformIcons: {[key: string]: React.ReactElement} = {
-    youtube: <FaYoutube className="h-5 w-5 text-red-600" />,
-    tiktok: <Icons.tiktok className="h-5 w-5" />,
-    zoom: <FaVideo className="h-5 w-5 text-blue-500" />,
+  const platformLabels: {[key: string]: string} = {
+    youtube: 'YouTube',
+    tiktok: 'TikTok',
+    zoom: 'Zoom',
   };
 
 
@@ -403,8 +403,8 @@ export default function Home() {
                                    {event.platforms && event.platforms.length > 0 && (
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm text-muted-foreground">Live on:</span>
-                                        <div className="flex gap-2.5">
-                                            {event.platforms.map(p => platformIcons[p])}
+                                        <div className="flex flex-wrap gap-1.5">
+                                            {event.platforms.map(p => <Badge key={p} variant="outline" className="text-xs">{platformLabels[p]}</Badge>)}
                                         </div>
                                     </div>
                                   )}

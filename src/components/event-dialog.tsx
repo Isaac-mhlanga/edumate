@@ -19,7 +19,6 @@ import { useToast } from '@/hooks/use-toast';
 import { Icons } from './icons';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import { FaYoutube, FaTiktok, FaVideo } from 'react-icons/fa';
 
 interface EventDialogProps {
   event: UpcomingEvent | null;
@@ -28,12 +27,6 @@ interface EventDialogProps {
   onClose: () => void;
   onEventSelect: (event: UpcomingEvent) => void;
 }
-
-const platformIcons: {[key: string]: React.ReactElement} = {
-    youtube: <FaYoutube className="h-5 w-5 text-red-600" />,
-    tiktok: <Icons.tiktok className="h-5 w-5" />,
-    zoom: <FaVideo className="h-5 w-5 text-blue-500" />,
-};
 
 const platformLabels: {[key: string]: string} = {
     youtube: 'YouTube',
@@ -91,11 +84,10 @@ const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>((
             {event.platforms && event.platforms.length > 0 && (
               <div className="mt-6">
                 <h3 className="font-semibold text-center mb-3">Join us live on:</h3>
-                <div className="flex justify-center gap-6">
+                <div className="flex justify-center gap-4">
                     {event.platforms.map(p => (
                         <div key={p} className="flex flex-col items-center gap-1 text-muted-foreground">
-                            {platformIcons[p]}
-                            <span className="text-xs font-medium">{platformLabels[p]}</span>
+                            <span className="text-sm font-medium">{platformLabels[p]}</span>
                         </div>
                     ))}
                 </div>
