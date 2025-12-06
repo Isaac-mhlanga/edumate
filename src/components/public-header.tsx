@@ -51,7 +51,7 @@ export const PublicHeader = () => {
               </Link>
             </div>
             
-             <nav className="hidden md:flex space-x-8">
+             <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 space-x-8">
               {navItems.map((item) => (
                 <button
                   key={item.name}
