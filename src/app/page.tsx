@@ -276,128 +276,123 @@ export default function Home() {
           
            <section id="curriculum" className="py-20 bg-muted/50">
             <div className="max-w-7xl mx-auto px-6">
-              <div className="text-center mb-12 animate-fade-in-up">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted to cover all essential topics for Grades 10, 11, and 12.</p>
-              </div>
-              
-              <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
-                {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
-                  const Icon = curriculumIcons[subject];
-                  return (
-                    <Card key={subject} className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
-                      <CardHeader>
-                        <div className="flex items-center gap-4">
-                          {Icon && <Icon className="h-8 w-8 text-primary" />}
-                          <CardTitle className="text-2xl">{subject}</CardTitle>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <Tabs defaultValue="12" className="w-full">
-                          <TabsList className="grid w-full grid-cols-3">
-                            <TabsTrigger value="10">Grade 10</TabsTrigger>
-                            <TabsTrigger value="11">Grade 11</TabsTrigger>
-                            <TabsTrigger value="12">Grade 12</TabsTrigger>
-                          </TabsList>
-                          {(['10', '11', '12'] as const).map(grade => (
-                            <TabsContent key={grade} value={grade} className="mt-4 space-y-4">
-                               <Accordion type="single" collapsible className="w-full">
-                                {curriculumData[grade][subject].map((chapter, chapterIndex) => (
-                                    <div key={chapter.chapter} className="mb-4">
-                                        <h4 className="font-semibold text-sm flex items-center gap-2 mb-2">
-                                            <BookOpen className="h-4 w-4 text-muted-foreground" />
-                                            {chapter.chapter}
-                                        </h4>
-                                        <div className="pl-6 space-y-1">
-                                            {chapter.topics.map((topic, topicIndex) => {
-                                                const relevantCourses = allCourses.filter(course => 
-                                                    course.subject === subject && 
-                                                    course.grade === grade &&
-                                                    (course.title.toLowerCase().includes(topic.toLowerCase()) || 
-                                                    topic.toLowerCase().includes(course.title.toLowerCase()))
-                                                );
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted to cover all essential topics for Grades 10, 11, and 12.</p>
+                </div>
+                
+                <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                    {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
+                    const Icon = curriculumIcons[subject];
+                    return (
+                        <Card key={subject} className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <CardHeader>
+                            <div className="flex items-center gap-4">
+                            {Icon && <Icon className="h-8 w-8 text-primary" />}
+                            <CardTitle className="text-2xl">{subject}</CardTitle>
+                            </div>
+                        </CardHeader>
+                        <CardContent>
+                            <Tabs defaultValue="12" className="w-full">
+                                <TabsList>
+                                    <TabsTrigger value="10">Grade 10</TabsTrigger>
+                                    <TabsTrigger value="11">Grade 11</TabsTrigger>
+                                    <TabsTrigger value="12">Grade 12</TabsTrigger>
+                                </TabsList>
+                            {(['10', '11', '12'] as const).map(grade => (
+                                <TabsContent key={grade} value={grade} className="mt-4 space-y-4">
+                                    {(curriculumData[grade][subject] as any[]).map((chapter) => (
+                                        <div key={chapter.chapter}>
+                                            <h4 className="font-semibold text-sm flex items-center gap-2 mb-2">
+                                                {chapter.paper === 'P1' ? <BookOpen className="h-4 w-4 text-muted-foreground" /> : <PenSquare className="h-4 w-4 text-muted-foreground" />}
+                                                {chapter.chapter}
+                                            </h4>
+                                            <Accordion type="single" collapsible className="w-full pl-6">
+                                                {chapter.topics.map((topic: string) => {
+                                                    const relevantCourses = allCourses.filter(course => 
+                                                        course.subject === subject && 
+                                                        course.grade === grade &&
+                                                        (course.title.toLowerCase().includes(topic.toLowerCase()) || 
+                                                        topic.toLowerCase().includes(course.title.toLowerCase()))
+                                                    );
 
-                                                return (
-                                                <AccordionItem value={`topic-${chapterIndex}-${topicIndex}`} key={topic}>
-                                                    <AccordionTrigger className="text-sm py-2 hover:no-underline">
-                                                        {topic}
-                                                    </AccordionTrigger>
-                                                    <AccordionContent>
-                                                        {relevantCourses.length > 0 ? (
-                                                            <div className="grid grid-cols-1 gap-2 pt-2">
-                                                                {relevantCourses.map(course => (
-                                                                    <div key={course.id} onClick={() => handleCourseClick(course)} className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10 cursor-pointer">
-                                                                        <Image src={course.thumbnail} alt={course.title} width={80} height={45} className="rounded-md object-cover aspect-video" data-ai-hint="online course" />
-                                                                        <div>
-                                                                            <p className="font-semibold text-xs line-clamp-1">{course.title}</p>
-                                                                            <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
+                                                    return (
+                                                    <AccordionItem value={topic} key={topic}>
+                                                        <AccordionTrigger className="text-sm py-2 hover:no-underline">
+                                                            {topic}
+                                                        </AccordionTrigger>
+                                                        <AccordionContent>
+                                                            {relevantCourses.length > 0 ? (
+                                                                <div className="grid grid-cols-1 gap-2 pt-2">
+                                                                    {relevantCourses.map(course => (
+                                                                        <div key={course.id} onClick={() => handleCourseClick(course)} className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10 cursor-pointer">
+                                                                            <Image src={course.thumbnail} alt={course.title} width={80} height={45} className="rounded-md object-cover aspect-video" data-ai-hint="online course" />
+                                                                            <div>
+                                                                                <p className="font-semibold text-xs line-clamp-1">{course.title}</p>
+                                                                                <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
+                                                                            </div>
                                                                         </div>
-                                                                    </div>
-                                                                ))}
-                                                            </div>
-                                                        ) : (
-                                                            <p className="text-xs text-muted-foreground px-2 py-4 text-center">No specific courses for this topic yet. Explore our main course catalog!</p>
-                                                        )}
-                                                    </AccordionContent>
-                                                </AccordionItem>
-                                                )
-                                            })}
+                                                                    ))}
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-xs text-muted-foreground px-2 py-4 text-center">No specific courses for this topic yet.</p>
+                                                            )}
+                                                        </AccordionContent>
+                                                    </AccordionItem>
+                                                    )
+                                                })}
+                                            </Accordion>
                                         </div>
-                                    </div>
-                                ))}
-                                </Accordion>
-                            </TabsContent>
-                          ))}
-                        </Tabs>
-                      </CardContent>
-                    </Card>
-                  )
-                })}
-              </div>
+                                    ))}
+                                </TabsContent>
+                            ))}
+                            </Tabs>
+                        </CardContent>
+                        </Card>
+                    )
+                    })}
+                </div>
             </div>
-          </section>
+        </section>
 
             <section id="events" className="py-20">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-12 animate-fade-in-up">
-                        <h2 className="text-3xl md:text-4xl font-bold mb-4">Upcoming Events</h2>
-                        <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
-                    </div>
-                    <Card className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: '0.2s' }}>
-                        <CardContent className="p-0">
-                             <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Event</TableHead>
-                                        <TableHead className="hidden md:table-cell">Date</TableHead>
-                                        <TableHead className="hidden sm:table-cell">Subject</TableHead>
-                                        <TableHead className="text-right"></TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {upcomingEvents.map((event) => (
-                                        <TableRow key={event.id} className="cursor-pointer hover:bg-muted/50" onClick={() => handleEventClick(event)}>
-                                            <TableCell>
-                                                <div className="font-medium">{event.title}</div>
-                                                <div className="text-sm text-muted-foreground md:hidden">
-                                                    {isClient ? format(new Date(event.start), 'eee, MMM d, p') : ''}
-                                                </div>
-                                            </TableCell>
-                                            <TableCell className="hidden md:table-cell">{isClient ? format(new Date(event.start), 'eeee, MMMM d, yyyy') : ''}</TableCell>
-                                            <TableCell className="hidden sm:table-cell"><Badge variant="outline">Grade {event.grade} {event.subject}</Badge></TableCell>
-                                            <TableCell className="text-right">
-                                                 <Button variant="ghost" size="sm">
-                                                    View Details <ChevronRightIcon className="ml-2 h-4 w-4" />
-                                                 </Button>
-                                            </TableCell>
-                                        </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                </div>
-            </section>
+              <div className="max-w-7xl mx-auto px-6">
+                  <div className="text-center mb-12 animate-fade-in-up">
+                      <h2 className="text-3xl md:text-4xl font-bold mb-4">Upcoming Events</h2>
+                      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
+                  </div>
+                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                      {upcomingEvents.map((event, index) => (
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
+                              <CardHeader className="flex-row items-center gap-4">
+                                  <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20">
+                                      <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
+                                      <span className="text-3xl font-bold">{isClient ? format(new Date(event.start), 'd') : ''}</span>
+                                  </div>
+                                  <div>
+                                      <Badge variant="secondary" className="mb-1">{event.subject} - Grade {event.grade}</Badge>
+                                      <CardTitle className="text-lg line-clamp-2">{event.title}</CardTitle>
+                                  </div>
+                              </CardHeader>
+                              <CardContent className="flex-grow">
+                                  <div className="text-sm text-muted-foreground flex items-center gap-2">
+                                      <Clock className="h-4 w-4" />
+                                      <span>
+                                          {isClient ? format(new Date(event.start), 'p') : ''}
+                                          {event.end && isClient && ` - ${format(new Date(event.end), 'p')}`}
+                                      </span>
+                                  </div>
+                              </CardContent>
+                              <CardFooter>
+                                  <Button variant="outline" className="w-full" onClick={() => handleEventClick(event)}>
+                                      View Details <ChevronRightIcon className="ml-2 h-4 w-4" />
+                                  </Button>
+                              </CardFooter>
+                          </Card>
+                      ))}
+                  </div>
+              </div>
+          </section>
 
           <section id="courses" className="py-20 bg-muted/50">
             <div className="max-w-7xl mx-auto px-6">
