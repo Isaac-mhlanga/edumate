@@ -6,7 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ArrowLeft, CreditCard, Lock, ShieldCheck } from 'lucide-react';
+import { ArrowLeft, CreditCard, Lock, ShieldCheck, Wand2 } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import Link from 'next/link';
 import { usePaystackPayment } from 'react-paystack';
@@ -76,7 +76,11 @@ function PaymentForm() {
     const onSuccess = (reference: any) => {
         console.log(reference);
         toast({ title: 'Payment Successful!', description: 'Your transaction has been received and is being processed.' });
-        router.push('/dashboard?tab=assignments');
+        if (paymentType === 'ai-tutor') {
+            router.push('/ai-tutor?payment=success');
+        } else {
+            router.push('/dashboard?tab=assignments');
+        }
     };
 
     const onClose = () => {
@@ -105,13 +109,16 @@ function PaymentForm() {
         )
     }
 
+    const backLink = paymentType === 'ai-tutor' ? '/ai-tutor' : '/dashboard?tab=assignments';
+    const icon = paymentType === 'ai-tutor' ? <Wand2 className="mr-2"/> : <CreditCard className="mr-2" />;
+
     return (
         <div className="min-h-screen bg-muted/40 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
             <div className="w-full max-w-lg mx-auto">
                  <div className="mb-4">
                     <Button variant="ghost" asChild>
-                        <Link href="/dashboard?tab=assignments">
-                            <ArrowLeft className="mr-2 h-4 w-4"/> Back to Dashboard
+                        <Link href={backLink}>
+                            <ArrowLeft className="mr-2 h-4 w-4"/> Back
                         </Link>
                     </Button>
                 </div>
@@ -144,7 +151,7 @@ function PaymentForm() {
                             }}
                             disabled={!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY || loading}
                         >
-                            <CreditCard className="mr-2" /> Pay Now
+                            {icon} Pay Now
                         </Button>
                         {!process.env.NEXT_PUBLIC_PAYSTACK_PUBLIC_KEY && (
                             <p className="text-center text-destructive text-xs">Paystack integration is not configured. Please set the public key.</p>
@@ -165,3 +172,5 @@ function PaymentPage() {
 }
 
 export default PaymentPage;
+
+    

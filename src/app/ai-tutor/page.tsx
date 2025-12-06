@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,19 @@ import { BlockMath, InlineMath } from 'react-katex';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { getFirestore, doc, onSnapshot, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import { useRouter } from 'next/navigation';
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 type Solution = {
     questionId: string;
@@ -26,6 +39,10 @@ type Solution = {
     clarification?: string;
 };
 
+type MonetizationSettings = {
+    isAiTutorPaid: boolean;
+};
+
 export default function AiTutorPage() {
     const [files, setFiles] = useState<File[]>([]);
     const [extractedQuestions, setExtractedQuestions] = useState<ExtractedQuestion[]>([]);
@@ -33,8 +50,37 @@ export default function AiTutorPage() {
     const [isExtracting, setIsExtracting] = useState(false);
     const [progress, setProgress] = useState(0);
     const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
+    const [monetizationSettings, setMonetizationSettings] = useState<MonetizationSettings | null>(null);
+    const [hasPaid, setHasPaid] = useState(false);
 
     const { toast } = useToast();
+    const router = useRouter();
+
+    useEffect(() => {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const settingsRef = doc(firestore, 'settings', 'monetization');
+        
+        const unsubscribe = onSnapshot(settingsRef, (doc) => {
+            if (doc.exists()) {
+                setMonetizationSettings(doc.data() as MonetizationSettings);
+            } else {
+                setMonetizationSettings({ isAiTutorPaid: false });
+            }
+        });
+
+        // Check for payment success from redirect
+        const searchParams = new URLSearchParams(window.location.search);
+        if (searchParams.get('payment') === 'success') {
+            setHasPaid(true);
+            toast({ title: 'Payment Successful!', description: 'You can now use the AI Tutor for this session.' });
+            // Clean up URL
+            router.replace('/ai-tutor');
+        }
+
+        return () => unsubscribe();
+    }, [router, toast]);
+
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
@@ -64,6 +110,12 @@ export default function AiTutorPage() {
             toast({ variant: 'destructive', title: 'No files selected', description: 'Please select one or more files to extract questions from.' });
             return;
         }
+
+        if (monetizationSettings?.isAiTutorPaid && !hasPaid) {
+            router.push('/payment?type=ai-tutor&title=AI Tutor Session&price=50'); // Example price
+            return;
+        }
+
         setIsExtracting(true);
         setExtractedQuestions([]);
         setSelectedQuestionId(null);
@@ -76,6 +128,18 @@ export default function AiTutorPage() {
             const response = await extractQuestionsFromPapers({ paperDataUris: fileDataUris });
             setProgress(70);
             
+            // Track usage
+            const auth = getAuth();
+            if (auth.currentUser) {
+                const firestore = getFirestore();
+                await addDoc(collection(firestore, 'aiTutorUsage'), {
+                    userId: auth.currentUser.uid,
+                    timestamp: serverTimestamp(),
+                    fileCount: files.length,
+                    questionCount: response.questions.length,
+                });
+            }
+
             setExtractedQuestions(response.questions);
             if (response.questions.length > 0) {
                 setSelectedQuestionId(response.questions[0].id);
@@ -269,7 +333,7 @@ export default function AiTutorPage() {
                                     )}
                                 </CardContent>
                             </Card>
-                        ) : !isExtracting && files.length > 0 && extractedQuestions.length === 0 ? (
+                        ) : !isExtracting && files.length > 0 ? (
                              <Card className="flex flex-col items-center justify-center text-center p-12 h-full">
                                 <CardHeader>
                                     <CardTitle>Ready to Go!</CardTitle>
@@ -296,3 +360,5 @@ export default function AiTutorPage() {
         </div>
     );
 }
+
+    
