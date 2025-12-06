@@ -1,10 +1,9 @@
-
 'use client';
 
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -463,7 +462,7 @@ export default function Home() {
                               </CardContent>
                               <CardFooter>
                                   <Button variant="outline" className="w-full" onClick={() => handleEventClick(event)}>
-                                      View Details <ChevronRightIcon className="ml-2 h-4 w-4" />
+                                      View Details <ChevronRight className="ml-2 h-4 w-4" />
                                   </Button>
                               </CardFooter>
                           </Card>
