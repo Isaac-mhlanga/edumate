@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -49,7 +50,7 @@ export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAdd
                         events={events}
                         dateClick={onDateClick}
                         eventClick={onEventClick}
-                        editable={true}
+                        editable={false}
                         selectable={true}
                         height="auto"
                         contentHeight="auto"
@@ -61,3 +62,5 @@ export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAdd
         </Card>
     );
 }
+
+    

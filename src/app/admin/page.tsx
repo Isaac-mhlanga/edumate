@@ -5,7 +5,7 @@ import React from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp } from "firebase/firestore";
+import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp, addDoc } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
 import { PayoutRequest as PayoutRequestType, adminData } from "@/lib/data";
@@ -38,7 +38,7 @@ export type Course = { id: string; title: string; subject: string; grade: string
 export type PayoutRequest = PayoutRequestType;
 export type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
-export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; };
+export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; grade?: string; subject?: string; scope?: string; platforms?: string[]; };
 export type Transaction = { id: string; itemType: string; status: string; amount: number; createdAt: Timestamp; };
 
 function AdminPage() {
@@ -54,14 +54,11 @@ function AdminPage() {
     const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>(adminData.payoutRequests);
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+    const [events, setEvents] = React.useState<CalendarEvent[]>([]);
+    
     const [loading, setLoading] = React.useState(true);
     const [aiSummary, setAiSummary] = React.useState('');
     const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
-    
-    const [events, setEvents] = React.useState<CalendarEvent[]>([
-        { id: '1', title: 'Platform Maintenance', start: '2024-08-20T02:00:00', end: '2024-08-20T04:00:00', allDay: false, color: 'hsl(var(--destructive))', description: 'Scheduled server upgrades.' },
-        { id: '2', title: 'Instructor Payout Deadline', start: '2024-08-25', allDay: true, color: 'hsl(var(--primary))', description: 'All payout requests must be submitted.' },
-    ]);
     
     const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
     const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
@@ -105,6 +102,11 @@ function AdminPage() {
         const fetchData = async () => {
             setLoading(true);
             try {
+                // Fetch Events
+                const eventsSnapshot = await getDocs(collection(firestore, "events"));
+                const fetchedEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+                setEvents(fetchedEvents);
+
                 const usersSnapshot = await getDocs(collection(firestore, "users"));
                 const fetchedUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().fullName, ...doc.data() } as User));
                 
@@ -295,3 +297,5 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
+
+    

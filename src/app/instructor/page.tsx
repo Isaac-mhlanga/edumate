@@ -144,6 +144,8 @@ function InstructorPage() {
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [aiSummary, setAiSummary] = React.useState('');
   const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
+  const [events, setEvents] = React.useState<CalendarEvent[]>([]);
+
 
   const [loadingCourses, setLoadingCourses] = React.useState(true);
   const [loadingQuizzes, setLoadingQuizzes] = React.useState(true);
@@ -169,7 +171,6 @@ function InstructorPage() {
   const [isPayoutDialogOpen, setIsPayoutDialogOpen] = React.useState(false);
   
   // Calendar State
-  const [events, setEvents] = React.useState<CalendarEvent[]>([]);
   const [isAiDialogOpen, setIsAiDialogOpen] = React.useState(false);
   const [isManualDialogOpen, setIsManualDialogOpen] = React.useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
@@ -213,6 +214,10 @@ function InstructorPage() {
       setLoadingAiSummary(true);
 
       try {
+        const eventsSnapshot = await getDocs(collection(firestore, "events"));
+        const fetchedEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+        setEvents(fetchedEvents);
+
         const coursesQuery = query(collection(firestore, 'courses'), where('instructorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
         const coursesSnapshot = await getDocs(coursesQuery);
         const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
@@ -843,8 +848,12 @@ function InstructorPage() {
           events={events}
           onDateClick={handleDateClick}
           onEventClick={handleEventClick}
-          onAddEventClick={() => setIsManualDialogOpen(true)}
-          onAiCreateClick={() => setIsAiDialogOpen(true)}
+          onAddEventClick={() => {
+             toast({ title: "Action not available", description: "Please go to the admin dashboard to create new events." });
+          }}
+          onAiCreateClick={() => {
+            toast({ title: "Action not available", description: "Please go to the admin dashboard to create new events." });
+          }}
         />
       )}
 
@@ -946,3 +955,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    

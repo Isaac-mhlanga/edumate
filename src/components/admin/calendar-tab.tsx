@@ -14,6 +14,17 @@ import { CalendarEvent } from "@/app/admin/page";
 import { CalendarDialogs } from "./calendar-dialogs";
 import { useToast } from "@/hooks/use-toast";
 import { createCalendarEvent, CreateCalendarEventOutput } from '@/ai/flows/create-calendar-event';
+import { getFirestore, doc, addDoc, collection } from "firebase/firestore";
+import { getApp, getApps, initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 interface AdminCalendarTabProps {
     events: CalendarEvent[];
@@ -49,16 +60,26 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
         setIsDetailDialogOpen(true);
     };
     
-    const handleAddManualEvent = () => {
+    const handleAddManualEvent = async () => {
         if (!manualEvent.title || !manualEvent.start) {
             toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
             return;
         }
-        const newEvent = { ...manualEvent, id: String(Date.now()) } as CalendarEvent
-        setEvents([...events, newEvent]);
-        toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
-        setIsManualDialogOpen(false);
-        setManualEvent({});
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        
+        try {
+            const docRef = await addDoc(collection(firestore, 'events'), manualEvent);
+            const newEvent = { ...manualEvent, id: docRef.id } as CalendarEvent;
+            setEvents([...events, newEvent]);
+            toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
+            setIsManualDialogOpen(false);
+            setManualEvent({});
+        } catch(error) {
+            console.error("Error creating event:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
+        }
     };
 
     const handleAiCreateEvent = async () => {
@@ -67,14 +88,19 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
         try {
             const result: CreateCalendarEventOutput = await createCalendarEvent({ prompt: aiPrompt });
             if (result.title && result.start) {
-                const newEvent: CalendarEvent = {
-                    id: String(Date.now()),
+                const newEventData: Partial<CalendarEvent> = {
                     title: result.title,
                     start: result.start,
                     end: result.end || undefined,
                     allDay: result.allDay,
                     color: 'hsl(var(--accent))'
                 };
+                
+                const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+                const firestore = getFirestore(app);
+                const docRef = await addDoc(collection(firestore, 'events'), newEventData);
+
+                const newEvent: CalendarEvent = { ...newEventData, id: docRef.id } as CalendarEvent;
                 setEvents([...events, newEvent]);
                 toast({ title: 'Event Created!', description: `"${result.title}" has been added to the calendar.` });
                 setIsAiDialogOpen(false);
@@ -149,3 +175,5 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
         </>
     );
 }
+
+    

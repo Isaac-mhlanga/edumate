@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star,
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { faqData, upcomingEvents, UpcomingEvent, curriculumData } from "@/lib/data";
+import { faqData, curriculumData, UpcomingEvent as UpcomingEventType } from "@/lib/data";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -22,7 +22,7 @@ import { FaFacebook, FaWhatsapp, FaYoutube, FaTiktok, FaVideo } from "react-icon
 import { format } from "date-fns";
 import { EventDialog } from "@/components/event-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, orderBy } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
@@ -61,6 +61,8 @@ type Course = {
     rating?: number;
     instructor?: string;
 };
+
+type UpcomingEvent = UpcomingEventType;
 
 
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
@@ -118,7 +120,9 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
 
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
+  const [upcomingEvents, setUpcomingEvents] = useState<UpcomingEvent[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   const [currentCoursePage, setCurrentCoursePage] = useState(1);
   const coursesPerPage = 6;
   
@@ -153,7 +157,22 @@ export default function Home() {
         }
     };
     
+    const fetchEvents = async () => {
+        setLoadingEvents(true);
+        try {
+            const eventsQuery = query(collection(firestore, 'events'), orderBy('start', 'asc'));
+            const querySnapshot = await getDocs(eventsQuery);
+            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UpcomingEvent[];
+            setUpcomingEvents(fetchedEvents);
+        } catch (error) {
+            console.error("Error fetching events: ", error);
+        } finally {
+            setLoadingEvents(false);
+        }
+    };
+
     fetchCourses();
+    fetchEvents();
   }, []);
 
   const features = [
@@ -394,7 +413,9 @@ export default function Home() {
                       <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                      {upcomingEvents.map((event, index) => (
+                      {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
+                          <Card key={i}><Skeleton className="h-64 w-full"/></Card>
+                      )) : upcomingEvents.slice(0,3).map((event, index) => (
                           <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-center gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20">
@@ -707,3 +728,5 @@ export default function Home() {
     </div>
   );
 }
+
+    

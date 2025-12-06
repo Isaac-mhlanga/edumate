@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import FullCalendar from '@fullcalendar/react';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
@@ -17,6 +17,18 @@ import { useToast } from '@/hooks/use-toast';
 import { Checkbox } from '@/components/ui/checkbox';
 import { PlusCircle, Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
+import { getFirestore, doc, getDocs, collection } from "firebase/firestore";
+import { getApp, getApps, initializeApp } from "firebase/app";
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
 
 type CalendarEvent = {
   id: string;
@@ -29,10 +41,7 @@ type CalendarEvent = {
 };
 
 export default function CalendarPage() {
-    const [events, setEvents] = useState<CalendarEvent[]>([
-        { id: '1', title: 'Maths Webinar', start: '2024-08-15T10:30:00', end: '2024-08-15T12:30:00', allDay: false, color: 'hsl(var(--primary))', description: 'A deep dive into advanced calculus concepts.' },
-        { id: '2', title: 'Physics Study Group', start: '2024-08-16', allDay: true, color: 'hsl(var(--secondary))', description: 'Collaborative session for Newtonian mechanics.' }
-    ]);
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
     
     const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -42,9 +51,19 @@ export default function CalendarPage() {
 
     const { toast } = useToast();
 
+     useEffect(() => {
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const fetchEvents = async () => {
+            const eventsSnapshot = await getDocs(collection(firestore, "events"));
+            const fetchedEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+            setEvents(fetchedEvents);
+        };
+        fetchEvents();
+    }, []);
+
     const handleDateClick = (arg: any) => {
-        setManualEvent({ start: arg.dateStr, allDay: arg.allDay });
-        setIsManualDialogOpen(true);
+        toast({ title: "Action not available", description: "Please go to the admin dashboard to create new events." });
     };
     
     const handleEventClick = (clickInfo: any) => {
@@ -59,18 +78,6 @@ export default function CalendarPage() {
             color: event.backgroundColor,
         });
         setIsDetailDialogOpen(true);
-    };
-
-    const handleAddManualEvent = () => {
-        if (!manualEvent.title || !manualEvent.start) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
-            return;
-        }
-        const newEvent = { ...manualEvent, id: String(Date.now()) } as CalendarEvent
-        setEvents([...events, newEvent]);
-        toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
-        setIsManualDialogOpen(false);
-        setManualEvent({});
     };
 
     return (
@@ -128,11 +135,6 @@ export default function CalendarPage() {
                             <CardTitle className="text-2xl">Calendar</CardTitle>
                             <CardDescription>Manage your schedule, events, and appointments.</CardDescription>
                         </div>
-                        <div className="flex gap-2">
-                             <Button variant="outline" onClick={() => setIsManualDialogOpen(true)}>
-                                 <PlusCircle className="mr-2 h-4 w-4" /> Add Event
-                             </Button>
-                        </div>
                     </CardHeader>
                     <CardContent>
                         <div className="rounded-lg border overflow-hidden p-1">
@@ -147,7 +149,7 @@ export default function CalendarPage() {
                                 events={events}
                                 dateClick={handleDateClick}
                                 eventClick={handleEventClick}
-                                editable={true}
+                                editable={false}
                                 selectable={true}
                                 height="auto"
                                 contentHeight="auto"
@@ -157,44 +159,6 @@ export default function CalendarPage() {
                         </div>
                     </CardContent>
                 </Card>
-
-                {/* Manual Event Dialog */}
-                <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Add New Event</DialogTitle>
-                            <DialogDescription>Fill in the details for your new event.</DialogDescription>
-                        </DialogHeader>
-                        <div className="py-4 space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="manual-title">Event Title</Label>
-                                <Input id="manual-title" value={manualEvent.title || ''} onChange={(e) => setManualEvent(prev => ({...prev, title: e.target.value}))}/>
-                            </div>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label htmlFor="manual-start">Start Date</Label>
-                                    <Input id="manual-start" type="date" value={manualEvent.start?.split('T')[0] || ''} onChange={(e) => setManualEvent(prev => ({...prev, start: e.target.value}))}/>
-                                </div>
-                                 <div className="space-y-2">
-                                    <Label htmlFor="manual-end">End Date (Optional)</Label>
-                                    <Input id="manual-end" type="date" value={manualEvent.end?.split('T')[0] || ''} onChange={(e) => setManualEvent(prev => ({...prev, end: e.target.value}))}/>
-                                </div>
-                            </div>
-                             <div className="space-y-2">
-                                <Label htmlFor="manual-description">Description (Optional)</Label>
-                                <Textarea id="manual-description" value={manualEvent.description || ''} onChange={(e) => setManualEvent(prev => ({...prev, description: e.target.value}))}/>
-                            </div>
-                            <div className="flex items-center space-x-2">
-                                <Checkbox id="all-day" checked={manualEvent.allDay} onCheckedChange={(checked) => setManualEvent(prev => ({...prev, allDay: !!checked}))} />
-                                <Label htmlFor="all-day">All-day event</Label>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="ghost" onClick={() => setIsManualDialogOpen(false)}>Cancel</Button>
-                            <Button onClick={handleAddManualEvent}>Add Event</Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
                 
                  {/* Event Detail Dialog */}
                 <Dialog open={isDetailDialogOpen} onOpenChange={setIsDetailDialogOpen}>
@@ -236,3 +200,5 @@ export default function CalendarPage() {
         </>
     );
 }
+
+    
