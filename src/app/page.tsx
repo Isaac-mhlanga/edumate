@@ -67,9 +67,10 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
     <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-background">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background z-0"></div>
+       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] animate-pulse duration-[4000ms]" />
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-red-400" style={{ animationDelay: '0.2s' }}>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-red-400 animate-shimmer" style={{ animationDelay: '0.2s', backgroundSize: '200% 100%' }}>
             Master Maths & Science
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
@@ -287,7 +288,7 @@ export default function Home() {
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
-                 <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
