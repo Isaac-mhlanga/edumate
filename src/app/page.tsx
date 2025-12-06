@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PublicHeader } from "@/components/public-header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Settings } from "lucide-react";
-import { FaWhatsapp, FaYoutube, FaTiktok, FaVideo } from "react-icons/fa";
+import { FaFacebook, FaWhatsapp, FaYoutube, FaTiktok, FaVideo } from "react-icons/fa";
 import { format } from "date-fns";
 import { EventDialog } from "@/components/event-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -94,6 +94,20 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
             <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
               <Link href="/tutors">Find a Tutor</Link>
             </Button>
+          </div>
+          <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+            <p className="text-sm text-muted-foreground mb-4">Follow us on</p>
+            <div className="flex justify-center gap-6">
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <FaFacebook className="h-6 w-6" />
+              </Link>
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <FaTiktok className="h-6 w-6" />
+              </Link>
+              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
+                <FaYoutube className="h-6 w-6" />
+              </Link>
+            </div>
           </div>
         </div>
       </div>
