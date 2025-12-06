@@ -18,7 +18,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PublicHeader } from "@/components/public-header";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Settings } from "lucide-react";
-import { FaWhatsapp } from "react-icons/fa";
+import { FaWhatsapp, FaYoutube, FaTiktok, FaVideo } from "react-icons/fa";
 import { format } from "date-fns";
 import { EventDialog } from "@/components/event-dialog";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -161,6 +161,12 @@ export default function Home() {
     'Life Sciences': Dna,
   };
 
+  const platformIcons: {[key: string]: React.ReactElement} = {
+    youtube: <FaYoutube className="h-5 w-5 text-red-600" />,
+    tiktok: <Icons.tiktok className="h-5 w-5" />,
+    zoom: <FaVideo className="h-5 w-5 text-blue-500" />,
+  };
+
 
   const handleCourseClick = (course: Course) => {
     setSelectedCourseForPlayer(course);
@@ -278,76 +284,76 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted to cover all essential topics for Grades 10, 11, and 12.</p>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
-                <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                 <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
                         <Card key={subject} className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
-                        <CardHeader>
-                            <div className="flex items-center gap-4">
-                            {Icon && <Icon className="h-8 w-8 text-primary" />}
-                            <CardTitle className="text-2xl">{subject}</CardTitle>
-                            </div>
-                        </CardHeader>
-                        <CardContent>
-                            <Tabs defaultValue="12" className="w-full">
-                                <TabsList>
-                                    <TabsTrigger value="10">Grade 10</TabsTrigger>
-                                    <TabsTrigger value="11">Grade 11</TabsTrigger>
-                                    <TabsTrigger value="12">Grade 12</TabsTrigger>
-                                </TabsList>
-                            {(['10', '11', '12'] as const).map(grade => (
-                                <TabsContent key={grade} value={grade} className="mt-4 space-y-4">
-                                    {(curriculumData[grade][subject] as any[]).map((chapter) => (
-                                        <div key={chapter.chapter}>
-                                            <h4 className="font-semibold text-sm flex items-center gap-2 mb-2">
-                                                {chapter.paper === 'P1' ? <BookOpen className="h-4 w-4 text-muted-foreground" /> : <PenSquare className="h-4 w-4 text-muted-foreground" />}
-                                                {chapter.chapter}
-                                            </h4>
-                                            <Accordion type="single" collapsible className="w-full pl-6">
-                                                {chapter.topics.map((topic: string) => {
-                                                    const relevantCourses = allCourses.filter(course => 
-                                                        course.subject === subject && 
-                                                        course.grade === grade &&
-                                                        (course.title.toLowerCase().includes(topic.toLowerCase()) || 
-                                                        topic.toLowerCase().includes(course.title.toLowerCase()))
-                                                    );
+                            <CardHeader>
+                                <div className="flex items-center gap-4">
+                                {Icon && <Icon className="h-8 w-8 text-primary" />}
+                                <CardTitle className="text-2xl">{subject}</CardTitle>
+                                </div>
+                            </CardHeader>
+                            <CardContent>
+                                <Tabs defaultValue="12" className="w-full">
+                                    <TabsList className="grid w-full grid-cols-3">
+                                        <TabsTrigger value="10">Grade 10</TabsTrigger>
+                                        <TabsTrigger value="11">Grade 11</TabsTrigger>
+                                        <TabsTrigger value="12">Grade 12</TabsTrigger>
+                                    </TabsList>
+                                    {(['10', '11', '12'] as const).map(grade => (
+                                        <TabsContent key={grade} value={grade} className="mt-4">
+                                            {(curriculumData[grade][subject] as any[]).map((chapter) => (
+                                                <div key={chapter.chapter} className="mb-4">
+                                                    <h4 className="font-semibold text-sm flex items-center gap-2 mb-2">
+                                                        <BookOpen className="h-4 w-4 text-muted-foreground" />
+                                                        {chapter.chapter}
+                                                    </h4>
+                                                    <Accordion type="single" collapsible className="w-full pl-6">
+                                                        {chapter.topics.map((topic: string) => {
+                                                            const relevantCourses = allCourses.filter(course => 
+                                                                course.subject === subject && 
+                                                                course.grade === grade &&
+                                                                (course.title.toLowerCase().includes(topic.toLowerCase()) || 
+                                                                topic.toLowerCase().includes(course.title.toLowerCase()))
+                                                            );
 
-                                                    return (
-                                                    <AccordionItem value={topic} key={topic}>
-                                                        <AccordionTrigger className="text-sm py-2 hover:no-underline">
-                                                            {topic}
-                                                        </AccordionTrigger>
-                                                        <AccordionContent>
-                                                            {relevantCourses.length > 0 ? (
-                                                                <div className="grid grid-cols-1 gap-2 pt-2">
-                                                                    {relevantCourses.map(course => (
-                                                                        <div key={course.id} onClick={() => handleCourseClick(course)} className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10 cursor-pointer">
-                                                                            <Image src={course.thumbnail} alt={course.title} width={80} height={45} className="rounded-md object-cover aspect-video" data-ai-hint="online course" />
-                                                                            <div>
-                                                                                <p className="font-semibold text-xs line-clamp-1">{course.title}</p>
-                                                                                <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
-                                                                            </div>
+                                                            return (
+                                                            <AccordionItem value={topic} key={topic}>
+                                                                <AccordionTrigger className="text-sm py-2 hover:no-underline">
+                                                                    {topic}
+                                                                </AccordionTrigger>
+                                                                <AccordionContent>
+                                                                    {relevantCourses.length > 0 ? (
+                                                                        <div className="grid grid-cols-1 gap-2 pt-2">
+                                                                            {relevantCourses.map(course => (
+                                                                                <div key={course.id} onClick={() => handleCourseClick(course)} className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10 cursor-pointer">
+                                                                                    <Image src={course.thumbnail} alt={course.title} width={80} height={45} className="rounded-md object-cover aspect-video" data-ai-hint="online course" />
+                                                                                    <div>
+                                                                                        <p className="font-semibold text-xs line-clamp-1">{course.title}</p>
+                                                                                        <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
+                                                                                    </div>
+                                                                                </div>
+                                                                            ))}
                                                                         </div>
-                                                                    ))}
-                                                                </div>
-                                                            ) : (
-                                                                <p className="text-xs text-muted-foreground px-2 py-4 text-center">No specific courses for this topic yet.</p>
-                                                            )}
-                                                        </AccordionContent>
-                                                    </AccordionItem>
-                                                    )
-                                                })}
-                                            </Accordion>
-                                        </div>
+                                                                    ) : (
+                                                                        <p className="text-xs text-muted-foreground px-2 py-4 text-center">No specific courses for this topic yet.</p>
+                                                                    )}
+                                                                </AccordionContent>
+                                                            </AccordionItem>
+                                                            )
+                                                        })}
+                                                    </Accordion>
+                                                </div>
+                                            ))}
+                                        </TabsContent>
                                     ))}
-                                </TabsContent>
-                            ))}
-                            </Tabs>
-                        </CardContent>
+                                </Tabs>
+                            </CardContent>
                         </Card>
                     )
                     })}
@@ -355,7 +361,7 @@ export default function Home() {
             </div>
         </section>
 
-            <section id="events" className="py-20">
+          <section id="events" className="py-20">
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <h2 className="text-3xl md:text-4xl font-bold mb-4">Upcoming Events</h2>
@@ -374,7 +380,7 @@ export default function Home() {
                                       <CardTitle className="text-lg line-clamp-2">{event.title}</CardTitle>
                                   </div>
                               </CardHeader>
-                              <CardContent className="flex-grow">
+                              <CardContent className="flex-grow space-y-3">
                                   <div className="text-sm text-muted-foreground flex items-center gap-2">
                                       <Clock className="h-4 w-4" />
                                       <span>
@@ -382,6 +388,14 @@ export default function Home() {
                                           {event.end && isClient && ` - ${format(new Date(event.end), 'p')}`}
                                       </span>
                                   </div>
+                                   {event.platforms && event.platforms.length > 0 && (
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-muted-foreground">Live on:</span>
+                                        <div className="flex gap-2.5">
+                                            {event.platforms.map(p => platformIcons[p])}
+                                        </div>
+                                    </div>
+                                  )}
                               </CardContent>
                               <CardFooter>
                                   <Button variant="outline" className="w-full" onClick={() => handleEventClick(event)}>
