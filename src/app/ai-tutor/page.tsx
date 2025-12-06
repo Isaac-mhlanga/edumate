@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useCallback, useMemo, useEffect } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -16,10 +16,10 @@ import { BlockMath, InlineMath } from 'react-katex';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { getFirestore, doc, onSnapshot, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
 import { getAuth } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { useRouter } from 'next/navigation';
+import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -48,7 +48,6 @@ export default function AiTutorPage() {
     const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
     
     const { toast } = useToast();
-    const router = useRouter();
     
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
@@ -92,9 +91,10 @@ export default function AiTutorPage() {
             setProgress(70);
             
             // Track usage
-            const auth = getAuth();
+            const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+            const auth = getAuth(app);
             if (auth.currentUser) {
-                const firestore = getFirestore();
+                const firestore = getFirestore(app);
                 await addDoc(collection(firestore, 'aiTutorUsage'), {
                     userId: auth.currentUser.uid,
                     timestamp: serverTimestamp(),
@@ -324,4 +324,3 @@ export default function AiTutorPage() {
     );
 }
 
-    

@@ -1,3 +1,4 @@
+
 'use server';
 /**
  * @fileOverview An AI flow to solve a single question from a question paper.
@@ -17,8 +18,8 @@ const SolveQuestionPaperInputSchema = z.object({
 export type SolveQuestionPaperInput = z.infer<typeof SolveQuestionPaperInputSchema>;
 
 const SolveQuestionPaperOutputSchema = z.object({
-  explanation: z.string().describe("A detailed, step-by-step explanation of how to arrive at the solution. This should be formatted as HTML with LaTeX for formulas."),
-  finalAnswer: z.string().describe("The final, concise answer to the question, formatted with LaTeX."),
+  explanation: z.string().describe("A detailed, step-by-step explanation of how to arrive at the solution. This should be formatted as HTML with valid LaTeX for formulas."),
+  finalAnswer: z.string().describe("The final, concise answer to the question, formatted with valid LaTeX."),
 });
 export type SolveQuestionPaperOutput = z.infer<typeof SolveQuestionPaperOutputSchema>;
 
@@ -35,7 +36,7 @@ const prompt = ai.definePrompt({
 
 **CRITICAL INSTRUCTIONS:**
 1.  **Explanation Format:** Your explanation MUST be valid HTML. Use tags like <p>, <ul>, <li>, <strong>, etc., for clear formatting.
-2.  **LaTeX for Formulas:** ALL mathematical formulas, variables, and symbols in both the explanation and the final answer MUST be formatted using LaTeX syntax. Use \\\\( ... \\\\) for inline math and \\\\\\[ ... \\\\\\] for block math.
+2.  **LaTeX for Formulas:** ALL mathematical formulas, variables, and symbols in both the explanation and the final answer MUST be formatted using valid LaTeX syntax. Use \\\\( ... \\\\) for inline math and \\\\\\[ ... \\\\\\] for block math.
 3.  **Step-by-Step Logic:** Break down the solution into logical, easy-to-follow steps. Explain the 'why' behind each step, including the principles or formulas used.
 4.  **Final Answer:** The final answer should be concise and directly answer the question asked.
 
