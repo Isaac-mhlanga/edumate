@@ -111,7 +111,7 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
                                 </CardHeader>
                                 <CardContent className="p-4 flex-grow">
                                     <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
-                                    <h3 className="font-semibold text-lg">{course.title}</h3>
+                                    <h3 className="font-semibold text-base truncate">{course.title}</h3>
                                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{course.description}</p>
                                 </CardContent>
                                 <CardFooter className="p-4 pt-0">
