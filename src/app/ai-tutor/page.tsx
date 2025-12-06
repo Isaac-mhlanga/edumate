@@ -39,10 +39,6 @@ type Solution = {
     clarification?: string;
 };
 
-type MonetizationSettings = {
-    isAiTutorPaid: boolean;
-};
-
 export default function AiTutorPage() {
     const [files, setFiles] = useState<File[]>([]);
     const [extractedQuestions, setExtractedQuestions] = useState<ExtractedQuestion[]>([]);
@@ -50,38 +46,10 @@ export default function AiTutorPage() {
     const [isExtracting, setIsExtracting] = useState(false);
     const [progress, setProgress] = useState(0);
     const [selectedQuestionId, setSelectedQuestionId] = useState<string | null>(null);
-    const [monetizationSettings, setMonetizationSettings] = useState<MonetizationSettings | null>(null);
-    const [hasPaid, setHasPaid] = useState(false);
-
+    
     const { toast } = useToast();
     const router = useRouter();
-
-    useEffect(() => {
-        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-        const firestore = getFirestore(app);
-        const settingsRef = doc(firestore, 'settings', 'monetization');
-        
-        const unsubscribe = onSnapshot(settingsRef, (doc) => {
-            if (doc.exists()) {
-                setMonetizationSettings(doc.data() as MonetizationSettings);
-            } else {
-                setMonetizationSettings({ isAiTutorPaid: false });
-            }
-        });
-
-        // Check for payment success from redirect
-        const searchParams = new URLSearchParams(window.location.search);
-        if (searchParams.get('payment') === 'success') {
-            setHasPaid(true);
-            toast({ title: 'Payment Successful!', description: 'You can now use the AI Tutor for this session.' });
-            // Clean up URL
-            router.replace('/ai-tutor');
-        }
-
-        return () => unsubscribe();
-    }, [router, toast]);
-
-
+    
     const onDrop = useCallback((acceptedFiles: File[]) => {
         setFiles(acceptedFiles);
         setExtractedQuestions([]);
@@ -108,11 +76,6 @@ export default function AiTutorPage() {
     const handleExtract = async () => {
         if (files.length === 0) {
             toast({ variant: 'destructive', title: 'No files selected', description: 'Please select one or more files to extract questions from.' });
-            return;
-        }
-
-        if (monetizationSettings?.isAiTutorPaid && !hasPaid) {
-            router.push('/payment?type=ai-tutor&title=AI Tutor Session&price=50'); // Example price
             return;
         }
 

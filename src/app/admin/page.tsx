@@ -70,9 +70,6 @@ function AdminPage() {
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [events, setEvents] = React.useState<CalendarEvent[]>([]);
-    const [monetizationSettings, setMonetizationSettings] = React.useState<MonetizationSettings>({ isAiTutorPaid: false });
-    const [aiTutorUsage, setAiTutorUsage] = React.useState<AiTutorUsageData>([]);
-
     
     const [loading, setLoading] = React.useState(true);
     const [aiSummary, setAiSummary] = React.useState('');
@@ -115,35 +112,6 @@ function AdminPage() {
             setAiSummary("Could not generate performance summary at this time.");
         } finally { setLoadingAiSummary(false); }
     }, []);
-
-    React.useEffect(() => {
-        const settingsRef = doc(firestore, 'settings', 'monetization');
-        const unsubscribeSettings = onSnapshot(settingsRef, (doc) => {
-            if (doc.exists()) {
-                setMonetizationSettings(doc.data() as MonetizationSettings);
-            }
-        });
-        
-        const usageRef = collection(firestore, 'aiTutorUsage');
-        const unsubscribeUsage = onSnapshot(usageRef, (snapshot) => {
-            const monthlyUsage: { [key: string]: number } = {};
-            snapshot.docs.forEach(doc => {
-                const data = doc.data();
-                if (data.timestamp) {
-                    const month = format(data.timestamp.toDate(), 'MMM yyyy');
-                    monthlyUsage[month] = (monthlyUsage[month] || 0) + 1;
-                }
-            });
-            const formattedUsage = Object.entries(monthlyUsage).map(([month, usage]) => ({ month, usage }));
-            setAiTutorUsage(formattedUsage);
-        });
-
-        return () => {
-            unsubscribeSettings();
-            unsubscribeUsage();
-        }
-    }, [firestore]);
-
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -249,22 +217,6 @@ function AdminPage() {
         setIsCancelSubscriptionDialogOpen(false);
     };
 
-    const handleMonetizationToggle = async (isPaid: boolean) => {
-        const newSettings = { isAiTutorPaid: isPaid };
-        try {
-            await setDoc(doc(firestore, 'settings', 'monetization'), newSettings);
-            setMonetizationSettings(newSettings);
-            toast({
-                title: "Settings Updated",
-                description: `AI Tutor monetization has been ${isPaid ? 'enabled' : 'disabled'}.`
-            });
-        } catch (error) {
-            console.error("Error updating monetization settings: ", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not update monetization settings.' });
-        }
-    };
-
-
     return (
         <div className="space-y-8">
             <style jsx global>{`
@@ -280,9 +232,6 @@ function AdminPage() {
                     events={events}
                     payoutRequests={payoutRequests}
                     onRegenerateSummary={() => generatePerformanceSummary(courses, users, assignments, transactions)}
-                    monetizationSettings={monetizationSettings}
-                    onMonetizationToggle={handleMonetizationToggle}
-                    aiTutorUsage={aiTutorUsage}
                 />
             )}
             {currentTab === 'users' && <AdminUsersTab users={users} onUserAction={handleUserAction} />}

@@ -22,12 +22,9 @@ interface AdminOverviewTabProps {
     onRegenerateSummary: () => void;
     events: CalendarEvent[];
     payoutRequests: PayoutRequest[];
-    monetizationSettings: MonetizationSettings;
-    onMonetizationToggle: (isPaid: boolean) => void;
-    aiTutorUsage: AiTutorUsageData;
 }
 
-export function AdminOverviewTab({ loading, aiSummary, loadingAiSummary, onRegenerateSummary, events, payoutRequests, monetizationSettings, onMonetizationToggle, aiTutorUsage }: AdminOverviewTabProps) {
+export function AdminOverviewTab({ loading, aiSummary, loadingAiSummary, onRegenerateSummary, events, payoutRequests }: AdminOverviewTabProps) {
     const [currentActivityPage, setCurrentActivityPage] = React.useState(1);
     const activitiesPerPage = 4;
     const [currentEventPage, setCurrentEventPage] = React.useState(1);
@@ -51,13 +48,6 @@ export function AdminOverviewTab({ loading, aiSummary, loadingAiSummary, onRegen
     
     const totalActivityPages = Math.ceil(adminData.recentActivity.length / activitiesPerPage);
     const paginatedActivities = adminData.recentActivity.slice((currentActivityPage - 1) * activitiesPerPage, currentActivityPage * activitiesPerPage);
-
-    const chartConfig: ChartConfig = {
-      usage: {
-        label: "Usage",
-        color: "hsl(var(--primary))",
-      },
-    };
 
     return (
         <div className="space-y-8">
@@ -231,46 +221,6 @@ export function AdminOverviewTab({ loading, aiSummary, loadingAiSummary, onRegen
                             </div>
                         </CardFooter>
                     )}
-                </Card>
-            </section>
-             <section className="grid gap-6 lg:grid-cols-2">
-                <Card>
-                    <CardHeader>
-                        <div className="flex items-center gap-2">
-                             <Wand2 className="text-primary h-6 w-6" />
-                            <CardTitle className="text-xl">AI Tutor Usage</CardTitle>
-                        </div>
-                        <CardDescription>Monthly usage statistics for the AI Tutor feature.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <ChartContainer config={chartConfig} className="h-64">
-                            <BarChart data={aiTutorUsage}>
-                                <XAxis dataKey="month" tickLine={false} axisLine={false} tickMargin={8} />
-                                <YAxis />
-                                <Tooltip cursor={false} content={<ChartTooltipContent />} />
-                                <Bar dataKey="usage" fill="var(--color-usage)" radius={4} />
-                            </BarChart>
-                        </ChartContainer>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardHeader>
-                        <CardTitle className="text-xl">Feature Monetization</CardTitle>
-                        <CardDescription>Enable or disable paid features across the platform.</CardDescription>
-                    </CardHeader>
-                    <CardContent className="space-y-4">
-                        <div className="flex items-center justify-between rounded-lg border p-4">
-                            <div>
-                                <Label htmlFor="ai-tutor-switch" className="font-semibold">AI Tutor Fee</Label>
-                                <p className="text-xs text-muted-foreground">Charge a one-time fee for using the AI Tutor.</p>
-                            </div>
-                            <Switch
-                                id="ai-tutor-switch"
-                                checked={monetizationSettings.isAiTutorPaid}
-                                onCheckedChange={onMonetizationToggle}
-                            />
-                        </div>
-                    </CardContent>
                 </Card>
             </section>
         </div>
