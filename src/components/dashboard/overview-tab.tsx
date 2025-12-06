@@ -110,7 +110,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                             <Card key={course.id} className="flex flex-col">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
-                                        <CardTitle className="text-lg truncate">{course.title}</CardTitle>
+                                        <CardTitle className="text-base truncate">{course.title}</CardTitle>
                                         <Badge>Enrolled</Badge>
                                     </div>
                                     <CardDescription>{course.subject} - Grade {course.grade}</CardDescription>
@@ -213,7 +213,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                                         </Link>
                                         <CardHeader>
                                             <Badge variant="secondary">{course.subject}</Badge>
-                                            <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
+                                            <CardTitle className="text-base pt-2 truncate">{course.title}</CardTitle>
                                         </CardHeader>
                                         <CardContent className="flex-grow">
                                             <p className="text-sm text-muted-foreground line-clamp-2">
