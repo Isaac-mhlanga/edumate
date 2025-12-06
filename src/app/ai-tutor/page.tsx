@@ -5,7 +5,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { UploadCloud, FileText, Wand2, RefreshCw, Lightbulb, BrainCircuit, Bot, Loader2, CheckCircle } from 'lucide-react';
+import { UploadCloud, FileText, Wand2, Lightbulb, BrainCircuit, Bot, Loader2, CheckCircle } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/hooks/use-toast';
 import { extractQuestionsFromPapers, type ExtractedQuestion } from '@/ai/flows/extract-questions-from-papers';
@@ -16,19 +16,7 @@ import { BlockMath, InlineMath } from 'react-katex';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { addDoc, collection, serverTimestamp } from 'firebase/firestore';
-import { getAuth } from 'firebase/auth';
-import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getFirestore } from 'firebase/firestore';
-
-const firebaseConfig = {
-    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
-    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
-    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
-    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
-    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
-    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-};
+import { Separator } from '@/components/ui/separator';
 
 type Solution = {
     questionId: string;
@@ -90,19 +78,6 @@ export default function AiTutorPage() {
             const response = await extractQuestionsFromPapers({ paperDataUris: fileDataUris });
             setProgress(70);
             
-            // Track usage
-            const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-            const auth = getAuth(app);
-            if (auth.currentUser) {
-                const firestore = getFirestore(app);
-                await addDoc(collection(firestore, 'aiTutorUsage'), {
-                    userId: auth.currentUser.uid,
-                    timestamp: serverTimestamp(),
-                    fileCount: files.length,
-                    questionCount: response.questions.length,
-                });
-            }
-
             setExtractedQuestions(response.questions);
             if (response.questions.length > 0) {
                 setSelectedQuestionId(response.questions[0].id);
@@ -170,18 +145,18 @@ export default function AiTutorPage() {
     return (
         <div className="min-h-screen bg-muted/20">
             <div className="container mx-auto py-8">
-                <div className="text-center mb-8">
+                <div className="text-center mb-12">
                     <h1 className="text-4xl font-bold tracking-tight flex items-center justify-center gap-3">
                         <Wand2 className="h-10 w-10 text-primary"/> AI Tutor Studio
                     </h1>
-                    <p className="text-lg text-muted-foreground mt-2">Upload a past paper or worksheet, and let the AI break it down, solve it, and explain it to you.</p>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Upload a past paper or worksheet, and let the AI break it down, solve it, and explain it to you.</p>
                 </div>
             
                 <div className={cn("grid gap-8", extractedQuestions.length > 0 ? "lg:grid-cols-3" : "lg:grid-cols-1")}>
-                    <div className={cn("space-y-6", extractedQuestions.length > 0 ? "lg:col-span-1" : "lg:col-span-1")}>
+                    <div className="lg:col-span-1 flex flex-col gap-8">
                         <Card>
                             <CardHeader>
-                                <CardTitle className="text-lg">1. Upload Document</CardTitle>
+                                <CardTitle className="text-xl">1. Upload Document</CardTitle>
                             </CardHeader>
                             <CardContent>
                                 <div {...getRootProps()} className={cn(`flex flex-col items-center justify-center p-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors`, isDragActive ? 'border-primary bg-primary/10' : 'border-border hover:border-primary/50 hover:bg-muted/50')}>
@@ -209,7 +184,7 @@ export default function AiTutorPage() {
                                 )}
                                 {isExtracting && <Progress value={progress} className="w-full" />}
                                 <Button onClick={handleExtract} disabled={files.length === 0 || isExtracting} size="lg" className="w-full">
-                                    {isExtracting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Analyzing Document</> : <><BrainCircuit className="mr-2 h-4 w-4"/> Extract Topics</>}
+                                    {isExtracting ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Analyzing...</> : <><BrainCircuit className="mr-2 h-4 w-4"/> Extract Questions</>}
                                 </Button>
                             </CardFooter>
                         </Card>
@@ -217,7 +192,7 @@ export default function AiTutorPage() {
                         {extractedQuestions.length > 0 && (
                              <Card>
                                 <CardHeader>
-                                    <CardTitle className="text-lg">2. Select a Topic</CardTitle>
+                                    <CardTitle className="text-xl">2. Select a Question</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex flex-col gap-2 max-h-[50vh] overflow-y-auto">
                                     {extractedQuestions.map((q, index) => (
@@ -246,31 +221,41 @@ export default function AiTutorPage() {
                         {selectedQuestion ? (
                              <Card className="sticky top-8">
                                 <CardHeader>
-                                    <CardTitle className="text-lg">3. Learn & Understand</CardTitle>
-                                    <CardDescription>AI-generated explanation for the selected topic.</CardDescription>
+                                    <CardTitle className="text-xl">3. Understand the Solution</CardTitle>
+                                    <CardDescription>AI-generated explanation for the selected question.</CardDescription>
                                 </CardHeader>
-                                <CardContent className="space-y-4 max-h-[75vh] overflow-y-auto">
+                                <CardContent className="space-y-6 max-h-[75vh] overflow-y-auto">
                                     {selectedSolution?.isGenerating ? (
                                         <div className="space-y-6 p-4">
                                             <Skeleton className="h-6 w-1/4" />
-                                            <div className="space-y-2">
+                                            <div className="space-y-3">
                                                 <Skeleton className="h-4 w-full" />
                                                 <Skeleton className="h-4 w-full" />
                                                 <Skeleton className="h-4 w-3/4" />
+                                            </div>
+                                             <Skeleton className="h-6 w-1/3" />
+                                            <div className="space-y-3">
+                                                <Skeleton className="h-4 w-full" />
+                                                <Skeleton className="h-4 w-5/6" />
                                             </div>
                                             <Skeleton className="h-8 w-1/2" />
                                         </div>
                                     ) : selectedSolution ? (
                                         <div className="prose prose-sm dark:prose-invert max-w-none">
-                                            <h4>Explanation:</h4>
                                             <div dangerouslySetInnerHTML={{ __html: selectedSolution.explanation }} />
 
-                                            <h4>Final Answer:</h4>
-                                            <BlockMath math={selectedSolution.finalAnswer} />
+                                            <Separator className="my-6"/>
+
+                                            <div>
+                                                <h4>Final Answer</h4>
+                                                <div className="p-4 bg-muted rounded-md not-prose text-base">
+                                                    <BlockMath math={selectedSolution.finalAnswer} />
+                                                </div>
+                                            </div>
                                             
-                                            <div className="mt-6 not-prose flex flex-col gap-4">
+                                            <div className="mt-8 not-prose flex flex-col gap-4">
                                                 <Button variant="link" onClick={() => handleClarify(selectedSolution.questionId, selectedSolution.explanation)} disabled={selectedSolution.isClarifying} className="p-0 h-auto justify-start text-base">
-                                                    <Lightbulb className="mr-2 h-4 w-4"/> Explain this like I'm 5
+                                                    <Lightbulb className="mr-2 h-4 w-4"/> Can you explain this differently?
                                                 </Button>
                                                 {selectedSolution.isClarifying && (
                                                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
@@ -291,7 +276,7 @@ export default function AiTutorPage() {
                                         </div>
                                     ) : (
                                         <div className="flex items-center justify-center p-8 space-x-2 text-muted-foreground">
-                                            <p>Select a topic to see the explanation.</p>
+                                            <p>Select a question to see the explanation.</p>
                                         </div>
                                     )}
                                 </CardContent>
@@ -300,7 +285,7 @@ export default function AiTutorPage() {
                              <Card className="flex flex-col items-center justify-center text-center p-12 h-full">
                                 <CardHeader>
                                     <CardTitle>Ready to Go!</CardTitle>
-                                    <CardDescription>Click the "Extract Topics" button to let the AI analyze your document.</CardDescription>
+                                    <CardDescription>Click the "Extract Questions" button to let the AI analyze your document.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <BrainCircuit className="h-16 w-16 text-muted-foreground"/>
@@ -310,7 +295,7 @@ export default function AiTutorPage() {
                              <Card className="flex flex-col items-center justify-center text-center p-12 h-full">
                                 <CardHeader>
                                     <CardTitle>Your AI Learning Space</CardTitle>
-                                    <CardDescription>Upload a document to get started. The AI will break it down into topics for you to explore.</CardDescription>
+                                    <CardDescription>Upload a document to get started. The AI will break it down into questions for you to explore.</CardDescription>
                                 </CardHeader>
                                 <CardContent>
                                     <Bot className="h-16 w-16 text-muted-foreground"/>
@@ -323,4 +308,3 @@ export default function AiTutorPage() {
         </div>
     );
 }
-
