@@ -107,6 +107,16 @@ service cloud.firestore {
        // Tutors can update booking status.
        allow update: if isSignedIn() && isOwner(resource.data.tutorId);
     }
+
+    // Rules for payouts
+    match /payouts/{payoutId} {
+        // Instructors can create their own payout requests
+        allow create: if isInstructor() && isOwner(request.resource.data.instructorId);
+        // Instructors can read their own payout requests
+        allow get, list: if isInstructor() && isOwner(resource.data.instructorId);
+        // Admins can read and update any payout request (to approve/decline)
+        allow get, list, update: if isAdmin();
+    }
     
   }
 }

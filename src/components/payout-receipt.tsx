@@ -2,12 +2,12 @@
 'use client';
 
 import React from "react";
-import { PayoutRequest } from "@/lib/data";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Icons } from "./icons";
 import { CheckCircle, Clock, XCircle } from "lucide-react";
+import { PayoutRequest } from "@/app/admin/page";
 
 interface PayoutReceiptProps {
     payout: PayoutRequest;

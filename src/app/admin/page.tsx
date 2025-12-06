@@ -5,10 +5,10 @@ import React from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp, addDoc } from "firebase/firestore";
+import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp, addDoc, orderBy, query } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
-import { PayoutRequest as PayoutRequestType, adminData } from "@/lib/data";
+import { adminData } from "@/lib/data";
 import { AdminOverviewTab } from "@/components/admin/overview-tab";
 import { AdminUsersTab } from "@/components/admin/users-tab";
 import { AdminCoursesTab } from "@/components/admin/courses-tab";
@@ -23,6 +23,8 @@ import { AssignmentReviewDialog } from "@/components/admin/assignment-review-dia
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
 import { CalendarDialogs } from "@/components/admin/calendar-dialogs";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
+import { format } from "date-fns";
+
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -35,7 +37,15 @@ const firebaseConfig = {
 
 export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
 export type Course = { id: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft' };
-export type PayoutRequest = PayoutRequestType;
+export type PayoutRequest = {
+    id: string;
+    instructor: string;
+    instructorId: string;
+    amount: number;
+    requestedAt: Timestamp;
+    date: string; // for display
+    status: 'Pending' | 'Completed' | 'Declined';
+};
 export type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; grade?: string; subject?: string; scope?: string; platforms?: string[]; };
@@ -51,7 +61,7 @@ function AdminPage() {
     const [users, setUsers] = React.useState<User[]>([]);
     const [courses, setCourses] = React.useState<Course[]>([]);
     const [assignments, setAssignments] = React.useState<Assignment[]>([]);
-    const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>(adminData.payoutRequests);
+    const [payoutRequests, setPayoutRequests] = React.useState<PayoutRequest[]>([]);
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [events, setEvents] = React.useState<CalendarEvent[]>([]);
@@ -128,6 +138,18 @@ function AdminPage() {
                 const transactionsSnapshot = await getDocs(collection(firestore, "transactions"));
                 const fetchedTransactions = transactionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
                 setTransactions(fetchedTransactions);
+
+                const payoutsQuery = query(collection(firestore, 'payouts'), orderBy('requestedAt', 'desc'));
+                const payoutsSnapshot = await getDocs(payoutsQuery);
+                const fetchedPayouts = payoutsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        ...data,
+                        date: data.requestedAt ? format(data.requestedAt.toDate(), 'PPP') : 'N/A'
+                    } as PayoutRequest;
+                });
+                setPayoutRequests(fetchedPayouts);
                 
                 await generatePerformanceSummary(fetchedCourses, usersWithSubscriptions, fetchedAssignments, fetchedTransactions);
             } catch (error) {
@@ -172,9 +194,12 @@ function AdminPage() {
         setIsCourseActionDialogOpen(false);
     };
 
-    const confirmPayoutAction = () => {
+    const confirmPayoutAction = async () => {
         if (!selectedPayout || !payoutAction) return;
         const newStatus = payoutAction === 'Approve' ? 'Completed' : 'Declined';
+        
+        await updateDoc(doc(firestore, 'payouts', selectedPayout.id), { status: newStatus });
+        
         setPayoutRequests(payouts => payouts.map(p => p.id === selectedPayout.id ? {...p, status: newStatus } : p));
         toast({ title: `Payout ${payoutAction}d`, description: `The payout request for ${selectedPayout.instructor} has been ${newStatus.toLowerCase()}.` });
         setIsPayoutActionDialogOpen(false);
@@ -297,5 +322,3 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
-
-    

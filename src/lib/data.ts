@@ -1,5 +1,6 @@
 
 import { BarChart, Book, BookOpen, CheckCircle, Clock, CreditCard, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote, PenSquare } from "lucide-react";
+import { type PayoutRequest as AdminPayoutRequest } from "@/app/admin/page";
 
 export const faqData = [
     {
@@ -506,14 +507,7 @@ const allAssignments = [
      { id: 'A020', studentName: 'Sarah Miller', assignmentTitle: 'Quantum Entanglement Paper', course: 'Quantum Physics Intro', submittedDate: '1 day ago', status: 'Pending Review', fileUrl: '#', instructor: 'Dr. Alan Grant' }
 ];
 
-export type PayoutRequest = {
-    id: string;
-    instructor: string;
-    instructorId: string;
-    amount: number;
-    date: string;
-    status: 'Pending' | 'Completed' | 'Declined';
-}
+export type PayoutRequest = Omit<AdminPayoutRequest, 'id'> & { id: string };
 
 const payoutRequests: PayoutRequest[] = [
      { id: 'T009', instructor: 'Dr. Evelyn Reed', instructorId: 'I001', status: 'Pending', amount: -4820.00, date: '2024-05-23' },
@@ -557,8 +551,3 @@ export const adminData = {
         { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
     ]
 };
-
-    
-    
-
-    

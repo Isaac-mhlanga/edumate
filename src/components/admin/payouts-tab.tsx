@@ -31,7 +31,7 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
         return payouts.filter(payout => {
             const searchMatch = payoutFilters.search.trim().toLowerCase() === '' ||
                 payout.instructor.toLowerCase().includes(payoutFilters.search.trim().toLowerCase());
-            const statusMatch = payoutFilters.status === 'All' || payout.status === payout.status;
+            const statusMatch = payoutFilters.status === 'All' || payout.status === payoutFilters.status;
             return searchMatch && statusMatch;
         });
     }, [payouts, payoutFilters]);
@@ -87,7 +87,7 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
                     {paginatedPayouts.map(payout => (
                         <TableRow key={payout.id}>
                             <TableCell className="font-medium">{payout.instructor}</TableCell>
-                            <TableCell className="font-semibold text-red-600">{payout.amount.toFixed(2)}</TableCell>
+                            <TableCell className={`font-semibold ${payout.amount < 0 ? 'text-red-600' : ''}`}>{Math.abs(payout.amount).toFixed(2)}</TableCell>
                             <TableCell className="hidden md:table-cell">{payout.date}</TableCell>
                             <TableCell>
                                 <Badge variant={"outline"} className={

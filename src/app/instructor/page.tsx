@@ -689,9 +689,29 @@ function InstructorPage() {
     setSelectedTransaction(null);
   };
 
-  const handlePayoutRequest = (amount: number) => {
-    toast({ title: "Payout Requested", description: `Your request to withdraw R ${amount.toFixed(2)} has been submitted.` });
-    setIsPayoutDialogOpen(false);
+  const handlePayoutRequest = async (amount: number) => {
+    if (!user || amount <= 0) {
+        toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Payout amount must be greater than zero.'});
+        return;
+    }
+
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+
+    try {
+        await addDoc(collection(firestore, 'payouts'), {
+            instructorId: user.uid,
+            instructor: user.displayName || 'Unnamed Instructor',
+            amount: -Math.abs(amount), // Store as a negative value
+            status: 'Pending',
+            requestedAt: serverTimestamp()
+        });
+        toast({ title: "Payout Requested", description: `Your request to withdraw R ${amount.toFixed(2)} has been submitted.` });
+        setIsPayoutDialogOpen(false);
+    } catch (error) {
+        console.error("Error requesting payout: ", error);
+        toast({ variant: 'destructive', title: 'Request Failed', description: 'Could not submit your payout request.' });
+    }
   };
 
   const handleDateClick = (arg: any) => {
@@ -955,5 +975,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
