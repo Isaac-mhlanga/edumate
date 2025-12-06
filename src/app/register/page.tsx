@@ -35,7 +35,7 @@ const registerFormSchema = z.object({
     email: z.string().email("Please enter a valid email address."),
     password: z.string().min(6, "Password must be at least 6 characters long."),
     confirmPassword: z.string(),
-    role: z.enum(["student", "instructor", "tutor", "admin"], { required_error: "Please select a role." }),
+    role: z.enum(["student", "instructor", "tutor"], { required_error: "Please select a role." }),
 }).refine(data => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
     path: ["confirmPassword"],
@@ -109,7 +109,7 @@ export default function RegisterPage() {
                     errorMessage = 'Firebase API Key is invalid. Please check your configuration.';
                 }
                 else {
-                    errorMessage = `An error occurred: ${error.message}`;
+                    errorMessage = `An error occurred: ${'\'\'\''}error.message{'\'\'\''}`;
                 }
             } else if (error instanceof Error) {
                 errorMessage = error.message;
@@ -222,7 +222,6 @@ export default function RegisterPage() {
                                                     <SelectItem value="student">Student</SelectItem>
                                                     <SelectItem value="instructor">Instructor</SelectItem>
                                                     <SelectItem value="tutor">Tutor</SelectItem>
-                                                    <SelectItem value="admin">Admin</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                             <FormMessage />
