@@ -162,7 +162,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         title: "Logged Out",
         description: "You have been successfully logged out.",
       });
-      router.push('/login');
+      router.replace('/');
     } catch (error) {
       toast({
         variant: "destructive",
