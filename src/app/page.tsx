@@ -301,19 +301,51 @@ export default function Home() {
                           </TabsList>
                           {(['10', '11', '12'] as const).map(grade => (
                             <TabsContent key={grade} value={grade} className="mt-4 space-y-4">
-                              {curriculumData[grade][subject].map((chapter) => (
-                                <div key={chapter.chapter}>
-                                  <h4 className="font-semibold text-md flex items-center gap-2 mb-2">
-                                    <BookOpen className="h-4 w-4 text-muted-foreground" />
-                                    {chapter.chapter}
-                                  </h4>
-                                  <ul className="space-y-1 list-disc list-inside text-muted-foreground pl-2">
-                                    {chapter.topics.map(topic => (
-                                      <li key={topic} className="text-sm">{topic}</li>
-                                    ))}
-                                  </ul>
-                                </div>
-                              ))}
+                               <Accordion type="single" collapsible className="w-full">
+                                {curriculumData[grade][subject].map((chapter, chapterIndex) => (
+                                    <div key={chapter.chapter} className="mb-4">
+                                        <h4 className="font-semibold text-md flex items-center gap-2 mb-2">
+                                            <BookOpen className="h-4 w-4 text-muted-foreground" />
+                                            {chapter.chapter}
+                                        </h4>
+                                        <div className="pl-6 space-y-1">
+                                            {chapter.topics.map((topic, topicIndex) => {
+                                                const relevantCourses = allCourses.filter(course => 
+                                                    course.subject === subject && 
+                                                    course.grade === grade &&
+                                                    (course.title.toLowerCase().includes(topic.toLowerCase()) || 
+                                                    topic.toLowerCase().includes(course.title.toLowerCase()))
+                                                );
+
+                                                return (
+                                                <AccordionItem value={`topic-${chapterIndex}-${topicIndex}`} key={topic}>
+                                                    <AccordionTrigger className="text-sm py-2 hover:no-underline">
+                                                        {topic}
+                                                    </AccordionTrigger>
+                                                    <AccordionContent>
+                                                        {relevantCourses.length > 0 ? (
+                                                            <div className="grid grid-cols-1 gap-2 pt-2">
+                                                                {relevantCourses.map(course => (
+                                                                    <div key={course.id} onClick={() => handleCourseClick(course)} className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10 cursor-pointer">
+                                                                        <Image src={course.thumbnail} alt={course.title} width={80} height={45} className="rounded-md object-cover aspect-video" data-ai-hint="online course" />
+                                                                        <div>
+                                                                            <p className="font-semibold text-xs line-clamp-1">{course.title}</p>
+                                                                            <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
+                                                                        </div>
+                                                                    </div>
+                                                                ))}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-xs text-muted-foreground px-2 py-4 text-center">No specific courses for this topic yet. Explore our main course catalog!</p>
+                                                        )}
+                                                    </AccordionContent>
+                                                </AccordionItem>
+                                                )
+                                            })}
+                                        </div>
+                                    </div>
+                                ))}
+                                </Accordion>
                             </TabsContent>
                           ))}
                         </Tabs>
