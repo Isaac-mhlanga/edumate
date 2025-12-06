@@ -104,7 +104,6 @@ export default function Home() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [quality, setQuality] = useState('720p');
   const [isClient, setIsClient] = useState(false);
-  const [selectedGrade, setSelectedGrade] = useState<'10' | '11' | '12'>('12');
   
   const { toast } = useToast();
 
@@ -156,23 +155,12 @@ export default function Home() {
     { number: '10k+', label: 'Happy Students' }
   ];
   
-  const curriculumIcons = {
+  const curriculumIcons: { [key: string]: React.ElementType } = {
     'Mathematics': FunctionSquare,
     'Physical Sciences': Rocket,
     'Life Sciences': Dna,
   };
 
-  const getCoursesForTopic = (topic: string, subject: keyof (typeof curriculumData)[typeof selectedGrade]) => {
-    const searchTerms = topic.toLowerCase().replace(/[-&,]/g, ' ').split(' ').filter(term => term.length > 2);
-    return allCourses.filter(course => 
-      course.subject === subject && 
-      course.grade === selectedGrade &&
-      searchTerms.some(term => 
-        course.title.toLowerCase().includes(term) || 
-        course.description.toLowerCase().includes(term)
-      )
-    );
-  };
 
   const handleCourseClick = (course: Course) => {
     setSelectedCourseForPlayer(course);
@@ -288,82 +276,52 @@ export default function Home() {
           
            <section id="curriculum" className="py-20 bg-muted/50">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted to cover all essential topics. Find courses that match your needs.</p>
-                </div>
-                
-                <Tabs defaultValue="Mathematics" className="w-full animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                    <TabsList className="grid w-full grid-cols-1 sm:grid-cols-3 mb-4">
-                        {Object.keys(curriculumData['12']).map((subject) => {
-                            const Icon = curriculumIcons[subject as keyof typeof curriculumIcons];
-                            return (
-                                <TabsTrigger key={subject} value={subject} className="gap-2">
-                                    {Icon && <Icon className="h-5 w-5"/>} {subject}
-                                </TabsTrigger>
-                            )
-                        })}
-                    </TabsList>
-
-                     <Tabs defaultValue={selectedGrade} onValueChange={(value) => setSelectedGrade(value as '10' | '11' | '12')} className="w-full animate-fade-in-up mb-8" style={{ animationDelay: '0.3s' }}>
-                        <TabsList className="grid w-full grid-cols-3 max-w-sm mx-auto">
+              <div className="text-center mb-12 animate-fade-in-up">
+                <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted to cover all essential topics for Grades 10, 11, and 12.</p>
+              </div>
+              
+              <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
+                {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
+                  const Icon = curriculumIcons[subject];
+                  return (
+                    <Card key={subject} className="animate-fade-in-up shadow-md hover:shadow-lg transition-shadow duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                      <CardHeader>
+                        <div className="flex items-center gap-4">
+                          {Icon && <Icon className="h-8 w-8 text-primary" />}
+                          <CardTitle className="text-2xl">{subject}</CardTitle>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <Tabs defaultValue="12" className="w-full">
+                          <TabsList className="grid w-full grid-cols-3">
                             <TabsTrigger value="10">Grade 10</TabsTrigger>
                             <TabsTrigger value="11">Grade 11</TabsTrigger>
                             <TabsTrigger value="12">Grade 12</TabsTrigger>
-                        </TabsList>
-                    </Tabs>
-                    
-                    {Object.entries(curriculumData[selectedGrade]).map(([subject, chapters]) => (
-                        <TabsContent key={`${selectedGrade}-${subject}`} value={subject}>
-                             <Accordion type="multiple" className="w-full space-y-4">
-                                {chapters.map((chapter, index) => (
-                                    <Card key={index} className="overflow-hidden bg-card shadow-md">
-                                        <AccordionItem value={`item-${index}`} className="border-b-0">
-                                            <AccordionTrigger className="font-semibold hover:no-underline p-6">
-                                                <div className="flex items-center gap-3">
-                                                    <BookOpen className="h-6 w-6 text-primary/80"/>
-                                                    <span>{chapter.chapter}</span>
-                                                </div>
-                                            </AccordionTrigger>
-                                            <AccordionContent className="p-6 pt-0">
-                                                <Accordion type="multiple" className="w-full space-y-2">
-                                                    {chapter.topics.map((topic, topicIndex) => {
-                                                        const relatedCourses = getCoursesForTopic(topic, subject as any);
-                                                        return (
-                                                            <AccordionItem value={`topic-${topicIndex}`} key={topicIndex} className="border rounded-md bg-background/50">
-                                                                <AccordionTrigger className="text-base font-medium hover:no-underline px-4 py-3 text-left">
-                                                                    {topic}
-                                                                </AccordionTrigger>
-                                                                <AccordionContent className="px-4 pb-4">
-                                                                     {relatedCourses.length > 0 ? (
-                                                                        <div className="pt-4 grid grid-cols-1 md:grid-cols-2 gap-4 border-t">
-                                                                            {relatedCourses.map(course => (
-                                                                                <Card key={course.id} className="flex flex-col sm:flex-row items-center gap-4 p-3 bg-muted/50 hover:bg-muted transition-colors">
-                                                                                    <Image src={course.thumbnail} alt={course.title} width={120} height={68} className="rounded-md object-cover aspect-video w-full sm:w-[120px] shrink-0" data-ai-hint="online course abstract" />
-                                                                                    <div className="flex-1 text-left">
-                                                                                        <h4 className="font-semibold text-sm">{course.title}</h4>
-                                                                                        <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
-                                                                                    </div>
-                                                                                    <Button size="sm" variant="ghost" onClick={() => handleCourseClick(course)}>Preview</Button>
-                                                                                </Card>
-                                                                            ))}
-                                                                        </div>
-                                                                    ) : (
-                                                                        <p className="text-sm text-muted-foreground pt-4 border-t">No courses available for this topic yet.</p>
-                                                                    )}
-                                                                </AccordionContent>
-                                                            </AccordionItem>
-                                                        );
-                                                    })}
-                                                </Accordion>
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    </Card>
-                                ))}
-                            </Accordion>
-                        </TabsContent>
-                    ))}
-                </Tabs>
+                          </TabsList>
+                          {(['10', '11', '12'] as const).map(grade => (
+                            <TabsContent key={grade} value={grade} className="mt-4 space-y-4">
+                              {curriculumData[grade][subject].map((chapter) => (
+                                <div key={chapter.chapter}>
+                                  <h4 className="font-semibold text-md flex items-center gap-2 mb-2">
+                                    <BookOpen className="h-4 w-4 text-muted-foreground" />
+                                    {chapter.chapter}
+                                  </h4>
+                                  <ul className="space-y-1 list-disc list-inside text-muted-foreground pl-2">
+                                    {chapter.topics.map(topic => (
+                                      <li key={topic} className="text-sm">{topic}</li>
+                                    ))}
+                                  </ul>
+                                </div>
+                              ))}
+                            </TabsContent>
+                          ))}
+                        </Tabs>
+                      </CardContent>
+                    </Card>
+                  )
+                })}
+              </div>
             </div>
           </section>
 
