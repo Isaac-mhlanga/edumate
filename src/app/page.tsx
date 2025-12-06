@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles } from "lucide-react";
+import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRightIcon, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -62,7 +62,18 @@ type Course = {
     instructor?: string;
 };
 
-type UpcomingEvent = UpcomingEventType;
+type UpcomingEvent = {
+  id: string;
+  title: string;
+  start: string;
+  end?: string;
+  allDay: boolean;
+  instructor: string;
+  grade: string;
+  subject: string;
+  scope: string;
+  platforms?: ('tiktok' | 'youtube' | 'zoom')[];
+};
 
 
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
@@ -435,6 +446,12 @@ export default function Home() {
                                           {event.end && isClient && ` - ${format(new Date(event.end), 'p')}`}
                                       </span>
                                   </div>
+                                   {event.scope && (
+                                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                        <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                                        <p className="line-clamp-2">{event.scope}</p>
+                                    </div>
+                                  )}
                                    {event.platforms && event.platforms.length > 0 && (
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm text-muted-foreground">Live on:</span>
@@ -728,5 +745,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

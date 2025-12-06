@@ -120,4 +120,13 @@
       background-position: 200% 0;
     }
   }
+  .fc-list-day-text, .fc-list-day-side-text {
+    color: hsl(var(--foreground)) !important;
+  }
+  .fc-list-day-cushion {
+    background-color: hsl(var(--card)) !important;
+  }
+   .fc-list-table tr {
+    border-color: hsl(var(--border));
+   }
 }
