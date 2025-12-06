@@ -285,7 +285,7 @@ export default function Home() {
                 {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                   const Icon = curriculumIcons[subject];
                   return (
-                    <Card key={subject} className="animate-fade-in-up shadow-md hover:shadow-lg transition-shadow duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                    <Card key={subject} className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                       <CardHeader>
                         <div className="flex items-center gap-4">
                           {Icon && <Icon className="h-8 w-8 text-primary" />}
@@ -304,7 +304,7 @@ export default function Home() {
                                <Accordion type="single" collapsible className="w-full">
                                 {curriculumData[grade][subject].map((chapter, chapterIndex) => (
                                     <div key={chapter.chapter} className="mb-4">
-                                        <h4 className="font-semibold text-md flex items-center gap-2 mb-2">
+                                        <h4 className="font-semibold text-sm flex items-center gap-2 mb-2">
                                             <BookOpen className="h-4 w-4 text-muted-foreground" />
                                             {chapter.chapter}
                                         </h4>
@@ -363,7 +363,7 @@ export default function Home() {
                         <h2 className="text-3xl md:text-4xl font-bold mb-4">Upcoming Events</h2>
                         <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
                     </div>
-                    <Card className="animate-fade-in-up shadow-lg" style={{ animationDelay: '0.2s' }}>
+                    <Card className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: '0.2s' }}>
                         <CardContent className="p-0">
                              <Table>
                                 <TableHeader>
@@ -429,7 +429,7 @@ export default function Home() {
                  ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {paginatedCourses.map((course, index) => (
-                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                 <Image 
                                 src={course.thumbnail}
@@ -518,7 +518,7 @@ export default function Home() {
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card shadow-md">
+                         <Card key={index} className="overflow-hidden bg-card shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
                                 <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}
