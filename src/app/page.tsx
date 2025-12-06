@@ -427,17 +427,21 @@ export default function Home() {
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
                           <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
-                              <CardHeader className="flex-row items-center gap-4">
-                                  <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20">
+                              <CardHeader className="flex-row items-start gap-4">
+                                  <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
                                       <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
                                       <span className="text-3xl font-bold">{isClient ? format(new Date(event.start), 'd') : ''}</span>
                                   </div>
-                                  <div>
+                                  <div className="flex-1">
                                       <Badge variant="secondary" className="mb-1">{event.subject} - Grade {event.grade}</Badge>
                                       <CardTitle className="text-lg line-clamp-2">{event.title}</CardTitle>
                                   </div>
                               </CardHeader>
                               <CardContent className="flex-grow space-y-3">
+                                   <div className="flex items-start gap-2 text-sm text-muted-foreground">
+                                        <Info className="h-4 w-4 mt-0.5 shrink-0" />
+                                        <p className="line-clamp-2">{event.scope}</p>
+                                    </div>
                                   <div className="text-sm text-muted-foreground flex items-center gap-2">
                                       <Clock className="h-4 w-4" />
                                       <span>
@@ -445,12 +449,6 @@ export default function Home() {
                                           {event.end && isClient && ` - ${format(new Date(event.end), 'p')}`}
                                       </span>
                                   </div>
-                                   {event.scope && (
-                                    <div className="flex items-start gap-2 text-sm text-muted-foreground">
-                                        <Info className="h-4 w-4 mt-0.5 shrink-0" />
-                                        <p className="line-clamp-2">{event.scope}</p>
-                                    </div>
-                                  )}
                                    {event.platforms && event.platforms.length > 0 && (
                                     <div className="flex items-center gap-2">
                                         <span className="text-sm text-muted-foreground">Live on:</span>
