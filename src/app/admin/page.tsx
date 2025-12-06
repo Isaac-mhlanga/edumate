@@ -187,6 +187,11 @@ function AdminPage() {
 
     return (
         <div className="space-y-8">
+            <style jsx global>{`
+                .fc-col-header-cell-cushion {
+                    color: hsl(var(--muted-foreground)) !important;
+                }
+            `}</style>
             {currentTab === 'overview' && (
                 <AdminOverviewTab
                     loading={loading}

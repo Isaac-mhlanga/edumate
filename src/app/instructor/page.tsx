@@ -793,6 +793,9 @@ function InstructorPage() {
         .fc .fc-list-event:hover td {
           background-color: hsl(var(--muted));
         }
+        .fc-col-header-cell-cushion {
+            color: hsl(var(--muted-foreground)) !important;
+        }
       `}</style>
 
       {currentTab === 'overview' && (

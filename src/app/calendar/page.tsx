@@ -116,6 +116,9 @@ export default function CalendarPage() {
                 .fc .fc-list-event:hover td {
                     background-color: hsl(var(--muted));
                 }
+                 .fc-col-header-cell-cushion {
+                    color: hsl(var(--muted-foreground)) !important;
+                }
             `}</style>
 
             <div className="space-y-6">
