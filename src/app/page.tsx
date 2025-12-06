@@ -66,11 +66,22 @@ type Course = {
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
     <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-background">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-background/80 to-background z-0"></div>
-       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-primary/10 rounded-full blur-[150px] animate-pulse duration-[4000ms]" />
+      <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10"></div>
+      <div className="absolute inset-0 z-0">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
+          <div className="absolute top-0 left-0 w-full h-full">
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] border-2 border-primary/10 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45rem] h-[45rem] border border-primary/10 rounded-full" />
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30rem] h-[30rem] border border-primary/10 rounded-full" />
+          </div>
+          <div className="absolute -top-1/4 -right-1/4 w-[50rem] h-96 -rotate-45 bg-primary/10 rounded-full blur-3xl" />
+          <div className="absolute -bottom-1/4 -left-1/4 w-[50rem] h-96 -rotate-45 bg-primary/10 rounded-full blur-3xl" />
+      </div>
+
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-purple-400 to-red-400 animate-shimmer" style={{ animationDelay: '0.2s', backgroundSize: '200% 100%' }}>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
             Master Maths & Science
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
