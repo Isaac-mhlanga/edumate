@@ -43,6 +43,7 @@ export type Course = {
     videos: any[];
     duration?: string;
     rating?: number;
+    progress?: number; // Added for student progress
 };
 
 export type SubmittedAssignment = {
@@ -82,6 +83,8 @@ function DashboardPage() {
     const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [allCourses, setAllCourses] = React.useState<Course[]>([]);
+    const [purchasedCourses, setPurchasedCourses] = React.useState<Course[]>([]);
+
     const [loadingAssignments, setLoadingAssignments] = React.useState(true);
     const [loadingTransactions, setLoadingTransactions] = React.useState(true);
     const [loadingCourses, setLoadingCourses] = React.useState(true);
@@ -102,23 +105,38 @@ function DashboardPage() {
             setLoadingTransactions(true);
             setLoadingCourses(true);
             try {
+                // Fetch assignments
                 const assignmentsQuery = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
                 const assignmentsSnapshot = await getDocs(assignmentsQuery);
                 const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
                 setSubmittedAssignments(assignments);
 
+                // Fetch transactions
                 const transactionsQuery = query(collection(firestore, 'transactions'), where('studentId', '==', user.uid), orderBy('createdAt', 'desc'));
                 const transactionsSnapshot = await getDocs(transactionsQuery);
-                const transactions = transactionsSnapshot.docs.map(doc => {
+                const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
                     const data = doc.data();
                     return {
                         id: doc.id, ...data, date: data.createdAt ? format(data.createdAt.toDate(), 'PPP') : 'N/A'
                     }
                 }) as Transaction[];
-                setTransactions(transactions);
+                setTransactions(fetchedTransactions);
 
+                // Fetch all courses
                 const coursesSnapshot = await getDocs(collection(firestore, 'courses'));
-                setAllCourses(coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[]);
+                const fetchedAllCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
+                setAllCourses(fetchedAllCourses);
+
+                // Determine purchased courses
+                const purchasedCourseIds = new Set(fetchedTransactions.filter(t => t.itemType === 'course').map(t => t.itemId));
+                const studentPurchasedCourses = fetchedAllCourses
+                    .filter(course => purchasedCourseIds.has(course.id))
+                    .map(course => ({
+                        ...course,
+                        // Simulate progress for now. In a real app, this would come from a 'progress' collection.
+                        progress: Math.floor(Math.random() * 80) + 10,
+                    }));
+                setPurchasedCourses(studentPurchasedCourses);
 
             } catch (error: any) {
                 console.error("Error fetching student data: ", error);
@@ -140,6 +158,7 @@ function DashboardPage() {
                 setSubmittedAssignments([]);
                 setTransactions([]);
                 setAllCourses([]);
+                setPurchasedCourses([]);
                 setLoadingAssignments(false);
                 setLoadingTransactions(false);
                 setLoadingCourses(false);
@@ -168,9 +187,20 @@ function DashboardPage() {
                 createdAt: serverTimestamp(),
             });
 
-            setTransactions(prev => [{
-                id: `temp-${Date.now()}`, itemId: course.id, itemTitle: course.title, itemType: 'course', status: 'Completed', amount: 0, createdAt: Timestamp.now(), date: format(new Date(), 'PPP'),
-            } as Transaction, ...prev]);
+            const newTransaction: Transaction = {
+                id: `temp-${Date.now()}`,
+                itemId: course.id,
+                itemTitle: course.title,
+                itemType: 'course',
+                status: 'Completed',
+                amount: 0,
+                createdAt: Timestamp.now(),
+                date: format(new Date(), 'PPP'),
+                type: 'course'
+            };
+            setTransactions(prev => [newTransaction, ...prev]);
+
+            setPurchasedCourses(prev => [{...course, progress: 0}, ...prev]);
 
             toast({ title: 'Enrollment Successful!', description: `You have enrolled in "${course.title}".` });
         } catch (error) {
@@ -201,8 +231,8 @@ function DashboardPage() {
             {currentTab === 'overview' && (
                 <OverviewTab 
                     submittedAssignments={submittedAssignments} 
-                    allCourses={allCourses} 
-                    purchasedCourseIds={purchasedCourseIds}
+                    purchasedCourses={purchasedCourses}
+                    loading={loadingCourses || loadingAssignments}
                 />
             )}
 
