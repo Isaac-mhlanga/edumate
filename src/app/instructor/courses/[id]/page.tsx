@@ -134,9 +134,9 @@ export default function CoursePreviewPage() {
 
 
     return (
-        <div className="space-y-6">
-             <div>
-                <Button variant="outline" asChild>
+        <div className="space-y-4">
+             <div className="mb-2">
+                <Button variant="link" asChild className="p-0 text-sm h-auto">
                     <Link href={backLink}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Back to Courses
@@ -290,3 +290,5 @@ export default function CoursePreviewPage() {
         </div>
     );
 }
+
+    
