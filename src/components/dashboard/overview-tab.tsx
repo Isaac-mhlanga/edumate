@@ -11,14 +11,22 @@ import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { studentData } from "@/lib/data";
-import { ArrowRight, Award, BookOpen, CheckCircle, Search, Filter } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CheckCircle, Search, Filter, Clapperboard, Clock } from "lucide-react";
 import { type Course, type SubmittedAssignment } from '@/app/dashboard/page';
+import { Separator } from '../ui/separator';
 
 interface OverviewTabProps {
     submittedAssignments: SubmittedAssignment[];
     allCourses: Course[];
     purchasedCourseIds: Set<string>;
 }
+
+type VideoData = {
+    id: string;
+    title: string;
+    url:string;
+    duration?: number;
+};
 
 export function OverviewTab({ submittedAssignments, allCourses, purchasedCourseIds }: OverviewTabProps) {
     const completedAssignmentsCount = submittedAssignments.filter(a => a.status === 'Paid').length;
@@ -55,6 +63,22 @@ export function OverviewTab({ submittedAssignments, allCourses, purchasedCourseI
     const totalPurchasedCoursePages = Math.ceil(filteredPurchasedCourses.length / purchasedCoursesPerPage);
     const paginatedPurchasedCourses = filteredPurchasedCourses.slice((currentPurchasedCoursePage - 1) * purchasedCoursesPerPage, currentPurchasedCoursePage * purchasedCoursesPerPage);
     const purchasedSubjects = ['All', ...Array.from(new Set(purchasedCoursesWithDetails.map(c => c.subject)))];
+
+    const formatDuration = (videos: VideoData[] = []) => {
+      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
+      if (totalSeconds === 0) return null;
+
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+      if (hours > 0) {
+          return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
+      }
+      if (minutes > 0) {
+          return `${minutes}m`;
+      }
+      return `${Math.round(totalSeconds)}s`;
+    };
 
     return (
         <div className="space-y-8">
@@ -152,21 +176,41 @@ export function OverviewTab({ submittedAssignments, allCourses, purchasedCourseI
                         {paginatedPurchasedCourses.length > 0 ? (
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 {paginatedPurchasedCourses.map((course) => (
-                                    <Card key={course.id} className="overflow-hidden group flex flex-col h-full">
-                                        <CardHeader className="p-0">
-                                            <div className="bg-primary/10 aspect-video flex items-center justify-center">
-                                                <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full h-full object-cover transition-transform group-hover:scale-105" data-ai-hint="online course abstract" />
+                                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1">
+                                        <Link href={`/courses/${course.id}?from=dashboard`} className="block">
+                                            <div className="relative h-48 overflow-hidden">
+                                                <Image 
+                                                src={course.thumbnail}
+                                                alt={course.title}
+                                                fill
+                                                className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                                data-ai-hint="online course"
+                                                />
                                             </div>
+                                        </Link>
+                                        <CardHeader>
+                                            <Badge variant="secondary">{course.subject}</Badge>
+                                            <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
                                         </CardHeader>
-                                        <CardContent className="p-4 flex-grow">
-                                            <Badge variant="secondary" className="mb-2">{course.subject}</Badge>
-                                            <h3 className="font-semibold text-lg">{course.title}</h3>
+                                        <CardContent className="flex-grow">
+                                            <p className="text-sm text-muted-foreground line-clamp-2">
+                                            {course.description}
+                                            </p>
                                         </CardContent>
-                                        <CardFooter className="p-4 pt-0">
-                                            <Button variant="link" className="p-0 h-auto as-child">
-                                                <Link href={`/courses/${course.id}?from=dashboard`}>
-                                                    Start Learning <ArrowRight className="ml-1 h-4 w-4"/>
-                                                </Link>
+                                        <CardFooter className="flex-col items-start gap-4">
+                                            <div className="flex justify-between w-full text-sm text-muted-foreground">
+                                                <div className="flex items-center gap-2">
+                                                    <Clapperboard className="w-4 h-4" />
+                                                    <span>{course.videos.length} lessons</span>
+                                                </div>
+                                                <div className="flex items-center gap-2">
+                                                    <Clock className="w-4 h-4" />
+                                                    <span>{formatDuration(course.videos as VideoData[]) || 'N/A'}</span>
+                                                </div>
+                                            </div>
+                                            <Separator />
+                                            <Button asChild className="w-full">
+                                                <Link href={`/courses/${course.id}?from=dashboard`}>Start Learning</Link>
                                             </Button>
                                         </CardFooter>
                                     </Card>
