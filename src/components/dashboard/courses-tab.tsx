@@ -10,14 +10,22 @@ import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ListFilter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ListFilter, ChevronLeft, ChevronRight, Clapperboard, Clock } from "lucide-react";
 import { type Course } from '@/app/dashboard/page';
+import { Separator } from '../ui/separator';
 
 interface CoursesTabProps {
     allCourses: Course[];
     loadingCourses: boolean;
     onFreeEnrollment: (course: Course) => void;
 }
+
+type VideoData = {
+    id: string;
+    title: string;
+    url:string;
+    duration?: number;
+};
 
 export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: CoursesTabProps) {
     const [courseFilters, setCourseFilters] = React.useState({ search: '', subject: 'All', grade: 'All' });
@@ -43,6 +51,23 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
     const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
     const allSubjects = ['All', 'Maths', 'Physical Sciences'];
     const allGrades = ['All', '10', '11', '12'];
+    
+    const formatDuration = (videos: VideoData[] = []) => {
+      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
+      if (totalSeconds === 0) return null;
+
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+
+      if (hours > 0) {
+          return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
+      }
+      if (minutes > 0) {
+          return `${minutes}m`;
+      }
+      return `${Math.round(totalSeconds)}s`;
+    };
+
 
     return (
         <Card>
@@ -114,7 +139,18 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
                                     <h3 className="font-semibold text-base truncate">{course.title}</h3>
                                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2">{course.description}</p>
                                 </CardContent>
-                                <CardFooter className="p-4 pt-0">
+                                <CardFooter className="p-4 pt-0 flex-col items-start gap-4">
+                                     <div className="flex justify-between w-full text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-2">
+                                            <Clapperboard className="w-4 h-4" />
+                                            <span>{course.videos.length} lessons</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <Clock className="w-4 h-4" />
+                                            <span>{formatDuration(course.videos as VideoData[]) || 'N/A'}</span>
+                                        </div>
+                                    </div>
+                                    <Separator />
                                     {course.pricing.type === 'free' ? (
                                         <Button className="w-full" variant="secondary" onClick={() => onFreeEnrollment(course)}>Enroll for Free</Button>
                                     ) : (
