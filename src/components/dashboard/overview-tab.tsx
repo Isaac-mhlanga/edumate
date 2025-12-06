@@ -10,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { studentData } from "@/lib/data";
 import { ArrowRight, Award, BookOpen, CheckCircle, Search, Filter, Clapperboard, Clock } from "lucide-react";
 import { type Course, type SubmittedAssignment } from '@/app/dashboard/page';
 import { Separator } from '../ui/separator';
@@ -128,7 +127,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                                         <Progress value={course.progress || 0} className="h-2"/>
                                     </div>
                                     <Button className="mt-4 w-full" asChild>
-                                        <Link href={`/courses/${course.id}?from=dashboard`}>
+                                        <Link href={`/dashboard/courses/${course.id}?from=dashboard`}>
                                             Continue Learning <ArrowRight className="ml-2 h-4 w-4"/>
                                         </Link>
                                     </Button>
@@ -201,7 +200,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 {paginatedPurchasedCourses.map((course) => (
                                      <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1">
-                                        <Link href={`/courses/${course.id}?from=dashboard`} className="block">
+                                        <Link href={`/dashboard/courses/${course.id}?from=dashboard`} className="block">
                                             <div className="relative h-48 overflow-hidden">
                                                 <Image 
                                                 src={course.thumbnail}
@@ -234,7 +233,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                                             </div>
                                             <Separator />
                                             <Button asChild className="w-full">
-                                                <Link href={`/courses/${course.id}?from=dashboard`}>Start Learning</Link>
+                                                <Link href={`/dashboard/courses/${course.id}?from=dashboard`}>Start Learning</Link>
                                             </Button>
                                         </CardFooter>
                                     </Card>
@@ -252,3 +251,5 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
         </div>
     );
 }
+
+    
