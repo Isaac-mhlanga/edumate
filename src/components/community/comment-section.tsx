@@ -306,9 +306,9 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                 </div>
                                 {replyingTo === comment.id && (
                                     <div className="ml-11 mt-2 flex items-start gap-3">
-                                         <Avatar className="h-8 w-8">
+                                         <Avatar className="h-8 w-8 border">
                                             <AvatarImage src={user?.photoURL || undefined} />
-                                            <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                                            <AvatarFallback>{user ? user.displayName?.charAt(0) : 'Ed'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 space-y-2">
                                             <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting || !user} className="text-sm" />
