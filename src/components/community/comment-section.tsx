@@ -138,7 +138,8 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
 
     if (!currentDoc) return;
     
-    const isLiked = currentDoc.likedBy.includes(user.uid);
+    const likedBy = currentDoc.likedBy || [];
+    const isLiked = likedBy.includes(user.uid);
     const newLikeCount = isLiked ? increment(-1) : increment(1);
     const likeUpdate = isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid);
 
@@ -152,14 +153,14 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
         if (type === 'question') {
             onUpdateQuestion({
                 ...question,
-                likeCount: question.likeCount + (isLiked ? -1 : 1),
-                likedBy: isLiked ? question.likedBy.filter(uid => uid !== user.uid) : [...question.likedBy, user.uid],
+                likeCount: (question.likeCount || 0) + (isLiked ? -1 : 1),
+                likedBy: isLiked ? (question.likedBy || []).filter(uid => uid !== user.uid) : [...(question.likedBy || []), user.uid],
             });
         } else {
             setComments(prev => prev.map(c => c.id === id ? {
                 ...c,
-                likeCount: c.likeCount + (isLiked ? -1 : 1),
-                likedBy: isLiked ? c.likedBy.filter(uid => uid !== user.uid) : [...c.likedBy, user.uid],
+                likeCount: (c.likeCount || 0) + (isLiked ? -1 : 1),
+                likedBy: isLiked ? (c.likedBy || []).filter(uid => uid !== user.uid) : [...(c.likedBy || []), user.uid],
             } : c));
         }
 
@@ -243,18 +244,18 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                  
                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
                     <Button variant="ghost" size="sm" onClick={() => handleLike('question', question.id)} disabled={!user}>
-                        <ThumbsUp className={cn("h-4 w-4 mr-2", user && question.likedBy.includes(user.uid) && "text-primary fill-primary/20")} />
-                        {question.likeCount}
+                        <ThumbsUp className={cn("h-4 w-4 mr-2", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
+                        {question.likeCount || 0}
                     </Button>
                      <div className="flex items-center gap-2">
-                        <MessageSquare className="h-4 w-4" /> {question.commentCount}
+                        <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
                     </div>
                 </div>
 
                  <Separator />
 
                  <div className="space-y-4">
-                    <h3 className="font-semibold">{question.commentCount} Answers</h3>
+                    <h3 className="font-semibold">{question.commentCount || 0} Answers</h3>
                     {loadingComments ? (
                         <p className="text-muted-foreground">Loading comments...</p>
                     ) : comments.length > 0 ? (
@@ -272,7 +273,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                     <p className="text-sm">{comment.content}</p>
                                     <div className="flex items-center gap-2 mt-1">
                                         <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
-                                            <ThumbsUp className={cn("h-4 w-4 mr-1", user && comment.likedBy.includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount}
+                                            <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                                         </Button>
                                         <Button variant="ghost" size="sm" className="text-muted-foreground">Reply</Button>
                                     </div>
