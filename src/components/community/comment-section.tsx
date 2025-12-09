@@ -291,7 +291,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                             <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
                                             <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                         </div>
-                                        <p className="text-sm">{comment.content}</p>
+                                        <p className="text-sm mt-1">{comment.content}</p>
                                         {renderAttachment(comment)}
                                         <div className="flex items-center gap-1 mt-1">
                                             <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)}>
@@ -341,7 +341,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                                     <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
                                                     <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                                 </div>
-                                                <p className="text-sm">{reply.content}</p>
+                                                <p className="text-sm mt-1">{reply.content}</p>
                                                 {renderAttachment(reply)}
                                                  <div className="flex items-center gap-1 mt-1">
                                                     <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)}>
