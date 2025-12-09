@@ -6,6 +6,7 @@ import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp, addDoc, orderBy, query, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { getStorage, ref, deleteObject } from "firebase/storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
 import { adminData } from "@/lib/data";
@@ -19,7 +20,7 @@ import { AdminSubscriptionsTab } from "@/components/admin/subscriptions-tab";
 import { UserActionDialogs } from "@/components/admin/user-action-dialogs";
 import { CourseActionDialog } from "@/components/admin/course-action-dialog";
 import { PayoutActionDialog, PayoutReceiptDialog } from "@/components/admin/payout-dialogs";
-import { AssignmentReviewDialog } from "@/components/admin/assignment-review-dialog";
+import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/admin/assignment-action-dialogs";
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
 import { CalendarDialogs } from "@/components/admin/calendar-dialogs";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
@@ -60,6 +61,7 @@ function AdminPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
     const [firestore] = React.useState(getFirestore(getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)));
+    const [storage] = React.useState(getStorage(getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)));
 
     const currentTab = searchParams.get('tab') || 'overview';
 
@@ -89,6 +91,7 @@ function AdminPage() {
     const [isPayoutActionDialogOpen, setIsPayoutActionDialogOpen] = React.useState(false);
     const [isReceiptDialogOpen, setIsReceiptDialogOpen] = React.useState(false);
     const [isAssignmentReviewDialogOpen, setIsAssignmentReviewDialogOpen] = React.useState(false);
+    const [isDeleteAssignmentDialogOpen, setIsDeleteAssignmentDialogOpen] = React.useState(false);
     const [isCancelSubscriptionDialogOpen, setIsCancelSubscriptionDialogOpen] = React.useState(false);
 
     const generatePerformanceSummary = React.useCallback(async (courses: Course[], users: User[], assignments: Assignment[], transactions: Transaction[]) => {
@@ -209,6 +212,30 @@ function AdminPage() {
         toast({ title: `Payout ${payoutAction}d`, description: `The payout request for ${selectedPayout.instructor} has been ${newStatus.toLowerCase()}.` });
         setIsPayoutActionDialogOpen(false);
     };
+
+    const confirmDeleteAssignment = async () => {
+        if (!selectedAssignment) return;
+        
+        try {
+            // Delete file from storage
+            if (selectedAssignment.fileUrl) {
+                const fileRef = ref(storage, selectedAssignment.fileUrl);
+                await deleteObject(fileRef);
+            }
+            
+            // Delete document from firestore
+            await deleteDoc(doc(firestore, 'assignments', selectedAssignment.id));
+
+            setAssignments(assignments.filter(a => a.id !== selectedAssignment.id));
+            toast({ title: "Assignment Deleted", description: `The assignment "${selectedAssignment.assignmentTitle}" has been deleted.` });
+        } catch (error) {
+            console.error("Error deleting assignment:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not delete the assignment.' });
+        } finally {
+            setIsDeleteAssignmentDialogOpen(false);
+            setSelectedAssignment(null);
+        }
+    };
     
     const confirmCancelSubscription = () => {
         if (!selectedSubscription) return;
@@ -251,7 +278,11 @@ function AdminPage() {
                     onOpenAssignmentReview={(assignment) => {
                         setSelectedAssignment(assignment);
                         setIsAssignmentReviewDialogOpen(true);
-                    }} 
+                    }}
+                    onDeleteAssignment={(assignment) => {
+                        setSelectedAssignment(assignment);
+                        setIsDeleteAssignmentDialogOpen(true);
+                    }}
                 />
             )}
             {currentTab === 'calendar' && <AdminCalendarTab events={events} setEvents={setEvents} />}
@@ -315,6 +346,12 @@ function AdminPage() {
                     toast({ title: "Feedback Sent", description: "Your comments and actions have been logged." });
                     setIsAssignmentReviewDialogOpen(false);
                 }}
+            />
+            <DeleteAssignmentDialog
+                isOpen={isDeleteAssignmentDialogOpen}
+                setIsOpen={setIsDeleteAssignmentDialogOpen}
+                selectedAssignment={selectedAssignment}
+                onConfirm={confirmDeleteAssignment}
             />
             <SubscriptionActionDialog
                 isOpen={isCancelSubscriptionDialogOpen}

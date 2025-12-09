@@ -4,19 +4,20 @@
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ListFilter, Eye, CheckCircle, DollarSign, Hourglass, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ListFilter, Eye, CheckCircle, DollarSign, Hourglass, ChevronLeft, ChevronRight, MoreVertical, Trash2 } from "lucide-react";
 import { type Assignment } from "@/app/admin/page";
 
 interface AdminAssignmentsTabProps {
     assignments: Assignment[];
     onOpenAssignmentReview: (assignment: Assignment) => void;
+    onDeleteAssignment: (assignment: Assignment) => void;
 }
 
-export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview }: AdminAssignmentsTabProps) {
+export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDeleteAssignment }: AdminAssignmentsTabProps) {
     const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', instructor: 'All' });
     const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
     const assignmentsPerPage = 7;
@@ -110,9 +111,20 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview }: Adm
                                 </Badge>
                             </TableCell>
                             <TableCell className="text-right">
-                                <Button variant="outline" size="sm" onClick={() => onOpenAssignmentReview(assignment)}>
-                                    <Eye className="mr-0 sm:mr-2 h-4 w-4" /> <span className="hidden sm:inline">View</span>
-                                </Button>
+                                <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                        <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => onOpenAssignmentReview(assignment)}>
+                                            <Eye className="mr-2 h-4 w-4" /> View Details
+                                        </DropdownMenuItem>
+                                        <DropdownMenuSeparator />
+                                        <DropdownMenuItem onClick={() => onDeleteAssignment(assignment)} className="text-destructive focus:text-destructive">
+                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                        </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                </DropdownMenu>
                             </TableCell>
                         </TableRow>
                     ))}
@@ -130,3 +142,5 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview }: Adm
         </Card>
     );
 }
+
+    
