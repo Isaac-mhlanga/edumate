@@ -89,7 +89,7 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
                         <TableRow key={user.id}>
                             <TableCell>
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-9 w-9"><AvatarFallback>{user.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
+                                    <Avatar className="h-9 w-9 border"><AvatarFallback>{user.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
                                     <div>
                                         <p className="font-medium">{user.name}</p>
                                         <p className="text-xs text-muted-foreground">{user.email}</p>
