@@ -106,6 +106,7 @@ const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/instructor', tab: 'calendar' },
   { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },
   { href: '/instructor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/instructor', tab: 'earnings' },
+  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
 ];
 
 const adminMenuItems: MenuItem[] = [
@@ -116,6 +117,7 @@ const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/admin', tab: 'calendar' },
   { href: '/admin?tab=payouts', label: 'Payouts', icon: Banknote, basePath: '/admin', tab: 'payouts' },
   { href: '/admin?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/admin', tab: 'subscriptions' },
+  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
 ];
 
 const tutorMenuItems: MenuItem[] = [
@@ -123,6 +125,7 @@ const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
+  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
 ];
 
 
