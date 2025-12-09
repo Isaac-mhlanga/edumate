@@ -298,8 +298,8 @@ function AdminPage() {
     return (
         <div className="space-y-8">
             <style jsx global>{`
-                .fc-col-header-cell-cushion {
-                    color: hsl(var(--muted-foreground)) !important;
+                .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
+                    color: hsl(var(--foreground)) !important;
                 }
             `}</style>
             {currentTab === 'overview' && (

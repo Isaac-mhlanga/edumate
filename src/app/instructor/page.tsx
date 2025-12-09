@@ -778,14 +778,14 @@ function InstructorPage() {
           padding: 4px 6px;
           cursor: pointer;
         }
-        .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard .fc-list-table td {
-          background-color: hsl(var(--card));
+        .fc-theme-standard .fc-list-day-cushion {
+          background-color: hsl(var(--card)) !important;
         }
         .fc .fc-list-event:hover td {
           background-color: hsl(var(--muted));
         }
-        .fc-col-header-cell-cushion {
-            color: hsl(var(--muted-foreground)) !important;
+        .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
+            color: hsl(var(--foreground)) !important;
         }
       `}</style>
 
