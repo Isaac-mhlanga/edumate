@@ -130,7 +130,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
         }
 
-        batch.set(commentRef, commentData as any);
+        batch.set(commentRef, commentData);
         
         if (!parentId) { // Only increment comment count for top-level comments
             const questionRef = doc(firestore, 'questions', question.id);
@@ -294,14 +294,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
     }
   };
-  
-  const toggleCollapse = (commentId: string) => {
-    setCollapsedComments(prev => 
-        prev.includes(commentId) 
-            ? prev.filter(id => id !== commentId)
-            : [...prev, commentId]
-    );
-  };
 
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
     if (!item.fileUrl) return null;
@@ -329,6 +321,14 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
         )}
       </div>
+    );
+  };
+  
+  const toggleCollapse = (commentId: string) => {
+    setCollapsedComments(prev => 
+        prev.includes(commentId) 
+            ? prev.filter(id => id !== commentId)
+            : [...prev, commentId]
     );
   };
   
