@@ -8,14 +8,23 @@ import { z } from 'zod';
 import { getAuth } from 'firebase/auth';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader2, Send, Paperclip } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
 
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
@@ -42,7 +51,8 @@ export function QuestionForm() {
 
   const onSubmit = async (data: FormValues) => {
     setIsSubmitting(true);
-    const auth = getAuth();
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
     const user = auth.currentUser;
 
     if (!user) {
@@ -52,8 +62,8 @@ export function QuestionForm() {
     }
 
     try {
-      const firestore = getFirestore();
-      const storage = getStorage();
+      const firestore = getFirestore(app);
+      const storage = getStorage(app);
       let fileUrl: string | undefined;
       let fileType: 'image' | 'pdf' | undefined;
 
