@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight, Book, GraduationCap } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -38,6 +38,8 @@ type Booking = {
 };
 
 type Mode = "Online" | "In-person";
+type VarsityModule = { name: string; year: string };
+
 
 type TutorProfile = {
     id: string;
@@ -48,6 +50,7 @@ type TutorProfile = {
     hourlyRate: number;
     subjects: string[];
     grades: string[];
+    varsityModules?: VarsityModule[];
     location: string;
     modes: Mode[];
     availability: { day: string; slots: string[] }[];
@@ -105,7 +108,7 @@ function TutorPage() {
                     const defaultProfile: TutorProfile = {
                         id: currentUser.uid, name: currentUser.displayName || 'New Tutor', email: currentUser.email || '',
                         avatar: currentUser.photoURL || 'https://placehold.co/100x100.png', bio: '', hourlyRate: 200, subjects: [],
-                        grades: [], location: '', modes: [], availability: availabilityPlaceholder, qualifications: '', approvalStatus: 'Pending'
+                        grades: [], varsityModules: [], location: '', modes: [], availability: availabilityPlaceholder, qualifications: '', approvalStatus: 'Pending'
                     };
                     await setDoc(profileRef, defaultProfile);
                     setProfile(defaultProfile);
@@ -242,12 +245,32 @@ function TutorPage() {
         handleProfileChange('availability', newAvailability);
     };
     
-    const handleModeToggle = (mode: Mode) => {
+    const handleCheckboxToggle = (field: 'subjects' | 'grades' | 'modes', value: string) => {
         if (!profile) return;
-        const newModes = profile.modes.includes(mode)
-            ? profile.modes.filter(m => m !== mode)
-            : [...profile.modes, mode];
-        handleProfileChange('modes', newModes);
+        const currentValues = profile[field] as string[] || [];
+        const newValues = currentValues.includes(value)
+            ? currentValues.filter(v => v !== value)
+            : [...currentValues, value];
+        handleProfileChange(field, newValues);
+    };
+
+    const handleAddVarsityModule = () => {
+        if (!profile) return;
+        const newModules = [...(profile.varsityModules || []), { name: '', year: '' }];
+        handleProfileChange('varsityModules', newModules);
+    };
+
+    const handleVarsityModuleChange = (index: number, field: 'name' | 'year', value: string) => {
+        if (!profile || !profile.varsityModules) return;
+        const newModules = [...profile.varsityModules];
+        newModules[index][field] = value;
+        handleProfileChange('varsityModules', newModules);
+    };
+    
+    const handleRemoveVarsityModule = (index: number) => {
+        if (!profile || !profile.varsityModules) return;
+        const newModules = profile.varsityModules.filter((_, i) => i !== index);
+        handleProfileChange('varsityModules', newModules);
     };
 
     const getStatusIcon = (status: Booking['status']) => {
@@ -327,7 +350,7 @@ function TutorPage() {
                            <CheckCircle className="h-4 w-4" />
                            <AlertTitle>Profile Approved!</AlertTitle>
                            <AlertDescription>
-                               Your profile is live and visible to students.
+                               Your profile is live and students can now book sessions with you.
                            </AlertDescription>
                        </Alert>
                     )}
@@ -469,6 +492,53 @@ function TutorPage() {
                             <CardDescription>Define subjects, rates, and how you conduct sessions.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="space-y-4">
+                                    <h4 className="font-semibold text-sm">High School</h4>
+                                    <div className="space-y-2">
+                                        <Label>Subjects</Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {["Maths", "Physical Sciences", "Life Sciences"].map(subject => (
+                                                <div key={subject} className="flex items-center space-x-2">
+                                                    <Checkbox id={`subject-${subject}`} checked={profile.subjects.includes(subject)} onCheckedChange={() => handleCheckboxToggle('subjects', subject)} />
+                                                    <label htmlFor={`subject-${subject}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">{subject}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Grades</Label>
+                                        <div className="flex flex-wrap gap-2">
+                                            {["10", "11", "12"].map(grade => (
+                                                <div key={grade} className="flex items-center space-x-2">
+                                                    <Checkbox id={`grade-${grade}`} checked={profile.grades.includes(grade)} onCheckedChange={() => handleCheckboxToggle('grades', grade)} />
+                                                    <label htmlFor={`grade-${grade}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">Grade {grade}</label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="space-y-4">
+                                     <h4 className="font-semibold text-sm">Varsity / College</h4>
+                                     <div className="space-y-2">
+                                        {(profile.varsityModules || []).map((mod, index) => (
+                                            <div key={index} className="flex items-end gap-2">
+                                                <div className="flex-1">
+                                                    <Label htmlFor={`mod-name-${index}`} className="text-xs">Module Name</Label>
+                                                    <Input id={`mod-name-${index}`} placeholder="e.g. MTH101" value={mod.name} onChange={e => handleVarsityModuleChange(index, 'name', e.target.value)} />
+                                                </div>
+                                                <div className="w-1/3">
+                                                    <Label htmlFor={`mod-year-${index}`} className="text-xs">Year</Label>
+                                                    <Input id={`mod-year-${index}`} placeholder="1st" value={mod.year} onChange={e => handleVarsityModuleChange(index, 'year', e.target.value)} />
+                                                </div>
+                                                <Button type="button" size="icon" variant="ghost" className="h-9 w-9 shrink-0" onClick={() => handleRemoveVarsityModule(index)}><XCircle className="h-4 w-4" /></Button>
+                                            </div>
+                                        ))}
+                                         <Button type="button" variant="outline" size="sm" onClick={handleAddVarsityModule}>Add Module</Button>
+                                     </div>
+                                </div>
+                            </div>
+                            <Separator/>
                              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-1">
                                     <Label htmlFor="tutor-rate">Your Hourly Rate (R)</Label>
@@ -501,7 +571,7 @@ function TutorPage() {
                             </div>
                         </CardHeader>
                         <CardContent className="space-y-6">
-                            {profile.availability.map((day, dayIndex) => (
+                             {profile.availability.map((day, dayIndex) => (
                                 <div key={day.day} className="grid grid-cols-[100px_1fr] items-start gap-6">
                                     <h4 className="font-semibold pt-2 text-right">{day.day}</h4>
                                     <div className="border rounded-lg p-4">
@@ -526,7 +596,7 @@ function TutorPage() {
                                                             )
                                                         )
                                                     ))}
-                                                     {!isEditingProfile && !day.slots.length && <p className="text-xs text-muted-foreground">Not available. Click 'Edit' to add slots.</p>}
+                                                     {!isEditingProfile && !day.slots.some(slot => slots.includes(slot)) && <p className="text-xs text-muted-foreground">Not available for this period.</p>}
                                                 </div>
                                             </div>
                                         ))}
