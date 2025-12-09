@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -48,26 +47,30 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion, lo
                 </div>
               </div>
               <p className="font-semibold mb-2 line-clamp-2">{q.title}</p>
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">{q.subject}</Badge>
-                    <Badge variant="outline" className="text-xs">Grade {q.grade}</Badge>
-                </div>
-                {q.fileUrl && (
-                    <div className="w-16 h-10 relative rounded overflow-hidden border">
+              
+              {q.fileUrl && (
+                <div className="my-2">
+                    <div className="w-full h-24 relative rounded-md overflow-hidden border">
                         {q.fileType === 'image' ? (
                             <Image src={q.fileUrl} alt="attachment" fill className="object-cover" />
                         ) : (
                             <div className="w-full h-full bg-muted flex items-center justify-center">
-                                <FileText className="h-5 w-5 text-muted-foreground"/>
+                                <FileText className="h-8 w-8 text-muted-foreground"/>
                             </div>
                         )}
                     </div>
-                )}
-              </div>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 pt-2 border-t">
-                <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> {q.likeCount || 0}</span>
-                <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {q.commentCount || 0}</span>
+                </div>
+              )}
+              
+              <div className="flex justify-between items-center mt-2 pt-2 border-t">
+                <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">{q.subject}</Badge>
+                    <Badge variant="outline" className="text-xs">Grade {q.grade}</Badge>
+                </div>
+                <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> {q.likeCount || 0}</span>
+                  <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {q.commentCount || 0}</span>
+                </div>
               </div>
             </button>
           ))
