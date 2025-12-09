@@ -106,7 +106,7 @@ export function AdminTutorsTab({ tutors, onTutorApproval, onViewProfile }: Admin
             </Card>
 
             <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
-                <DialogContent className="max-w-4xl h-[90vh]">
+                <DialogContent className="max-w-4xl h-[95vh]">
                     <DialogHeader>
                         <DialogTitle>Qualification Document</DialogTitle>
                         <DialogDescription>Review the document provided by the tutor.</DialogDescription>
@@ -210,3 +210,5 @@ export function TutorProfileDialog({ isOpen, setIsOpen, tutor }: TutorProfileDia
     </Dialog>
   )
 }
+
+    
