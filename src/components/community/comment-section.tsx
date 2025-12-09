@@ -128,9 +128,12 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             await uploadBytes(fileRef, file);
             commentData.fileUrl = await getDownloadURL(fileRef);
             commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+        } else {
+            commentData.fileUrl = null;
+            commentData.fileType = undefined;
         }
 
-        batch.set(commentRef, commentData);
+        batch.set(commentRef, commentData as any);
         
         if (!parentId) { // Only increment comment count for top-level comments
             const questionRef = doc(firestore, 'questions', question.id);
@@ -293,7 +296,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         console.error('Error toggling comments:', error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
     }
-  };
+};
   
     const toggleCollapse = (commentId: string) => {
       setCollapsedComments(prev => 
@@ -303,7 +306,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       );
     };
 
-    const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
+    const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
         if (!item.fileUrl) return null;
         return (
           <div className="space-y-2 rounded-lg border p-3 mt-2">
@@ -408,7 +411,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                             return (
                             <div key={comment.id} className="flex items-start gap-3">
                                 <Avatar className="h-8 w-8">
-                                    <AvatarImage src={comment.studentAvatar} />
+                                    <AvatarImage src={comment.studentAvatar ?? undefined} />
                                     <AvatarFallback>{comment.studentName?.charAt(0) || 'A'}</AvatarFallback>
                                 </Avatar>
                                 <div className="flex-1">
@@ -419,8 +422,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                     <p className="text-sm mt-1">{comment.content}</p>
                                     {renderAttachment(comment)}
                                     <div className="flex items-center gap-1 mt-2">
-                                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
-                                            <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
+                                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)}>
+                                            <ThumbsUp className={cn("h-4 w-4 mr-1", (comment.likedBy || []).includes(user?.uid || '') && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                                         </Button>
                                         <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }}>
                                             <CornerUpLeft className="mr-1 h-3 w-3" />
@@ -472,7 +475,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                                     {replies.map(reply => (
                                                     <div key={reply.id} className="flex items-start gap-3">
                                                         <Avatar className="h-8 w-8">
-                                                            <AvatarImage src={reply.studentAvatar} />
+                                                            <AvatarImage src={reply.studentAvatar ?? undefined} />
                                                             <AvatarFallback>{reply.studentName?.charAt(0) || 'A'}</AvatarFallback>
                                                         </Avatar>
                                                         <div className="flex-1">
@@ -483,8 +486,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                                             <p className="text-sm mt-1">{reply.content}</p>
                                                             {renderAttachment(reply)}
                                                             <div className="flex items-center gap-1 mt-2">
-                                                                <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)} disabled={!user}>
-                                                                    <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
+                                                                <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)}>
+                                                                    <ThumbsUp className={cn("h-4 w-4 mr-1", (reply.likedBy || []).includes(user?.uid || '') && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
                                                                 </Button>
                                                                  {userRole === 'admin' && (
                                                                     <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('comment', reply.id)}>
