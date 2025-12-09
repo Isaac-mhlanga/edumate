@@ -8,13 +8,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X, User } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
@@ -36,7 +36,7 @@ interface CommentSectionProps {
 
 export function CommentSection({ question, onUpdateQuestion }: CommentSectionProps) {
   const { toast } = useToast();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<import('firebase/auth').User | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(true);
   const [newComment, setNewComment] = useState('');
@@ -288,6 +288,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                     </Avatar>
                                     <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <User className="h-4 w-4"/>
                                             <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
                                             <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                         </div>
@@ -338,6 +339,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                             </Avatar>
                                             <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <User className="h-4 w-4"/>
                                                     <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
                                                     <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                                 </div>
