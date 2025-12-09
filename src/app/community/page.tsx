@@ -2,16 +2,15 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, getDocs, writeBatch, deleteDoc, getDoc, increment } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionForm } from '@/components/community/question-form';
 import { QuestionList } from '@/components/community/question-list';
 import { CommentSection } from '@/components/community/comment-section';
 import { type Question } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
-import { PublicHeader } from '@/components/public-header';
-import { Footer } from '@/components/footer';
 import { Card } from '@/components/ui/card';
+import withAuth from '@/components/with-auth';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -57,57 +56,68 @@ function CommunityPage() {
         }
     };
 
-    const handleQuestionDelete = (deletedQuestionId: string) => {
-        setQuestions(prev => prev.filter(q => q.id !== deletedQuestionId));
-        if (selectedQuestion?.id === deletedQuestionId) {
-            // If the deleted question was selected, select the next one or null
-            const currentIndex = questions.findIndex(q => q.id === deletedQuestionId);
-            if (questions.length > 1) {
-                const newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
-                setSelectedQuestion(questions[newIndex] || null);
-            } else {
-                setSelectedQuestion(null);
+    const handleQuestionDelete = async (deletedQuestionId: string) => {
+        const firestore = getFirestore();
+        try {
+            // Delete all comments within the question's subcollection
+            const commentsRef = collection(firestore, 'questions', deletedQuestionId, 'comments');
+            const commentsSnapshot = await getDocs(commentsRef);
+            const batch = writeBatch(firestore);
+            commentsSnapshot.forEach(commentDoc => {
+                batch.delete(commentDoc.ref);
+            });
+            await batch.commit();
+            
+            // Delete the question itself
+            await deleteDoc(doc(firestore, 'questions', deletedQuestionId));
+
+            setQuestions(prev => prev.filter(q => q.id !== deletedQuestionId));
+            if (selectedQuestion?.id === deletedQuestionId) {
+                const currentIndex = questions.findIndex(q => q.id === deletedQuestionId);
+                if (questions.length > 1) {
+                    const newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+                    setSelectedQuestion(questions[newIndex] || null);
+                } else {
+                    setSelectedQuestion(null);
+                }
             }
+        } catch (error) {
+            console.error("Error deleting question and its comments: ", error);
         }
     };
 
+
     return (
-        <div className="flex flex-col min-h-screen bg-muted/30">
-          <PublicHeader />
-          <main className="flex-grow pt-16">
-            <div className="container mx-auto py-8">
-                 <div className="text-center mb-12">
-                    <h1 className="text-4xl font-bold tracking-tight">Community Forum</h1>
-                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Ask questions, share knowledge, and connect with fellow students.</p>
+        <div className="space-y-4">
+             <div className="text-left mb-8">
+                <h1 className="text-3xl font-bold tracking-tight">Community Forum</h1>
+                <p className="text-lg text-muted-foreground mt-1">Ask questions, share knowledge, and connect with fellow students.</p>
+            </div>
+            <div className="grid lg:grid-cols-12 gap-8 items-start">
+                <div className="lg:col-span-4">
+                    <Card className="flex flex-col h-full">
+                        <QuestionForm />
+                        <Separator />
+                        <QuestionList 
+                            questions={questions} 
+                            selectedQuestion={selectedQuestion}
+                            onSelectQuestion={setSelectedQuestion} 
+                            loading={loading}
+                        />
+                    </Card>
                 </div>
-                <div className="grid lg:grid-cols-12 gap-8 items-start">
-                    <div className="lg:col-span-4">
-                        <Card className="flex flex-col h-full">
-                            <QuestionForm />
-                            <Separator />
-                            <QuestionList 
-                                questions={questions} 
-                                selectedQuestion={selectedQuestion}
-                                onSelectQuestion={setSelectedQuestion} 
-                                loading={loading}
-                            />
-                        </Card>
-                    </div>
-                    <div className="lg:col-span-8">
-                       <Card className="min-h-[calc(100vh-20rem)]">
-                         <CommentSection 
-                            question={selectedQuestion} 
-                            onUpdateQuestion={handleQuestionUpdate}
-                            onDeleteQuestion={handleQuestionDelete}
-                         />
-                       </Card>
-                    </div>
+                <div className="lg:col-span-8">
+                   <Card className="min-h-[calc(100vh-16rem)]">
+                     <CommentSection 
+                        question={selectedQuestion} 
+                        onUpdateQuestion={handleQuestionUpdate}
+                        onDeleteQuestion={handleQuestionDelete}
+                     />
+                   </Card>
                 </div>
             </div>
-          </main>
-          <Footer />
         </div>
     );
 }
 
-export default CommunityPage;
+export default withAuth(CommunityPage, ['student', 'instructor', 'admin', 'tutor']);

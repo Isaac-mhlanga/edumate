@@ -33,7 +33,6 @@ export const PublicHeader = () => {
   const navItems = [
     { name: 'Home', href: '/#home', isScroll: true },
     { name: 'Courses', href: '/#courses', isScroll: true },
-    { name: 'Community', href: '/community', isScroll: false },
     { name: 'About', href: '/#about', isScroll: true },
     { name: 'Contact', href: '/#contact', isScroll: true },
   ];

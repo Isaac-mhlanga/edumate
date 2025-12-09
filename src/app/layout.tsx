@@ -8,7 +8,7 @@ import { AppLayout } from '@/components/app-layout';
 import React from 'react';
 import 'katex/dist/katex.min.css';
 
-const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors', '/community'];
+const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors'];
 
 export default function RootLayout({
   children,
