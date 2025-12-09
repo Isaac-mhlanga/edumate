@@ -4,7 +4,7 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { studentData } from "@/lib/data";
+import { studentData, subscriptionPlans } from "@/lib/data";
 import { CheckCircle, ShieldCheck } from "lucide-react";
 
 export function SubscriptionsTab() {
@@ -27,7 +27,7 @@ export function SubscriptionsTab() {
                             </div>
                         </CardHeader>
                         <CardFooter className="flex justify-end gap-2">
-                            <Button variant="destructive">Cancel Subscription</Button>
+                             {studentData.currentSubscription.planId !== 'free' && <Button variant="destructive">Cancel Subscription</Button>}
                         </CardFooter>
                     </Card>
                 </CardContent>
@@ -37,8 +37,8 @@ export function SubscriptionsTab() {
                     <CardTitle>Available Plans</CardTitle>
                     <CardDescription>Choose a plan that best fits your learning needs.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 gap-6">
-                    {studentData.availablePlans.map(plan => (
+                <CardContent className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                    {subscriptionPlans.map(plan => (
                         <Card key={plan.id} className="flex flex-col">
                             <CardHeader>
                                 <div className="flex justify-between items-center">

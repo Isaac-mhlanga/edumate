@@ -1,4 +1,5 @@
 
+
 import { BarChart, Book, BookOpen, CheckCircle, Clock, CreditCard, DollarSign, Users, MessageSquare, Calendar, UserCog, UserPlus, Banknote, PenSquare } from "lucide-react";
 import { type PayoutRequest as AdminPayoutRequest } from "@/app/admin/page";
 
@@ -189,6 +190,50 @@ export let upcomingEvents: UpcomingEvent[] = [
     },
 ];
 
+export const subscriptionPlans = [
+    {
+        id: 'free',
+        name: 'Free',
+        price: 0,
+        features: [
+            'Access to free introductory courses',
+            'Community forum access',
+            'Limited AI Tutor queries'
+        ],
+    },
+    {
+        id: 'basic',
+        name: 'Basic',
+        price: 99,
+        features: [
+            'Access to all courses for ONE subject',
+            'Community forum access',
+            'Standard AI Tutor access',
+        ],
+    },
+    {
+        id: 'pro',
+        name: 'Pro',
+        price: 180,
+        features: [
+            'Access to ALL courses for ALL subjects',
+            'Priority support',
+            'Unlimited AI Tutor queries',
+        ],
+    },
+    {
+        id: 'premium',
+        name: 'Premium',
+        price: 250,
+        features: [
+            'Access to ALL courses & subjects',
+            'Priority support & exclusive webinars',
+            'Unlimited AI Tutor & premium features',
+            '10% off all assignment solutions',
+        ],
+    }
+];
+
 export const studentData = {
     name: "Alex Johnson",
     activeSubscriptions: [
@@ -215,35 +260,12 @@ export const studentData = {
         { id: 'TXN006', item: 'Another Course', type: 'Course', status: 'Refunded', amount: 199.00, date: '2024-03-15' },
     ],
     currentSubscription: {
-        planId: 'pro_maths',
-        planName: "Maths Pro",
-        price: 350,
-        nextBillingDate: 'June 30, 2024',
+        planId: 'free',
+        planName: "Free",
+        price: 0,
+        nextBillingDate: 'N/A',
     },
-    availablePlans: [
-        {
-            id: 'pro_maths',
-            name: 'Maths Pro',
-            price: 350,
-            features: [
-                'Access to all Maths courses',
-                'Priority tutor support',
-                'Exclusive webinars',
-                'Downloadable resources'
-            ],
-        },
-        {
-            id: 'pro_all',
-            name: 'All Subjects Pro',
-            price: 600,
-            features: [
-                'Access to all Maths &amp; Science courses',
-                'Priority tutor support',
-                'Exclusive webinars',
-                'All downloadable resources'
-            ],
-        }
-    ]
+    availablePlans: subscriptionPlans,
 };
 
 export const instructorData = {

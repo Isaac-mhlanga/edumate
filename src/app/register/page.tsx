@@ -15,7 +15,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, type Auth } from "firebase/auth";
-import { getFirestore, doc, setDoc } from "firebase/firestore";
+import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
 import { User, Mail, KeyRound } from "lucide-react";
 
@@ -91,7 +91,9 @@ export default function RegisterPage() {
                 fullName: data.fullName,
                 email: data.email,
                 role: data.role,
-                createdAt: new Date(),
+                createdAt: serverTimestamp(),
+                subscriptionPlan: 'Free', // Default to Free plan
+                status: 'Active'
             });
 
             toast({
@@ -109,7 +111,7 @@ export default function RegisterPage() {
                     errorMessage = 'Firebase API Key is invalid. Please check your configuration.';
                 }
                 else {
-                    errorMessage = `An error occurred: ${'\'\'\''}error.message{'\'\'\''}`;
+                    errorMessage = `An error occurred: '${error.message}'`;
                 }
             } else if (error instanceof Error) {
                 errorMessage = error.message;
