@@ -27,7 +27,6 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
-import { CommunityPreview } from "@/components/community-preview";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -190,7 +189,7 @@ export default function Home() {
         try {
             const eventsQuery = query(collection(firestore, 'events'), orderBy('start', 'asc'));
             const querySnapshot = await getDocs(eventsQuery);
-            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UpcomingEvent[];
+            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as UpcomingEvent));
             setUpcomingEvents(fetchedEvents);
         } catch (error) {
             console.error("Error fetching events: ", error);
@@ -601,8 +600,6 @@ export default function Home() {
                 )}
             </div>
           </section>
-
-           <CommunityPreview />
 
           <section id="faq" className="py-20">
             <div className="max-w-4xl mx-auto px-6">
