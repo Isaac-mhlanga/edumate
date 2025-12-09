@@ -124,7 +124,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       batch.set(commentRef, {
           studentId: user?.uid || 'anonymous',
           studentName: user?.displayName || 'Anonymous',
-          studentAvatar: user?.photoURL,
+          studentAvatar: user?.photoURL || null,
           content: content,
           fileUrl,
           fileType,
