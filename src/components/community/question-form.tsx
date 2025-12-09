@@ -17,6 +17,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Loader2, Send, Paperclip } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
+import Link from 'next/link';
+import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -42,6 +44,14 @@ export function QuestionForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [user, setUser] = useState<import('firebase/auth').User | null>(null);
+
+  React.useEffect(() => {
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const unsubscribe = auth.onAuthStateChanged(setUser);
+    return () => unsubscribe();
+  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -119,89 +129,102 @@ export function QuestionForm() {
             <DialogHeader>
                 <DialogTitle>Ask the Community</DialogTitle>
             </DialogHeader>
-             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <FormField name="title" control={form.control} render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Title</FormLabel>
-                            <FormControl><Input placeholder="What's your question about?" {...field} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="subject" render={({ field }) => (
+             {!user ? (
+                 <Alert>
+                    <AlertTitle>You're not logged in!</AlertTitle>
+                    <AlertDescription>
+                        Please log in or create an account to ask a question.
+                        <div className="flex gap-2 mt-4">
+                            <Button asChild size="sm"><Link href="/login">Log In</Link></Button>
+                            <Button asChild size="sm" variant="outline"><Link href="/register">Register</Link></Button>
+                        </div>
+                    </AlertDescription>
+                </Alert>
+             ) : (
+                <Form {...form}>
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                        <FormField name="title" control={form.control} render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Subject</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select subject"/></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Mathematics">Mathematics</SelectItem>
-                                        <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                        <SelectItem value="Life Sciences">Life Sciences</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <FormLabel>Title</FormLabel>
+                                <FormControl><Input placeholder="What's your question about?" {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <FormField control={form.control} name="grade" render={({ field }) => (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <FormField control={form.control} name="subject" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Subject</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select subject"/></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                            <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                            <SelectItem value="Life Sciences">Life Sciences</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            <FormField control={form.control} name="grade" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Grade</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select grade" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="10">Grade 10</SelectItem>
+                                            <SelectItem value="11">Grade 11</SelectItem>
+                                            <SelectItem value="12">Grade 12</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </div>
+                        <FormField name="content" control={form.control} render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Grade</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select grade" /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="10">Grade 10</SelectItem>
-                                        <SelectItem value="11">Grade 11</SelectItem>
-                                        <SelectItem value="12">Grade 12</SelectItem>
-                                    </SelectContent>
-                                </Select>
+                                <FormLabel>Question</FormLabel>
+                                <FormControl><Textarea placeholder="Describe your question in detail..." rows={5} {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
-                    </div>
-                    <FormField name="content" control={form.control} render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Question</FormLabel>
-                            <FormControl><Textarea placeholder="Describe your question in detail..." rows={5} {...field} /></FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                    <FormField name="file" control={form.control} render={({ field }) => (
-                        <FormItem>
-                             <FormLabel>Attach a file (optional)</FormLabel>
-                             <div className="flex items-center gap-2">
-                                <Button type="button" variant="outline" asChild>
-                                    <label htmlFor="file-upload" className="cursor-pointer">
-                                        <Paperclip className="mr-2 h-4 w-4"/>
-                                        Choose File
-                                    </label>
-                                </Button>
-                                {fileName && <span className="text-sm text-muted-foreground">{fileName}</span>}
-                             </div>
-                            <FormControl>
-                                <Input 
-                                    id="file-upload"
-                                    type="file" 
-                                    className="hidden"
-                                    accept="image/*,.pdf"
-                                    {...fileRef}
-                                    onChange={e => {
-                                        const file = e.target.files?.[0];
-                                        field.onChange(file);
-                                        setFileName(file ? file.name : null);
-                                    }}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )} />
-                    <div className="flex justify-end">
-                        <Button type="submit" disabled={isSubmitting}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            {isSubmitting ? 'Posting...' : 'Post Question'}
-                        </Button>
-                    </div>
-                </form>
-            </Form>
+                        <FormField name="file" control={form.control} render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Attach a file (optional)</FormLabel>
+                                <div className="flex items-center gap-2">
+                                    <Button type="button" variant="outline" asChild>
+                                        <label htmlFor="file-upload" className="cursor-pointer">
+                                            <Paperclip className="mr-2 h-4 w-4"/>
+                                            Choose File
+                                        </label>
+                                    </Button>
+                                    {fileName && <span className="text-sm text-muted-foreground">{fileName}</span>}
+                                </div>
+                                <FormControl>
+                                    <Input 
+                                        id="file-upload"
+                                        type="file" 
+                                        className="hidden"
+                                        accept="image/*,.pdf"
+                                        {...fileRef}
+                                        onChange={e => {
+                                            const file = e.target.files?.[0];
+                                            field.onChange(file);
+                                            setFileName(file ? file.name : null);
+                                        }}
+                                    />
+                                </FormControl>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <div className="flex justify-end">
+                            <Button type="submit" disabled={isSubmitting}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                {isSubmitting ? 'Posting...' : 'Post Question'}
+                            </Button>
+                        </div>
+                    </form>
+                </Form>
+             )}
         </DialogContent>
     </Dialog>
   );

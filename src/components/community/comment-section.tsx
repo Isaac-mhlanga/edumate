@@ -4,7 +4,7 @@
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { type Question, type Comment } from '@/lib/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { CardHeader, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -12,7 +12,7 @@ import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLef
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
-import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
@@ -350,7 +350,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     <div className="flex flex-col h-full">
         <CardHeader className="flex-shrink-0">
             <div className="flex justify-between items-start">
-                <CardTitle className="text-lg">{question.title}</CardTitle>
+                <h2 className="text-lg font-bold">{question.title}</h2>
                 {userRole === 'admin' && (
                     <div className="flex items-center space-x-2">
                         <Label htmlFor="disable-comments" className="text-xs text-muted-foreground">Disable Comments</Label>
@@ -379,7 +379,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                  
                  <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1" onClick={() => handleLike('question', question.id)}>
+                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1" onClick={() => handleLike('question', question.id)} disabled={!user}>
                             <ThumbsUp className={cn("h-4 w-4 mr-1", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
                             {question.likeCount || 0}
                         </Button>
@@ -424,10 +424,10 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                         <p className="text-sm mt-2">{comment.content}</p>
                                         {renderAttachment(comment)}
                                         <div className="flex items-center gap-1 mt-2">
-                                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)}>
+                                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
                                                 <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                                             </Button>
-                                            <Button variant="outline" size="sm" className="text-xs h-auto px-2 py-1" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }}>
+                                            <Button variant="outline" size="sm" className="text-xs h-auto px-2 py-1" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }} disabled={!user}>
                                                 <CornerUpLeft className="mr-1 h-3 w-3" />
                                                 Reply
                                             </Button>
@@ -484,7 +484,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                                 <p className="text-sm mt-2">{reply.content}</p>
                                                 {renderAttachment(reply)}
                                                  <div className="flex items-center gap-1 mt-2">
-                                                    <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)}>
+                                                    <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)} disabled={!user}>
                                                         <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
                                                     </Button>
                                                 </div>
