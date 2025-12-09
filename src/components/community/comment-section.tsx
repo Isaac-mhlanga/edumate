@@ -12,7 +12,7 @@ import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLef
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
-import { getFirestore, collection, query, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc, deleteDoc, getDoc, getDocs, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
@@ -295,42 +295,42 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
   
-  const toggleCollapse = (commentId: string) => {
+    const toggleCollapse = (commentId: string) => {
       setCollapsedComments(prev => 
           prev.includes(commentId) 
               ? prev.filter(id => id !== commentId)
               : [...prev, commentId]
       );
-  };
+    };
 
-  const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
-    if (!item.fileUrl) return null;
-    return (
-      <div className="space-y-2 rounded-lg border p-3 mt-2">
-        <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-xs flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Attached File
-            </h4>
-            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                <Download className="h-3 w-3" />
-                Download
-            </a>
-        </div>
-        {item.fileType === 'image' ? (
-            <div className="relative w-full">
-                <Image src={item.fileUrl} alt="Attached image" width={0} height={0} sizes="100vw" className="object-contain rounded-md w-full h-auto" />
+    const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
+        if (!item.fileUrl) return null;
+        return (
+          <div className="space-y-2 rounded-lg border p-3 mt-2">
+            <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-xs flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Attached File
+                </h4>
+                <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <Download className="h-3 w-3" />
+                    Download
+                </a>
             </div>
-        ) : item.fileType === 'pdf' ? (
-            <div className="w-full aspect-[4/5]">
-                <iframe src={item.fileUrl} className="w-full h-full rounded-md border" title="Attached PDF"></iframe>
-            </div>
-        ) : (
-            <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
-        )}
-      </div>
-    );
-  };
+            {item.fileType === 'image' ? (
+                <div className="relative w-full">
+                    <Image src={item.fileUrl} alt="Attached image" width={0} height={0} sizes="100vw" className="object-contain rounded-md w-full h-auto" />
+                </div>
+            ) : item.fileType === 'pdf' ? (
+                <div className="w-full aspect-[4/5]">
+                    <iframe src={item.fileUrl} className="w-full h-full rounded-md border" title="Attached PDF"></iframe>
+                </div>
+            ) : (
+                <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
+            )}
+          </div>
+        );
+    };
   
   if (!question) {
     return (
@@ -406,102 +406,100 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                             const replies = getReplies(comment.id);
                             const isCollapsed = collapsedComments.includes(comment.id);
                             return (
-                            <div key={comment.id}>
-                                <div className="flex items-start gap-3">
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src={comment.studentAvatar} />
-                                        <AvatarFallback>{comment.studentName?.charAt(0) || 'A'}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
-                                        <div className="flex justify-between items-start">
-                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                <User className="h-4 w-4"/>
-                                                <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
-                                                <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
-                                            </div>
-                                             {userRole === 'admin' && (
-                                                <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-1" onClick={() => handleDelete('comment', comment.id)}>
-                                                    <Trash2 className="h-4 w-4 text-destructive" />
-                                                </Button>
-                                            )}
-                                        </div>
-                                        <p className="text-sm mt-2">{comment.content}</p>
-                                        {renderAttachment(comment)}
-                                        <div className="flex items-center gap-1 mt-2">
-                                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
-                                                <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
-                                            </Button>
-                                            <Button variant="outline" size="sm" className="text-xs h-auto px-2 py-1" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }}>
-                                                <CornerUpLeft className="mr-1 h-3 w-3" />
-                                                Reply
-                                            </Button>
-                                        </div>
+                            <div key={comment.id} className="flex items-start gap-3">
+                                <Avatar className="h-8 w-8">
+                                    <AvatarImage src={comment.studentAvatar} />
+                                    <AvatarFallback>{comment.studentName?.charAt(0) || 'A'}</AvatarFallback>
+                                </Avatar>
+                                <div className="flex-1">
+                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                        <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
+                                        <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                     </div>
-                                </div>
-                                {replyingTo === comment.id && (
-                                    <div className="ml-11 mt-2 flex items-start gap-3">
-                                         <Avatar className="h-8 w-8 border">
-                                            {user ? <AvatarImage src={user.photoURL || undefined} /> : <AvatarFallback>A</AvatarFallback>}
-                                            <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
-                                        </Avatar>
-                                        <div className="flex-1 space-y-2">
-                                            <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting} className="text-sm" />
-                                            {replyFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{replyFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setReplyFile(null)}><X className="h-4 w-4"/></Button></div>}
-                                            <div className="flex justify-between items-center">
-                                                <Button type="button" variant="ghost" size="icon" asChild>
-                                                  <label htmlFor={`reply-file-${comment.id}`} className={cn("cursor-pointer")}>
-                                                      <Paperclip className="h-4 w-4"/>
-                                                  </label>
-                                                </Button>
-                                                <Input id={`reply-file-${comment.id}`} type="file" className="hidden" onChange={e => setReplyFile(e.target.files?.[0] || null)} />
+                                    <p className="text-sm mt-1">{comment.content}</p>
+                                    {renderAttachment(comment)}
+                                    <div className="flex items-center gap-1 mt-2">
+                                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
+                                            <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
+                                        </Button>
+                                        <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }}>
+                                            <CornerUpLeft className="mr-1 h-3 w-3" />
+                                            Reply
+                                        </Button>
+                                        {userRole === 'admin' && (
+                                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('comment', comment.id)}>
+                                                <Trash2 className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                    </div>
 
-                                                <div className="flex justify-end gap-2">
-                                                    <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
-                                                    <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id, replyFile)} disabled={isSubmitting || (!replyContent.trim() && !replyFile)}>
-                                                        {isSubmitting ? 'Replying...' : 'Reply'}
+                                    {replyingTo === comment.id && (
+                                        <div className="mt-4 flex items-start gap-3">
+                                            <Avatar className="h-8 w-8 border">
+                                                {user ? <AvatarImage src={user.photoURL || undefined} /> : <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>}
+                                                <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1 space-y-2">
+                                                <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting} className="text-sm" />
+                                                {replyFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{replyFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setReplyFile(null)}><X className="h-4 w-4"/></Button></div>}
+                                                <div className="flex justify-between items-center">
+                                                    <Button type="button" variant="ghost" size="icon" asChild>
+                                                      <label htmlFor={`reply-file-${comment.id}`} className={cn("cursor-pointer")}>
+                                                          <Paperclip className="h-4 w-4"/>
+                                                      </label>
                                                     </Button>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                )}
-                                {replies.length > 0 && (
-                                    <div className="ml-7 mt-2 space-y-2 pl-4 border-l">
-                                         <button onClick={() => toggleCollapse(comment.id)} className="flex items-center gap-1 text-xs text-primary font-semibold">
-                                            <ChevronDown className={cn("h-4 w-4 transition-transform", !isCollapsed && "rotate-180")} />
-                                            {isCollapsed ? `Show ${replies.length} replies` : 'Hide replies'}
-                                        </button>
-                                        {!isCollapsed && replies.map(reply => (
-                                            <div key={reply.id} className="flex items-start gap-3">
-                                                <Avatar className="h-8 w-8">
-                                                    <AvatarImage src={reply.studentAvatar} />
-                                                    <AvatarFallback>{reply.studentName?.charAt(0) || 'A'}</AvatarFallback>
-                                                </Avatar>
-                                                <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
-                                                    <div className="flex justify-between items-start">
-                                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                            <User className="h-4 w-4"/>
-                                                            <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
-                                                            <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
-                                                        </div>
-                                                        {userRole === 'admin' && (
-                                                            <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-1" onClick={() => handleDelete('comment', reply.id)}>
-                                                                <Trash2 className="h-4 w-4 text-destructive" />
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                    <p className="text-sm mt-2">{reply.content}</p>
-                                                    {renderAttachment(reply)}
-                                                    <div className="flex items-center gap-1 mt-2">
-                                                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)} disabled={!user}>
-                                                            <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
+                                                    <Input id={`reply-file-${comment.id}`} type="file" className="hidden" onChange={e => setReplyFile(e.target.files?.[0] || null)} />
+
+                                                    <div className="flex justify-end gap-2">
+                                                        <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                                                        <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id, replyFile)} disabled={isSubmitting || (!replyContent.trim() && !replyFile)}>
+                                                            {isSubmitting ? 'Replying...' : 'Reply'}
                                                         </Button>
                                                     </div>
                                                 </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                )}
+                                        </div>
+                                    )}
+
+                                    {replies.length > 0 && (
+                                        <div className="mt-2 space-y-2">
+                                            <button onClick={() => toggleCollapse(comment.id)} className="flex items-center gap-1 text-xs text-primary font-semibold">
+                                                <ChevronDown className={cn("h-4 w-4 transition-transform", isCollapsed && "-rotate-90")} />
+                                                {isCollapsed ? `Show ${replies.length} replies` : 'Hide replies'}
+                                            </button>
+                                            {!isCollapsed && (
+                                                <div className="pl-6 border-l space-y-4">
+                                                    {replies.map(reply => (
+                                                    <div key={reply.id} className="flex items-start gap-3">
+                                                        <Avatar className="h-8 w-8">
+                                                            <AvatarImage src={reply.studentAvatar} />
+                                                            <AvatarFallback>{reply.studentName?.charAt(0) || 'A'}</AvatarFallback>
+                                                        </Avatar>
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                                <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
+                                                                <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                                                            </div>
+                                                            <p className="text-sm mt-1">{reply.content}</p>
+                                                            {renderAttachment(reply)}
+                                                            <div className="flex items-center gap-1 mt-2">
+                                                                <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)} disabled={!user}>
+                                                                    <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
+                                                                </Button>
+                                                                 {userRole === 'admin' && (
+                                                                    <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('comment', reply.id)}>
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                                </div>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
                             </div>
                         )})}
                     ) : (
@@ -518,7 +516,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             ) : (
                 <div className="flex items-start gap-3">
                     <Avatar className="h-9 w-9 mt-1 border">
-                        {user ? <AvatarImage src={user.photoURL || undefined} /> : <AvatarFallback>A</AvatarFallback>}
+                        {user ? <AvatarImage src={user.photoURL || undefined} /> : <AvatarFallback><User className="h-4 w-4"/></AvatarFallback>}
                         <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-2">
