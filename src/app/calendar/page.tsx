@@ -137,7 +137,7 @@ export default function CalendarPage() {
                     background-color: hsl(var(--card));
                 }
                 .fc .fc-list-event:hover td {
-                    background-color: hsl(var(--muted));
+                    background-color: hsl(var(--muted)) !important;
                 }
                  .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
                     color: hsl(var(--foreground)) !important;

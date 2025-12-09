@@ -126,7 +126,7 @@
   .fc-list-day-cushion {
     background-color: hsl(var(--card)) !important;
   }
-   .fc-list-table tr {
-    border-color: hsl(var(--border));
+   .fc-list-table tr:hover {
+    background-color: hsl(var(--muted)) !important;
    }
 }

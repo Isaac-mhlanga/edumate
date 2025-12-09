@@ -301,6 +301,9 @@ function AdminPage() {
                 .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
                     color: hsl(var(--foreground)) !important;
                 }
+                .fc .fc-list-event:hover td {
+                    background-color: hsl(var(--muted)) !important;
+                }
             `}</style>
             {currentTab === 'overview' && (
                 <AdminOverviewTab
