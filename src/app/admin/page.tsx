@@ -259,6 +259,10 @@ function AdminPage() {
                     events={events}
                     payoutRequests={payoutRequests}
                     onRegenerateSummary={() => generatePerformanceSummary(courses, users, assignments, transactions)}
+                    users={users}
+                    courses={courses}
+                    transactions={transactions}
+                    subscriptions={subscriptions}
                 />
             )}
             {currentTab === 'users' && <AdminUsersTab users={users} onUserAction={handleUserAction} />}
@@ -364,5 +368,7 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
+
+    
 
     

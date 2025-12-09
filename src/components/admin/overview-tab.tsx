@@ -7,9 +7,9 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { adminData } from "@/lib/data";
-import { ArrowUpRight, Sparkles, RefreshCw, UserPlus, BookOpen, Banknote, ChevronLeft, ChevronRight, Wand2 } from "lucide-react";
+import { ArrowUpRight, Sparkles, RefreshCw, UserPlus, BookOpen, Banknote, ChevronLeft, ChevronRight, Wand2, Users, DollarSign, CreditCard } from "lucide-react";
 import { format } from 'date-fns';
-import { type PayoutRequest, type CalendarEvent, type MonetizationSettings, type AiTutorUsageData } from "@/app/admin/page";
+import { type PayoutRequest, type CalendarEvent, type MonetizationSettings, type AiTutorUsageData, type Transaction, type User, type Course, type Subscription } from "@/app/admin/page";
 import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
 import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
 import { Switch } from "../ui/switch";
@@ -22,9 +22,24 @@ interface AdminOverviewTabProps {
     onRegenerateSummary: () => void;
     events: CalendarEvent[];
     payoutRequests: PayoutRequest[];
+    users: User[];
+    courses: Course[];
+    transactions: Transaction[];
+    subscriptions: Subscription[];
 }
 
-export function AdminOverviewTab({ loading, aiSummary, loadingAiSummary, onRegenerateSummary, events, payoutRequests }: AdminOverviewTabProps) {
+export function AdminOverviewTab({ 
+    loading, 
+    aiSummary, 
+    loadingAiSummary, 
+    onRegenerateSummary, 
+    events, 
+    payoutRequests,
+    users,
+    courses,
+    transactions,
+    subscriptions
+}: AdminOverviewTabProps) {
     const [currentActivityPage, setCurrentActivityPage] = React.useState(1);
     const activitiesPerPage = 4;
     const [currentEventPage, setCurrentEventPage] = React.useState(1);
@@ -49,10 +64,21 @@ export function AdminOverviewTab({ loading, aiSummary, loadingAiSummary, onRegen
     const totalActivityPages = Math.ceil(adminData.recentActivity.length / activitiesPerPage);
     const paginatedActivities = adminData.recentActivity.slice((currentActivityPage - 1) * activitiesPerPage, currentActivityPage * activitiesPerPage);
 
+    const totalRevenue = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+    const activeSubscriptions = subscriptions.filter(s => s.status === 'Active').length;
+    const activeCourses = courses.filter(c => c.status === 'Published').length;
+
+    const stats = [
+        { title: "Total Revenue", value: `R ${totalRevenue.toFixed(2)}`, icon: DollarSign, change: "+15% this month" },
+        { title: "Total Users", value: users.length, icon: Users, change: "+5 new users" },
+        { title: "Active Subscriptions", value: activeSubscriptions, icon: CreditCard, change: "+2 this month" },
+        { title: "Active Courses", value: activeCourses, icon: BookOpen, change: "+2 this month" },
+    ];
+
     return (
         <div className="space-y-8">
             <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                {loading ? Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : adminData.stats.map((stat) => (
+                {loading ? Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : stats.map((stat) => (
                     <Card key={stat.title}>
                         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                             <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -226,5 +252,7 @@ export function AdminOverviewTab({ loading, aiSummary, loadingAiSummary, onRegen
         </div>
     );
 }
+
+    
 
     
