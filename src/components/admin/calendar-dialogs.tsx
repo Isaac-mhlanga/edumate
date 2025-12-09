@@ -19,8 +19,6 @@ import { Badge } from "../ui/badge";
 
 
 interface CalendarDialogsProps {
-    isAiDialogOpen: boolean;
-    setIsAiDialogOpen: (open: boolean) => void;
     isManualDialogOpen: boolean;
     setIsManualDialogOpen: (open: boolean) => void;
     isDetailDialogOpen: boolean;
@@ -28,10 +26,6 @@ interface CalendarDialogsProps {
     selectedEvent: CalendarEvent | null;
     manualEvent: Partial<CalendarEvent>;
     setManualEvent: React.Dispatch<React.SetStateAction<Partial<CalendarEvent>>>;
-    aiPrompt: string;
-    setAiPrompt: (prompt: string) => void;
-    isAiLoading: boolean;
-    onAiCreate: () => void;
     onManualCreate: () => void;
 }
 
@@ -42,45 +36,16 @@ const platforms = [
 ]
 
 export function CalendarDialogs({
-    isAiDialogOpen, setIsAiDialogOpen,
     isManualDialogOpen, setIsManualDialogOpen,
     isDetailDialogOpen, setIsDetailDialogOpen,
     selectedEvent, manualEvent, setManualEvent,
-    aiPrompt, setAiPrompt, isAiLoading,
-    onAiCreate, onManualCreate
+    onManualCreate
 }: CalendarDialogsProps) {
 
     const [openPlatforms, setOpenPlatforms] = React.useState(false);
 
     return (
         <>
-            {/* AI Event Dialog */}
-            <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle className="text-xl">Create Event with AI</DialogTitle>
-                        <DialogDescription>
-                            Describe the event you want to create. For example, "Schedule a meeting with the team for next Friday at 2pm."
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <Label htmlFor="ai-prompt" className="sr-only">AI Prompt</Label>
-                        <Textarea
-                            id="ai-prompt"
-                            placeholder="e.g. Set up a Maths study session for Grade 12s on Saturday from 10am to 12pm."
-                            value={aiPrompt}
-                            onChange={(e) => setAiPrompt(e.target.value)}
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsAiDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={onAiCreate} disabled={isAiLoading}>
-                            {isAiLoading ? "Creating..." : "Create Event"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
             {/* Manual Event Dialog */}
             <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
                 <DialogContent className="sm:max-w-2xl">

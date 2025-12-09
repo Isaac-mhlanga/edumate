@@ -17,10 +17,9 @@ interface InstructorCalendarTabProps {
     onDateClick: (arg: any) => void;
     onEventClick: (clickInfo: any) => void;
     onAddEventClick: () => void;
-    onAiCreateClick: () => void;
 }
 
-export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAddEventClick, onAiCreateClick }: InstructorCalendarTabProps) {
+export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAddEventClick }: InstructorCalendarTabProps) {
     return (
         <Card className="shadow-lg rounded-xl">
             <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
@@ -31,9 +30,6 @@ export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAdd
                 <div className="flex gap-2">
                     <Button variant="outline" onClick={onAddEventClick}>
                         <PlusCircle className="mr-2 h-4 w-4" /> Add Event
-                    </Button>
-                    <Button onClick={onAiCreateClick}>
-                        <Sparkles className="mr-2 h-4 w-4" /> Create with AI
                     </Button>
                 </div>
             </CardHeader>

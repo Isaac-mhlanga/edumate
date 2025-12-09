@@ -8,13 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar as CalendarIcon, Loader2, Save, X } from "lucide-react";
+import { Calendar as CalendarIcon, Save, X } from "lucide-react";
 import { format } from 'date-fns';
 import { type CalendarEvent } from "@/app/instructor/page";
 
 interface CalendarDialogsProps {
-    isAiDialogOpen: boolean;
-    setIsAiDialogOpen: (open: boolean) => void;
     isManualDialogOpen: boolean;
     setIsManualDialogOpen: (open: boolean) => void;
     isDetailDialogOpen: boolean;
@@ -22,50 +20,17 @@ interface CalendarDialogsProps {
     selectedEvent: CalendarEvent | null;
     manualEvent: Partial<CalendarEvent>;
     setManualEvent: React.Dispatch<React.SetStateAction<Partial<CalendarEvent>>>;
-    aiPrompt: string;
-    setAiPrompt: (prompt: string) => void;
-    isAiLoading: boolean;
-    onAiCreate: () => void;
     onManualCreate: () => void;
 }
 
 export function CalendarDialogs({
-    isAiDialogOpen, setIsAiDialogOpen,
     isManualDialogOpen, setIsManualDialogOpen,
     isDetailDialogOpen, setIsDetailDialogOpen,
     selectedEvent, manualEvent, setManualEvent,
-    aiPrompt, setAiPrompt, isAiLoading,
-    onAiCreate, onManualCreate
+    onManualCreate
 }: CalendarDialogsProps) {
     return (
         <>
-            {/* AI Event Dialog */}
-            <Dialog open={isAiDialogOpen} onOpenChange={setIsAiDialogOpen}>
-                <DialogContent>
-                    <DialogHeader>
-                        <DialogTitle className="text-xl">Create Event with AI</DialogTitle>
-                        <DialogDescription>
-                            Describe the event you want to create. For example, "Schedule a meeting with the team for next Friday at 2pm."
-                        </DialogDescription>
-                    </DialogHeader>
-                    <div className="py-4">
-                        <Label htmlFor="ai-prompt" className="sr-only">AI Prompt</Label>
-                        <Textarea
-                            id="ai-prompt"
-                            placeholder="e.g. Set up a Maths study session for Grade 12s on Saturday from 10am to 12pm."
-                            value={aiPrompt}
-                            onChange={(e) => setAiPrompt(e.target.value)}
-                        />
-                    </div>
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsAiDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={onAiCreate} disabled={isAiLoading}>
-                            {isAiLoading ? <><Loader2 className="mr-2 h-4 w-4 animate-spin"/> Creating...</> : "Create Event"}
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-
             {/* Manual Event Dialog */}
             <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
                 <DialogContent>

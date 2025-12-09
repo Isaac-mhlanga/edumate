@@ -13,7 +13,6 @@ import { PlusCircle, Sparkles } from "lucide-react";
 import { CalendarEvent } from "@/app/admin/page";
 import { CalendarDialogs } from "./calendar-dialogs";
 import { useToast } from "@/hooks/use-toast";
-import { createCalendarEvent, CreateCalendarEventOutput } from '@/ai/flows/create-calendar-event';
 import { getFirestore, doc, addDoc, collection } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
@@ -33,13 +32,10 @@ interface AdminCalendarTabProps {
 
 export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
     const { toast } = useToast();
-    const [isAiDialogOpen, setIsAiDialogOpen] = React.useState(false);
     const [isManualDialogOpen, setIsManualDialogOpen] = React.useState(false);
     const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
     const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent | null>(null);
     const [manualEvent, setManualEvent] = React.useState<Partial<CalendarEvent>>({});
-    const [aiPrompt, setAiPrompt] = React.useState('');
-    const [isAiLoading, setIsAiLoading] = React.useState(false);
 
     const handleDateClick = (arg: any) => {
         setManualEvent({ start: arg.dateStr, allDay: arg.allDay });
@@ -48,13 +44,19 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
     
     const handleEventClick = (clickInfo: any) => {
         const event = clickInfo.event;
+        const extendedProps = event.extendedProps;
         setSelectedEvent({
             id: event.id,
             title: event.title,
             start: event.startStr,
             end: event.endStr,
             allDay: event.allDay,
-            description: event.extendedProps.description,
+            description: extendedProps.description,
+            instructor: extendedProps.instructor,
+            grade: extendedProps.grade,
+            subject: extendedProps.subject,
+            scope: extendedProps.scope,
+            platforms: extendedProps.platforms,
             color: event.backgroundColor,
         });
         setIsDetailDialogOpen(true);
@@ -82,40 +84,6 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
         }
     };
 
-    const handleAiCreateEvent = async () => {
-        if (!aiPrompt) return;
-        setIsAiLoading(true);
-        try {
-            const result: CreateCalendarEventOutput = await createCalendarEvent({ prompt: aiPrompt });
-            if (result.title && result.start) {
-                const newEventData: Partial<CalendarEvent> = {
-                    title: result.title,
-                    start: result.start,
-                    end: result.end || undefined,
-                    allDay: result.allDay,
-                    color: 'hsl(var(--accent))'
-                };
-                
-                const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-                const firestore = getFirestore(app);
-                const docRef = await addDoc(collection(firestore, 'events'), newEventData);
-
-                const newEvent: CalendarEvent = { ...newEventData, id: docRef.id } as CalendarEvent;
-                setEvents([...events, newEvent]);
-                toast({ title: 'Event Created!', description: `"${result.title}" has been added to the calendar.` });
-                setIsAiDialogOpen(false);
-                setAiPrompt('');
-            } else {
-                toast({ variant: 'destructive', title: 'Could not create event', description: 'The AI could not understand the event details. Please try being more specific.' });
-            }
-        } catch (error) {
-            console.error("Error creating AI event:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while creating the event.' });
-        } finally {
-            setIsAiLoading(false);
-        }
-    };
-
     return (
         <>
             <Card className="shadow-lg rounded-xl">
@@ -128,9 +96,6 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
                          <Button variant="outline" onClick={() => setIsManualDialogOpen(true)}>
                              <PlusCircle className="mr-2 h-4 w-4" /> Add Event
                          </Button>
-                         <Button onClick={() => setIsAiDialogOpen(true)}>
-                            <Sparkles className="mr-2 h-4 w-4" /> Create with AI
-                        </Button>
                     </div>
                 </CardHeader>
                 <CardContent>
@@ -157,8 +122,6 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
                 </CardContent>
             </Card>
             <CalendarDialogs
-                isAiDialogOpen={isAiDialogOpen}
-                setIsAiDialogOpen={setIsAiDialogOpen}
                 isManualDialogOpen={isManualDialogOpen}
                 setIsManualDialogOpen={setIsManualDialogOpen}
                 isDetailDialogOpen={isDetailDialogOpen}
@@ -166,10 +129,6 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
                 selectedEvent={selectedEvent}
                 manualEvent={manualEvent}
                 setManualEvent={setManualEvent}
-                aiPrompt={aiPrompt}
-                setAiPrompt={setAiPrompt}
-                isAiLoading={isAiLoading}
-                onAiCreate={handleAiCreateEvent}
                 onManualCreate={handleAddManualEvent}
             />
         </>

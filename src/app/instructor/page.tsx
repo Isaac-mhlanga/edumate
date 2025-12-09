@@ -24,7 +24,6 @@ import { StudentActionDialogs } from "@/components/instructor/student-action-dia
 import { TransactionDialogs } from "@/components/instructor/transaction-dialogs";
 import { CalendarDialogs } from "@/components/instructor/calendar-dialogs";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
-import { createCalendarEvent, CreateCalendarEventOutput } from '@/ai/flows/create-calendar-event';
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { format } from "date-fns";
 
@@ -171,12 +170,9 @@ function InstructorPage() {
   const [isPayoutDialogOpen, setIsPayoutDialogOpen] = React.useState(false);
   
   // Calendar State
-  const [isAiDialogOpen, setIsAiDialogOpen] = React.useState(false);
   const [isManualDialogOpen, setIsManualDialogOpen] = React.useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = React.useState(false);
   const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent | null>(null);
-  const [aiPrompt, setAiPrompt] = React.useState('');
-  const [isAiLoading, setIsAiLoading] = React.useState(false);
   const [manualEvent, setManualEvent] = React.useState<Partial<CalendarEvent>>({});
   
   const generatePerformanceSummary = React.useCallback(async (instructor: User, courses: Course[], students: EnrolledStudent[], assignments: SubmittedAssignment[], transactions: Transaction[]) => {
@@ -745,36 +741,6 @@ function InstructorPage() {
       setManualEvent({});
   };
 
-  const handleAiCreateEvent = async () => {
-      if (!aiPrompt) return;
-      setIsAiLoading(true);
-
-      try {
-          const result: CreateCalendarEventOutput = await createCalendarEvent({ prompt: aiPrompt });
-          if (result.title && result.start) {
-              const newEvent: CalendarEvent = {
-                  id: String(Date.now()),
-                  title: result.title,
-                  start: result.start,
-                  end: result.end || undefined,
-                  allDay: result.allDay,
-                  color: 'hsl(var(--accent))'
-              };
-              setEvents([...events, newEvent]);
-              toast({ title: 'Event Created!', description: `"${result.title}" has been added to the calendar.` });
-              setIsAiDialogOpen(false);
-              setAiPrompt('');
-          } else {
-              toast({ variant: 'destructive', title: 'Could not create event', description: 'The AI could not understand the event details. Please try being more specific.' });
-          }
-      } catch (error) {
-          console.error("Error creating AI event:", error);
-          toast({ variant: 'destructive', title: 'Error', description: 'An error occurred while creating the event.' });
-      } finally {
-          setIsAiLoading(false);
-      }
-  };
-
   return (
     <div className="space-y-8">
       <style jsx global>{`
@@ -871,9 +837,6 @@ function InstructorPage() {
           onAddEventClick={() => {
              toast({ title: "Action not available", description: "Please go to the admin dashboard to create new events." });
           }}
-          onAiCreateClick={() => {
-            toast({ title: "Action not available", description: "Please go to the admin dashboard to create new events." });
-          }}
         />
       )}
 
@@ -955,8 +918,6 @@ function InstructorPage() {
       />
       
       <CalendarDialogs
-        isAiDialogOpen={isAiDialogOpen}
-        setIsAiDialogOpen={setIsAiDialogOpen}
         isManualDialogOpen={isManualDialogOpen}
         setIsManualDialogOpen={setIsManualDialogOpen}
         isDetailDialogOpen={isDetailDialogOpen}
@@ -964,10 +925,6 @@ function InstructorPage() {
         selectedEvent={selectedEvent}
         manualEvent={manualEvent}
         setManualEvent={setManualEvent}
-        aiPrompt={aiPrompt}
-        setAiPrompt={setAiPrompt}
-        isAiLoading={isAiLoading}
-        onAiCreate={handleAiCreateEvent}
         onManualCreate={handleAddManualEvent}
       />
     </div>

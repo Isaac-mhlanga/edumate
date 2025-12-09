@@ -21,7 +21,6 @@ import { CourseActionDialog } from "@/components/admin/course-action-dialog";
 import { PayoutActionDialog, PayoutReceiptDialog } from "@/components/admin/payout-dialogs";
 import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/admin/assignment-action-dialogs";
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
-import { CalendarDialogs } from "@/components/admin/calendar-dialogs";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { format, formatDistanceToNow } from "date-fns";
 
