@@ -210,5 +210,3 @@ export function TutorProfileDialog({ isOpen, setIsOpen, tutor }: TutorProfileDia
     </Dialog>
   )
 }
-
-    
