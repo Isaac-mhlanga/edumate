@@ -35,7 +35,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string | Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
+export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; originalJoinedDate: Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
 export type Course = { id: string; instructorId: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft'; createdAt: Timestamp };
 export type PayoutRequest = {
     id: string;
@@ -131,7 +131,14 @@ function AdminPage() {
                 const usersSnapshot = await getDocs(query(collection(firestore, "users"), orderBy('createdAt', 'desc')));
                 const fetchedUsers = usersSnapshot.docs.map(doc => {
                     const data = doc.data();
-                    return { id: doc.id, name: data.fullName, joined: data.createdAt.toDate(), ...data } as User
+                    const joinedDate = data.createdAt.toDate();
+                    return { 
+                        id: doc.id, 
+                        name: data.fullName, 
+                        joined: format(joinedDate, 'PPP'), 
+                        originalJoinedDate: joinedDate, 
+                        ...data 
+                    } as User;
                 });
                 
                 const subsSnapshot = await getDocs(collection(firestore, "subscriptions"));
@@ -178,19 +185,19 @@ function AdminPage() {
     }, [firestore, toast, generatePerformanceSummary]);
 
     const recentActivity = React.useMemo(() => {
+        const userMap = new Map(users.map(u => [u.id, u.fullName]));
+
         const userActivities: RecentActivity[] = users.slice(0, 5).map(user => ({
             id: `user-${user.id}`,
             type: 'New User',
             description: `${user.fullName} signed up as a ${user.role}.`,
-            originalTimestamp: new Date(user.joined),
-            timestamp: formatDistanceToNow(new Date(user.joined), { addSuffix: true }),
+            originalTimestamp: user.originalJoinedDate,
+            timestamp: formatDistanceToNow(user.originalJoinedDate, { addSuffix: true }),
             value: user.role
         }));
     
-        const instructorMap = new Map(users.map(u => [u.id, u.fullName]));
-    
         const courseActivities: RecentActivity[] = courses.slice(0, 5).map(course => {
-            const instructorName = instructorMap.get(course.instructorId) || 'An instructor';
+            const instructorName = userMap.get(course.instructorId) || 'An instructor';
             return {
                 id: `course-${course.id}`,
                 type: 'New Course',
