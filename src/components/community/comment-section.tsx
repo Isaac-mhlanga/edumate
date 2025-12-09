@@ -128,6 +128,9 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         await uploadBytes(fileRef, file);
         commentData.fileUrl = await getDownloadURL(fileRef);
         commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+      } else {
+        commentData.fileUrl = null;
+        commentData.fileType = null;
       }
 
       batch.set(commentRef, commentData);
@@ -551,3 +554,5 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     </div>
   );
 }
+
+    
