@@ -16,7 +16,7 @@ import { AdminAssignmentsTab } from "@/components/admin/assignments-tab";
 import { AdminCalendarTab } from "@/components/admin/calendar-tab";
 import { AdminPayoutsTab } from "@/components/admin/payouts-tab";
 import { AdminSubscriptionsTab } from "@/components/admin/subscriptions-tab";
-import { AdminTutorsTab } from "@/components/admin/tutors-tab";
+import { AdminTutorsTab, TutorProfileDialog } from "@/components/admin/tutors-tab";
 import { UserActionDialogs } from "@/components/admin/user-action-dialogs";
 import { CourseActionDialog } from "@/components/admin/course-action-dialog";
 import { PayoutActionDialog, PayoutReceiptDialog } from "@/components/admin/payout-dialogs";
@@ -62,6 +62,14 @@ export type TutorProfile = {
     id: string;
     name: string;
     email: string;
+    bio: string;
+    hourlyRate: number;
+    subjects: string[];
+    grades: string[];
+    location: string;
+    avatar: string;
+    modes: ('Online' | 'In-person')[];
+    availability: { day: string; slots: string[] }[];
     qualifications: string;
     qualificationUrl: string;
     approvalStatus: 'Pending' | 'Approved' | 'Rejected';
@@ -96,6 +104,7 @@ function AdminPage() {
     const [payoutAction, setPayoutAction] = React.useState<'Approve' | 'Decline' | null>(null);
     const [selectedAssignment, setSelectedAssignment] = React.useState<Assignment | null>(null);
     const [selectedSubscription, setSelectedSubscription] = React.useState<Subscription | null>(null);
+    const [selectedTutorProfile, setSelectedTutorProfile] = React.useState<TutorProfile | null>(null);
 
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
     const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = React.useState(false);
@@ -105,6 +114,7 @@ function AdminPage() {
     const [isAssignmentReviewDialogOpen, setIsAssignmentReviewDialogOpen] = React.useState(false);
     const [isDeleteAssignmentDialogOpen, setIsDeleteAssignmentDialogOpen] = React.useState(false);
     const [isCancelSubscriptionDialogOpen, setIsCancelSubscriptionDialogOpen] = React.useState(false);
+    const [isTutorProfileDialogOpen, setIsTutorProfileDialogOpen] = React.useState(false);
 
     const generatePerformanceSummary = React.useCallback(async (courses: Course[], users: User[], assignments: Assignment[], transactions: Transaction[]) => {
         setLoadingAiSummary(true);
@@ -323,6 +333,11 @@ function AdminPage() {
             toast({ variant: 'destructive', title: 'Error', description: `Could not update tutor status.` });
         }
     };
+    
+    const handleViewTutorProfile = (tutor: TutorProfile) => {
+        setSelectedTutorProfile(tutor);
+        setIsTutorProfileDialogOpen(true);
+    };
 
     return (
         <div className="space-y-8">
@@ -356,7 +371,7 @@ function AdminPage() {
                 />
             )}
             {currentTab === 'users' && <AdminUsersTab users={users} onUserAction={handleUserAction} />}
-            {currentTab === 'tutors' && <AdminTutorsTab tutors={tutors} onTutorApproval={handleTutorApproval} />}
+            {currentTab === 'tutors' && <AdminTutorsTab tutors={tutors} onTutorApproval={handleTutorApproval} onViewProfile={handleViewTutorProfile} />}
             {currentTab === 'courses' && (
                 <AdminCoursesTab 
                     courses={courses} 
@@ -453,6 +468,11 @@ function AdminPage() {
                 setIsOpen={setIsCancelSubscriptionDialogOpen}
                 selectedSubscription={selectedSubscription}
                 onConfirm={confirmCancelSubscription}
+            />
+            <TutorProfileDialog
+                isOpen={isTutorProfileDialogOpen}
+                setIsOpen={setIsTutorProfileDialogOpen}
+                tutor={selectedTutorProfile}
             />
         </div>
     );

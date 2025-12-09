@@ -6,17 +6,21 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Eye, CheckCircle, XCircle, Clock } from "lucide-react";
+import { Eye, CheckCircle, XCircle, Clock, MoreVertical } from "lucide-react";
 import { type TutorProfile } from "@/app/admin/page";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import Image from "next/image";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Separator } from "../ui/separator";
 
 interface AdminTutorsTabProps {
     tutors: TutorProfile[];
     onTutorApproval: (tutor: TutorProfile, status: 'Approved' | 'Rejected') => void;
+    onViewProfile: (tutor: TutorProfile) => void;
 }
 
-export function AdminTutorsTab({ tutors, onTutorApproval }: AdminTutorsTabProps) {
+export function AdminTutorsTab({ tutors, onTutorApproval, onViewProfile }: AdminTutorsTabProps) {
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [selectedDocumentUrl, setSelectedDocumentUrl] = useState<string | null>(null);
 
@@ -67,23 +71,32 @@ export function AdminTutorsTab({ tutors, onTutorApproval }: AdminTutorsTabProps)
                                     <TableCell className="hidden sm:table-cell truncate max-w-xs">{tutor.qualifications}</TableCell>
                                     <TableCell>{getStatusBadge(tutor.approvalStatus)}</TableCell>
                                     <TableCell className="text-right">
-                                        <div className="flex gap-2 justify-end">
-                                            {tutor.qualificationUrl && (
-                                                <Button variant="outline" size="sm" onClick={() => handleViewDocument(tutor.qualificationUrl!)}>
-                                                    <Eye className="mr-1 h-3 w-3"/> View Doc
-                                                </Button>
-                                            )}
-                                            {tutor.approvalStatus === 'Pending' && (
-                                                <>
-                                                    <Button variant="outline" size="sm" className="text-red-600 border-red-600/50 hover:bg-red-50" onClick={() => onTutorApproval(tutor, 'Rejected')}>
-                                                        <XCircle className="mr-1 h-3 w-3"/>Reject
-                                                    </Button>
-                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => onTutorApproval(tutor, 'Approved')}>
-                                                        <CheckCircle className="mr-1 h-3 w-3"/>Approve
-                                                    </Button>
-                                                </>
-                                            )}
-                                        </div>
+                                        <DropdownMenu>
+                                            <DropdownMenuTrigger asChild>
+                                                <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4" /></Button>
+                                            </DropdownMenuTrigger>
+                                            <DropdownMenuContent align="end">
+                                                <DropdownMenuItem onClick={() => onViewProfile(tutor)}>
+                                                    <Eye className="mr-2 h-4 w-4" /> View Profile
+                                                </DropdownMenuItem>
+                                                {tutor.qualificationUrl && (
+                                                    <DropdownMenuItem onClick={() => handleViewDocument(tutor.qualificationUrl!)}>
+                                                        <Eye className="mr-2 h-4 w-4" /> View Document
+                                                    </DropdownMenuItem>
+                                                )}
+                                                {tutor.approvalStatus === 'Pending' && (
+                                                    <>
+                                                        <Separator />
+                                                        <DropdownMenuItem onClick={() => onTutorApproval(tutor, 'Approved')} className="text-green-600 focus:text-green-700 focus:bg-green-100">
+                                                            <CheckCircle className="mr-2 h-4 w-4" /> Approve
+                                                        </DropdownMenuItem>
+                                                        <DropdownMenuItem onClick={() => onTutorApproval(tutor, 'Rejected')} className="text-red-600 focus:text-red-700 focus:bg-red-100">
+                                                            <XCircle className="mr-2 h-4 w-4" /> Reject
+                                                        </DropdownMenuItem>
+                                                    </>
+                                                )}
+                                            </DropdownMenuContent>
+                                        </DropdownMenu>
                                     </TableCell>
                                 </TableRow>
                             ))}
@@ -121,4 +134,79 @@ export function AdminTutorsTab({ tutors, onTutorApproval }: AdminTutorsTabProps)
             </Dialog>
         </>
     );
+}
+
+
+interface TutorProfileDialogProps {
+  isOpen: boolean;
+  setIsOpen: (open: boolean) => void;
+  tutor: TutorProfile | null;
+}
+
+export function TutorProfileDialog({ isOpen, setIsOpen, tutor }: TutorProfileDialogProps) {
+  if (!tutor) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>Tutor Profile: {tutor.name}</DialogTitle>
+          <DialogDescription>
+            A complete overview of the tutor's profile details.
+          </DialogDescription>
+        </DialogHeader>
+        <div className="py-4 space-y-6 max-h-[70vh] overflow-y-auto pr-4">
+            <div className="flex items-start gap-4">
+                <Avatar className="w-20 h-20 border">
+                    <AvatarImage src={tutor.avatar} alt={tutor.name} />
+                    <AvatarFallback>{tutor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                </Avatar>
+                <div className="flex-1 space-y-1">
+                    <p className="font-semibold">{tutor.name}</p>
+                    <p className="text-sm text-muted-foreground">{tutor.email}</p>
+                    <p className="text-sm text-muted-foreground">{tutor.location}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-2xl font-bold">R{tutor.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hr</span></p>
+                </div>
+            </div>
+
+            <Separator />
+            
+            <div>
+                <h4 className="font-semibold text-sm mb-2">Bio</h4>
+                <p className="text-sm text-muted-foreground">{tutor.bio}</p>
+            </div>
+            
+            <div>
+                <h4 className="font-semibold text-sm mb-2">Expertise</h4>
+                <div className="flex flex-wrap gap-2">
+                    {tutor.subjects.map(s => <Badge key={s} variant="secondary">{s}</Badge>)}
+                    {tutor.grades.map(g => <Badge key={g} variant="outline">Grade {g}</Badge>)}
+                    {tutor.modes.map(m => <Badge key={m} variant="outline">{m}</Badge>)}
+                </div>
+            </div>
+
+            <div>
+                <h4 className="font-semibold text-sm mb-2">Availability</h4>
+                <div className="space-y-1">
+                    {tutor.availability.filter(d => d.slots.length > 0).map(day => (
+                        <div key={day.day} className="flex items-start gap-4 text-sm">
+                            <span className="font-medium w-20 shrink-0">{day.day}</span>
+                            <div className="flex flex-wrap gap-1.5">
+                                {day.slots.map(slot => (
+                                    <Badge key={slot} variant="outline" className="font-mono">{slot}</Badge>
+                                ))}
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" onClick={() => setIsOpen(false)}>Close</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
 }
