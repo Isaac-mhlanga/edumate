@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -8,7 +7,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ThumbsUp, MessageSquare, Send, FileText } from 'lucide-react';
-import { formatDistanceToNow from 'date-fns';
+import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 
