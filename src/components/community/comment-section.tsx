@@ -39,6 +39,8 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
   const [loadingComments, setLoadingComments] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [replyingTo, setReplyingTo] = useState<string | null>(null);
+  const [replyContent, setReplyContent] = useState('');
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -76,12 +78,12 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
     return () => unsubscribe();
   }, [question, toast]);
 
-  const handlePostComment = async () => {
+  const handlePostComment = async (content: string, parentId: string | null) => {
     if (!user) {
         toast({ variant: 'destructive', title: 'Not authenticated', description: 'You must be logged in to comment.' });
         return;
     }
-    if (!question || !newComment.trim()) return;
+    if (!question || !content.trim()) return;
     
     setIsSubmitting(true);
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -94,19 +96,26 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
         studentId: user.uid,
         studentName: user.displayName || 'Anonymous',
         studentAvatar: user.photoURL,
-        content: newComment,
+        content: content,
         createdAt: serverTimestamp(),
         likeCount: 0,
         likedBy: [],
-        parentId: null,
+        parentId: parentId,
     });
     
-    const questionRef = doc(firestore, 'questions', question.id);
-    batch.update(questionRef, { commentCount: increment(1) });
+    if (!parentId) { // Only increment comment count for top-level comments
+        const questionRef = doc(firestore, 'questions', question.id);
+        batch.update(questionRef, { commentCount: increment(1) });
+    }
 
     try {
         await batch.commit();
-        setNewComment('');
+        if (parentId) {
+            setReplyContent('');
+            setReplyingTo(null);
+        } else {
+            setNewComment('');
+        }
     } catch(error) {
         console.error("Error posting comment:", error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not post your comment.' });
@@ -170,7 +179,6 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
     }
   };
 
-
   if (!question) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
@@ -179,6 +187,11 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
         <p>Choose a question from the list to see the discussion.</p>
       </div>
     );
+  }
+
+  const topLevelComments = comments.filter(comment => !comment.parentId);
+  const getReplies = (commentId: string) => {
+    return comments.filter(comment => comment.parentId === commentId);
   }
 
   return (
@@ -258,25 +271,66 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                     <h3 className="font-semibold">{question.commentCount || 0} Answers</h3>
                     {loadingComments ? (
                         <p className="text-muted-foreground">Loading comments...</p>
-                    ) : comments.length > 0 ? (
-                        comments.map(comment => (
-                            <div key={comment.id} className="flex items-start gap-3">
-                                <Avatar className="h-9 w-9">
-                                    <AvatarImage src={comment.studentAvatar} />
-                                    <AvatarFallback>{comment.studentName.charAt(0)}</AvatarFallback>
-                                </Avatar>
-                                <div className="flex-1">
-                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                        <span className="font-semibold text-foreground">{comment.studentName}</span>
-                                        <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                    ) : topLevelComments.length > 0 ? (
+                        topLevelComments.map(comment => (
+                            <div key={comment.id}>
+                                <div className="flex items-start gap-3">
+                                    <Avatar className="h-9 w-9">
+                                        <AvatarImage src={comment.studentAvatar} />
+                                        <AvatarFallback>{comment.studentName.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                            <span className="font-semibold text-foreground">{comment.studentName}</span>
+                                            <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                                        </div>
+                                        <p className="text-sm">{comment.content}</p>
+                                        <div className="flex items-center gap-2 mt-1">
+                                            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
+                                                <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
+                                            </Button>
+                                            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); }}>Reply</Button>
+                                        </div>
                                     </div>
-                                    <p className="text-sm">{comment.content}</p>
-                                    <div className="flex items-center gap-2 mt-1">
-                                        <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
-                                            <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
-                                        </Button>
-                                        <Button variant="ghost" size="sm" className="text-muted-foreground">Reply</Button>
+                                </div>
+                                {replyingTo === comment.id && (
+                                    <div className="ml-12 mt-2 flex items-start gap-3">
+                                         <Avatar className="h-9 w-9">
+                                            <AvatarImage src={user?.photoURL || undefined} />
+                                            <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                                        </Avatar>
+                                        <div className="flex-1 space-y-2">
+                                            <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting || !user} />
+                                            <div className="flex justify-end gap-2">
+                                                <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                                                <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id)} disabled={isSubmitting || !replyContent.trim() || !user}>
+                                                    {isSubmitting ? 'Replying...' : 'Reply'}
+                                                </Button>
+                                            </div>
+                                        </div>
                                     </div>
+                                )}
+                                <div className="ml-8 mt-2 space-y-2 pl-4 border-l">
+                                    {getReplies(comment.id).map(reply => (
+                                        <div key={reply.id} className="flex items-start gap-3">
+                                            <Avatar className="h-9 w-9">
+                                                <AvatarImage src={reply.studentAvatar} />
+                                                <AvatarFallback>{reply.studentName.charAt(0)}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                    <span className="font-semibold text-foreground">{reply.studentName}</span>
+                                                    <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                                                </div>
+                                                <p className="text-sm">{reply.content}</p>
+                                                 <div className="flex items-center gap-2 mt-1">
+                                                    <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => handleLike('comment', reply.id)} disabled={!user}>
+                                                        <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
+                                                    </Button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
                         ))
@@ -300,7 +354,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                         disabled={isSubmitting || !user}
                     />
                     <div className="flex justify-end">
-                        <Button size="sm" onClick={handlePostComment} disabled={isSubmitting || !newComment.trim() || !user}>
+                        <Button size="sm" onClick={() => handlePostComment(newComment, null)} disabled={isSubmitting || !newComment.trim() || !user}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             Post Answer
                         </Button>
