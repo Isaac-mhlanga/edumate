@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -11,13 +12,15 @@ import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLef
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
-import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc, deleteDoc, getDoc, getDocs } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Input } from '../ui/input';
+import { Switch } from '../ui/switch';
+import { Label } from '../ui/label';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -224,10 +227,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     const storage = getStorage();
 
     if (type === 'question') {
-        // Confirm before deleting a whole question
         if (!window.confirm('Are you sure you want to delete this entire question and all its comments?')) return;
         try {
-            // Delete all comments and their files first
             const commentsQuery = query(collection(firestore, 'questions', id, 'comments'));
             const commentsSnapshot = await getDocs(commentsQuery);
             const batch = writeBatch(firestore);
@@ -240,29 +241,26 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             }
             await batch.commit();
 
-            // Delete the question and its file
             if (question.fileUrl) {
                 try { await deleteObject(ref(storage, question.fileUrl)); } catch (e) { console.error(e); }
             }
             await deleteDoc(doc(firestore, 'questions', id));
-            onDeleteQuestion(id); // Notify parent component
+            onDeleteQuestion(id);
             toast({ title: 'Question Deleted', description: 'The question and all its comments have been removed.' });
         } catch (error) {
             console.error('Error deleting question:', error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
         }
-    } else { // Deleting a comment
+    } else {
         const commentToDelete = comments.find(c => c.id === id);
         if (!commentToDelete) return;
 
         try {
-            // Delete the comment and its file
              if (commentToDelete.fileUrl) {
                 try { await deleteObject(ref(storage, commentToDelete.fileUrl)); } catch (e) { console.error(e); }
             }
             await deleteDoc(doc(firestore, 'questions', question.id, 'comments', id));
 
-            // Also delete replies if it's a top-level comment
             const replies = comments.filter(c => c.parentId === id);
             if (replies.length > 0) {
                  const batch = writeBatch(firestore);
@@ -284,6 +282,25 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         }
     }
   };
+
+  const handleToggleComments = async (disabled: boolean) => {
+    if (userRole !== 'admin' || !question) return;
+
+    const firestore = getFirestore();
+    const questionRef = doc(firestore, 'questions', question.id);
+    try {
+        await updateDoc(questionRef, { commentsDisabled: disabled });
+        onUpdateQuestion({ ...question, commentsDisabled: disabled });
+        toast({
+            title: `Comments ${disabled ? 'Disabled' : 'Enabled'}`,
+            description: `Comments have been ${disabled ? 'turned off' : 'turned on'} for this question.`,
+        });
+    } catch (error) {
+        console.error('Error toggling comments:', error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
+    }
+  };
+
 
   const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
     if (!item.fileUrl) return null;
@@ -332,7 +349,19 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
   return (
     <div className="flex flex-col h-full">
         <CardHeader className="flex-shrink-0">
-            <CardTitle className="text-lg">{question.title}</CardTitle>
+            <div className="flex justify-between items-start">
+                <CardTitle className="text-lg">{question.title}</CardTitle>
+                {userRole === 'admin' && (
+                    <div className="flex items-center space-x-2">
+                        <Label htmlFor="disable-comments" className="text-xs text-muted-foreground">Disable Comments</Label>
+                        <Switch
+                            id="disable-comments"
+                            checked={question.commentsDisabled}
+                            onCheckedChange={handleToggleComments}
+                        />
+                    </div>
+                )}
+            </div>
              <div className="flex items-center gap-3 pt-2 text-xs text-muted-foreground">
                 <Avatar className="h-6 w-6">
                   <AvatarImage src={question.studentAvatar} />
@@ -345,7 +374,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         </CardHeader>
         <ScrollArea className="flex-grow">
             <CardContent className="space-y-4">
-                 <p className="text-sm whitespace-pre-wrap">{question.content}</p>
+                 <p className="text-sm whitespace-pre-wrap mt-2">{question.content}</p>
                  {renderAttachment(question)}
                  
                  <div className="flex items-center justify-between">
@@ -408,7 +437,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                 {replyingTo === comment.id && (
                                     <div className="ml-11 mt-2 flex items-start gap-3">
                                          <Avatar className="h-8 w-8 border">
-                                            <AvatarImage src={user?.photoURL || undefined} />
+                                            {user ? <AvatarImage src={user.photoURL || undefined} /> : null}
                                             <AvatarFallback>{user ? user.displayName?.charAt(0) : 'Ed'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 space-y-2">
@@ -472,37 +501,43 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             </CardContent>
         </ScrollArea>
         <CardContent className="flex-shrink-0 border-t pt-4">
-            <div className="flex items-start gap-3">
-                 {user && (
-                    <Avatar className="h-9 w-9 mt-1 border">
-                        <AvatarImage src={user?.photoURL || undefined} />
-                        <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
-                    </Avatar>
-                 )}
-                <div className="flex-1 space-y-2">
-                    <Textarea 
-                        placeholder={user ? "Add your answer..." : "Please log in to post an answer."}
-                        value={newComment}
-                        onChange={(e) => setNewComment(e.target.value)}
-                        disabled={isSubmitting || !user}
-                        className="text-sm"
-                    />
-                    {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
-                    <div className="flex justify-between items-center">
-                        <Button type="button" variant="ghost" size="icon" asChild>
-                          <label htmlFor="comment-file" className={cn("cursor-pointer", !user && "cursor-not-allowed opacity-50")}>
-                              <Paperclip className="h-4 w-4"/>
-                          </label>
-                        </Button>
-                        <Input id="comment-file" type="file" className="hidden" disabled={!user} onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
-                        <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile) || !user}>
-                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                            <Send className="mr-2 h-4 w-4" />
-                            Post Answer
-                        </Button>
+             {question.commentsDisabled ? (
+                <div className="text-center text-sm text-muted-foreground p-4 bg-muted rounded-lg">
+                    Comments have been disabled for this question.
+                </div>
+            ) : (
+                <div className="flex items-start gap-3">
+                    {user && (
+                        <Avatar className="h-9 w-9 mt-1 border">
+                            <AvatarImage src={user.photoURL || undefined} />
+                            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                        </Avatar>
+                    )}
+                    <div className="flex-1 space-y-2">
+                        <Textarea 
+                            placeholder={user ? "Add your answer..." : "Please log in to post an answer."}
+                            value={newComment}
+                            onChange={(e) => setNewComment(e.target.value)}
+                            disabled={isSubmitting || !user}
+                            className="text-sm"
+                        />
+                        {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
+                        <div className="flex justify-between items-center">
+                            <Button type="button" variant="ghost" size="icon" asChild>
+                            <label htmlFor="comment-file" className={cn("cursor-pointer", !user && "cursor-not-allowed opacity-50")}>
+                                <Paperclip className="h-4 w-4"/>
+                            </label>
+                            </Button>
+                            <Input id="comment-file" type="file" className="hidden" disabled={!user} onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
+                            <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile) || !user}>
+                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                <Send className="mr-2 h-4 w-4" />
+                                Post Answer
+                            </Button>
+                        </div>
                     </div>
                 </div>
-            </div>
+            )}
         </CardContent>
     </div>
   );
