@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -26,6 +26,7 @@ import { formatDistanceToNow } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 
 type Booking = {
     id: string;
@@ -74,6 +75,11 @@ function TutorPage() {
 
     const currentTab = searchParams.get('tab') || 'overview';
     const [isEditingProfile, setIsEditingProfile] = useState(false);
+
+    // Bookings tab state
+    const [bookingFilters, setBookingFilters] = useState({ search: '', status: 'All' });
+    const [currentBookingPage, setCurrentBookingPage] = useState(1);
+    const bookingsPerPage = 7;
     
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -266,6 +272,24 @@ function TutorPage() {
             { title: "Unread Messages", value: unreadMessages, icon: MessageSquare },
         ];
     }, [bookings, profile?.hourlyRate, messageThreads]);
+    
+    const handleBookingFilterChange = (key: keyof typeof bookingFilters, value: string) => {
+        setBookingFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentBookingPage(1);
+    };
+
+    const filteredBookings = React.useMemo(() => {
+        return bookings.filter(booking => {
+            const searchMatch = bookingFilters.search.trim().toLowerCase() === '' ||
+                booking.studentName.toLowerCase().includes(bookingFilters.search.trim().toLowerCase()) ||
+                booking.subject.toLowerCase().includes(bookingFilters.search.trim().toLowerCase());
+            const statusMatch = bookingFilters.status === 'All' || booking.status === bookingFilters.status;
+            return searchMatch && statusMatch;
+        });
+    }, [bookings, bookingFilters]);
+
+    const totalBookingPages = Math.ceil(filteredBookings.length / bookingsPerPage);
+    const paginatedBookings = filteredBookings.slice((currentBookingPage - 1) * bookingsPerPage, currentBookingPage * bookingsPerPage);
 
 
     const isProfileIncomplete = !profile?.bio || !profile?.qualifications;
@@ -474,7 +498,7 @@ function TutorPage() {
                                                             )
                                                         )
                                                     ))}
-                                                     {!isEditingProfile && day.slots.length === 0 && dayIndex === 0 && <p className="text-xs text-muted-foreground">Not available. Click 'Edit' to add slots.</p>}
+                                                     {!isEditingProfile && !day.slots.length && <p className="text-xs text-muted-foreground">Not available. Click 'Edit' to add slots.</p>}
                                                 </div>
                                             </div>
                                         ))}
@@ -498,44 +522,87 @@ function TutorPage() {
                         <CardTitle>My Bookings</CardTitle>
                         <CardDescription>Manage all your confirmed and pending student sessions.</CardDescription>
                     </CardHeader>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Student</TableHead>
-                                <TableHead className="hidden sm:table-cell">Date & Time</TableHead>
-                                <TableHead className="hidden md:table-cell">Subject</TableHead>
-                                <TableHead>Status</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {bookings.map(booking => (
-                                <TableRow key={booking.id}>
-                                    <TableCell>
-                                        <div className="font-medium">{booking.studentName}</div>
-                                        <div className="text-xs text-muted-foreground sm:hidden">{booking.date} @ {booking.time}</div>
-                                    </TableCell>
-                                    <TableCell className="hidden sm:table-cell">{booking.date} @ {booking.time}</TableCell>
-                                    <TableCell className="hidden md:table-cell"><Badge variant="secondary">{booking.subject}</Badge></TableCell>
-                                    <TableCell>
-                                        <Badge variant="outline" className="flex items-center gap-1.5 w-fit">
-                                            {getStatusIcon(booking.status)}
-                                            {booking.status}
-                                        </Badge>
-                                    </TableCell>
-                                    <TableCell className="text-right">
-                                        {booking.status === 'Pending Confirmation' && (
-                                            <div className="flex gap-2 justify-end">
-                                                <Button size="sm" variant="outline" className="text-red-600 border-red-500/50 hover:bg-red-50"><XCircle className="h-4 w-4" /></Button>
-                                                <Button size="sm" className="bg-green-600 hover:bg-green-700"><CheckCircle className="h-4 w-4" /></Button>
-                                            </div>
-                                        )}
-                                        {booking.status === 'Confirmed' && <Button size="sm" variant="outline">Reschedule</Button>}
-                                    </TableCell>
+                    <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
+                        <div className="relative flex-1 w-full">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input
+                                placeholder="Search by student or subject..."
+                                className="pl-8"
+                                value={bookingFilters.search}
+                                onChange={(e) => handleBookingFilterChange('search', e.target.value)}
+                            />
+                        </div>
+                        <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                                <Button variant="outline" className="gap-1 w-full md:w-auto">
+                                    <ListFilter className="h-3.5 w-3.5" />
+                                    <span>Filter by Status</span>
+                                </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                                <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuRadioGroup value={bookingFilters.status} onValueChange={(value) => handleBookingFilterChange('status', value)}>
+                                    <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Pending Confirmation">Pending Confirmation</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Confirmed">Confirmed</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Completed">Completed</DropdownMenuRadioItem>
+                                </DropdownMenuRadioGroup>
+                            </DropdownMenuContent>
+                        </DropdownMenu>
+                    </div>
+                    <CardContent className="p-0">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>Student</TableHead>
+                                    <TableHead className="hidden sm:table-cell">Date & Time</TableHead>
+                                    <TableHead className="hidden md:table-cell">Subject</TableHead>
+                                    <TableHead>Status</TableHead>
+                                    <TableHead className="text-right">Actions</TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {paginatedBookings.map(booking => (
+                                    <TableRow key={booking.id}>
+                                        <TableCell>
+                                            <div className="font-medium">{booking.studentName}</div>
+                                            <div className="text-xs text-muted-foreground sm:hidden">{booking.date} @ {booking.time}</div>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell">{booking.date} @ {booking.time}</TableCell>
+                                        <TableCell className="hidden md:table-cell"><Badge variant="secondary">{booking.subject}</Badge></TableCell>
+                                        <TableCell>
+                                            <Badge variant="outline" className="flex items-center gap-1.5 w-fit">
+                                                {getStatusIcon(booking.status)}
+                                                {booking.status}
+                                            </Badge>
+                                        </TableCell>
+                                        <TableCell className="text-right">
+                                            {booking.status === 'Pending Confirmation' ? (
+                                                <div className="flex gap-2 justify-end">
+                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-500/50 hover:bg-red-50"><XCircle className="h-4 w-4" /></Button>
+                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700"><CheckCircle className="h-4 w-4" /></Button>
+                                                </div>
+                                            ) : booking.status === 'Confirmed' ? (
+                                                <Button size="sm" variant="outline">Reschedule</Button>
+                                            ) : (
+                                                <span className="text-xs text-muted-foreground">No actions</span>
+                                            )}
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </CardContent>
+                    <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
+                        <div className="text-xs text-muted-foreground">
+                            Showing <strong>{(currentBookingPage - 1) * bookingsPerPage + 1}-{Math.min(currentBookingPage * bookingsPerPage, filteredBookings.length)}</strong> of <strong>{filteredBookings.length}</strong> bookings.
+                        </div>
+                        <div className="flex items-center gap-2">
+                            <Button variant="outline" size="sm" onClick={() => setCurrentBookingPage(p => p - 1)} disabled={currentBookingPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                            <Button variant="outline" size="sm" onClick={() => setCurrentBookingPage(p => p + 1)} disabled={currentBookingPage >= totalBookingPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                        </div>
+                    </CardFooter>
                 </Card>
             )}
             
