@@ -89,7 +89,7 @@ export function AdminTutorsTab({ tutors, onTutorApproval }: AdminTutorsTabProps)
                             ))}
                         </TableBody>
                     </Table>
-                </Card>
+                </CardContent>
             </Card>
 
             <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
