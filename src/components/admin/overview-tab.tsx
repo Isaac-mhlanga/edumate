@@ -6,14 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { adminData } from "@/lib/data";
-import { ArrowUpRight, Sparkles, RefreshCw, UserPlus, BookOpen, Banknote, ChevronLeft, ChevronRight, Wand2, Users, DollarSign, CreditCard } from "lucide-react";
-import { format } from 'date-fns';
-import { type PayoutRequest, type CalendarEvent, type MonetizationSettings, type AiTutorUsageData, type Transaction, type User, type Course, type Subscription } from "@/app/admin/page";
-import { Bar, BarChart, ResponsiveContainer, XAxis, YAxis, Tooltip } from "recharts";
-import { ChartConfig, ChartContainer, ChartTooltipContent } from "@/components/ui/chart";
-import { Switch } from "../ui/switch";
-import { Label } from "../ui/label";
+import { ArrowUpRight, Sparkles, RefreshCw, UserPlus, BookOpen, Banknote, ChevronLeft, ChevronRight, Wand2, Users, DollarSign, CreditCard, Transaction } from "lucide-react";
+import { format } from "date-fns";
+import { type PayoutRequest, type CalendarEvent, type RecentActivity, type User, type Course, type Subscription } from "@/app/admin/page";
 
 interface AdminOverviewTabProps {
     loading: boolean;
@@ -26,6 +21,7 @@ interface AdminOverviewTabProps {
     courses: Course[];
     transactions: Transaction[];
     subscriptions: Subscription[];
+    recentActivity: RecentActivity[];
 }
 
 export function AdminOverviewTab({ 
@@ -38,10 +34,11 @@ export function AdminOverviewTab({
     users,
     courses,
     transactions,
-    subscriptions
+    subscriptions,
+    recentActivity
 }: AdminOverviewTabProps) {
     const [currentActivityPage, setCurrentActivityPage] = React.useState(1);
-    const activitiesPerPage = 4;
+    const activitiesPerPage = 5;
     const [currentEventPage, setCurrentEventPage] = React.useState(1);
     const eventsPerPage = 4;
     const [currentPayoutRequestPage, setCurrentPayoutRequestPage] = React.useState(1);
@@ -61,8 +58,8 @@ export function AdminOverviewTab({
     const totalPayoutRequestPages = Math.ceil(pendingPayoutRequests.length / payoutRequestsPerPage);
     const paginatedPayoutRequests = pendingPayoutRequests.slice((currentPayoutRequestPage - 1) * payoutRequestsPerPage, currentPayoutRequestPage * payoutRequestsPerPage);
     
-    const totalActivityPages = Math.ceil(adminData.recentActivity.length / activitiesPerPage);
-    const paginatedActivities = adminData.recentActivity.slice((currentActivityPage - 1) * activitiesPerPage, currentActivityPage * activitiesPerPage);
+    const totalActivityPages = Math.ceil(recentActivity.length / activitiesPerPage);
+    const paginatedActivities = recentActivity.slice((currentActivityPage - 1) * activitiesPerPage, currentActivityPage * activitiesPerPage);
 
     const totalRevenue = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
     const activeSubscriptions = subscriptions.filter(s => s.status === 'Active').length;
@@ -134,7 +131,7 @@ export function AdminOverviewTab({
                                         <div className="bg-muted p-2 rounded-full mt-1">
                                             {activity.type === 'New User' && <UserPlus className="h-5 w-5 text-muted-foreground"/>}
                                             {activity.type === 'New Course' && <BookOpen className="h-5 w-5 text-muted-foreground"/>}
-                                            {activity.type === 'Payout' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
+                                            {activity.type === 'Transaction' && <Banknote className="h-5 w-5 text-muted-foreground"/>}
                                         </div>
                                         <div className="flex-1">
                                             <p className="font-medium">{activity.description}</p>

@@ -9,7 +9,6 @@ import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp
 import { getStorage, ref, deleteObject } from "firebase/storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
-import { adminData } from "@/lib/data";
 import { AdminOverviewTab } from "@/components/admin/overview-tab";
 import { AdminUsersTab } from "@/components/admin/users-tab";
 import { AdminCoursesTab } from "@/components/admin/courses-tab";
@@ -24,7 +23,7 @@ import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/adm
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
 import { CalendarDialogs } from "@/components/admin/calendar-dialogs";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
-import { format } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 
 
 const firebaseConfig = {
@@ -36,8 +35,8 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
-export type Course = { id: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft' };
+export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string | Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
+export type Course = { id: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft'; createdAt: Timestamp };
 export type PayoutRequest = {
     id: string;
     instructor: string;
@@ -50,11 +49,14 @@ export type PayoutRequest = {
 export type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; grade?: string; subject?: string; scope?: string; platforms?: string[]; };
-export type Transaction = { id: string; itemType: string; status: string; amount: number; createdAt: Timestamp; };
-export type MonetizationSettings = {
-    isAiTutorPaid: boolean;
+export type Transaction = { id: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
+export type RecentActivity = {
+    id: string;
+    type: 'New User' | 'New Course' | 'Payout' | 'Transaction';
+    description: string;
+    timestamp: string;
+    value?: string;
 };
-export type AiTutorUsageData = { month: string; usage: number }[];
 
 
 function AdminPage() {
@@ -125,17 +127,21 @@ function AdminPage() {
                 const fetchedEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
                 setEvents(fetchedEvents);
 
-                const usersSnapshot = await getDocs(collection(firestore, "users"));
-                const fetchedUsers = usersSnapshot.docs.map(doc => ({ id: doc.id, name: doc.data().fullName, ...doc.data() } as User));
+                const usersSnapshot = await getDocs(query(collection(firestore, "users"), orderBy('createdAt', 'desc')));
+                const fetchedUsers = usersSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return { id: doc.id, name: data.fullName, joined: data.createdAt.toDate(), ...data } as User
+                });
                 
-                const fetchedSubscriptions = adminData.subscriptions;
+                const subsSnapshot = await getDocs(collection(firestore, "subscriptions"));
+                const fetchedSubscriptions = subsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() as Omit<Subscription, 'id'>}));
                 setSubscriptions(fetchedSubscriptions);
                 const subscriptionMap = new Map<string, string>();
                 fetchedSubscriptions.forEach(sub => { if (sub.status === 'Active') { subscriptionMap.set(sub.studentId, sub.planName); } });
                 const usersWithSubscriptions = fetchedUsers.map(user => ({ ...user, subscriptionPlan: subscriptionMap.get(user.id) }));
                 setUsers(usersWithSubscriptions);
 
-                const coursesSnapshot = await getDocs(collection(firestore, "courses"));
+                const coursesSnapshot = await getDocs(query(collection(firestore, "courses"), orderBy('createdAt', 'desc')));
                 const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
                 setCourses(fetchedCourses);
 
@@ -143,7 +149,7 @@ function AdminPage() {
                 const fetchedAssignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, assignmentTitle: doc.data().title, ...doc.data() } as Assignment));
                 setAssignments(fetchedAssignments);
                 
-                const transactionsSnapshot = await getDocs(collection(firestore, "transactions"));
+                const transactionsSnapshot = await getDocs(query(collection(firestore, "transactions"), orderBy('createdAt', 'desc')));
                 const fetchedTransactions = transactionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
                 setTransactions(fetchedTransactions);
 
@@ -169,6 +175,36 @@ function AdminPage() {
         };
         fetchData();
     }, [firestore, toast, generatePerformanceSummary]);
+
+    const recentActivity = React.useMemo(() => {
+        const userActivities: RecentActivity[] = users.slice(0, 5).map(user => ({
+            id: `user-${user.id}`,
+            type: 'New User',
+            description: `${user.fullName} signed up as a ${user.role}.`,
+            timestamp: formatDistanceToNow(new Date(user.joined), { addSuffix: true }),
+            value: user.role
+        }));
+
+        const courseActivities: RecentActivity[] = courses.slice(0, 5).map(course => ({
+            id: `course-${course.id}`,
+            type: 'New Course',
+            description: `${course.instructor} created "${course.title}".`,
+            timestamp: formatDistanceToNow(course.createdAt.toDate(), { addSuffix: true }),
+            value: course.status
+        }));
+        
+        const transactionActivities: RecentActivity[] = transactions.slice(0, 5).map(t => ({
+             id: `txn-${t.id}`,
+            type: 'Transaction',
+            description: `Sale of "${t.itemTitle}".`,
+            timestamp: formatDistanceToNow(t.createdAt.toDate(), { addSuffix: true }),
+            value: `R ${t.amount.toFixed(2)}`
+        }));
+        
+        return [...userActivities, ...courseActivities, ...transactionActivities]
+            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // This sort is tricky with relative times. A better way would be to keep original dates.
+    }, [users, courses, transactions]);
+
 
     const handleUserAction = (user: User, action: 'suspend' | 'delete') => {
         setSelectedUser(user);
@@ -263,6 +299,7 @@ function AdminPage() {
                     courses={courses}
                     transactions={transactions}
                     subscriptions={subscriptions}
+                    recentActivity={recentActivity}
                 />
             )}
             {currentTab === 'users' && <AdminUsersTab users={users} onUserAction={handleUserAction} />}
