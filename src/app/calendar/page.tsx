@@ -133,7 +133,7 @@ export default function CalendarPage() {
                     padding: 4px 6px;
                     cursor: pointer;
                 }
-                .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard .fc-list-table td {
+                .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard th {
                     background-color: hsl(var(--card));
                 }
                 .fc .fc-list-event:hover td {

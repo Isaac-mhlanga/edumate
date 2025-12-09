@@ -298,6 +298,12 @@ function AdminPage() {
     return (
         <div className="space-y-8">
             <style jsx global>{`
+                .fc-theme-standard .fc-list-day-cushion {
+                    background-color: hsl(var(--card));
+                }
+                .fc-theme-standard th {
+                    background: hsl(var(--card));
+                }
                 .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
                     color: hsl(var(--foreground)) !important;
                 }

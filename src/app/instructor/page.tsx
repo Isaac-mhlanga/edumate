@@ -778,8 +778,8 @@ function InstructorPage() {
           padding: 4px 6px;
           cursor: pointer;
         }
-        .fc-theme-standard .fc-list-day-cushion {
-          background-color: hsl(var(--card)) !important;
+        .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard th {
+          background-color: hsl(var(--card));
         }
         .fc .fc-list-event:hover td {
           background-color: hsl(var(--muted)) !important;
