@@ -111,28 +111,25 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       const batch = writeBatch(firestore);
       const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
       
-      let fileUrl: string | undefined;
-      let fileType: 'image' | 'pdf' | undefined;
+      const commentData: any = {
+        studentId: user?.uid || 'anonymous',
+        studentName: user?.displayName || 'Anonymous',
+        studentAvatar: user?.photoURL || null,
+        content: content,
+        createdAt: serverTimestamp(),
+        likeCount: 0,
+        likedBy: [],
+        parentId: parentId,
+      };
 
       if (file) {
         const fileRef = ref(storage, `questions/${question.id}/comments/${commentRef.id}/${file.name}`);
         await uploadBytes(fileRef, file);
-        fileUrl = await getDownloadURL(fileRef);
-        fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+        commentData.fileUrl = await getDownloadURL(fileRef);
+        commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
       }
 
-      batch.set(commentRef, {
-          studentId: user?.uid || 'anonymous',
-          studentName: user?.displayName || 'Anonymous',
-          studentAvatar: user?.photoURL || null,
-          content: content,
-          fileUrl,
-          fileType,
-          createdAt: serverTimestamp(),
-          likeCount: 0,
-          likedBy: [],
-          parentId: parentId,
-      });
+      batch.set(commentRef, commentData);
       
       if (!parentId) { // Only increment comment count for top-level comments
           const questionRef = doc(firestore, 'questions', question.id);
@@ -536,3 +533,5 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     </div>
   );
 }
+
+    
