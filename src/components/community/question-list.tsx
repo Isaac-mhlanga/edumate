@@ -32,7 +32,7 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion, lo
               onClick={() => onSelectQuestion(q)}
               className={cn(
                 'w-full text-left p-3 rounded-lg border transition-colors',
-                selectedQuestion?.id === q.id ? 'bg-primary/10 border-primary' : 'hover:bg-muted/50'
+                selectedQuestion?.id === q.id ? 'bg-primary/10 border-primary' : 'hover:bg-muted'
               )}
             >
               <div className="flex items-center gap-3 mb-2">

@@ -108,8 +108,8 @@ function CommunityPage() {
 
 
     return (
-        <div className="space-y-4">
-             <div className="text-left mb-8">
+        <div className="space-y-8">
+             <div className="text-left">
                 <h1 className="text-3xl font-bold tracking-tight">Community Forum</h1>
                 <p className="text-lg text-muted-foreground mt-1">Ask questions, share knowledge, and connect with fellow students.</p>
             </div>
