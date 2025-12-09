@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -9,7 +8,7 @@ import { CheckCircle, ShieldCheck } from "lucide-react";
 
 export function SubscriptionsTab() {
     return (
-        <div className="space-y-6">
+        <div className="space-y-8">
             <Card>
                 <CardHeader>
                     <CardTitle>My Current Plan</CardTitle>
@@ -50,8 +49,8 @@ export function SubscriptionsTab() {
                             <CardContent className="flex-grow">
                                 <ul className="space-y-2 text-sm text-muted-foreground">
                                     {plan.features.map((feature, i) => (
-                                        <li key={i} className="flex items-center gap-2">
-                                            <CheckCircle className="h-4 w-4 text-green-500"/>
+                                        <li key={i} className="flex items-start gap-2">
+                                            <CheckCircle className="h-4 w-4 text-green-500 mt-1 shrink-0"/>
                                             <span>{feature}</span>
                                         </li>
                                     ))}
