@@ -293,44 +293,44 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         console.error('Error toggling comments:', error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
     }
-};
-  
-    const toggleCollapse = (commentId: string) => {
-      setCollapsedComments(prev => 
-          prev.includes(commentId) 
-              ? prev.filter(id => id !== commentId)
-              : [...prev, commentId]
-      );
-    };
+  };
 
-    const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
-        if (!item.fileUrl) return null;
-        return (
-          <div className="space-y-2 rounded-lg border p-3 mt-2">
-            <div className="flex items-center justify-between">
-                <h4 className="font-semibold text-xs flex items-center gap-2">
-                    <FileText className="h-4 w-4" />
-                    Attached File
-                </h4>
-                <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                    <Download className="h-3 w-3" />
-                    Download
-                </a>
+  const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
+    if (!item.fileUrl) return null;
+    return (
+      <div className="space-y-2 rounded-lg border p-3 mt-2">
+        <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-xs flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Attached File
+            </h4>
+            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                <Download className="h-3 w-3" />
+                Download
+            </a>
+        </div>
+        {item.fileType === 'image' ? (
+            <div className="relative w-full">
+                <Image src={item.fileUrl} alt="Attached image" width={0} height={0} sizes="100vw" className="object-contain rounded-md w-full h-auto" />
             </div>
-            {item.fileType === 'image' ? (
-                <div className="relative w-full">
-                    <Image src={item.fileUrl} alt="Attached image" width={0} height={0} sizes="100vw" className="object-contain rounded-md w-full h-auto" />
-                </div>
-            ) : item.fileType === 'pdf' ? (
-                <div className="w-full aspect-[4/5]">
-                    <iframe src={item.fileUrl} className="w-full h-full rounded-md border" title="Attached PDF"></iframe>
-                </div>
-            ) : (
-                <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
-            )}
-          </div>
-        );
-    };
+        ) : item.fileType === 'pdf' ? (
+            <div className="w-full aspect-[4/5]">
+                <iframe src={item.fileUrl} className="w-full h-full rounded-md border" title="Attached PDF"></iframe>
+            </div>
+        ) : (
+            <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
+        )}
+      </div>
+    );
+  };
+  
+  const toggleCollapse = (commentId: string) => {
+    setCollapsedComments(prev => 
+        prev.includes(commentId) 
+            ? prev.filter(id => id !== commentId)
+            : [...prev, commentId]
+    );
+  };
   
   if (!question) {
     return (
