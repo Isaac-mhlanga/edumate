@@ -9,7 +9,7 @@ import { QuestionList } from '@/components/community/question-list';
 import { CommentSection } from '@/components/community/comment-section';
 import { type Question } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import withAuth from '@/components/with-auth';
 import { Input } from '@/components/ui/input';
 import { Search } from 'lucide-react';
@@ -113,49 +113,45 @@ function CommunityPage() {
                 <h1 className="text-3xl font-bold tracking-tight">Community Forum</h1>
                 <p className="text-lg text-muted-foreground mt-1">Ask questions, share knowledge, and connect with fellow students.</p>
             </div>
-            <div className="grid lg:grid-cols-12 gap-8 items-start">
-                <div className="lg:col-span-4">
-                    <Card className="flex flex-col h-full">
-                        <div className="p-4 border-b">
-                            <QuestionForm />
-                            <div className="relative mt-4">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                    placeholder="Search questions..."
-                                    className="pl-8"
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value);
-                                        setCurrentPage(1);
-                                    }}
-                                />
-                            </div>
+            <Card className="flex flex-col md:flex-row h-full min-h-[calc(100vh-16rem)]">
+                <div className="w-full md:w-1/3 border-b md:border-r md:border-b-0">
+                     <div className="p-4 border-b">
+                        <QuestionForm />
+                        <div className="relative mt-4">
+                            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                            <Input 
+                                placeholder="Search questions..."
+                                className="pl-8"
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    setCurrentPage(1);
+                                }}
+                            />
                         </div>
-                        <QuestionList 
-                            questions={paginatedQuestions} 
-                            selectedQuestion={selectedQuestion}
-                            onSelectQuestion={setSelectedQuestion} 
-                            loading={loading}
-                        />
-                        {totalPages > 1 && (
-                            <div className="p-2 border-t flex justify-center items-center gap-2">
-                                <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
-                                <span className="text-xs text-muted-foreground">Page {currentPage} of {totalPages}</span>
-                                <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
-                            </div>
-                        )}
-                    </Card>
+                    </div>
+                    <QuestionList 
+                        questions={paginatedQuestions} 
+                        selectedQuestion={selectedQuestion}
+                        onSelectQuestion={setSelectedQuestion} 
+                        loading={loading}
+                    />
+                    {totalPages > 1 && (
+                        <div className="p-2 border-t flex justify-center items-center gap-2">
+                            <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
+                            <span className="text-xs text-muted-foreground">Page {currentPage} of {totalPages}</span>
+                            <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
+                        </div>
+                    )}
                 </div>
-                <div className="lg:col-span-8">
-                   <Card className="min-h-[calc(100vh-16rem)]">
-                     <CommentSection 
-                        question={selectedQuestion} 
-                        onUpdateQuestion={handleQuestionUpdate}
-                        onDeleteQuestion={handleQuestionDelete}
-                     />
-                   </Card>
+                 <div className="w-full md:w-2/3">
+                    <CommentSection 
+                    question={selectedQuestion} 
+                    onUpdateQuestion={handleQuestionUpdate}
+                    onDeleteQuestion={handleQuestionDelete}
+                    />
                 </div>
-            </div>
+            </Card>
         </div>
     );
 }
