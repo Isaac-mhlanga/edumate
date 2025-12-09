@@ -13,10 +13,10 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { tutorData } from "@/lib/data";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, Timestamp, onSnapshot, Unsubscribe, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
@@ -26,6 +26,7 @@ import { type MessageThread, type ThreadMessage } from "@/lib/types";
 import { formatDistanceToNow } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
 type Booking = {
     id: string;
@@ -56,6 +57,7 @@ type TutorProfile = {
 };
 
 function TutorPage() {
+    const router = useRouter();
     const searchParams = useSearchParams();
     const { toast } = useToast();
     const [user, setUser] = useState<User | null>(null);
@@ -245,6 +247,8 @@ function TutorPage() {
         }
     };
 
+    const isProfileIncomplete = !profile?.bio || !profile?.qualifications;
+
     if (loading) {
         return <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-64 w-full" /></div>
     }
@@ -257,6 +261,16 @@ function TutorPage() {
         <div className="space-y-8">
             {currentTab === 'overview' && (
                 <div className="space-y-8">
+                    {isProfileIncomplete && (
+                        <Alert>
+                            <Info className="h-4 w-4" />
+                            <AlertTitle>Complete Your Profile!</AlertTitle>
+                            <AlertDescription className="flex items-center justify-between">
+                                Your profile is incomplete. Please update it to become visible to students.
+                                <Button size="sm" onClick={() => router.push('/tutor?tab=profile')}>Update Profile</Button>
+                            </AlertDescription>
+                        </Alert>
+                    )}
                     <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                         {tutorData.stats.map((stat) => (
                             <Card key={stat.title}>
@@ -566,5 +580,3 @@ const firebaseConfig = {
 };
 
 export default withAuth(TutorPage, ['tutor']);
-
-    
