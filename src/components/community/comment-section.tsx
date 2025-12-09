@@ -109,47 +109,44 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     const storage = getStorage(app);
     
     try {
-      const batch = writeBatch(firestore);
-      const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
-      
-      const commentData: any = {
-        studentId: user?.uid || 'anonymous',
-        studentName: user?.displayName || 'Anonymous',
-        studentAvatar: user?.photoURL || null,
-        content: content,
-        createdAt: serverTimestamp(),
-        likeCount: 0,
-        likedBy: [],
-        parentId: parentId,
-      };
+        const batch = writeBatch(firestore);
+        const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
+        
+        const commentData: any = {
+            studentId: user?.uid || 'anonymous',
+            studentName: user?.displayName || 'Anonymous',
+            studentAvatar: user?.photoURL || null,
+            content: content,
+            createdAt: serverTimestamp(),
+            likeCount: 0,
+            likedBy: [],
+            parentId: parentId,
+        };
 
-      if (file) {
-        const fileRef = ref(storage, `questions/${question.id}/comments/${commentRef.id}/${file.name}`);
-        await uploadBytes(fileRef, file);
-        commentData.fileUrl = await getDownloadURL(fileRef);
-        commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
-      } else {
-        commentData.fileUrl = null;
-        commentData.fileType = null;
-      }
+        if (file) {
+            const fileRef = ref(storage, `questions/${question.id}/comments/${commentRef.id}/${file.name}`);
+            await uploadBytes(fileRef, file);
+            commentData.fileUrl = await getDownloadURL(fileRef);
+            commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+        }
 
-      batch.set(commentRef, commentData);
-      
-      if (!parentId) { // Only increment comment count for top-level comments
-          const questionRef = doc(firestore, 'questions', question.id);
-          batch.update(questionRef, { commentCount: increment(1) });
-      }
+        batch.set(commentRef, commentData);
+        
+        if (!parentId) { // Only increment comment count for top-level comments
+            const questionRef = doc(firestore, 'questions', question.id);
+            batch.update(questionRef, { commentCount: increment(1) });
+        }
 
-      await batch.commit();
-      
-      if (parentId) {
-          setReplyContent('');
-          setReplyFile(null);
-          setReplyingTo(null);
-      } else {
-          setNewComment('');
-          setNewCommentFile(null);
-      }
+        await batch.commit();
+        
+        if (parentId) {
+            setReplyContent('');
+            setReplyFile(null);
+            setReplyingTo(null);
+        } else {
+            setNewComment('');
+            setNewCommentFile(null);
+        }
     } catch(error) {
         console.error("Error posting comment:", error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not post your comment.' });
@@ -306,7 +303,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         );
     };
 
-
   const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
     if (!item.fileUrl) return null;
     return (
@@ -445,7 +441,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                 {replyingTo === comment.id && (
                                     <div className="ml-11 mt-2 flex items-start gap-3">
                                          <Avatar className="h-8 w-8 border">
-                                            {user ? <AvatarImage src={user.photoURL || undefined} /> : null}
+                                            {user ? <AvatarImage src={user.photoURL || undefined} /> : <AvatarFallback>A</AvatarFallback>}
                                             <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 space-y-2">
@@ -522,7 +518,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             ) : (
                 <div className="flex items-start gap-3">
                     <Avatar className="h-9 w-9 mt-1 border">
-                        {user ? <AvatarImage src={user.photoURL || undefined} /> : null}
+                        {user ? <AvatarImage src={user.photoURL || undefined} /> : <AvatarFallback>A</AvatarFallback>}
                         <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
                     </Avatar>
                     <div className="flex-1 space-y-2">
