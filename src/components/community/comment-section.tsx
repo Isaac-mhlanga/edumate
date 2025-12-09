@@ -286,14 +286,14 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                         <AvatarImage src={comment.studentAvatar} />
                                         <AvatarFallback>{comment.studentName.charAt(0)}</AvatarFallback>
                                     </Avatar>
-                                    <div className="flex-1">
+                                    <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                             <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
                                             <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                         </div>
                                         <p className="text-sm mt-1">{comment.content}</p>
                                         {renderAttachment(comment)}
-                                        <div className="flex items-center gap-1 mt-1">
+                                        <div className="flex items-center gap-1 mt-2">
                                             <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)}>
                                                 <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                                             </Button>
@@ -336,14 +336,14 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                                 <AvatarImage src={reply.studentAvatar} />
                                                 <AvatarFallback>{reply.studentName.charAt(0)}</AvatarFallback>
                                             </Avatar>
-                                            <div className="flex-1">
+                                            <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
                                                     <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
                                                     <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                                 </div>
                                                 <p className="text-sm mt-1">{reply.content}</p>
                                                 {renderAttachment(reply)}
-                                                 <div className="flex items-center gap-1 mt-1">
+                                                 <div className="flex items-center gap-1 mt-2">
                                                     <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)}>
                                                         <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
                                                     </Button>
@@ -362,9 +362,9 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
         </ScrollArea>
         <CardContent className="flex-shrink-0 border-t pt-4">
             <div className="flex items-start gap-3">
-                 <Avatar className="h-9 w-9 mt-1">
+                 <Avatar className="h-9 w-9 mt-1 border">
                     <AvatarImage src={user?.photoURL || undefined} />
-                    <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                    <AvatarFallback>{user?.displayName?.charAt(0) || 'Ed'}</AvatarFallback>
                 </Avatar>
                 <div className="flex-1 space-y-2">
                     <Textarea 
