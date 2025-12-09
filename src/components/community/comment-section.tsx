@@ -112,12 +112,11 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         const batch = writeBatch(firestore);
         const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
         
-        const commentData: Partial<Comment> = {
+        const commentData: Omit<Comment, 'id' | 'createdAt'> = {
             studentId: user?.uid || 'anonymous',
             studentName: user?.displayName || 'Anonymous',
             studentAvatar: user?.photoURL || null,
             content: content,
-            createdAt: serverTimestamp() as Timestamp,
             likeCount: 0,
             likedBy: [],
             parentId: parentId,
@@ -130,7 +129,10 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
         }
 
-        batch.set(commentRef, commentData);
+        batch.set(commentRef, {
+            ...commentData,
+            createdAt: serverTimestamp()
+        });
         
         if (!parentId) { // Only increment comment count for top-level comments
             const questionRef = doc(firestore, 'questions', question.id);
@@ -155,7 +157,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
 
- const handleLike = async (type: 'question' | 'comment', id: string) => {
+  const handleLike = async (type: 'question' | 'comment', id: string) => {
     if (!user) {
       toast({ title: 'Please log in', description: 'You need to be logged in to like a post.' });
       return;
@@ -210,7 +212,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
   
-   const handleDelete = async (type: 'question' | 'comment', id: string) => {
+  const handleDelete = async (type: 'question' | 'comment', id: string) => {
     if (userRole !== 'admin') {
       toast({ variant: 'destructive', title: 'Permission Denied', description: 'You are not authorized to perform this action.' });
       return;
