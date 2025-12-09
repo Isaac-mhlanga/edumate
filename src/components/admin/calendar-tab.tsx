@@ -13,7 +13,7 @@ import { PlusCircle, Sparkles } from "lucide-react";
 import { CalendarEvent } from "@/app/admin/page";
 import { CalendarDialogs } from "./calendar-dialogs";
 import { useToast } from "@/hooks/use-toast";
-import { getFirestore, doc, addDoc, collection } from "firebase/firestore";
+import { getFirestore, doc, addDoc, collection, updateDoc } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
 const firebaseConfig = {
@@ -62,7 +62,7 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
         setIsDetailDialogOpen(true);
     };
     
-    const handleAddManualEvent = async () => {
+    const handleAddOrUpdateEvent = async () => {
         if (!manualEvent.title || !manualEvent.start) {
             toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
             return;
@@ -72,14 +72,24 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
         const firestore = getFirestore(app);
         
         try {
-            const docRef = await addDoc(collection(firestore, 'events'), manualEvent);
-            const newEvent = { ...manualEvent, id: docRef.id } as CalendarEvent;
-            setEvents([...events, newEvent]);
-            toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
+            if (manualEvent.id) {
+                // Update existing event
+                const eventRef = doc(firestore, 'events', manualEvent.id);
+                await updateDoc(eventRef, manualEvent);
+                setEvents(prev => prev.map(e => e.id === manualEvent.id ? manualEvent as CalendarEvent : e));
+                toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
+            } else {
+                // Create new event
+                const docRef = await addDoc(collection(firestore, 'events'), manualEvent);
+                const newEvent = { ...manualEvent, id: docRef.id } as CalendarEvent;
+                setEvents([...events, newEvent]);
+                toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
+            }
+            
             setIsManualDialogOpen(false);
             setManualEvent({});
         } catch(error) {
-            console.error("Error creating event:", error);
+            console.error("Error saving event:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
         }
     };
@@ -129,7 +139,7 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
                 selectedEvent={selectedEvent}
                 manualEvent={manualEvent}
                 setManualEvent={setManualEvent}
-                onManualCreate={handleAddManualEvent}
+                onManualCreate={handleAddOrUpdateEvent}
             />
         </>
     );

@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Calendar as CalendarIcon, Check, PlusCircle, X, Save, User, BookOpen, GraduationCap, Info, ExternalLink } from "lucide-react";
+import { Calendar as CalendarIcon, Check, PlusCircle, X, Save, User, BookOpen, GraduationCap, Info, ExternalLink, Edit } from "lucide-react";
 import { format } from 'date-fns';
 import { type CalendarEvent } from "@/app/admin/page";
 import { cn } from "@/lib/utils";
@@ -43,6 +43,14 @@ export function CalendarDialogs({
 }: CalendarDialogsProps) {
 
     const [openPlatforms, setOpenPlatforms] = React.useState(false);
+    
+    const handleEdit = () => {
+        if (!selectedEvent) return;
+        setManualEvent(selectedEvent);
+        setIsDetailDialogOpen(false);
+        setIsManualDialogOpen(true);
+    };
+
 
     return (
         <>
@@ -50,8 +58,8 @@ export function CalendarDialogs({
             <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
                 <DialogContent className="sm:max-w-2xl">
                     <DialogHeader>
-                        <DialogTitle className="text-xl">Add New Event</DialogTitle>
-                        <DialogDescription>Fill in the details for your new event. This will be visible to all users.</DialogDescription>
+                        <DialogTitle className="text-xl">{manualEvent.id ? 'Edit Event' : 'Add New Event'}</DialogTitle>
+                        <DialogDescription>{manualEvent.id ? 'Update the details for this event.' : 'Fill in the details for your new event. This will be visible to all users.'}</DialogDescription>
                     </DialogHeader>
                     <div className="py-4 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-4">
@@ -87,7 +95,7 @@ export function CalendarDialogs({
                                     <PopoverTrigger asChild>
                                         <Button variant="outline" role="combobox" aria-expanded={openPlatforms} className="w-full justify-between">
                                             <span className="truncate">
-                                            {manualEvent.platforms?.length ? manualEvent.platforms.join(', ') : "Select platforms..."}
+                                            {manualEvent.platforms?.length ? manualEvent.platforms.map(p => platforms.find(pl => pl.value === p)?.label).join(', ') : "Select platforms..."}
                                             </span>
                                         </Button>
                                     </PopoverTrigger>
@@ -143,7 +151,7 @@ export function CalendarDialogs({
                             <X className="mr-2 h-4 w-4"/>Cancel
                         </Button>
                         <Button onClick={onManualCreate}>
-                            <Save className="mr-2 h-4 w-4"/>Add Event
+                            <Save className="mr-2 h-4 w-4"/>{manualEvent.id ? 'Save Changes' : 'Add Event'}
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -210,6 +218,7 @@ export function CalendarDialogs({
                             </div>
                             <DialogFooter>
                                 <Button variant="ghost" onClick={() => setIsDetailDialogOpen(false)}>Close</Button>
+                                <Button onClick={handleEdit}><Edit className="mr-2 h-4 w-4"/> Edit Event</Button>
                             </DialogFooter>
                         </>
                     )}
