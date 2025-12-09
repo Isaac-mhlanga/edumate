@@ -932,3 +932,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
