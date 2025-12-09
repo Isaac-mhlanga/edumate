@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,12 +7,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X, User } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X, User, Trash2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
-import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc } from 'firebase/firestore';
-import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
+import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc, deleteDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
@@ -29,14 +28,18 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+type Role = 'student' | 'instructor' | 'admin' | 'tutor';
+
 interface CommentSectionProps {
   question: Question | null;
   onUpdateQuestion: (question: Question) => void;
+  onDeleteQuestion: (questionId: string) => void;
 }
 
-export function CommentSection({ question, onUpdateQuestion }: CommentSectionProps) {
+export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }: CommentSectionProps) {
   const { toast } = useToast();
   const [user, setUser] = useState<import('firebase/auth').User | null>(null);
+  const [userRole, setUserRole] = useState<Role | null>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(true);
   const [newComment, setNewComment] = useState('');
@@ -49,8 +52,19 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
+    const firestore = getFirestore(app);
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
       setUser(currentUser);
+      if (currentUser) {
+        const userDocRef = doc(firestore, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setUserRole(userDoc.data().role as Role);
+        }
+      } else {
+        setUserRole(null);
+      }
     });
     return () => unsubscribeAuth();
   }, []);
@@ -198,6 +212,78 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process your like.' });
     }
   };
+  
+   const handleDelete = async (type: 'question' | 'comment', id: string) => {
+    if (userRole !== 'admin') {
+      toast({ variant: 'destructive', title: 'Permission Denied', description: 'You are not authorized to perform this action.' });
+      return;
+    }
+    if (!question) return;
+    
+    const firestore = getFirestore();
+    const storage = getStorage();
+
+    if (type === 'question') {
+        // Confirm before deleting a whole question
+        if (!window.confirm('Are you sure you want to delete this entire question and all its comments?')) return;
+        try {
+            // Delete all comments and their files first
+            const commentsQuery = query(collection(firestore, 'questions', id, 'comments'));
+            const commentsSnapshot = await getDocs(commentsQuery);
+            const batch = writeBatch(firestore);
+            for (const commentDoc of commentsSnapshot.docs) {
+                const commentData = commentDoc.data();
+                if (commentData.fileUrl) {
+                    try { await deleteObject(ref(storage, commentData.fileUrl)); } catch (e) { console.error(e); }
+                }
+                batch.delete(commentDoc.ref);
+            }
+            await batch.commit();
+
+            // Delete the question and its file
+            if (question.fileUrl) {
+                try { await deleteObject(ref(storage, question.fileUrl)); } catch (e) { console.error(e); }
+            }
+            await deleteDoc(doc(firestore, 'questions', id));
+            onDeleteQuestion(id); // Notify parent component
+            toast({ title: 'Question Deleted', description: 'The question and all its comments have been removed.' });
+        } catch (error) {
+            console.error('Error deleting question:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
+        }
+    } else { // Deleting a comment
+        const commentToDelete = comments.find(c => c.id === id);
+        if (!commentToDelete) return;
+
+        try {
+            // Delete the comment and its file
+             if (commentToDelete.fileUrl) {
+                try { await deleteObject(ref(storage, commentToDelete.fileUrl)); } catch (e) { console.error(e); }
+            }
+            await deleteDoc(doc(firestore, 'questions', question.id, 'comments', id));
+
+            // Also delete replies if it's a top-level comment
+            const replies = comments.filter(c => c.parentId === id);
+            if (replies.length > 0) {
+                 const batch = writeBatch(firestore);
+                 for (const reply of replies) {
+                    if (reply.fileUrl) {
+                        try { await deleteObject(ref(storage, reply.fileUrl)); } catch (e) { console.error(e); }
+                    }
+                    batch.delete(doc(firestore, 'questions', question.id, 'comments', reply.id));
+                 }
+                 await batch.commit();
+            }
+            if (!commentToDelete.parentId) {
+                await updateDoc(doc(firestore, 'questions', question.id), { commentCount: increment(-1) });
+            }
+            toast({ title: 'Comment Deleted', description: 'The comment has been removed.' });
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the comment.' });
+        }
+    }
+  };
 
   const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
     if (!item.fileUrl) return null;
@@ -262,14 +348,21 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                  <p className="text-sm whitespace-pre-wrap">{question.content}</p>
                  {renderAttachment(question)}
                  
-                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                    <Button variant="ghost" size="sm" className="text-xs h-auto p-1" onClick={() => handleLike('question', question.id)}>
-                        <ThumbsUp className={cn("h-4 w-4 mr-1", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
-                        {question.likeCount || 0}
-                    </Button>
-                     <div className="flex items-center gap-1">
-                        <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
+                 <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1" onClick={() => handleLike('question', question.id)}>
+                            <ThumbsUp className={cn("h-4 w-4 mr-1", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
+                            {question.likeCount || 0}
+                        </Button>
+                         <div className="flex items-center gap-1">
+                            <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
+                        </div>
                     </div>
+                     {userRole === 'admin' && (
+                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('question', question.id)}>
+                            <Trash2 className="h-4 w-4 mr-1" /> Delete Question
+                        </Button>
+                    )}
                 </div>
 
                  <Separator />
@@ -287,12 +380,19 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                         <AvatarFallback>{comment.studentName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
-                                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <User className="h-4 w-4"/>
-                                            <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
-                                            <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                                        <div className="flex justify-between items-start">
+                                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                <User className="h-4 w-4"/>
+                                                <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
+                                                <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                                            </div>
+                                             {userRole === 'admin' && (
+                                                <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-1" onClick={() => handleDelete('comment', comment.id)}>
+                                                    <Trash2 className="h-4 w-4 text-destructive" />
+                                                </Button>
+                                            )}
                                         </div>
-                                        <p className="text-sm mt-1">{comment.content}</p>
+                                        <p className="text-sm mt-2">{comment.content}</p>
                                         {renderAttachment(comment)}
                                         <div className="flex items-center gap-1 mt-2">
                                             <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)}>
@@ -316,9 +416,11 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                             {replyFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{replyFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setReplyFile(null)}><X className="h-4 w-4"/></Button></div>}
                                             <div className="flex justify-between items-center">
                                                 <Button type="button" variant="ghost" size="icon" asChild>
-                                                  <label htmlFor={`reply-file-${comment.id}`} className="cursor-pointer"><Paperclip className="h-4 w-4"/></label>
+                                                  <label htmlFor={`reply-file-${comment.id}`} className={cn("cursor-pointer", !user && "cursor-not-allowed opacity-50")}>
+                                                      <Paperclip className="h-4 w-4"/>
+                                                  </label>
                                                 </Button>
-                                                <Input id={`reply-file-${comment.id}`} type="file" className="hidden" onChange={e => setReplyFile(e.target.files?.[0] || null)} />
+                                                <Input id={`reply-file-${comment.id}`} type="file" className="hidden" disabled={!user} onChange={e => setReplyFile(e.target.files?.[0] || null)} />
 
                                                 <div className="flex justify-end gap-2">
                                                     <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
@@ -338,12 +440,19 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                                 <AvatarFallback>{reply.studentName.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1 bg-muted/50 p-3 rounded-lg border">
-                                                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                    <User className="h-4 w-4"/>
-                                                    <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
-                                                    <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                                                 <div className="flex justify-between items-start">
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                                                        <User className="h-4 w-4"/>
+                                                        <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
+                                                        <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                                                    </div>
+                                                    {userRole === 'admin' && (
+                                                        <Button variant="ghost" size="icon" className="h-6 w-6 -mr-2 -mt-1" onClick={() => handleDelete('comment', reply.id)}>
+                                                            <Trash2 className="h-4 w-4 text-destructive" />
+                                                        </Button>
+                                                    )}
                                                 </div>
-                                                <p className="text-sm mt-1">{reply.content}</p>
+                                                <p className="text-sm mt-2">{reply.content}</p>
                                                 {renderAttachment(reply)}
                                                  <div className="flex items-center gap-1 mt-2">
                                                     <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)}>
@@ -364,10 +473,12 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
         </ScrollArea>
         <CardContent className="flex-shrink-0 border-t pt-4">
             <div className="flex items-start gap-3">
-                 <Avatar className="h-9 w-9 mt-1 border">
-                    <AvatarImage src={user?.photoURL || undefined} />
-                    <AvatarFallback>{user?.displayName?.charAt(0) || 'Ed'}</AvatarFallback>
-                </Avatar>
+                 {user && (
+                    <Avatar className="h-9 w-9 mt-1 border">
+                        <AvatarImage src={user?.photoURL || undefined} />
+                        <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
+                    </Avatar>
+                 )}
                 <div className="flex-1 space-y-2">
                     <Textarea 
                         placeholder={user ? "Add your answer..." : "Please log in to post an answer."}
@@ -379,9 +490,11 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                     {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
                     <div className="flex justify-between items-center">
                         <Button type="button" variant="ghost" size="icon" asChild>
-                          <label htmlFor="comment-file" className="cursor-pointer"><Paperclip className="h-4 w-4"/></label>
+                          <label htmlFor="comment-file" className={cn("cursor-pointer", !user && "cursor-not-allowed opacity-50")}>
+                              <Paperclip className="h-4 w-4"/>
+                          </label>
                         </Button>
-                        <Input id="comment-file" type="file" className="hidden" onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
+                        <Input id="comment-file" type="file" className="hidden" disabled={!user} onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
                         <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile) || !user}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                             <Send className="mr-2 h-4 w-4" />

@@ -127,7 +127,7 @@ service cloud.firestore {
       // Users can only update their own question, or update likes
       allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy']));
        // Users can only delete their own questions
-      allow delete: if isSignedIn() && isOwner(resource.data.studentId);
+      allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
 
       // Rules for comments on questions
       match /comments/{commentId} {
@@ -138,7 +138,7 @@ service cloud.firestore {
         // Users can only update their own comments, or update likes
         allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy']));
         // Users can only delete their own comments
-        allow delete: if isSignedIn() && isOwner(resource.data.studentId);
+        allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
       }
     }
   }

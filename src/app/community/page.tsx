@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, getDocs, writeBatch, deleteDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionForm } from '@/components/community/question-form';
 import { QuestionList } from '@/components/community/question-list';
@@ -57,6 +57,20 @@ function CommunityPage() {
         }
     };
 
+    const handleQuestionDelete = (deletedQuestionId: string) => {
+        setQuestions(prev => prev.filter(q => q.id !== deletedQuestionId));
+        if (selectedQuestion?.id === deletedQuestionId) {
+            // If the deleted question was selected, select the next one or null
+            const currentIndex = questions.findIndex(q => q.id === deletedQuestionId);
+            if (questions.length > 1) {
+                const newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
+                setSelectedQuestion(questions[newIndex] || null);
+            } else {
+                setSelectedQuestion(null);
+            }
+        }
+    };
+
     return (
         <div className="flex flex-col min-h-screen bg-muted/30">
           <PublicHeader />
@@ -81,7 +95,11 @@ function CommunityPage() {
                     </div>
                     <div className="lg:col-span-8">
                        <Card className="min-h-[calc(100vh-20rem)]">
-                         <CommentSection question={selectedQuestion} onUpdateQuestion={handleQuestionUpdate}/>
+                         <CommentSection 
+                            question={selectedQuestion} 
+                            onUpdateQuestion={handleQuestionUpdate}
+                            onDeleteQuestion={handleQuestionDelete}
+                         />
                        </Card>
                     </div>
                 </div>
