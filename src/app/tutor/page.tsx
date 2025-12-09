@@ -312,7 +312,7 @@ function TutorPage() {
         <div className="space-y-8">
             {currentTab === 'overview' && (
                 <div className="space-y-8">
-                    {isProfileIncomplete && (
+                     {isProfileIncomplete && (
                         <Alert>
                             <Info className="h-4 w-4" />
                             <AlertTitle>Complete Your Profile!</AlertTitle>
@@ -321,6 +321,34 @@ function TutorPage() {
                                 <Button size="sm" onClick={() => router.push('/tutor?tab=profile')}>Update Profile</Button>
                             </AlertDescription>
                         </Alert>
+                    )}
+                     {profile.approvalStatus === 'Approved' && (
+                        <Alert variant="default" className="bg-green-50 border-green-200 text-green-800 dark:bg-green-950 dark:border-green-800 dark:text-green-300">
+                           <CheckCircle className="h-4 w-4" />
+                           <AlertTitle>Profile Approved!</AlertTitle>
+                           <AlertDescription>
+                               Your profile is live and visible to students.
+                           </AlertDescription>
+                       </Alert>
+                    )}
+                    {profile.approvalStatus === 'Pending' && (
+                         <Alert variant="default" className="bg-yellow-50 border-yellow-200 text-yellow-800 dark:bg-yellow-950 dark:border-yellow-800 dark:text-yellow-300">
+                           <Clock className="h-4 w-4" />
+                           <AlertTitle>Profile Pending Review</AlertTitle>
+                           <AlertDescription>
+                               Your profile is currently being reviewed by our team. You will be notified once it's approved.
+                           </AlertDescription>
+                       </Alert>
+                    )}
+                     {profile.approvalStatus === 'Rejected' && (
+                        <Alert variant="destructive">
+                           <XCircle className="h-4 w-4" />
+                           <AlertTitle>Profile Rejected</AlertTitle>
+                           <AlertDescription className="flex items-center justify-between">
+                               There was an issue with your submission. Please review your profile and resubmit.
+                               <Button size="sm" variant="secondary" onClick={() => router.push('/tutor?tab=profile')}>Review Profile</Button>
+                           </AlertDescription>
+                       </Alert>
                     )}
                     <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
                         {overviewStats.map((stat) => (
