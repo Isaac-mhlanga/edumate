@@ -112,12 +112,12 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         const batch = writeBatch(firestore);
         const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
         
-        const commentData: any = {
+        const commentData: Partial<Comment> = {
             studentId: user?.uid || 'anonymous',
             studentName: user?.displayName || 'Anonymous',
             studentAvatar: user?.photoURL || null,
             content: content,
-            createdAt: serverTimestamp(),
+            createdAt: serverTimestamp() as Timestamp,
             likeCount: 0,
             likedBy: [],
             parentId: parentId,
@@ -295,13 +295,13 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
   
-    const toggleCollapse = (commentId: string) => {
-        setCollapsedComments(prev => 
-            prev.includes(commentId) 
-                ? prev.filter(id => id !== commentId)
-                : [...prev, commentId]
-        );
-    };
+  const toggleCollapse = (commentId: string) => {
+      setCollapsedComments(prev => 
+          prev.includes(commentId) 
+              ? prev.filter(id => id !== commentId)
+              : [...prev, commentId]
+      );
+  };
 
   const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
     if (!item.fileUrl) return null;
@@ -330,8 +330,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         )}
       </div>
     );
-  }
-
+  };
+  
   if (!question) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
@@ -550,5 +550,3 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     </div>
   );
 }
-
-    
