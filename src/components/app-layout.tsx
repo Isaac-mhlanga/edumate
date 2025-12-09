@@ -93,7 +93,6 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Course Catalog', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/ai-tutor', label: 'AI Tutor', icon: Wand2, basePath: '/ai-tutor' },
-  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
   { href: '/dashboard?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/dashboard', tab: 'subscriptions' },
@@ -107,14 +106,12 @@ const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/instructor', tab: 'calendar' },
   { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },
   { href: '/instructor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/instructor', tab: 'earnings' },
-  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
 ];
 
 const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/admin', tab: 'overview' },
   { href: '/admin?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/admin', tab: 'courses' },
   { href: '/admin?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/admin', tab: 'assignments' },
-  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
   { href: '/admin?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/admin', tab: 'calendar' },
   { href: '/admin?tab=users', label: 'Users', icon: Users, basePath: '/admin', tab: 'users' },
   { href: '/admin?tab=tutors', label: 'Tutors', icon: UserCog, basePath: '/admin', tab: 'tutors' },
@@ -127,7 +124,6 @@ const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
-  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
 ];
 
 
@@ -296,5 +292,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
