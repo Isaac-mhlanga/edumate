@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -72,6 +73,12 @@ type UpcomingEvent = {
   subject: string;
   scope: string;
   platforms?: ('tiktok' | 'youtube' | 'zoom')[];
+};
+
+type UserDoc = {
+    id: string;
+    fullName: string;
+    role: 'student' | 'instructor' | 'admin' | 'tutor';
 };
 
 
@@ -153,12 +160,22 @@ export default function Home() {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
 
-    const fetchCourses = async () => {
+    const fetchCoursesAndUsers = async () => {
         setLoadingCourses(true);
         try {
+            const usersSnapshot = await getDocs(collection(firestore, 'users'));
+            const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as UserDoc[];
+            const instructorMap = new Map(users.filter(u => u.role === 'instructor').map(i => [i.id, i.fullName]));
+
             const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'));
             const querySnapshot = await getDocs(coursesQuery);
-            const fetchedCourses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as Course[];
+            const fetchedCourses = querySnapshot.docs.map(doc => {
+                const courseData = { id: doc.id, ...doc.data() } as Course;
+                return {
+                    ...courseData,
+                    instructor: instructorMap.get(courseData.instructorId) || 'Edumate Team'
+                };
+            });
             setAllCourses(fetchedCourses);
         } catch (error) {
             console.error("Error fetching published courses: ", error);
@@ -181,7 +198,7 @@ export default function Home() {
         }
     };
 
-    fetchCourses();
+    fetchCoursesAndUsers();
     fetchEvents();
   }, []);
 
@@ -523,7 +540,7 @@ export default function Home() {
                                 <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <User className="h-4 w-4" />
-                                    <span>{course.instructor || 'Edumate Team'}</span>
+                                    <span>{course.instructor}</span>
                                 </div>
                             </CardHeader>
                             <CardContent className="flex-grow">
