@@ -6,9 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ArrowUpRight, Sparkles, RefreshCw, UserPlus, BookOpen, Banknote, ChevronLeft, ChevronRight, Wand2, Users, DollarSign, CreditCard, Transaction } from "lucide-react";
+import { ArrowUpRight, Sparkles, RefreshCw, UserPlus, BookOpen, Banknote, ChevronLeft, ChevronRight, Wand2, Users, DollarSign, CreditCard, Book } from "lucide-react";
 import { format } from "date-fns";
-import { type PayoutRequest, type CalendarEvent, type RecentActivity, type User, type Course, type Subscription } from "@/app/admin/page";
+import { type PayoutRequest, type CalendarEvent, type RecentActivity, type User, type Course, type Subscription, type Transaction } from "@/app/admin/page";
 
 interface AdminOverviewTabProps {
     loading: boolean;
@@ -69,7 +69,7 @@ export function AdminOverviewTab({
         { title: "Total Revenue", value: `R ${totalRevenue.toFixed(2)}`, icon: DollarSign, change: "+15% this month" },
         { title: "Total Users", value: users.length, icon: Users, change: "+5 new users" },
         { title: "Active Subscriptions", value: activeSubscriptions, icon: CreditCard, change: "+2 this month" },
-        { title: "Active Courses", value: activeCourses, icon: BookOpen, change: "+2 this month" },
+        { title: "Active Courses", value: activeCourses, icon: Book, change: "+2 this month" },
     ];
 
     return (

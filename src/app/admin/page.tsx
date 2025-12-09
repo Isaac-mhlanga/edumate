@@ -36,7 +36,7 @@ const firebaseConfig = {
 };
 
 export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string | Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
-export type Course = { id: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft'; createdAt: Timestamp };
+export type Course = { id: string; instructorId: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft'; createdAt: Timestamp };
 export type PayoutRequest = {
     id: string;
     instructor: string;
@@ -56,6 +56,7 @@ export type RecentActivity = {
     description: string;
     timestamp: string;
     value?: string;
+    originalTimestamp: Date;
 };
 
 
@@ -181,28 +182,36 @@ function AdminPage() {
             id: `user-${user.id}`,
             type: 'New User',
             description: `${user.fullName} signed up as a ${user.role}.`,
+            originalTimestamp: new Date(user.joined),
             timestamp: formatDistanceToNow(new Date(user.joined), { addSuffix: true }),
             value: user.role
         }));
-
-        const courseActivities: RecentActivity[] = courses.slice(0, 5).map(course => ({
-            id: `course-${course.id}`,
-            type: 'New Course',
-            description: `${course.instructor} created "${course.title}".`,
-            timestamp: formatDistanceToNow(course.createdAt.toDate(), { addSuffix: true }),
-            value: course.status
-        }));
+    
+        const instructorMap = new Map(users.map(u => [u.id, u.fullName]));
+    
+        const courseActivities: RecentActivity[] = courses.slice(0, 5).map(course => {
+            const instructorName = instructorMap.get(course.instructorId) || 'An instructor';
+            return {
+                id: `course-${course.id}`,
+                type: 'New Course',
+                description: `${instructorName} created "${course.title}".`,
+                originalTimestamp: course.createdAt.toDate(),
+                timestamp: formatDistanceToNow(course.createdAt.toDate(), { addSuffix: true }),
+                value: course.status
+            };
+        });
         
         const transactionActivities: RecentActivity[] = transactions.slice(0, 5).map(t => ({
              id: `txn-${t.id}`,
             type: 'Transaction',
             description: `Sale of "${t.itemTitle}".`,
+            originalTimestamp: t.createdAt.toDate(),
             timestamp: formatDistanceToNow(t.createdAt.toDate(), { addSuffix: true }),
             value: `R ${t.amount.toFixed(2)}`
         }));
         
         return [...userActivities, ...courseActivities, ...transactionActivities]
-            .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()); // This sort is tricky with relative times. A better way would be to keep original dates.
+            .sort((a, b) => b.originalTimestamp.getTime() - a.originalTimestamp.getTime());
     }, [users, courses, transactions]);
 
 
