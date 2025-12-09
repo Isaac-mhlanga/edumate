@@ -8,10 +8,10 @@ import { QuestionForm } from '@/components/community/question-form';
 import { QuestionList } from '@/components/community/question-list';
 import { CommentSection } from '@/components/community/comment-section';
 import { type Question } from '@/lib/types';
-import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Separator } from '@/components/ui/separator';
 import { PublicHeader } from '@/components/public-header';
 import { Footer } from '@/components/footer';
+import { Card } from '@/components/ui/card';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -48,7 +48,7 @@ function CommunityPage() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [selectedQuestion]);
 
     const handleQuestionUpdate = (updatedQuestion: Question) => {
         setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
@@ -58,7 +58,7 @@ function CommunityPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col min-h-screen bg-muted/30">
           <PublicHeader />
           <main className="flex-grow pt-16">
             <div className="container mx-auto py-8">
@@ -66,25 +66,24 @@ function CommunityPage() {
                     <h1 className="text-4xl font-bold tracking-tight">Community Forum</h1>
                     <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Ask questions, share knowledge, and connect with fellow students.</p>
                 </div>
-                <div className="h-[calc(100vh-20rem)] min-h-[500px]">
-                    <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border">
-                        <ResizablePanel defaultSize={35} minSize={25} maxSize={45}>
-                            <div className="flex flex-col h-full">
-                                <QuestionForm />
-                                <Separator />
-                                <QuestionList 
-                                    questions={questions} 
-                                    selectedQuestion={selectedQuestion}
-                                    onSelectQuestion={setSelectedQuestion} 
-                                    loading={loading}
-                                />
-                            </div>
-                        </ResizablePanel>
-                        <ResizableHandle withHandle />
-                        <ResizablePanel defaultSize={65}>
-                            <CommentSection question={selectedQuestion} onUpdateQuestion={handleQuestionUpdate}/>
-                        </ResizablePanel>
-                    </ResizablePanelGroup>
+                <div className="grid lg:grid-cols-12 gap-8 items-start">
+                    <div className="lg:col-span-4">
+                        <Card className="flex flex-col h-full">
+                            <QuestionForm />
+                            <Separator />
+                            <QuestionList 
+                                questions={questions} 
+                                selectedQuestion={selectedQuestion}
+                                onSelectQuestion={setSelectedQuestion} 
+                                loading={loading}
+                            />
+                        </Card>
+                    </div>
+                    <div className="lg:col-span-8">
+                       <Card className="min-h-[calc(100vh-20rem)]">
+                         <CommentSection question={selectedQuestion} onUpdateQuestion={handleQuestionUpdate}/>
+                       </Card>
+                    </div>
                 </div>
             </div>
           </main>

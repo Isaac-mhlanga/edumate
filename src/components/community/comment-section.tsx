@@ -12,7 +12,7 @@ import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2 } from 'luci
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
-import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment } from 'firebase/firestore';
+import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc } from 'firebase/firestore';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
@@ -80,7 +80,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
 
   const handlePostComment = async (content: string, parentId: string | null) => {
     if (!user) {
-        toast({ variant: 'destructive', title: 'Not authenticated', description: 'You must be logged in to comment.' });
+        toast({ title: 'Please log in', description: 'You need to be logged in to post a comment.' });
         return;
     }
     if (!question || !content.trim()) return;
@@ -126,7 +126,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
 
  const handleLike = async (type: 'question' | 'comment', id: string) => {
     if (!user) {
-      toast({ variant: 'destructive', title: 'Not authenticated', description: 'You must be logged in to like.' });
+      toast({ title: 'Please log in', description: 'You need to be logged in to like a post.' });
       return;
     }
     if (!question) return;
@@ -197,25 +197,25 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
   return (
     <div className="flex flex-col h-full">
         <CardHeader className="flex-shrink-0">
-            <CardTitle>{question.title}</CardTitle>
-             <div className="flex items-center gap-3 pt-2 text-sm text-muted-foreground">
-                <Avatar className="h-8 w-8">
+            <CardTitle className="text-lg">{question.title}</CardTitle>
+             <div className="flex items-center gap-3 pt-2 text-xs text-muted-foreground">
+                <Avatar className="h-6 w-6">
                   <AvatarImage src={question.studentAvatar} />
                   <AvatarFallback>{question.studentName.charAt(0)}</AvatarFallback>
                 </Avatar>
-                <span className="font-semibold">{question.studentName}</span>
+                <span className="font-semibold text-foreground">{question.studentName}</span>
                 <span>•</span>
                 <span>{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : ''}</span>
               </div>
         </CardHeader>
         <ScrollArea className="flex-grow">
-            <CardContent className="space-y-6">
-                 <p className="text-base whitespace-pre-wrap">{question.content}</p>
+            <CardContent className="space-y-4">
+                 <p className="text-sm whitespace-pre-wrap">{question.content}</p>
                  
                  {question.fileUrl && (
-                    <div className="space-y-2 rounded-lg border p-4">
+                    <div className="space-y-2 rounded-lg border p-3">
                         <div className="flex items-center justify-between">
-                             <h4 className="font-semibold text-sm flex items-center gap-2">
+                             <h4 className="font-semibold text-xs flex items-center gap-2">
                                 <FileText className="h-4 w-4" />
                                 Attached File
                             </h4>
@@ -255,12 +255,12 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                     </div>
                  )}
                  
-                 <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <Button variant="ghost" size="sm" onClick={() => handleLike('question', question.id)} disabled={!user}>
-                        <ThumbsUp className={cn("h-4 w-4 mr-2", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
+                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                    <Button variant="ghost" size="sm" className="text-xs h-auto p-1" onClick={() => handleLike('question', question.id)}>
+                        <ThumbsUp className={cn("h-4 w-4 mr-1", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
                         {question.likeCount || 0}
                     </Button>
-                     <div className="flex items-center gap-2">
+                     <div className="flex items-center gap-1">
                         <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
                     </div>
                 </div>
@@ -268,39 +268,39 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                  <Separator />
 
                  <div className="space-y-4">
-                    <h3 className="font-semibold">{question.commentCount || 0} Answers</h3>
+                    <h3 className="font-semibold text-sm">{question.commentCount || 0} Answers</h3>
                     {loadingComments ? (
-                        <p className="text-muted-foreground">Loading comments...</p>
+                        <p className="text-muted-foreground text-sm">Loading comments...</p>
                     ) : topLevelComments.length > 0 ? (
                         topLevelComments.map(comment => (
                             <div key={comment.id}>
                                 <div className="flex items-start gap-3">
-                                    <Avatar className="h-9 w-9">
+                                    <Avatar className="h-8 w-8">
                                         <AvatarImage src={comment.studentAvatar} />
                                         <AvatarFallback>{comment.studentName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex-1">
                                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                            <span className="font-semibold text-foreground">{comment.studentName}</span>
+                                            <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
                                             <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                         </div>
                                         <p className="text-sm">{comment.content}</p>
-                                        <div className="flex items-center gap-2 mt-1">
-                                            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
+                                        <div className="flex items-center gap-1 mt-1">
+                                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)}>
                                                 <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                                             </Button>
-                                            <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); }}>Reply</Button>
+                                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); }}>Reply</Button>
                                         </div>
                                     </div>
                                 </div>
                                 {replyingTo === comment.id && (
-                                    <div className="ml-12 mt-2 flex items-start gap-3">
-                                         <Avatar className="h-9 w-9">
+                                    <div className="ml-11 mt-2 flex items-start gap-3">
+                                         <Avatar className="h-8 w-8">
                                             <AvatarImage src={user?.photoURL || undefined} />
                                             <AvatarFallback>{user?.displayName?.charAt(0) || 'U'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 space-y-2">
-                                            <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting || !user} />
+                                            <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting || !user} className="text-sm" />
                                             <div className="flex justify-end gap-2">
                                                 <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
                                                 <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id)} disabled={isSubmitting || !replyContent.trim() || !user}>
@@ -310,21 +310,21 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                         </div>
                                     </div>
                                 )}
-                                <div className="ml-8 mt-2 space-y-2 pl-4 border-l">
+                                <div className="ml-7 mt-2 space-y-2 pl-4 border-l">
                                     {getReplies(comment.id).map(reply => (
                                         <div key={reply.id} className="flex items-start gap-3">
-                                            <Avatar className="h-9 w-9">
+                                            <Avatar className="h-8 w-8">
                                                 <AvatarImage src={reply.studentAvatar} />
                                                 <AvatarFallback>{reply.studentName.charAt(0)}</AvatarFallback>
                                             </Avatar>
                                             <div className="flex-1">
                                                 <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                                                    <span className="font-semibold text-foreground">{reply.studentName}</span>
+                                                    <span className="font-semibold text-foreground text-sm">{reply.studentName}</span>
                                                     <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                                 </div>
                                                 <p className="text-sm">{reply.content}</p>
-                                                 <div className="flex items-center gap-2 mt-1">
-                                                    <Button variant="ghost" size="sm" className="text-muted-foreground" onClick={() => handleLike('comment', reply.id)} disabled={!user}>
+                                                 <div className="flex items-center gap-1 mt-1">
+                                                    <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)}>
                                                         <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
                                                     </Button>
                                                 </div>
@@ -352,6 +352,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         disabled={isSubmitting || !user}
+                        className="text-sm"
                     />
                     <div className="flex justify-end">
                         <Button size="sm" onClick={() => handlePostComment(newComment, null)} disabled={isSubmitting || !newComment.trim() || !user}>
