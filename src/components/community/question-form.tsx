@@ -16,6 +16,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2, Send, Paperclip } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -29,6 +30,8 @@ const firebaseConfig = {
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters.'),
   content: z.string().min(10, 'Question must be at least 10 characters.'),
+  subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences']),
+  grade: z.enum(['10', '11', '12']),
   file: z.instanceof(File).optional(),
 });
 
@@ -80,11 +83,14 @@ export function QuestionForm() {
         studentAvatar: user.photoURL,
         title: data.title,
         content: data.content,
+        subject: data.subject,
+        grade: data.grade,
         fileUrl,
         fileType,
         createdAt: serverTimestamp(),
         commentCount: 0,
         likeCount: 0,
+        likedBy: [],
       });
 
       toast({ title: 'Question posted!', description: 'Your question is now live for the community.' });
@@ -104,12 +110,10 @@ export function QuestionForm() {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-            <div className="p-4">
-                <Button className="w-full">
-                    <Send className="mr-2 h-4 w-4"/>
-                    Ask a Question
-                </Button>
-            </div>
+            <Button className="w-full">
+                <Send className="mr-2 h-4 w-4"/>
+                Ask a Question
+            </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[625px]">
             <DialogHeader>
@@ -124,6 +128,36 @@ export function QuestionForm() {
                             <FormMessage />
                         </FormItem>
                     )} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField control={form.control} name="subject" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Subject</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select subject"/></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                        <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                        <SelectItem value="Life Sciences">Life Sciences</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                        <FormField control={form.control} name="grade" render={({ field }) => (
+                            <FormItem>
+                                <FormLabel>Grade</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select grade" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="10">Grade 10</SelectItem>
+                                        <SelectItem value="11">Grade 11</SelectItem>
+                                        <SelectItem value="12">Grade 12</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                                <FormMessage />
+                            </FormItem>
+                        )} />
+                    </div>
                     <FormField name="content" control={form.control} render={({ field }) => (
                         <FormItem>
                             <FormLabel>Question</FormLabel>

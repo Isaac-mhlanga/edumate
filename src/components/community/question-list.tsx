@@ -2,13 +2,15 @@
 'use client';
 
 import React from 'react';
+import Image from 'next/image';
 import { type Question } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MessageSquare, ThumbsUp } from 'lucide-react';
+import { MessageSquare, ThumbsUp, FileText } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { Badge } from '../ui/badge';
 
 interface QuestionListProps {
   questions: Question[];
@@ -45,8 +47,25 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion, lo
                     </p>
                 </div>
               </div>
-              <p className="font-semibold mb-2">{q.title}</p>
-              <div className="flex items-center gap-4 text-xs text-muted-foreground">
+              <p className="font-semibold mb-2 line-clamp-2">{q.title}</p>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">{q.subject}</Badge>
+                    <Badge variant="outline" className="text-xs">Grade {q.grade}</Badge>
+                </div>
+                {q.fileUrl && (
+                    <div className="w-16 h-10 relative rounded overflow-hidden border">
+                        {q.fileType === 'image' ? (
+                            <Image src={q.fileUrl} alt="attachment" fill className="object-cover" />
+                        ) : (
+                            <div className="w-full h-full bg-muted flex items-center justify-center">
+                                <FileText className="h-5 w-5 text-muted-foreground"/>
+                            </div>
+                        )}
+                    </div>
+                )}
+              </div>
+              <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2 pt-2 border-t">
                 <span className="flex items-center gap-1"><ThumbsUp className="h-3 w-3" /> {q.likeCount || 0}</span>
                 <span className="flex items-center gap-1"><MessageSquare className="h-3 w-3" /> {q.commentCount || 0}</span>
               </div>
@@ -54,8 +73,8 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion, lo
           ))
         ) : (
              <div className="text-center py-16 text-muted-foreground">
-                <h3 className="text-lg font-semibold">No Questions Yet</h3>
-                <p>Be the first to ask a question!</p>
+                <h3 className="text-lg font-semibold">No Questions Found</h3>
+                <p>Try adjusting your search or be the first to ask!</p>
             </div>
         )}
       </div>

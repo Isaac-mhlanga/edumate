@@ -1,7 +1,7 @@
 
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, getDocs, writeBatch, deleteDoc, getDoc, increment } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionForm } from '@/components/community/question-form';
@@ -11,6 +11,9 @@ import { type Question } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { Card } from '@/components/ui/card';
 import withAuth from '@/components/with-auth';
+import { Input } from '@/components/ui/input';
+import { Search } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -25,6 +28,9 @@ function CommunityPage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
     const [loading, setLoading] = useState(true);
+    const [searchTerm, setSearchTerm] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const questionsPerPage = 5;
 
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -38,7 +44,7 @@ function CommunityPage() {
             } as Question));
             setQuestions(fetchedQuestions);
             if (fetchedQuestions.length > 0 && !selectedQuestion) {
-              setSelectedQuestion(fetchedQuestions[0]);
+              setSelectedQuestion(fetchedQuestions.find(q => q.title.toLowerCase().includes(searchTerm.toLowerCase())) || fetchedQuestions[0]);
             }
             setLoading(false);
         }, (error) => {
@@ -47,7 +53,21 @@ function CommunityPage() {
         });
 
         return () => unsubscribe();
-    }, [selectedQuestion]);
+    }, [selectedQuestion, searchTerm]);
+
+    const filteredQuestions = useMemo(() => {
+        return questions.filter(question => 
+            question.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            question.content.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+    }, [questions, searchTerm]);
+    
+    const totalPages = Math.ceil(filteredQuestions.length / questionsPerPage);
+    const paginatedQuestions = filteredQuestions.slice(
+        (currentPage - 1) * questionsPerPage,
+        currentPage * questionsPerPage
+    );
+
 
     const handleQuestionUpdate = (updatedQuestion: Question) => {
         setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
@@ -96,14 +116,34 @@ function CommunityPage() {
             <div className="grid lg:grid-cols-12 gap-8 items-start">
                 <div className="lg:col-span-4">
                     <Card className="flex flex-col h-full">
-                        <QuestionForm />
-                        <Separator />
+                        <div className="p-4 border-b">
+                            <QuestionForm />
+                            <div className="relative mt-4">
+                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Input 
+                                    placeholder="Search questions..."
+                                    className="pl-8"
+                                    value={searchTerm}
+                                    onChange={(e) => {
+                                        setSearchTerm(e.target.value);
+                                        setCurrentPage(1);
+                                    }}
+                                />
+                            </div>
+                        </div>
                         <QuestionList 
-                            questions={questions} 
+                            questions={paginatedQuestions} 
                             selectedQuestion={selectedQuestion}
                             onSelectQuestion={setSelectedQuestion} 
                             loading={loading}
                         />
+                        {totalPages > 1 && (
+                            <div className="p-2 border-t flex justify-center items-center gap-2">
+                                <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
+                                <span className="text-xs text-muted-foreground">Page {currentPage} of {totalPages}</span>
+                                <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
+                            </div>
+                        )}
                     </Card>
                 </div>
                 <div className="lg:col-span-8">
