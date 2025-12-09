@@ -12,7 +12,6 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { tutorData } from "@/lib/data";
 import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
@@ -80,6 +79,11 @@ function TutorPage() {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const firestore = getFirestore(app);
+        const availabilityPlaceholder = [
+            { day: "Monday", slots: [] }, { day: "Tuesday", slots: [] }, { day: "Wednesday", slots: [] },
+            { day: "Thursday", slots: [] }, { day: "Friday", slots: [] }, { day: "Saturday", slots: [] }, { day: "Sunday", slots: [] },
+        ];
+
 
         const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
@@ -89,12 +93,13 @@ function TutorPage() {
                 const profileRef = doc(firestore, 'tutors', currentUser.uid);
                 const profileSnap = await getDoc(profileRef);
                 if (profileSnap.exists()) {
-                    setProfile({ id: profileSnap.id, ...profileSnap.data() } as TutorProfile);
+                    const data = profileSnap.data();
+                    setProfile({ id: profileSnap.id, ...data, availability: data.availability || availabilityPlaceholder } as TutorProfile);
                 } else {
                     const defaultProfile: TutorProfile = {
                         id: currentUser.uid, name: currentUser.displayName || 'New Tutor', email: currentUser.email || '',
                         avatar: currentUser.photoURL || 'https://placehold.co/100x100.png', bio: '', hourlyRate: 200, subjects: [],
-                        grades: [], location: '', modes: [], availability: tutorData.availability, qualifications: '', approvalStatus: 'Pending'
+                        grades: [], location: '', modes: [], availability: availabilityPlaceholder, qualifications: '', approvalStatus: 'Pending'
                     };
                     await setDoc(profileRef, defaultProfile);
                     setProfile(defaultProfile);
@@ -168,6 +173,7 @@ function TutorPage() {
                 lastMessage: replyContent,
                 lastMessageTimestamp: serverTimestamp(),
                 isReadByTutor: true,
+                isReadByStudent: false, // Make sure to notify the student
             });
 
             setReplyContent('');
@@ -247,6 +253,21 @@ function TutorPage() {
         }
     };
 
+    const overviewStats = useMemo(() => {
+        const totalStudents = new Set(bookings.map(b => b.studentName)).size;
+        const upcomingBookings = bookings.filter(b => b.status === 'Confirmed').length;
+        const monthlyEarnings = bookings.filter(b => b.status === 'Completed').length * (profile?.hourlyRate || 0);
+        const unreadMessages = messageThreads.filter(t => !t.isReadByTutor).length;
+
+        return [
+            { title: "Total Students", value: totalStudents, icon: Users },
+            { title: "Upcoming Bookings", value: upcomingBookings, icon: Calendar },
+            { title: "Monthly Earnings", value: `R ${monthlyEarnings.toFixed(2)}`, icon: DollarSign },
+            { title: "Unread Messages", value: unreadMessages, icon: MessageSquare },
+        ];
+    }, [bookings, profile?.hourlyRate, messageThreads]);
+
+
     const isProfileIncomplete = !profile?.bio || !profile?.qualifications;
 
     if (loading) {
@@ -272,7 +293,7 @@ function TutorPage() {
                         </Alert>
                     )}
                     <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-                        {tutorData.stats.map((stat) => (
+                        {overviewStats.map((stat) => (
                             <Card key={stat.title}>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                     <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
@@ -280,7 +301,6 @@ function TutorPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stat.value}</div>
-                                    {stat.change && <p className="text-xs text-muted-foreground">{stat.change}</p>}
                                 </CardContent>
                             </Card>
                         ))}
@@ -580,5 +600,3 @@ const firebaseConfig = {
 };
 
 export default withAuth(TutorPage, ['tutor']);
-
-    
