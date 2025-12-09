@@ -112,7 +112,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         const batch = writeBatch(firestore);
         const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
         
-        const commentData: Omit<Comment, 'id' | 'createdAt'> = {
+        const commentData: Partial<Comment> = {
             studentId: user?.uid || 'anonymous',
             studentName: user?.displayName || 'Anonymous',
             studentAvatar: user?.photoURL || null,
@@ -296,7 +296,15 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
     }
   };
-
+  
+  const toggleCollapse = (commentId: string) => {
+    setCollapsedComments(prev => 
+        prev.includes(commentId) 
+            ? prev.filter(id => id !== commentId)
+            : [...prev, commentId]
+    );
+  };
+  
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
     if (!item.fileUrl) return null;
     return (
@@ -325,15 +333,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       </div>
     );
   };
-  
-  const toggleCollapse = (commentId: string) => {
-    setCollapsedComments(prev => 
-        prev.includes(commentId) 
-            ? prev.filter(id => id !== commentId)
-            : [...prev, commentId]
-    );
-  };
-  
+
   if (!question) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
@@ -503,7 +503,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                     )}
                                 </div>
                             </div>
-                        )})}
+                        )})
                     ) : (
                         <p className="text-sm text-muted-foreground text-center py-4">No answers yet. Be the first to reply!</p>
                     )}
