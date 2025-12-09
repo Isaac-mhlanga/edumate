@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -7,15 +8,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
 import { getFirestore, collection, query, where, orderBy, onSnapshot, doc, writeBatch, serverTimestamp, arrayUnion, arrayRemove, increment, updateDoc } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Input } from '../ui/input';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -37,9 +40,11 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
   const [comments, setComments] = useState<Comment[]>([]);
   const [loadingComments, setLoadingComments] = useState(true);
   const [newComment, setNewComment] = useState('');
+  const [newCommentFile, setNewCommentFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyContent, setReplyContent] = useState('');
+  const [replyFile, setReplyFile] = useState<File | null>(null);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -77,44 +82,60 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
     return () => unsubscribe();
   }, [question, toast]);
 
-  const handlePostComment = async (content: string, parentId: string | null) => {
+  const handlePostComment = async (content: string, parentId: string | null, file: File | null) => {
     if (!user) {
         toast({ title: 'Please log in', description: 'You need to be logged in to post a comment.' });
         return;
     }
-    if (!question || !content.trim()) return;
+    if (!question || (!content.trim() && !file)) return;
     
     setIsSubmitting(true);
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
+    const storage = getStorage(app);
     
-    const batch = writeBatch(firestore);
-    
-    const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
-    batch.set(commentRef, {
-        studentId: user.uid,
-        studentName: user.displayName || 'Anonymous',
-        studentAvatar: user.photoURL,
-        content: content,
-        createdAt: serverTimestamp(),
-        likeCount: 0,
-        likedBy: [],
-        parentId: parentId,
-    });
-    
-    if (!parentId) { // Only increment comment count for top-level comments
-        const questionRef = doc(firestore, 'questions', question.id);
-        batch.update(questionRef, { commentCount: increment(1) });
-    }
-
     try {
-        await batch.commit();
-        if (parentId) {
-            setReplyContent('');
-            setReplyingTo(null);
-        } else {
-            setNewComment('');
-        }
+      const batch = writeBatch(firestore);
+      const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
+      
+      let fileUrl: string | undefined;
+      let fileType: 'image' | 'pdf' | undefined;
+
+      if (file) {
+        const fileRef = ref(storage, `questions/${question.id}/comments/${commentRef.id}/${file.name}`);
+        await uploadBytes(fileRef, file);
+        fileUrl = await getDownloadURL(fileRef);
+        fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+      }
+
+      batch.set(commentRef, {
+          studentId: user.uid,
+          studentName: user.displayName || 'Anonymous',
+          studentAvatar: user.photoURL,
+          content: content,
+          fileUrl,
+          fileType,
+          createdAt: serverTimestamp(),
+          likeCount: 0,
+          likedBy: [],
+          parentId: parentId,
+      });
+      
+      if (!parentId) { // Only increment comment count for top-level comments
+          const questionRef = doc(firestore, 'questions', question.id);
+          batch.update(questionRef, { commentCount: increment(1) });
+      }
+
+      await batch.commit();
+      
+      if (parentId) {
+          setReplyContent('');
+          setReplyFile(null);
+          setReplyingTo(null);
+      } else {
+          setNewComment('');
+          setNewCommentFile(null);
+      }
     } catch(error) {
         console.error("Error posting comment:", error);
         toast({ variant: 'destructive', title: 'Error', description: 'Could not post your comment.' });
@@ -178,6 +199,35 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
     }
   };
 
+  const renderAttachment = (item: { fileUrl?: string, fileType?: 'image' | 'pdf' }) => {
+    if (!item.fileUrl) return null;
+    return (
+      <div className="space-y-2 rounded-lg border p-3 mt-2">
+        <div className="flex items-center justify-between">
+            <h4 className="font-semibold text-xs flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Attached File
+            </h4>
+            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                <Download className="h-3 w-3" />
+                Download
+            </a>
+        </div>
+        {item.fileType === 'image' ? (
+            <div className="relative w-full">
+                <Image src={item.fileUrl} alt="Attached image" width={0} height={0} sizes="100vw" className="object-contain rounded-md w-full h-auto" />
+            </div>
+        ) : item.fileType === 'pdf' ? (
+            <div className="w-full aspect-[4/5]">
+                <iframe src={item.fileUrl} className="w-full h-full rounded-md border" title="Attached PDF"></iframe>
+            </div>
+        ) : (
+            <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
+        )}
+      </div>
+    );
+  }
+
   if (!question) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
@@ -210,49 +260,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
         <ScrollArea className="flex-grow">
             <CardContent className="space-y-4">
                  <p className="text-sm whitespace-pre-wrap">{question.content}</p>
-                 
-                 {question.fileUrl && (
-                    <div className="space-y-2 rounded-lg border p-3">
-                        <div className="flex items-center justify-between">
-                             <h4 className="font-semibold text-xs flex items-center gap-2">
-                                <FileText className="h-4 w-4" />
-                                Attached File
-                            </h4>
-                            <a 
-                                href={question.fileUrl} 
-                                target="_blank" 
-                                rel="noopener noreferrer" 
-                                className="text-xs text-primary hover:underline flex items-center gap-1"
-                            >
-                                <Download className="h-3 w-3" />
-                                Download
-                            </a>
-                        </div>
-
-                        {question.fileType === 'image' ? (
-                            <div className="relative w-full">
-                                <Image 
-                                    src={question.fileUrl} 
-                                    alt="Attached image" 
-                                    width={0}
-                                    height={0}
-                                    sizes="100vw"
-                                    className="object-contain rounded-md w-full h-auto"
-                                />
-                            </div>
-                        ) : question.fileType === 'pdf' ? (
-                             <div className="w-full aspect-[4/5]">
-                                <iframe 
-                                    src={question.fileUrl} 
-                                    className="w-full h-full rounded-md border"
-                                    title="Attached PDF"
-                                ></iframe>
-                            </div>
-                        ) : (
-                             <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
-                        )}
-                    </div>
-                 )}
+                 {renderAttachment(question)}
                  
                  <div className="flex items-center gap-4 text-xs text-muted-foreground">
                     <Button variant="ghost" size="sm" className="text-xs h-auto p-1" onClick={() => handleLike('question', question.id)}>
@@ -284,11 +292,12 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                             <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                         </div>
                                         <p className="text-sm">{comment.content}</p>
+                                        {renderAttachment(comment)}
                                         <div className="flex items-center gap-1 mt-1">
                                             <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)}>
                                                 <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                                             </Button>
-                                            <Button variant="outline" size="sm" className="text-xs h-auto px-2 py-1" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); }}>
+                                            <Button variant="outline" size="sm" className="text-xs h-auto px-2 py-1" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }}>
                                                 <CornerUpLeft className="mr-1 h-3 w-3" />
                                                 Reply
                                             </Button>
@@ -303,11 +312,19 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                         </Avatar>
                                         <div className="flex-1 space-y-2">
                                             <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting || !user} className="text-sm" />
-                                            <div className="flex justify-end gap-2">
-                                                <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
-                                                <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id)} disabled={isSubmitting || !replyContent.trim() || !user}>
-                                                    {isSubmitting ? 'Replying...' : 'Reply'}
+                                            {replyFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{replyFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setReplyFile(null)}><X className="h-4 w-4"/></Button></div>}
+                                            <div className="flex justify-between items-center">
+                                                <Button type="button" variant="ghost" size="icon" asChild>
+                                                  <label htmlFor={`reply-file-${comment.id}`} className="cursor-pointer"><Paperclip className="h-4 w-4"/></label>
                                                 </Button>
+                                                <Input id={`reply-file-${comment.id}`} type="file" className="hidden" onChange={e => setReplyFile(e.target.files?.[0] || null)} />
+
+                                                <div className="flex justify-end gap-2">
+                                                    <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
+                                                    <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id, replyFile)} disabled={isSubmitting || (!replyContent.trim() && !replyFile) || !user}>
+                                                        {isSubmitting ? 'Replying...' : 'Reply'}
+                                                    </Button>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -325,6 +342,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                                                     <span>{reply.createdAt ? formatDistanceToNow(reply.createdAt.toDate(), { addSuffix: true }) : ''}</span>
                                                 </div>
                                                 <p className="text-sm">{reply.content}</p>
+                                                {renderAttachment(reply)}
                                                  <div className="flex items-center gap-1 mt-1">
                                                     <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', reply.id)}>
                                                         <ThumbsUp className={cn("h-4 w-4 mr-1", user && (reply.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {reply.likeCount || 0}
@@ -356,9 +374,15 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                         disabled={isSubmitting || !user}
                         className="text-sm"
                     />
-                    <div className="flex justify-end">
-                        <Button size="sm" onClick={() => handlePostComment(newComment, null)} disabled={isSubmitting || !newComment.trim() || !user}>
+                    {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
+                    <div className="flex justify-between items-center">
+                        <Button type="button" variant="ghost" size="icon" asChild>
+                          <label htmlFor="comment-file" className="cursor-pointer"><Paperclip className="h-4 w-4"/></label>
+                        </Button>
+                        <Input id="comment-file" type="file" className="hidden" onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
+                        <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile) || !user}>
                             {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            <Send className="mr-2 h-4 w-4" />
                             Post Answer
                         </Button>
                     </div>

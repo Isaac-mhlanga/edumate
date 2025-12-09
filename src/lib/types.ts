@@ -26,4 +26,6 @@ export type Comment = {
     likeCount: number;
     likedBy: string[];
     parentId: string | null;
+    fileUrl?: string;
+    fileType?: 'image' | 'pdf';
 }
