@@ -13,6 +13,7 @@ export type Question = {
     createdAt: Timestamp;
     commentCount: number;
     likeCount: number;
+    likedBy: string[];
 }
 
 export type Comment = {
@@ -23,5 +24,6 @@ export type Comment = {
     content: string;
     createdAt: Timestamp;
     likeCount: number;
+    likedBy: string[];
     parentId: string | null;
 }

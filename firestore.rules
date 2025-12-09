@@ -124,20 +124,22 @@ service cloud.firestore {
       allow get, list: if isSignedIn();
       // Users can create their own questions
       allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
-      // Users can only update their own question
-      allow update: if isSignedIn() && isOwner(resource.data.studentId);
+      // Users can only update their own question, or update likes
+      allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy']));
        // Users can only delete their own questions
       allow delete: if isSignedIn() && isOwner(resource.data.studentId);
-    }
 
-    // Rules for comments on questions
-    match /questions/{questionId}/comments/{commentId} {
-       // Any signed-in user can read comments
-      allow get, list: if isSignedIn();
-      // Users can create comments
-      allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
-      // Users can only update or delete their own comments
-      allow update, delete: if isSignedIn() && isOwner(resource.data.studentId);
+      // Rules for comments on questions
+      match /comments/{commentId} {
+         // Any signed-in user can read comments
+        allow get, list: if isSignedIn();
+        // Users can create comments
+        allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+        // Users can only update their own comments, or update likes
+        allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy']));
+        // Users can only delete their own comments
+        allow delete: if isSignedIn() && isOwner(resource.data.studentId);
+      }
     }
   }
 }

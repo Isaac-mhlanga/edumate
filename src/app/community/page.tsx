@@ -8,7 +8,6 @@ import { QuestionForm } from '@/components/community/question-form';
 import { QuestionList } from '@/components/community/question-list';
 import { CommentSection } from '@/components/community/comment-section';
 import { type Question } from '@/lib/types';
-import { Card, CardContent } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Separator } from '@/components/ui/separator';
 import { PublicHeader } from '@/components/public-header';
@@ -49,7 +48,14 @@ function CommunityPage() {
         });
 
         return () => unsubscribe();
-    }, [selectedQuestion]);
+    }, []);
+
+    const handleQuestionUpdate = (updatedQuestion: Question) => {
+        setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
+        if (selectedQuestion?.id === updatedQuestion.id) {
+            setSelectedQuestion(updatedQuestion);
+        }
+    };
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -76,7 +82,7 @@ function CommunityPage() {
                         </ResizablePanel>
                         <ResizableHandle withHandle />
                         <ResizablePanel defaultSize={65}>
-                            <CommentSection question={selectedQuestion} />
+                            <CommentSection question={selectedQuestion} onUpdateQuestion={handleQuestionUpdate}/>
                         </ResizablePanel>
                     </ResizablePanelGroup>
                 </div>
