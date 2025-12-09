@@ -64,20 +64,24 @@ export function CommentSection({ question }: CommentSectionProps) {
                         </div>
 
                         {question.fileType === 'image' ? (
-                            <div className="relative h-96 w-full">
+                            <div className="relative w-full">
                                 <Image 
                                     src={question.fileUrl} 
                                     alt="Attached image" 
-                                    fill
-                                    className="object-contain rounded-md"
+                                    width={0}
+                                    height={0}
+                                    sizes="100vw"
+                                    className="object-contain rounded-md w-full h-auto"
                                 />
                             </div>
                         ) : question.fileType === 'pdf' ? (
-                            <iframe 
-                                src={question.fileUrl} 
-                                className="w-full h-[500px] rounded-md border"
-                                title="Attached PDF"
-                            ></iframe>
+                            <div className="w-full aspect-[4/5]">
+                                <iframe 
+                                    src={question.fileUrl} 
+                                    className="w-full h-full rounded-md border"
+                                    title="Attached PDF"
+                                ></iframe>
+                            </div>
                         ) : (
                              <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
                         )}
