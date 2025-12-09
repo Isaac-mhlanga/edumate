@@ -40,6 +40,7 @@ import {
   FileQuestion,
   Send,
   Wand2,
+  UserCog,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
@@ -116,6 +117,7 @@ const adminMenuItems: MenuItem[] = [
   { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
   { href: '/admin?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/admin', tab: 'calendar' },
   { href: '/admin?tab=users', label: 'Users', icon: Users, basePath: '/admin', tab: 'users' },
+  { href: '/admin?tab=tutors', label: 'Tutors', icon: UserCog, basePath: '/admin', tab: 'tutors' },
   { href: '/admin?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/admin', tab: 'subscriptions' },
   { href: '/admin?tab=payouts', label: 'Payouts', icon: Banknote, basePath: '/admin', tab: 'payouts' },
 ];
@@ -294,3 +296,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    

@@ -13,12 +13,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { tutorData } from "@/lib/data";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
 import { useSearchParams } from "next/navigation";
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, Timestamp, onSnapshot, Unsubscribe, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type MessageThread, type ThreadMessage } from "@/lib/types";
@@ -49,6 +50,9 @@ type TutorProfile = {
     location: string;
     modes: Mode[];
     availability: { day: string; slots: string[] }[];
+    qualifications: string;
+    qualificationUrl?: string;
+    approvalStatus: 'Pending' | 'Approved' | 'Rejected';
 };
 
 function TutorPage() {
@@ -64,6 +68,8 @@ function TutorPage() {
     const [isSending, setIsSending] = useState(false);
     
     const [loading, setLoading] = useState(true);
+    const [isSaving, setIsSaving] = useState(false);
+    const [qualificationFile, setQualificationFile] = useState<File | null>(null);
 
     const currentTab = searchParams.get('tab') || 'overview';
     const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -86,7 +92,7 @@ function TutorPage() {
                     const defaultProfile: TutorProfile = {
                         id: currentUser.uid, name: currentUser.displayName || 'New Tutor', email: currentUser.email || '',
                         avatar: currentUser.photoURL || 'https://placehold.co/100x100.png', bio: '', hourlyRate: 200, subjects: [],
-                        grades: [], location: '', modes: [], availability: tutorData.availability,
+                        grades: [], location: '', modes: [], availability: tutorData.availability, qualifications: '', approvalStatus: 'Pending'
                     };
                     await setDoc(profileRef, defaultProfile);
                     setProfile(defaultProfile);
@@ -179,13 +185,32 @@ function TutorPage() {
 
     const handleSaveProfile = async () => {
         if (!user || !profile) return;
+        setIsSaving(true);
         const firestore = getFirestore();
+        const storage = getStorage();
         const profileRef = doc(firestore, 'tutors', user.uid);
+
+        let newQualificationUrl = profile.qualificationUrl;
+
         try {
-            await updateDoc(profileRef, { ...profile });
-            toast({ title: 'Profile Updated', description: 'Your changes have been saved.' });
+            if (qualificationFile) {
+                const fileRef = ref(storage, `tutors/${user.uid}/qualifications/${qualificationFile.name}`);
+                await uploadBytes(fileRef, qualificationFile);
+                newQualificationUrl = await getDownloadURL(fileRef);
+            }
+
+            await updateDoc(profileRef, { 
+                ...profile,
+                qualificationUrl: newQualificationUrl,
+                approvalStatus: 'Pending' // Resubmit for approval on changes
+            });
+            setProfile({ ...profile, qualificationUrl: newQualificationUrl, approvalStatus: 'Pending' });
+            setQualificationFile(null);
+            toast({ title: 'Profile Updated', description: 'Your changes have been saved and submitted for review.' });
         } catch (error) {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not save your profile.' });
+        } finally {
+            setIsSaving(false);
         }
     };
 
@@ -321,9 +346,29 @@ function TutorPage() {
                                 <Textarea id="tutor-bio" value={profile.bio} onChange={(e) => handleProfileChange('bio', e.target.value)} rows={5} placeholder="Tell students about yourself, your teaching style, and your experience."/>
                             </div>
                         </CardContent>
-                        <CardFooter className="justify-end">
-                            <Button onClick={handleSaveProfile}><Save className="mr-2 h-4 w-4"/>Save Changes</Button>
-                        </CardFooter>
+                    </Card>
+                    
+                    <Card>
+                        <CardHeader>
+                            <CardTitle>Qualifications & Verification</CardTitle>
+                            <CardDescription>Provide your qualifications for admin approval.</CardDescription>
+                        </CardHeader>
+                        <CardContent className="space-y-6">
+                             <div className="space-y-1">
+                                <Label htmlFor="tutor-qualifications">Qualifications</Label>
+                                <Input id="tutor-qualifications" value={profile.qualifications} onChange={(e) => handleProfileChange('qualifications', e.target.value)} placeholder="e.g. B.Sc. in Physics, M.Ed."/>
+                            </div>
+                            <div className="space-y-1">
+                                <Label htmlFor="qualification-file">Highest Qualification Document</Label>
+                                <div className="flex items-center gap-4">
+                                    <Input id="qualification-file" type="file" accept=".pdf,.png,.jpg,.jpeg" onChange={(e) => setQualificationFile(e.target.files?.[0] || null)} className="flex-1"/>
+                                </div>
+                                {qualificationFile && <p className="text-sm text-muted-foreground">New file selected: {qualificationFile.name}</p>}
+                                {profile.qualificationUrl && !qualificationFile && (
+                                     <p className="text-sm text-muted-foreground">Current file: <a href={profile.qualificationUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">View Document</a></p>
+                                )}
+                            </div>
+                        </CardContent>
                     </Card>
 
                     <Card>
@@ -349,9 +394,6 @@ function TutorPage() {
                                 </div>
                             </div>
                         </CardContent>
-                        <CardFooter className="justify-end">
-                            <Button onClick={handleSaveProfile}><Save className="mr-2 h-4 w-4"/>Save Expertise</Button>
-                        </CardFooter>
                     </Card>
                     
                     <Card>
@@ -361,11 +403,8 @@ function TutorPage() {
                                     <CardTitle>Availability</CardTitle>
                                     <CardDescription>Set the time slots when you are available for tutoring.</CardDescription>
                                 </div>
-                                <Button variant={isEditingProfile ? "default" : "outline"} onClick={() => {
-                                    if(isEditingProfile) handleSaveProfile();
-                                    setIsEditingProfile(!isEditingProfile)
-                                }}>
-                                    {isEditingProfile ? <><Save className="mr-2 h-4 w-4" /> Save</> : <><Edit className="mr-2 h-4 w-4" /> Edit</>}
+                                <Button variant={isEditingProfile ? "default" : "outline"} onClick={() => setIsEditingProfile(!isEditingProfile)}>
+                                    {isEditingProfile ? 'Done Editing' : <><Edit className="mr-2 h-4 w-4" /> Edit</>}
                                 </Button>
                             </div>
                         </CardHeader>
@@ -393,6 +432,12 @@ function TutorPage() {
                                 ))}
                             </div>
                         </CardContent>
+                         <CardFooter className="justify-end pt-4">
+                            <Button onClick={handleSaveProfile} disabled={isSaving}>
+                                {isSaving ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4"/>}
+                                {isSaving ? 'Saving...' : 'Save All Profile Changes'}
+                            </Button>
+                        </CardFooter>
                     </Card>
                 </div>
             )}
@@ -521,3 +566,5 @@ const firebaseConfig = {
 };
 
 export default withAuth(TutorPage, ['tutor']);
+
+    

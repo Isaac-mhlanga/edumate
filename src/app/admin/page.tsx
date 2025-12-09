@@ -16,6 +16,7 @@ import { AdminAssignmentsTab } from "@/components/admin/assignments-tab";
 import { AdminCalendarTab } from "@/components/admin/calendar-tab";
 import { AdminPayoutsTab } from "@/components/admin/payouts-tab";
 import { AdminSubscriptionsTab } from "@/components/admin/subscriptions-tab";
+import { AdminTutorsTab } from "@/components/admin/tutors-tab";
 import { UserActionDialogs } from "@/components/admin/user-action-dialogs";
 import { CourseActionDialog } from "@/components/admin/course-action-dialog";
 import { PayoutActionDialog, PayoutReceiptDialog } from "@/components/admin/payout-dialogs";
@@ -57,6 +58,14 @@ export type RecentActivity = {
     value?: string;
     originalTimestamp: Date;
 };
+export type TutorProfile = {
+    id: string;
+    name: string;
+    email: string;
+    qualifications: string;
+    qualificationUrl: string;
+    approvalStatus: 'Pending' | 'Approved' | 'Rejected';
+};
 
 
 function AdminPage() {
@@ -74,6 +83,7 @@ function AdminPage() {
     const [subscriptions, setSubscriptions] = React.useState<Subscription[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [events, setEvents] = React.useState<CalendarEvent[]>([]);
+    const [tutors, setTutors] = React.useState<TutorProfile[]>([]);
     
     const [loading, setLoading] = React.useState(true);
     const [aiSummary, setAiSummary] = React.useState('');
@@ -147,6 +157,10 @@ function AdminPage() {
                 fetchedSubscriptions.forEach(sub => { if (sub.status === 'Active') { subscriptionMap.set(sub.studentId, sub.planName); } });
                 const usersWithSubscriptions = fetchedUsers.map(user => ({ ...user, subscriptionPlan: subscriptionMap.get(user.id) }));
                 setUsers(usersWithSubscriptions);
+
+                const tutorsSnapshot = await getDocs(collection(firestore, "tutors"));
+                const fetchedTutors = tutorsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as TutorProfile));
+                setTutors(fetchedTutors);
 
                 const coursesSnapshot = await getDocs(query(collection(firestore, "courses"), orderBy('createdAt', 'desc')));
                 const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
@@ -295,6 +309,21 @@ function AdminPage() {
         setIsCancelSubscriptionDialogOpen(false);
     };
 
+    const handleTutorApproval = async (tutor: TutorProfile, newStatus: 'Approved' | 'Rejected') => {
+        const tutorRef = doc(firestore, 'tutors', tutor.id);
+        try {
+            await updateDoc(tutorRef, { approvalStatus: newStatus });
+            setTutors(prevTutors => prevTutors.map(t => t.id === tutor.id ? { ...t, approvalStatus: newStatus } : t));
+            toast({
+                title: `Tutor ${newStatus}`,
+                description: `${tutor.name} has been ${newStatus.toLowerCase()}.`
+            });
+        } catch (error) {
+            console.error(`Error updating tutor status:`, error);
+            toast({ variant: 'destructive', title: 'Error', description: `Could not update tutor status.` });
+        }
+    };
+
     return (
         <div className="space-y-8">
             <style jsx global>{`
@@ -327,6 +356,7 @@ function AdminPage() {
                 />
             )}
             {currentTab === 'users' && <AdminUsersTab users={users} onUserAction={handleUserAction} />}
+            {currentTab === 'tutors' && <AdminTutorsTab tutors={tutors} onTutorApproval={handleTutorApproval} />}
             {currentTab === 'courses' && (
                 <AdminCoursesTab 
                     courses={courses} 
@@ -429,9 +459,5 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
-
-    
-
-    
 
     

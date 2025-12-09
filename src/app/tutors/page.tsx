@@ -11,7 +11,6 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { tutorData } from "@/lib/data";
 import { BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, Loader2, MapPin, MessageSquare, Search, Star, LogIn } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -19,17 +18,34 @@ import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
 import { Footer } from "@/components/footer";
+import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getApp, getApps, initializeApp } from 'firebase/app';
 
-type Tutor = typeof tutorData;
+type Mode = "Online" | "In-person";
 
-const allTutors = [
-    tutorData, 
-    { ...tutorData, id: "T002", name: "Dr. Evelyn Reed", avatar: "https://placehold.co/100x100.png", hourlyRate: 300, subjects: ["Maths"], location: "Johannesburg, Gauteng", modes: ["Online"] },
-    { ...tutorData, id: "T003", name: "Ben Carter", avatar: "https://placehold.co/100x100.png", hourlyRate: 220, subjects: ["Physical Sciences"], grades: ["11", "12"], location: "Durban, KZN", modes: ["In-person"] },
-    { ...tutorData, id: "T004", name: "Chloe Taylor", avatar: "https://placehold.co/100x100.png", hourlyRate: 275, subjects: ["Maths"], grades: ["10"], location: "Pretoria, Gauteng", modes: ["Online", "In-person"] },
-    { ...tutorData, id: "T005", name: "David Lee", avatar: "https://placehold.co/100x100.png", hourlyRate: 250, subjects: ["Maths", "Physical Sciences"], grades: ["12"], location: "Cape Town, Western Cape", modes: ["Online"] },
-    { ...tutorData, id: "T006", name: "Sarah Miller", avatar: "https://placehold.co/100x100.png", hourlyRate: 280, subjects: ["Physical Sciences"], grades: ["10", "11"], location: "Johannesburg, Gauteng", modes: ["In-person"] },
-];
+type Tutor = {
+    id: string;
+    name: string;
+    avatar: string;
+    bio: string;
+    hourlyRate: number;
+    subjects: string[];
+    grades: string[];
+    location: string;
+    modes: Mode[];
+    availability: { day: string; slots: string[] }[];
+    approvalStatus: 'Approved';
+};
+
+const firebaseConfig = {
+    apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+    authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+    projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+    storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+    appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
 
 // A mock function to simulate getting city from coordinates.
 // In a real app, this would be a call to a Geocoding API.
@@ -114,6 +130,9 @@ export default function TutorsPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
 
+    const [allTutors, setAllTutors] = useState<Tutor[]>([]);
+    const [loading, setLoading] = useState(true);
+
     const [subject, setSubject] = React.useState(searchParams.get('subject') || 'All');
     const [grade, setGrade] = React.useState(searchParams.get('grade') || 'All');
     const [location, setLocation] = React.useState('');
@@ -127,6 +146,28 @@ export default function TutorsPage() {
     // Pagination state
     const [currentPage, setCurrentPage] = React.useState(1);
     const tutorsPerPage = 6;
+
+     useEffect(() => {
+        const fetchApprovedTutors = async () => {
+            setLoading(true);
+            const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+            const firestore = getFirestore(app);
+            const tutorsQuery = query(collection(firestore, 'tutors'), where('approvalStatus', '==', 'Approved'));
+            
+            try {
+                const querySnapshot = await getDocs(tutorsQuery);
+                const approvedTutors = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Tutor));
+                setAllTutors(approvedTutors);
+            } catch (error) {
+                console.error("Error fetching approved tutors:", error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch available tutors.' });
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchApprovedTutors();
+    }, [toast]);
 
     useEffect(() => {
         if ("geolocation" in navigator) {
@@ -159,7 +200,7 @@ export default function TutorsPage() {
             const locationMatch = location === '' || tutor.location.toLowerCase().includes(location.toLowerCase());
             return subjectMatch && gradeMatch && locationMatch;
         });
-    }, [subject, grade, location]);
+    }, [allTutors, subject, grade, location]);
     
     // Pagination logic
     const totalPages = Math.ceil(filteredTutors.length / tutorsPerPage);
@@ -239,7 +280,11 @@ export default function TutorsPage() {
                                 {locationStatus.startsWith('Detecting') ? <Loader2 className="h-4 w-4 animate-spin"/> : <MapPin className="h-4 w-4"/> }
                                 <span>{locationStatus}</span>
                             </div>
-                            {paginatedTutors.length > 0 ? (
+                            {loading ? (
+                                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                    {Array.from({ length: 3 }).map((_, i) => <Card key={i}><CardHeader><div className="h-48 w-full bg-muted rounded-md animate-pulse"></div></CardHeader></Card>)}
+                                </div>
+                            ) : paginatedTutors.length > 0 ? (
                             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                                 {paginatedTutors.map(tutor => (
                                     <Card key={tutor.id} className="flex flex-col">
@@ -398,3 +443,5 @@ export default function TutorsPage() {
         </div>
     );
 }
+
+    
