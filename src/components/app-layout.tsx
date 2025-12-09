@@ -92,6 +92,7 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Course Catalog', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/ai-tutor', label: 'AI Tutor', icon: Wand2, basePath: '/ai-tutor' },
+  { href: '/community', label: 'Community', icon: MessageSquare, basePath: '/community' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
   { href: '/dashboard?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/dashboard', tab: 'subscriptions' },
@@ -184,7 +185,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   }
 
   const menuItems = getMenuItems();
-  const currentTab = searchParams.get('tab') || 'overview';
+  const currentTab = searchParams.get('tab');
+  const isCurrentPage = (item: MenuItem) => {
+    if (item.tab) {
+        return pathname.startsWith(item.basePath) && (currentTab === item.tab || (!currentTab && item.tab === 'overview'))
+    }
+    return pathname === item.basePath;
+  }
   const isSettingsPage = pathname === '/settings';
 
   return (
@@ -208,7 +215,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <SidebarMenuItem key={item.label}>
                     <SidebarMenuButton
                     asChild
-                    isActive={item.tab ? (pathname.startsWith(item.basePath) && currentTab === item.tab) : pathname === item.basePath}
+                    isActive={isCurrentPage(item)}
                     tooltip={{
                         children: item.label,
                         side: 'right',
