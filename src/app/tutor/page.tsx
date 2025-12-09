@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -278,6 +277,12 @@ function TutorPage() {
         return <div>Loading profile...</div>
     }
 
+    const timeSlots = {
+        Morning: ["09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00"],
+        Afternoon: ["14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00"],
+        Evening: ["17:00 - 18:00", "18:00 - 19:00", "19:00 - 20:00"],
+    };
+
     return (
         <div className="space-y-8">
             {currentTab === 'overview' && (
@@ -442,29 +447,39 @@ function TutorPage() {
                                 </Button>
                             </div>
                         </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {profile.availability.map((day, dayIndex) => (
-                                    <div key={day.day}>
-                                        <h4 className="font-semibold mb-3">{day.day}</h4>
-                                        <div className="space-y-2">
-                                            {["09:00 - 10:00", "10:00 - 11:00", "11:00 - 12:00", "14:00 - 15:00", "15:00 - 16:00", "16:00 - 17:00", "17:00 - 18:00"].map(slot => (
-                                                <div key={slot} className="flex items-center space-x-2">
-                                                    <Checkbox 
-                                                        id={`${day.day}-${slot}`} 
-                                                        checked={day.slots.includes(slot)}
-                                                        disabled={!isEditingProfile}
-                                                        onCheckedChange={() => handleSlotToggle(dayIndex, slot)}
-                                                    />
-                                                    <label htmlFor={`${day.day}-${slot}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                                        {slot}
-                                                    </label>
+                        <CardContent className="space-y-6">
+                            {profile.availability.map((day, dayIndex) => (
+                                <div key={day.day} className="grid grid-cols-[100px_1fr] items-start gap-6">
+                                    <h4 className="font-semibold pt-2 text-right">{day.day}</h4>
+                                    <div className="border rounded-lg p-4">
+                                        {Object.entries(timeSlots).map(([period, slots]) => (
+                                            <div key={period} className="mb-4 last:mb-0">
+                                                <h5 className="text-sm font-medium mb-2">{period}</h5>
+                                                <div className="flex flex-wrap gap-2">
+                                                    {slots.map(slot => (
+                                                        isEditingProfile ? (
+                                                            <Button
+                                                                key={slot}
+                                                                variant={day.slots.includes(slot) ? 'secondary' : 'outline'}
+                                                                size="sm"
+                                                                onClick={() => handleSlotToggle(dayIndex, slot)}
+                                                                className="text-xs h-8"
+                                                            >
+                                                                {slot}
+                                                            </Button>
+                                                        ) : (
+                                                            day.slots.includes(slot) && (
+                                                                <Badge key={slot} variant="secondary">{slot}</Badge>
+                                                            )
+                                                        )
+                                                    ))}
+                                                     {!isEditingProfile && day.slots.length === 0 && dayIndex === 0 && <p className="text-xs text-muted-foreground">Not available. Click 'Edit' to add slots.</p>}
                                                 </div>
-                                            ))}
-                                        </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
-                            </div>
+                                </div>
+                            ))}
                         </CardContent>
                          <CardFooter className="justify-end pt-4">
                             <Button onClick={handleSaveProfile} disabled={isSaving}>
