@@ -16,7 +16,7 @@ export function SubscriptionsTab() {
                     <CardDescription>Your primary subscription for accessing course content.</CardDescription>
                 </CardHeader>
                 <CardContent>
-                    <Card className="bg-primary/5 border-primary">
+                    <Card className="bg-primary/5 border-primary ring-2 ring-green-500/50">
                         <CardHeader className="flex flex-col sm:flex-row items-start sm:items-center sm:justify-between">
                             <div>
                                 <CardTitle className="text-2xl">{studentData.currentSubscription.planName}</CardTitle>
