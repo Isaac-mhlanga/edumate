@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -420,7 +421,7 @@ function TutorPage() {
                                 <div className="space-y-1">
                                     <Label htmlFor="tutor-rate">Your Hourly Rate (R)</Label>
                                     <div className="relative">
-                                        <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                        <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">R</span>
                                         <Input id="tutor-rate" type="number" className="pl-8" value={profile.hourlyRate} onChange={(e) => handleProfileChange('hourlyRate', parseFloat(e.target.value))}/>
                                     </div>
                                 </div>
