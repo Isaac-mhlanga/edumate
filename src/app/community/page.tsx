@@ -2,7 +2,6 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import withAuth from '@/components/with-auth';
 import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionForm } from '@/components/community/question-form';
@@ -12,6 +11,8 @@ import { type Question } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Separator } from '@/components/ui/separator';
+import { PublicHeader } from '@/components/public-header';
+import { Footer } from '@/components/footer';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -38,34 +39,52 @@ function CommunityPage() {
                 ...doc.data()
             } as Question));
             setQuestions(fetchedQuestions);
+            if (fetchedQuestions.length > 0 && !selectedQuestion) {
+              setSelectedQuestion(fetchedQuestions[0]);
+            }
+            setLoading(false);
+        }, (error) => {
+            console.error("Error fetching questions:", error);
             setLoading(false);
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [selectedQuestion]);
 
     return (
-        <div className="h-[calc(100vh-10rem)]">
-            <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border">
-                <ResizablePanel defaultSize={35} minSize={25} maxSize={45}>
-                    <div className="flex flex-col h-full">
-                        <QuestionForm />
-                        <Separator />
-                        <QuestionList 
-                            questions={questions} 
-                            selectedQuestion={selectedQuestion}
-                            onSelectQuestion={setSelectedQuestion} 
-                            loading={loading}
-                        />
-                    </div>
-                </ResizablePanel>
-                <ResizableHandle withHandle />
-                <ResizablePanel defaultSize={65}>
-                    <CommentSection question={selectedQuestion} />
-                </ResizablePanel>
-            </ResizablePanelGroup>
+        <div className="flex flex-col min-h-screen">
+          <PublicHeader />
+          <main className="flex-grow pt-16">
+            <div className="container mx-auto py-8">
+                 <div className="text-center mb-12">
+                    <h1 className="text-4xl font-bold tracking-tight">Community Forum</h1>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Ask questions, share knowledge, and connect with fellow students.</p>
+                </div>
+                <div className="h-[calc(100vh-20rem)] min-h-[500px]">
+                    <ResizablePanelGroup direction="horizontal" className="h-full rounded-lg border">
+                        <ResizablePanel defaultSize={35} minSize={25} maxSize={45}>
+                            <div className="flex flex-col h-full">
+                                <QuestionForm />
+                                <Separator />
+                                <QuestionList 
+                                    questions={questions} 
+                                    selectedQuestion={selectedQuestion}
+                                    onSelectQuestion={setSelectedQuestion} 
+                                    loading={loading}
+                                />
+                            </div>
+                        </ResizablePanel>
+                        <ResizableHandle withHandle />
+                        <ResizablePanel defaultSize={65}>
+                            <CommentSection question={selectedQuestion} />
+                        </ResizablePanel>
+                    </ResizablePanelGroup>
+                </div>
+            </div>
+          </main>
+          <Footer />
         </div>
     );
 }
 
-export default withAuth(CommunityPage, ['student', 'instructor', 'admin', 'tutor']);
+export default CommunityPage;
