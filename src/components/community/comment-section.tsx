@@ -100,10 +100,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
   }, [question, toast]);
 
   const handlePostComment = async (content: string, parentId: string | null, file: File | null) => {
-    if (!user) {
-        toast({ title: 'Please log in', description: 'You need to be logged in to post a comment.' });
-        return;
-    }
     if (!question || (!content.trim() && !file)) return;
     
     setIsSubmitting(true);
@@ -126,9 +122,9 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       }
 
       batch.set(commentRef, {
-          studentId: user.uid,
-          studentName: user.displayName || 'Anonymous',
-          studentAvatar: user.photoURL,
+          studentId: user?.uid || 'anonymous',
+          studentName: user?.displayName || 'Anonymous',
+          studentAvatar: user?.photoURL,
           content: content,
           fileUrl,
           fileType,
@@ -427,7 +423,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                             <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
                                                 <ThumbsUp className={cn("h-4 w-4 mr-1", user && (comment.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                                             </Button>
-                                            <Button variant="outline" size="sm" className="text-xs h-auto px-2 py-1" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }} disabled={!user}>
+                                            <Button variant="outline" size="sm" className="text-xs h-auto px-2 py-1" onClick={() => { setReplyingTo(replyingTo === comment.id ? null : comment.id); setReplyContent(''); setReplyFile(null); }}>
                                                 <CornerUpLeft className="mr-1 h-3 w-3" />
                                                 Reply
                                             </Button>
@@ -438,22 +434,22 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                                     <div className="ml-11 mt-2 flex items-start gap-3">
                                          <Avatar className="h-8 w-8 border">
                                             {user ? <AvatarImage src={user.photoURL || undefined} /> : null}
-                                            <AvatarFallback>{user ? user.displayName?.charAt(0) : 'Ed'}</AvatarFallback>
+                                            <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
                                         </Avatar>
                                         <div className="flex-1 space-y-2">
-                                            <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting || !user} className="text-sm" />
+                                            <Textarea placeholder={`Replying to ${comment.studentName}...`} value={replyContent} onChange={(e) => setReplyContent(e.target.value)} disabled={isSubmitting} className="text-sm" />
                                             {replyFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{replyFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setReplyFile(null)}><X className="h-4 w-4"/></Button></div>}
                                             <div className="flex justify-between items-center">
                                                 <Button type="button" variant="ghost" size="icon" asChild>
-                                                  <label htmlFor={`reply-file-${comment.id}`} className={cn("cursor-pointer", !user && "cursor-not-allowed opacity-50")}>
+                                                  <label htmlFor={`reply-file-${comment.id}`} className={cn("cursor-pointer")}>
                                                       <Paperclip className="h-4 w-4"/>
                                                   </label>
                                                 </Button>
-                                                <Input id={`reply-file-${comment.id}`} type="file" className="hidden" disabled={!user} onChange={e => setReplyFile(e.target.files?.[0] || null)} />
+                                                <Input id={`reply-file-${comment.id}`} type="file" className="hidden" onChange={e => setReplyFile(e.target.files?.[0] || null)} />
 
                                                 <div className="flex justify-end gap-2">
                                                     <Button size="sm" variant="ghost" onClick={() => setReplyingTo(null)}>Cancel</Button>
-                                                    <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id, replyFile)} disabled={isSubmitting || (!replyContent.trim() && !replyFile) || !user}>
+                                                    <Button size="sm" onClick={() => handlePostComment(replyContent, comment.id, replyFile)} disabled={isSubmitting || (!replyContent.trim() && !replyFile)}>
                                                         {isSubmitting ? 'Replying...' : 'Reply'}
                                                     </Button>
                                                 </div>
@@ -507,29 +503,27 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                 </div>
             ) : (
                 <div className="flex items-start gap-3">
-                    {user && (
-                        <Avatar className="h-9 w-9 mt-1 border">
-                            <AvatarImage src={user.photoURL || undefined} />
-                            <AvatarFallback>{user.displayName?.charAt(0) || 'U'}</AvatarFallback>
-                        </Avatar>
-                    )}
+                    <Avatar className="h-9 w-9 mt-1 border">
+                        {user ? <AvatarImage src={user.photoURL || undefined} /> : null}
+                        <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
+                    </Avatar>
                     <div className="flex-1 space-y-2">
                         <Textarea 
-                            placeholder={user ? "Add your answer..." : "Please log in to post an answer."}
+                            placeholder="Add your answer..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            disabled={isSubmitting || !user}
+                            disabled={isSubmitting}
                             className="text-sm"
                         />
                         {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
                         <div className="flex justify-between items-center">
                             <Button type="button" variant="ghost" size="icon" asChild>
-                            <label htmlFor="comment-file" className={cn("cursor-pointer", !user && "cursor-not-allowed opacity-50")}>
+                            <label htmlFor="comment-file" className={cn("cursor-pointer")}>
                                 <Paperclip className="h-4 w-4"/>
                             </label>
                             </Button>
-                            <Input id="comment-file" type="file" className="hidden" disabled={!user} onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
-                            <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile) || !user}>
+                            <Input id="comment-file" type="file" className="hidden" onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
+                            <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile)}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 <Send className="mr-2 h-4 w-4" />
                                 Post Answer
