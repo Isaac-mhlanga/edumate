@@ -293,7 +293,7 @@ export function CommentSection({ question, onUpdateQuestion }: CommentSectionPro
                 </Avatar>
                 <div className="flex-1 space-y-2">
                     <Textarea 
-                        placeholder="Add your answer..." 
+                        placeholder={user ? "Add your answer..." : "Please log in to post an answer."}
                         value={newComment}
                         onChange={(e) => setNewComment(e.target.value)}
                         disabled={isSubmitting || !user}
