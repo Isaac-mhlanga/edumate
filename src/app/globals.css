@@ -24,7 +24,7 @@
     --border: 215 28% 25%;
     --input: 215 28% 25%;
     --ring: 210 90% 60%;
-    --radius: 0.75rem;
+    --radius: 0.3rem;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -120,13 +120,13 @@
       background-position: 200% 0;
     }
   }
-  .fc-list-day-text, .fc-list-day-side-text {
-    color: hsl(var(--foreground)) !important;
+  .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
+      color: hsl(var(--foreground)) !important;
   }
-  .fc-list-day-cushion {
-    background-color: hsl(var(--card)) !important;
+  .fc-theme-standard .fc-list-day-cushion, .fc-col-header-cell {
+      background-color: hsl(var(--card)) !important;
   }
-   .fc-list-table tr:hover {
-    background-color: hsl(var(--muted)) !important;
-   }
+  .fc .fc-list-event:hover td {
+      background-color: hsl(var(--muted)) !important;
+  }
 }
