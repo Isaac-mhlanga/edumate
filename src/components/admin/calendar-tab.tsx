@@ -96,7 +96,7 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
 
     return (
         <>
-            <Card className="shadow-lg rounded-xl">
+            <Card className="shadow-lg">
                 <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
                     <div>
                         <CardTitle className="text-xl">Platform Calendar</CardTitle>
@@ -109,7 +109,7 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
                     </div>
                 </CardHeader>
                 <CardContent>
-                    <div className="rounded-lg border overflow-hidden p-1">
+                    <div className="border overflow-hidden p-1">
                         <FullCalendar
                             plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                             initialView="dayGridMonth"

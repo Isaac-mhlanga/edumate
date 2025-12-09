@@ -133,7 +133,7 @@ export default function CalendarPage() {
                     padding: 4px 6px;
                     cursor: pointer;
                 }
-                .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard th {
+                .fc-theme-standard .fc-list-day-cushion {
                     background-color: hsl(var(--card));
                 }
                 .fc .fc-list-event:hover td {
@@ -142,10 +142,13 @@ export default function CalendarPage() {
                  .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
                     color: hsl(var(--foreground)) !important;
                 }
+                .fc-theme-standard th {
+                    background: hsl(var(--card));
+                }
             `}</style>
 
             <div className="space-y-6">
-                <Card className="shadow-lg rounded-xl">
+                <Card className="shadow-lg">
                     <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
                             <CardTitle className="text-2xl">Calendar</CardTitle>
@@ -153,7 +156,7 @@ export default function CalendarPage() {
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="rounded-lg border overflow-hidden p-1">
+                        <div className="border overflow-hidden p-1">
                             <FullCalendar
                                 plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                                 initialView="dayGridMonth"

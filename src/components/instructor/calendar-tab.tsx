@@ -21,7 +21,7 @@ interface InstructorCalendarTabProps {
 
 export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAddEventClick }: InstructorCalendarTabProps) {
     return (
-        <Card className="shadow-lg rounded-xl">
+        <Card className="shadow-lg">
             <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <CardTitle className="text-xl">My Calendar</CardTitle>
@@ -34,7 +34,7 @@ export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAdd
                 </div>
             </CardHeader>
             <CardContent>
-                <div className="rounded-lg border overflow-hidden p-1">
+                <div className="border overflow-hidden p-1">
                     <FullCalendar
                         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin, listPlugin]}
                         initialView="dayGridMonth"
