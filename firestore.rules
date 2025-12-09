@@ -141,5 +141,19 @@ service cloud.firestore {
         allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
       }
     }
+    
+    // Rules for messages
+    match /messages/{threadId} {
+      // Student or tutor in the thread can read/write
+      allow get, list: if isSignedIn() && (resource.data.studentId == request.auth.uid || resource.data.tutorId == request.auth.uid);
+      allow update: if isSignedIn() && (resource.data.studentId == request.auth.uid || resource.data.tutorId == request.auth.uid);
+      // Student can create a thread
+      allow create: if isSignedIn() && request.resource.data.studentId == request.auth.uid;
+      
+      match /threadMessages/{messageId} {
+         allow get, list: if isSignedIn() && (get(/databases/$(database)/documents/messages/$(threadId)).data.studentId == request.auth.uid || get(/databases/$(database)/documents/messages/$(threadId)).data.tutorId == request.auth.uid);
+         allow create: if isSignedIn() && (request.resource.data.senderId == request.auth.uid);
+      }
+    }
   }
 }

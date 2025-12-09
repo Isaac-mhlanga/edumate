@@ -13,14 +13,18 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { tutorData } from "@/lib/data";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle } from "lucide-react";
-import React, { useEffect, useState } from "react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip } from "lucide-react";
+import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
 import { useSearchParams } from "next/navigation";
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, Timestamp } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, Timestamp, onSnapshot, Unsubscribe, addDoc, serverTimestamp, arrayUnion } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { Skeleton } from "@/components/ui/skeleton";
+import { type MessageThread, type ThreadMessage } from "@/lib/types";
+import { formatDistanceToNow } from "date-fns";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { cn } from "@/lib/utils";
 
 type Booking = {
     id: string;
@@ -31,7 +35,6 @@ type Booking = {
     status: 'Confirmed' | 'Completed' | 'Pending Confirmation';
 };
 
-type Message = (typeof tutorData.messages)[0];
 type Mode = "Online" | "In-person";
 
 type TutorProfile = {
@@ -54,7 +57,12 @@ function TutorPage() {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<TutorProfile | null>(null);
     const [bookings, setBookings] = useState<Booking[]>([]);
-    const [messages, setMessages] = useState<Message[]>([]);
+    const [messageThreads, setMessageThreads] = useState<MessageThread[]>([]);
+    const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
+    const [currentThreadMessages, setCurrentThreadMessages] = useState<ThreadMessage[]>([]);
+    const [replyContent, setReplyContent] = useState('');
+    const [isSending, setIsSending] = useState(false);
+    
     const [loading, setLoading] = useState(true);
 
     const currentTab = searchParams.get('tab') || 'overview';
@@ -65,28 +73,20 @@ function TutorPage() {
         const auth = getAuth(app);
         const firestore = getFirestore(app);
 
-        const fetchData = async (currentUser: User) => {
-            setLoading(true);
-            try {
-                // Fetch Tutor Profile
+        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+            setUser(currentUser);
+            if (currentUser) {
+                setLoading(true);
+                // Fetch Profile
                 const profileRef = doc(firestore, 'tutors', currentUser.uid);
                 const profileSnap = await getDoc(profileRef);
                 if (profileSnap.exists()) {
                     setProfile({ id: profileSnap.id, ...profileSnap.data() } as TutorProfile);
                 } else {
-                    // Create a default profile if none exists
                     const defaultProfile: TutorProfile = {
-                        id: currentUser.uid,
-                        name: currentUser.displayName || 'New Tutor',
-                        email: currentUser.email || '',
-                        avatar: currentUser.photoURL || 'https://placehold.co/100x100.png',
-                        bio: '',
-                        hourlyRate: 200,
-                        subjects: [],
-                        grades: [],
-                        location: '',
-                        modes: [],
-                        availability: tutorData.availability,
+                        id: currentUser.uid, name: currentUser.displayName || 'New Tutor', email: currentUser.email || '',
+                        avatar: currentUser.photoURL || 'https://placehold.co/100x100.png', bio: '', hourlyRate: 200, subjects: [],
+                        grades: [], location: '', modes: [], availability: tutorData.availability,
                     };
                     await setDoc(profileRef, defaultProfile);
                     setProfile(defaultProfile);
@@ -97,29 +97,81 @@ function TutorPage() {
                 const bookingsSnap = await getDocs(bookingsQuery);
                 setBookings(bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}) as Booking));
 
-                // Fetch Messages (using static for now)
-                setMessages(tutorData.messages);
-
-            } catch (error) {
-                console.error("Error fetching tutor data:", error);
-                toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch your data.' });
-            }
-            setLoading(false);
-        };
-        
-        const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-            setUser(currentUser);
-            if (currentUser) {
-                fetchData(currentUser);
+                // Subscribe to Message Threads
+                const messagesQuery = query(collection(firestore, 'messages'), where('tutorId', '==', currentUser.uid), orderBy('lastMessageTimestamp', 'desc'));
+                const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
+                    const threads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MessageThread));
+                    setMessageThreads(threads);
+                });
+                
+                setLoading(false);
+                return () => unsubscribeMessages();
             } else {
                 setLoading(false);
             }
         });
         
         return () => unsubscribe();
-
     }, [toast]);
     
+     useEffect(() => {
+        if (!selectedThread) return;
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        
+        const messagesSubcollectionQuery = query(collection(firestore, 'messages', selectedThread.id, 'threadMessages'), orderBy('timestamp', 'asc'));
+        
+        const unsubscribe = onSnapshot(messagesSubcollectionQuery, (snapshot) => {
+            const messages = snapshot.docs.map(doc => ({id: doc.id, ...doc.data() } as ThreadMessage));
+            setCurrentThreadMessages(messages);
+            
+            // Mark as read
+            if (selectedThread.isReadByTutor === false) {
+                 updateDoc(doc(firestore, 'messages', selectedThread.id), { isReadByTutor: true });
+            }
+        });
+
+        return () => unsubscribe();
+
+    }, [selectedThread]);
+    
+    const handleSelectThread = (thread: MessageThread) => {
+        setSelectedThread(thread);
+    }
+
+    const handleSendMessage = async () => {
+        if (!replyContent.trim() || !selectedThread || !user) return;
+        setIsSending(true);
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        
+        const threadRef = doc(firestore, 'messages', selectedThread.id);
+        const messagesColRef = collection(threadRef, 'threadMessages');
+
+        try {
+            await addDoc(messagesColRef, {
+                senderId: user.uid,
+                content: replyContent,
+                timestamp: serverTimestamp(),
+            });
+
+            await updateDoc(threadRef, {
+                lastMessage: replyContent,
+                lastMessageTimestamp: serverTimestamp(),
+                isReadByTutor: true,
+            });
+
+            setReplyContent('');
+        } catch (error) {
+            console.error("Error sending message:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not send your message.' });
+        } finally {
+            setIsSending(false);
+        }
+    };
+
+
     const handleProfileChange = (field: keyof TutorProfile, value: any) => {
         if (!profile) return;
         setProfile({ ...profile, [field]: value });
@@ -222,15 +274,17 @@ function TutorPage() {
                             </CardHeader>
                             <CardContent>
                             <ul className="space-y-4">
-                                    {messages.slice(0, 4).map(message => (
-                                        <li key={message.id} className="flex items-start gap-4">
+                                    {messageThreads.slice(0, 4).map(thread => (
+                                        <li key={thread.id} className="flex items-start gap-4">
                                             <div className="flex-1">
                                                 <div className="flex justify-between">
-                                                    <p className="font-medium">{message.studentName}</p>
-                                                    {message.unread && <Badge>New</Badge>}
+                                                    <p className="font-medium">{thread.studentName}</p>
+                                                    {!thread.isReadByTutor && <Badge>New</Badge>}
                                                 </div>
-                                                <p className="text-sm text-muted-foreground truncate">{message.snippet}</p>
-                                                <p className="text-xs text-muted-foreground mt-1">{message.timestamp}</p>
+                                                <p className="text-sm text-muted-foreground truncate">{thread.lastMessage}</p>
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                     {thread.lastMessageTimestamp ? formatDistanceToNow(thread.lastMessageTimestamp.toDate(), { addSuffix: true }) : ''}
+                                                </p>
                                             </div>
                                         </li>
                                     ))}
@@ -391,34 +445,67 @@ function TutorPage() {
             )}
             
             {currentTab === 'messages' && (
-                 <Card>
-                    <CardHeader>
-                        <CardTitle>Inbox</CardTitle>
-                        <CardDescription>Respond to student inquiries and booking requests.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                         <ul className="space-y-4">
-                            {messages.map(message => (
-                                <li key={message.id} className={`p-4 rounded-lg flex items-start gap-4 transition-colors ${message.unread ? 'bg-muted/50' : 'hover:bg-muted/50'}`}>
-                                    <Avatar className="h-10 w-10 border mt-1">
-                                        <AvatarFallback>{message.studentName.split(' ').map(n=>n[0]).join('')}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex-1">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <div>
-                                                <p className="font-semibold">{message.studentName}</p>
-                                                <p className="text-sm font-medium">{message.subject}</p>
-                                            </div>
-                                            <p className="text-xs text-muted-foreground">{message.timestamp}</p>
-                                        </div>
-                                        <p className="text-sm text-muted-foreground">{message.snippet}</p>
+                 <Card className="flex h-[calc(100vh-12rem)]">
+                    <div className="w-1/3 border-r flex flex-col">
+                        <div className="p-4 border-b">
+                             <CardTitle className="text-lg">Inbox</CardTitle>
+                        </div>
+                        <ScrollArea className="flex-1">
+                            {messageThreads.map(thread => (
+                                <button key={thread.id} onClick={() => handleSelectThread(thread)} className={cn("block w-full text-left p-4 border-b hover:bg-muted", selectedThread?.id === thread.id && "bg-muted")}>
+                                    <div className="flex justify-between">
+                                        <h4 className="font-semibold">{thread.studentName}</h4>
+                                        {!thread.isReadByTutor && <Badge className="h-2 w-2 p-0"></Badge>}
                                     </div>
-                                    <Button variant="outline" size="sm" className="mt-1">Reply</Button>
-                                </li>
+                                    <p className="text-sm text-muted-foreground truncate">{thread.lastMessage}</p>
+                                    <p className="text-xs text-muted-foreground mt-1">
+                                        {thread.lastMessageTimestamp ? formatDistanceToNow(thread.lastMessageTimestamp.toDate(), { addSuffix: true }) : ''}
+                                    </p>
+                                </button>
                             ))}
-                        </ul>
-                    </CardContent>
-                </Card>
+                        </ScrollArea>
+                    </div>
+                    <div className="w-2/3 flex flex-col">
+                        {selectedThread ? (
+                             <>
+                                <div className="p-4 border-b flex items-center gap-3">
+                                    <Avatar className="h-10 w-10 border">
+                                        <AvatarFallback>{selectedThread.studentName.charAt(0)}</AvatarFallback>
+                                    </Avatar>
+                                    <div>
+                                        <h3 className="font-semibold">{selectedThread.studentName}</h3>
+                                        <p className="text-sm text-muted-foreground">Student</p>
+                                    </div>
+                                </div>
+                                <ScrollArea className="flex-1 p-4">
+                                     <div className="space-y-4">
+                                        {currentThreadMessages.map(msg => (
+                                            <div key={msg.id} className={cn("flex items-end gap-2", msg.senderId === user?.uid ? 'justify-end' : '')}>
+                                                {msg.senderId !== user?.uid && <Avatar className="h-8 w-8"><AvatarFallback>{selectedThread.studentName.charAt(0)}</AvatarFallback></Avatar>}
+                                                <div className={cn("max-w-xs md:max-w-md p-3 rounded-lg", msg.senderId === user?.uid ? 'bg-primary text-primary-foreground' : 'bg-muted')}>
+                                                    <p className="text-sm">{msg.content}</p>
+                                                    <p className="text-xs opacity-70 mt-1 text-right">{msg.timestamp ? formatDistanceToNow(msg.timestamp.toDate(), { addSuffix: true }) : 'sending...'}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                     </div>
+                                </ScrollArea>
+                                <div className="p-4 border-t flex items-center gap-2">
+                                    <Input placeholder="Type your reply..." className="flex-1" value={replyContent} onChange={(e) => setReplyContent(e.target.value)} onKeyDown={(e) => e.key === 'Enter' && handleSendMessage()}/>
+                                    <Button onClick={handleSendMessage} disabled={isSending}>
+                                        {isSending ? <Loader2 className="h-4 w-4 animate-spin"/> : <Send className="h-4 w-4" />}
+                                    </Button>
+                                </div>
+                             </>
+                        ) : (
+                            <div className="flex flex-col h-full items-center justify-center text-center text-muted-foreground">
+                                <MessageSquare className="h-16 w-16 mb-4"/>
+                                <h2 className="text-xl font-semibold">Select a conversation</h2>
+                                <p>Choose a conversation from the list to view messages.</p>
+                            </div>
+                        )}
+                    </div>
+                 </Card>
             )}
         </div>
     );

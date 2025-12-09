@@ -32,3 +32,21 @@ export type Comment = {
     fileUrl?: string;
     fileType?: 'image' | 'pdf';
 }
+
+export type ThreadMessage = {
+    id: string;
+    senderId: string;
+    content: string;
+    timestamp: Timestamp;
+};
+
+export type MessageThread = {
+    id: string;
+    studentId: string;
+    studentName: string;
+    tutorId: string;
+    lastMessage: string;
+    lastMessageTimestamp: Timestamp;
+    isReadByTutor: boolean;
+    messages: ThreadMessage[];
+};
