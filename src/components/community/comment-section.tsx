@@ -8,7 +8,7 @@ import { CardHeader, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X, User, Trash2, Edit } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X, User, Trash2, Edit, ChevronDown, ChevronUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
@@ -53,6 +53,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
   const [replyFile, setReplyFile] = useState<File | null>(null);
 
   const [editingComment, setEditingComment] = useState<{ id: string, content: string } | null>(null);
+  const [collapsedComments, setCollapsedComments] = useState<string[]>([]);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -135,7 +136,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             createdAt: serverTimestamp()
         });
         
-        if (!parentId) { // Only increment comment count for top-level comments
+        if (!parentId) {
             const questionRef = doc(firestore, 'questions', question.id);
             batch.update(questionRef, { commentCount: increment(1) });
         }
@@ -157,8 +158,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         setIsSubmitting(false);
     }
   };
-
-  const handleUpdateComment = async () => {
+  
+    const handleUpdateComment = async () => {
     if (!editingComment || !question) return;
 
     setIsSubmitting(true);
@@ -176,7 +177,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       setIsSubmitting(false);
     }
   };
-
 
   const handleLike = async (type: 'question' | 'comment', id: string) => {
     if (!user) {
@@ -212,7 +212,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
             likedBy: likeUpdate,
         });
 
-        // Optimistically update UI
         if (type === 'question') {
             onUpdateQuestion({
                 ...question,
@@ -233,7 +232,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
   
-  const handleDelete = async (type: 'question' | 'comment', id: string) => {
+    const handleDelete = async (type: 'question' | 'comment', id: string) => {
     if (userRole !== 'admin') {
       toast({ variant: 'destructive', title: 'Permission Denied', description: 'You are not authorized to perform this action.' });
       return;
@@ -317,7 +316,13 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
     }
   };
-
+  
+  const toggleCollapse = (commentId: string) => {
+    setCollapsedComments(prev => 
+      prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
+    );
+  };
+  
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
     if (!item.fileUrl) return null;
     return (
@@ -347,24 +352,10 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     );
   };
 
-  if (!question) {
-    return (
-      <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
-        <MessageSquare className="h-16 w-16 mb-4" />
-        <h2 className="text-xl font-semibold">Select a Question</h2>
-        <p>Choose a question from the list to see the discussion.</p>
-      </div>
-    );
-  }
-
-  const topLevelComments = comments.filter(comment => !comment.parentId);
-  const getReplies = (commentId: string) => {
-    return comments.filter(comment => comment.parentId === commentId);
-  }
-  
   const renderComment = (comment: Comment, isReply: boolean = false) => {
     const replies = isReply ? [] : getReplies(comment.id);
     const isEditing = editingComment?.id === comment.id;
+    const isCollapsed = collapsedComments.includes(comment.id);
 
     return (
         <div key={comment.id} className="flex items-start gap-3">
@@ -410,7 +401,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                             Reply
                         </Button>
                         {user && user.uid === comment.studentId && (
-                             <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => setEditingComment({ id: comment.id, content: comment.content })}>
+                            <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => setEditingComment({ id: comment.id, content: comment.content })}>
                                 <Edit className="mr-1 h-3 w-3" />
                                 Edit
                             </Button>
@@ -422,7 +413,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                         )}
                     </div>
                 )}
-
 
                 {replyingTo === comment.id && (
                     <div className="mt-4 flex items-start gap-3">
@@ -451,16 +441,37 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                         </div>
                     </div>
                 )}
-
+                
                 {replies.length > 0 && (
-                    <div className="mt-4 space-y-4 pl-8 border-l">
-                        {replies.map(reply => renderComment(reply, true))}
+                    <div className="mt-4">
+                        <Button variant="ghost" size="sm" className="text-xs text-primary" onClick={() => toggleCollapse(comment.id)}>
+                            {isCollapsed ? <ChevronDown className="h-4 w-4 mr-1" /> : <ChevronUp className="h-4 w-4 mr-1" />}
+                            {isCollapsed ? `Show ${replies.length} replies` : 'Hide replies'}
+                        </Button>
+
+                        {!isCollapsed && (
+                             <div className="mt-2 space-y-4 pl-4 border-l">
+                                {replies.map(reply => renderComment(reply, true))}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
         </div>
     );
   }
+
+  if (!question) {
+    return (
+      <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
+        <MessageSquare className="h-16 w-16 mb-4" />
+        <h2 className="text-xl font-semibold">Select a Question</h2>
+        <p>Choose a question from the list to see the discussion.</p>
+      </div>
+    );
+  }
+
+  const topLevelComments = comments.filter(comment => !comment.parentId);
 
   return (
     <div className="flex flex-col h-full">
