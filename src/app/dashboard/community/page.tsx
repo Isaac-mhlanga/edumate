@@ -146,9 +146,10 @@ function CommunityDashboardPage() {
                 </div>
                 <div className="w-full md:w-2/3">
                     <CommentSection 
-                    question={selectedQuestion} 
-                    onUpdateQuestion={handleQuestionUpdate}
-                    onDeleteQuestion={handleQuestionDelete}
+                        question={selectedQuestion} 
+                        onUpdateQuestion={handleQuestionUpdate}
+                        onDeleteQuestion={handleQuestionDelete}
+                        dashboardView={true}
                     />
                 </div>
             </Card>

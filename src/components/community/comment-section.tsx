@@ -36,9 +36,10 @@ interface CommentSectionProps {
   question: Question | null;
   onUpdateQuestion: (question: Question) => void;
   onDeleteQuestion: (questionId: string) => void;
+  dashboardView?: boolean;
 }
 
-export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }: CommentSectionProps) {
+export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, dashboardView = false }: CommentSectionProps) {
   const { toast } = useToast();
   const [user, setUser] = useState<import('firebase/auth').User | null>(null);
   const [userRole, setUserRole] = useState<Role | null>(null);
@@ -235,134 +236,134 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
   
-  const handleDelete = async (type: 'question' | 'comment', id: string) => {
-    if (userRole !== 'admin') {
-      toast({ variant: 'destructive', title: 'Permission Denied', description: 'You are not authorized to perform this action.' });
-      return;
-    }
-    if (!question) return;
-    
-    const firestore = getFirestore();
-    const storage = getStorage();
-
-    if (type === 'question') {
-        if (!window.confirm('Are you sure you want to delete this entire question and all its comments?')) return;
-        try {
-            const commentsQuery = query(collection(firestore, 'questions', id, 'comments'));
-            const commentsSnapshot = await getDocs(commentsQuery);
-            const batch = writeBatch(firestore);
-            for (const commentDoc of commentsSnapshot.docs) {
-                const commentData = commentDoc.data();
-                if (commentData.fileUrl) {
-                    try { await deleteObject(ref(storage, commentData.fileUrl)); } catch (e) { console.error(e); }
-                }
-                batch.delete(commentDoc.ref);
-            }
-            await batch.commit();
-
-            if (question.fileUrl) {
-                try { await deleteObject(ref(storage, question.fileUrl)); } catch (e) { console.error(e); }
-            }
-            await deleteDoc(doc(firestore, 'questions', id));
-            onDeleteQuestion(id);
-            toast({ title: 'Question Deleted', description: 'The question and all its comments have been removed.' });
-        } catch (error) {
-            console.error('Error deleting question:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
+    const handleDelete = async (type: 'question' | 'comment', id: string) => {
+        if (!dashboardView || userRole !== 'admin') {
+            toast({ variant: 'destructive', title: 'Permission Denied', description: 'You are not authorized to perform this action.' });
+            return;
         }
-    } else {
-        const commentToDelete = comments.find(c => c.id === id);
-        if (!commentToDelete) return;
+        if (!question) return;
+        
+        const firestore = getFirestore();
+        const storage = getStorage();
 
-        try {
-             if (commentToDelete.fileUrl) {
-                try { await deleteObject(ref(storage, commentToDelete.fileUrl)); } catch (e) { console.error(e); }
-            }
-            await deleteDoc(doc(firestore, 'questions', question.id, 'comments', id));
-
-            const replies = comments.filter(c => c.parentId === id);
-            if (replies.length > 0) {
-                 const batch = writeBatch(firestore);
-                 for (const reply of replies) {
-                    if (reply.fileUrl) {
-                        try { await deleteObject(ref(storage, reply.fileUrl)); } catch (e) { console.error(e); }
+        if (type === 'question') {
+            if (!window.confirm('Are you sure you want to delete this entire question and all its comments?')) return;
+            try {
+                const commentsQuery = query(collection(firestore, 'questions', id, 'comments'));
+                const commentsSnapshot = await getDocs(commentsQuery);
+                const batch = writeBatch(firestore);
+                for (const commentDoc of commentsSnapshot.docs) {
+                    const commentData = commentDoc.data();
+                    if (commentData.fileUrl) {
+                        try { await deleteObject(ref(storage, commentData.fileUrl)); } catch (e) { console.error(e); }
                     }
-                    batch.delete(doc(firestore, 'questions', question.id, 'comments', reply.id));
-                 }
-                 await batch.commit();
+                    batch.delete(commentDoc.ref);
+                }
+                await batch.commit();
+
+                if (question.fileUrl) {
+                    try { await deleteObject(ref(storage, question.fileUrl)); } catch (e) { console.error(e); }
+                }
+                await deleteDoc(doc(firestore, 'questions', id));
+                onDeleteQuestion(id);
+                toast({ title: 'Question Deleted', description: 'The question and all its comments have been removed.' });
+            } catch (error) {
+                console.error('Error deleting question:', error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
             }
-            if (!commentToDelete.parentId) {
-                await updateDoc(doc(firestore, 'questions', question.id), { commentCount: increment(-1) });
+        } else {
+            const commentToDelete = comments.find(c => c.id === id);
+            if (!commentToDelete) return;
+
+            try {
+                if (commentToDelete.fileUrl) {
+                    try { await deleteObject(ref(storage, commentToDelete.fileUrl)); } catch (e) { console.error(e); }
+                }
+                await deleteDoc(doc(firestore, 'questions', question.id, 'comments', id));
+
+                const replies = comments.filter(c => c.parentId === id);
+                if (replies.length > 0) {
+                    const batch = writeBatch(firestore);
+                    for (const reply of replies) {
+                        if (reply.fileUrl) {
+                            try { await deleteObject(ref(storage, reply.fileUrl)); } catch (e) { console.error(e); }
+                        }
+                        batch.delete(doc(firestore, 'questions', question.id, 'comments', reply.id));
+                    }
+                    await batch.commit();
+                }
+                if (!commentToDelete.parentId) {
+                    await updateDoc(doc(firestore, 'questions', question.id), { commentCount: increment(-1) });
+                }
+                toast({ title: 'Comment Deleted', description: 'The comment has been removed.' });
+            } catch (error) {
+                console.error('Error deleting comment:', error);
+                toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the comment.' });
             }
-            toast({ title: 'Comment Deleted', description: 'The comment has been removed.' });
-        } catch (error) {
-            console.error('Error deleting comment:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the comment.' });
         }
-    }
-  };
+    };
 
-  const handleToggleComments = async (disabled: boolean) => {
-    if (userRole !== 'admin' || !question) {
-        toast({ variant: 'destructive', title: 'Permission Denied', description: 'Only admins can perform this action.' });
-        return;
-    }
+    const handleToggleComments = async (disabled: boolean) => {
+        if (!dashboardView || userRole !== 'admin' || !question) {
+            toast({ variant: 'destructive', title: 'Permission Denied', description: 'Only admins can perform this action.' });
+            return;
+        }
 
-    const firestore = getFirestore();
-    const questionRef = doc(firestore, 'questions', question.id);
-    try {
-        await updateDoc(questionRef, { commentsDisabled: disabled });
-        onUpdateQuestion({ ...question, commentsDisabled: disabled });
-        toast({
-            title: `Comments ${disabled ? 'Disabled' : 'Enabled'}`,
-            description: `Comments have been ${disabled ? 'turned off' : 'turned on'} for this question.`,
-        });
-    } catch (error) {
-        console.error('Error toggling comments:', error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
-    }
-  };
-  
-  const getReplies = (commentId: string): Comment[] => {
-    return comments
-      .filter((comment) => comment.parentId === commentId)
-      .sort((a, b) => (a.createdAt?.toDate()?.getTime() || 0) - (b.createdAt?.toDate()?.getTime() || 0));
-  };
+        const firestore = getFirestore();
+        const questionRef = doc(firestore, 'questions', question.id);
+        try {
+            await updateDoc(questionRef, { commentsDisabled: disabled });
+            onUpdateQuestion({ ...question, commentsDisabled: disabled });
+            toast({
+                title: `Comments ${disabled ? 'Disabled' : 'Enabled'}`,
+                description: `Comments have been ${disabled ? 'turned off' : 'turned on'} for this question.`,
+            });
+        } catch (error) {
+            console.error('Error toggling comments:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
+        }
+    };
 
-  const toggleCollapse = (commentId: string) => {
-    setCollapsedComments(prev => 
-      prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
-    );
-  };
-  
-  const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
-    if (!item.fileUrl) return null;
-    return (
-      <div className="space-y-2 rounded-lg border p-3 mt-2">
-        <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-xs flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                Attached File
-            </h4>
-            <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
-                <Download className="h-3 w-3" />
-                Download
-            </a>
-        </div>
-        {item.fileType === 'image' ? (
-            <div className="relative w-full">
-                <Image src={item.fileUrl} alt="Attached image" width={0} height={0} sizes="100vw" className="object-contain rounded-md w-full h-auto" />
+    const getReplies = (commentId: string): Comment[] => {
+        return comments
+          .filter((comment) => comment.parentId === commentId)
+          .sort((a, b) => (a.createdAt?.toDate()?.getTime() || 0) - (b.createdAt?.toDate()?.getTime() || 0));
+      };
+
+    const toggleCollapse = (commentId: string) => {
+        setCollapsedComments(prev => 
+        prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
+        );
+    };
+
+    const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
+        if (!item.fileUrl) return null;
+        return (
+          <div className="space-y-2 rounded-lg border p-3 mt-2">
+            <div className="flex items-center justify-between">
+                <h4 className="font-semibold text-xs flex items-center gap-2">
+                    <FileText className="h-4 w-4" />
+                    Attached File
+                </h4>
+                <a href={item.fileUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <Download className="h-3 w-3" />
+                    Download
+                </a>
             </div>
-        ) : item.fileType === 'pdf' ? (
-            <div className="w-full aspect-[4/5]">
-                <iframe src={item.fileUrl} className="w-full h-full rounded-md border" title="Attached PDF"></iframe>
-            </div>
-        ) : (
-            <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
-        )}
-      </div>
-    );
-  };
+            {item.fileType === 'image' ? (
+                <div className="relative w-full">
+                    <Image src={item.fileUrl} alt="Attached image" width={0} height={0} sizes="100vw" className="object-contain rounded-md w-full h-auto" />
+                </div>
+            ) : item.fileType === 'pdf' ? (
+                <div className="w-full aspect-[4/5]">
+                    <iframe src={item.fileUrl} className="w-full h-full rounded-md border" title="Attached PDF"></iframe>
+                </div>
+            ) : (
+                <p className="text-xs text-muted-foreground">File type not supported for preview. Please download to view.</p>
+            )}
+          </div>
+        );
+    };
 
   const renderComment = (comment: Comment, isReply: boolean = false) => {
     const replies = isReply ? [] : getReplies(comment.id);
@@ -412,13 +413,13 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                             <CornerUpLeft className="mr-1 h-3 w-3" />
                             Reply
                         </Button>
-                        {user && user.uid === comment.studentId && (
+                        {dashboardView && user && user.uid === comment.studentId && (
                             <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => setEditingComment({ id: comment.id, content: comment.content })}>
                                 <Edit className="mr-1 h-3 w-3" />
                                 Edit
                             </Button>
                         )}
-                        {userRole === 'admin' && (
+                        {dashboardView && userRole === 'admin' && (
                             <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('comment', comment.id)}>
                                 <Trash2 className="h-4 w-4" />
                             </Button>
@@ -490,7 +491,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         <CardHeader className="flex-shrink-0">
             <div className="flex justify-between items-start">
                 <h2 className="text-lg font-bold">{question.title}</h2>
-                {userRole === 'admin' && (
+                {dashboardView && userRole === 'admin' && (
                     <div className="flex items-center space-x-2">
                         <Label htmlFor="disable-comments" className="text-xs text-muted-foreground">Disable Comments</Label>
                         <Switch
@@ -526,7 +527,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                             <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
                         </div>
                     </div>
-                     {userRole === 'admin' && (
+                     {dashboardView && userRole === 'admin' && (
                         <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('question', question.id)}>
                             <Trash2 className="h-4 w-4 mr-1" /> Delete Question
                         </Button>
