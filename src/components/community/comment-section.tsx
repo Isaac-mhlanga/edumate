@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -54,286 +55,11 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
 
   const [editingComment, setEditingComment] = useState<{ id: string, content: string } | null>(null);
   const [collapsedComments, setCollapsedComments] = useState<string[]>([]);
-
-  useEffect(() => {
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const firestore = getFirestore(app);
-
-    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
-      setUser(currentUser);
-      if (currentUser) {
-        const userDocRef = doc(firestore, "users", currentUser.uid);
-        const userDoc = await getDoc(userDocRef);
-        if (userDoc.exists()) {
-          setUserRole(userDoc.data().role as Role);
-        }
-      } else {
-        setUserRole(null);
-      }
-    });
-    return () => unsubscribeAuth();
-  }, []);
-
-  useEffect(() => {
-    if (!question) {
-        setComments([]);
-        return;
-    };
-
-    setLoadingComments(true);
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    const firestore = getFirestore(app);
-    const q = query(
-        collection(firestore, 'questions', question.id, 'comments'), 
-        orderBy('createdAt', 'asc')
-    );
-
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-        const fetchedComments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment));
-        setComments(fetchedComments);
-        setLoadingComments(false);
-    }, (error) => {
-        console.error("Error fetching comments:", error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not load comments.' });
-        setLoadingComments(false);
-    });
-
-    return () => unsubscribe();
-  }, [question, toast]);
-
-  const handlePostComment = async (content: string, parentId: string | null, file: File | null) => {
-    if (!user) {
-        toast({ variant: 'destructive', title: 'Not Logged In', description: 'You must be logged in to post a comment.' });
-        return;
-    }
-    if (!question || (!content.trim() && !file)) return;
-    
-    setIsSubmitting(true);
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    const firestore = getFirestore(app);
-    const storage = getStorage(app);
-    
-    try {
-        const batch = writeBatch(firestore);
-        const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
-        
-        const commentData: Partial<Comment> = {
-            studentId: user?.uid,
-            studentName: user?.displayName || 'Anonymous',
-            studentAvatar: user?.photoURL ?? null,
-            content: content,
-            likeCount: 0,
-            likedBy: [],
-            parentId: parentId,
-        };
-
-        if (file) {
-            const fileRef = ref(storage, `questions/${question.id}/comments/${commentRef.id}/${file.name}`);
-            await uploadBytes(fileRef, file);
-            commentData.fileUrl = await getDownloadURL(fileRef);
-            commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
-        }
-
-        batch.set(commentRef, {
-            ...commentData,
-            createdAt: serverTimestamp()
-        });
-        
-        if (!parentId) {
-            const questionRef = doc(firestore, 'questions', question.id);
-            batch.update(questionRef, { commentCount: increment(1) });
-        }
-
-        await batch.commit();
-        
-        if (parentId) {
-            setReplyContent('');
-            setReplyFile(null);
-            setReplyingTo(null);
-        } else {
-            setNewComment('');
-            setNewCommentFile(null);
-        }
-    } catch(error) {
-        console.error("Error posting comment:", error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not post your comment.' });
-    } finally {
-        setIsSubmitting(false);
-    }
-  };
   
-  const handleUpdateComment = async () => {
-    if (!editingComment || !question || user?.uid !== comments.find(c => c.id === editingComment.id)?.studentId) return;
-
-    setIsSubmitting(true);
-    const firestore = getFirestore();
-    const commentRef = doc(firestore, 'questions', question.id, 'comments', editingComment.id);
-    
-    try {
-      await updateDoc(commentRef, { content: editingComment.content });
-      toast({ title: 'Comment updated!' });
-      setEditingComment(null);
-    } catch (error) {
-      console.error("Error updating comment:", error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not update your comment.' });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleLike = async (type: 'question' | 'comment', id: string) => {
-    if (!user) {
-      toast({ title: 'Please log in', description: 'You need to be logged in to like a post.' });
-      return;
-    }
-    if (!question) return;
-
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    const firestore = getFirestore(app);
-
-    let docRef;
-    let currentDoc: Question | Comment | undefined;
-
-    if (type === 'question') {
-        docRef = doc(firestore, 'questions', id);
-        currentDoc = question;
-    } else {
-        docRef = doc(firestore, 'questions', question.id, 'comments', id);
-        currentDoc = comments.find(c => c.id === id);
-    }
-
-    if (!currentDoc) return;
-    
-    const likedBy = currentDoc.likedBy || [];
-    const isLiked = likedBy.includes(user.uid);
-    const newLikeCount = isLiked ? increment(-1) : increment(1);
-    const likeUpdate = isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid);
-
-    try {
-        await updateDoc(docRef, {
-            likeCount: newLikeCount,
-            likedBy: likeUpdate,
-        });
-
-        if (type === 'question') {
-            onUpdateQuestion({
-                ...question,
-                likeCount: (question.likeCount || 0) + (isLiked ? -1 : 1),
-                likedBy: isLiked ? (question.likedBy || []).filter(uid => uid !== user.uid) : [...(question.likedBy || []), user.uid],
-            });
-        } else {
-            setComments(prev => prev.map(c => c.id === id ? {
-                ...c,
-                likeCount: (c.likeCount || 0) + (isLiked ? -1 : 1),
-                likedBy: isLiked ? (c.likedBy || []).filter(uid => uid !== user.uid) : [...(c.likedBy || []), user.uid],
-            } : c));
-        }
-
-    } catch (error) {
-      console.error("Error updating like:", error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process your like.' });
-    }
-  };
-  
-  const handleDelete = async (type: 'question' | 'comment', id: string) => {
-    if (!dashboardView || userRole !== 'admin') {
-        toast({ variant: 'destructive', title: 'Permission Denied', description: 'You are not authorized to perform this action.' });
-        return;
-    }
-    if (!question) return;
-    
-    const firestore = getFirestore();
-    const storage = getStorage();
-
-    if (type === 'question') {
-        if (!window.confirm('Are you sure you want to delete this entire question and all its comments?')) return;
-        try {
-            const commentsQuery = query(collection(firestore, 'questions', id, 'comments'));
-            const commentsSnapshot = await getDocs(commentsQuery);
-            const batch = writeBatch(firestore);
-            for (const commentDoc of commentsSnapshot.docs) {
-                const commentData = commentDoc.data();
-                if (commentData.fileUrl) {
-                    try { await deleteObject(ref(storage, commentData.fileUrl)); } catch (e) { console.error(e); }
-                }
-                batch.delete(commentDoc.ref);
-            }
-            await batch.commit();
-
-            if (question.fileUrl) {
-                try { await deleteObject(ref(storage, question.fileUrl)); } catch (e) { console.error(e); }
-            }
-            await deleteDoc(doc(firestore, 'questions', id));
-            onDeleteQuestion(id);
-            toast({ title: 'Question Deleted', description: 'The question and all its comments have been removed.' });
-        } catch (error) {
-            console.error('Error deleting question:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
-        }
-    } else {
-        const commentToDelete = comments.find(c => c.id === id);
-        if (!commentToDelete) return;
-
-        try {
-            if (commentToDelete.fileUrl) {
-                try { await deleteObject(ref(storage, commentToDelete.fileUrl)); } catch (e) { console.error(e); }
-            }
-            await deleteDoc(doc(firestore, 'questions', question.id, 'comments', id));
-
-            const replies = comments.filter(c => c.parentId === id);
-            if (replies.length > 0) {
-                const batch = writeBatch(firestore);
-                for (const reply of replies) {
-                    if (reply.fileUrl) {
-                        try { await deleteObject(ref(storage, reply.fileUrl)); } catch (e) { console.error(e); }
-                    }
-                    batch.delete(doc(firestore, 'questions', question.id, 'comments', reply.id));
-                }
-                await batch.commit();
-            }
-            if (!commentToDelete.parentId) {
-                await updateDoc(doc(firestore, 'questions', question.id), { commentCount: increment(-1) });
-            }
-            toast({ title: 'Comment Deleted', description: 'The comment has been removed.' });
-        } catch (error) {
-            console.error('Error deleting comment:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the comment.' });
-        }
-    }
-  };
-
-  const handleToggleComments = async (disabled: boolean) => {
-    if (!dashboardView || userRole !== 'admin' || !question) {
-        toast({ variant: 'destructive', title: 'Permission Denied', description: 'Only admins can perform this action.' });
-        return;
-    }
-
-    const firestore = getFirestore();
-    const questionRef = doc(firestore, 'questions', question.id);
-    try {
-        await updateDoc(questionRef, { commentsDisabled: disabled });
-        onUpdateQuestion({ ...question, commentsDisabled: disabled });
-        toast({
-            title: `Comments ${disabled ? 'Disabled' : 'Enabled'}`,
-            description: `Comments have been ${disabled ? 'turned off' : 'turned on'} for this question.`,
-        });
-    } catch (error) {
-        console.error('Error toggling comments:', error);
-        toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
-    }
-  };
-
   const getReplies = (commentId: string): Comment[] => {
     return comments
       .filter((comment) => comment.parentId === commentId)
       .sort((a, b) => (a.createdAt?.toDate()?.getTime() || 0) - (b.createdAt?.toDate()?.getTime() || 0));
-  };
-
-  const toggleCollapse = (commentId: string) => {
-    setCollapsedComments(prev => 
-    prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
-    );
   };
   
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
@@ -364,7 +90,13 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
       </div>
     );
   };
-
+  
+  const toggleCollapse = (commentId: string) => {
+    setCollapsedComments(prev => 
+    prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
+    );
+  };
+  
   const renderComment = (comment: Comment, isReply: boolean = false) => {
     const replies = isReply ? [] : getReplies(comment.id);
     const isEditing = editingComment?.id === comment.id;
@@ -474,6 +206,252 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     );
   }
 
+  const handleUpdateComment = async () => {
+    if (!editingComment || !question || user?.uid !== comments.find(c => c.id === editingComment.id)?.studentId) return;
+
+    setIsSubmitting(true);
+    const firestore = getFirestore();
+    const commentRef = doc(firestore, 'questions', question.id, 'comments', editingComment.id);
+    
+    try {
+      await updateDoc(commentRef, { content: editingComment.content });
+      toast({ title: 'Comment updated!' });
+      setEditingComment(null);
+    } catch (error) {
+      console.error("Error updating comment:", error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not update your comment.' });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleLike = async (type: 'question' | 'comment', id: string) => {
+    if (!user) {
+      toast({ title: 'Please log in', description: 'You need to be logged in to like a post.' });
+      return;
+    }
+    if (!question) return;
+
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+
+    let docRef;
+    let currentDoc: Question | Comment | undefined;
+
+    if (type === 'question') {
+        docRef = doc(firestore, 'questions', id);
+        currentDoc = question;
+    } else {
+        docRef = doc(firestore, 'questions', question.id, 'comments', id);
+        currentDoc = comments.find(c => c.id === id);
+    }
+
+    if (!currentDoc) return;
+    
+    const likedBy = currentDoc.likedBy || [];
+    const isLiked = likedBy.includes(user.uid);
+    const newLikeCount = isLiked ? increment(-1) : increment(1);
+    const likeUpdate = isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid);
+
+    try {
+        await updateDoc(docRef, {
+            likeCount: newLikeCount,
+            likedBy: likeUpdate,
+        });
+
+        if (type === 'question') {
+            onUpdateQuestion({
+                ...question,
+                likeCount: (question.likeCount || 0) + (isLiked ? -1 : 1),
+                likedBy: isLiked ? (question.likedBy || []).filter(uid => uid !== user.uid) : [...(question.likedBy || []), user.uid],
+            });
+        } else {
+            setComments(prev => prev.map(c => c.id === id ? {
+                ...c,
+                likeCount: (c.likeCount || 0) + (isLiked ? -1 : 1),
+                likedBy: isLiked ? (c.likedBy || []).filter(uid => uid !== user.uid) : [...(c.likedBy || []), user.uid],
+            } : c));
+        }
+
+    } catch (error) {
+      console.error("Error updating like:", error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process your like.' });
+    }
+  };
+
+  const handlePostComment = async (content: string, parentId: string | null, file: File | null) => {
+    if (!user) {
+        toast({ variant: 'destructive', title: 'Not Logged In', description: 'You must be logged in to post a comment.' });
+        return;
+    }
+    if (!question || (!content.trim() && !file)) return;
+    
+    setIsSubmitting(true);
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const storage = getStorage(app);
+    
+    try {
+        const batch = writeBatch(firestore);
+        const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
+        
+        const commentData: Partial<Comment> = {
+            studentId: user?.uid,
+            studentName: user?.displayName || 'Anonymous',
+            studentAvatar: user?.photoURL ?? null,
+            content: content,
+            likeCount: 0,
+            likedBy: [],
+            parentId: parentId,
+        };
+
+        if (file) {
+            const fileRef = ref(storage, `questions/${question.id}/comments/${commentRef.id}/${file.name}`);
+            await uploadBytes(fileRef, file);
+            commentData.fileUrl = await getDownloadURL(fileRef);
+            commentData.fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+        }
+
+        batch.set(commentRef, {
+            ...commentData,
+            createdAt: serverTimestamp()
+        });
+        
+        if (!parentId) {
+            const questionRef = doc(firestore, 'questions', question.id);
+            batch.update(questionRef, { commentCount: increment(1) });
+        }
+
+        await batch.commit();
+        
+        if (parentId) {
+            setReplyContent('');
+            setReplyFile(null);
+            setReplyingTo(null);
+        } else {
+            setNewComment('');
+            setNewCommentFile(null);
+        }
+    } catch(error) {
+        console.error("Error posting comment:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not post your comment.' });
+    } finally {
+        setIsSubmitting(false);
+    }
+  };
+
+  const handleDelete = async (type: 'question' | 'comment', id: string) => {
+    if (!dashboardView || userRole !== 'admin') return;
+    if (!question) return;
+    
+    const firestore = getFirestore();
+    const storage = getStorage();
+
+    if (type === 'question') {
+        if (!window.confirm('Are you sure you want to delete this entire question and all its comments?')) return;
+        try {
+            onDeleteQuestion(id);
+        } catch (error) {
+            console.error('Error deleting question:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
+        }
+    } else {
+        const commentToDelete = comments.find(c => c.id === id);
+        if (!commentToDelete) return;
+
+        try {
+            if (commentToDelete.fileUrl) {
+                try { await deleteObject(ref(storage, commentToDelete.fileUrl)); } catch (e) { console.error(e); }
+            }
+            await deleteDoc(doc(firestore, 'questions', question.id, 'comments', id));
+
+            const replies = comments.filter(c => c.parentId === id);
+            if (replies.length > 0) {
+                const batch = writeBatch(firestore);
+                for (const reply of replies) {
+                    if (reply.fileUrl) {
+                        try { await deleteObject(ref(storage, reply.fileUrl)); } catch (e) { console.error(e); }
+                    }
+                    batch.delete(doc(firestore, 'questions', question.id, 'comments', reply.id));
+                }
+                await batch.commit();
+            }
+            if (!commentToDelete.parentId) {
+                await updateDoc(doc(firestore, 'questions', question.id), { commentCount: increment(-1) });
+            }
+            toast({ title: 'Comment Deleted', description: 'The comment has been removed.' });
+        } catch (error) {
+            console.error('Error deleting comment:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the comment.' });
+        }
+    }
+  };
+
+  const handleToggleComments = async (disabled: boolean) => {
+    if (!dashboardView || userRole !== 'admin' || !question) return;
+
+    const firestore = getFirestore();
+    const questionRef = doc(firestore, 'questions', question.id);
+    try {
+        await updateDoc(questionRef, { commentsDisabled: disabled });
+        onUpdateQuestion({ ...question, commentsDisabled: disabled });
+        toast({
+            title: `Comments ${disabled ? 'Disabled' : 'Enabled'}`,
+            description: `Comments have been ${disabled ? 'turned off' : 'turned on'} for this question.`,
+        });
+    } catch (error) {
+        console.error('Error toggling comments:', error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
+    }
+  };
+
+  useEffect(() => {
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const firestore = getFirestore(app);
+
+    const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
+      setUser(currentUser);
+      if (currentUser) {
+        const userDocRef = doc(firestore, "users", currentUser.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+          setUserRole(userDoc.data().role as Role);
+        }
+      } else {
+        setUserRole(null);
+      }
+    });
+    return () => unsubscribeAuth();
+  }, []);
+
+  useEffect(() => {
+    if (!question) {
+        setComments([]);
+        return;
+    };
+
+    setLoadingComments(true);
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    const q = query(
+        collection(firestore, 'questions', question.id, 'comments'), 
+        orderBy('createdAt', 'asc')
+    );
+
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+        const fetchedComments = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Comment));
+        setComments(fetchedComments);
+        setLoadingComments(false);
+    }, (error) => {
+        console.error("Error fetching comments:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not load comments.' });
+        setLoadingComments(false);
+    });
+
+    return () => unsubscribe();
+  }, [question, toast]);
+
   if (!question) {
     return (
       <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
@@ -490,7 +468,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     <div className="flex flex-col h-full">
         <CardHeader className="flex-shrink-0">
             <div className="flex justify-between items-start">
-                <h2 className="text-lg font-bold">{question.title}</h2>
+                <h2 className="text-xl font-bold">{question.title}</h2>
                 {dashboardView && userRole === 'admin' && (
                     <div className="flex items-center space-x-2">
                         <Label htmlFor="disable-comments" className="text-xs text-muted-foreground">Disable Comments</Label>
@@ -536,8 +514,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
 
                  <Separator />
 
-                 <div className="space-y-4">
-                    <h3 className="font-semibold text-sm">{question.commentCount || 0} Answers</h3>
+                 <div className="space-y-6">
+                    <h3 className="font-semibold text-md">{question.commentCount || 0} Answers</h3>
                     {loadingComments ? (
                         <p className="text-muted-foreground text-sm">Loading comments...</p>
                     ) : topLevelComments.length > 0 ? (
@@ -548,7 +526,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                  </div>
             </CardContent>
         </ScrollArea>
-        <CardContent className="flex-shrink-0 border-t pt-4">
+        <CardContent className="flex-shrink-0 border-t pt-6 bg-muted/50">
              {question.commentsDisabled ? (
                 <div className="text-center text-sm text-muted-foreground p-4 bg-muted rounded-lg">
                     Comments have been disabled for this question.
@@ -565,7 +543,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
                             disabled={isSubmitting || !user}
-                            className="text-sm"
+                            className="text-sm bg-background"
                         />
                         {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
                         <div className="flex justify-between items-center">

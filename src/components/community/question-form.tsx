@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Loader2, Send, Paperclip } from 'lucide-react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import Link from 'next/link';
 import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
@@ -30,10 +30,10 @@ const firebaseConfig = {
 };
 
 const formSchema = z.object({
-  title: z.string().min(5, 'Title must be at least 5 characters.'),
-  content: z.string().min(10, 'Question must be at least 10 characters.'),
-  subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences']),
-  grade: z.enum(['10', '11', '12']),
+  title: z.string().min(5, 'Title must be at least 5 characters long.').max(150, 'Title cannot exceed 150 characters.'),
+  content: z.string().min(10, 'Question must be at least 10 characters long.'),
+  subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences'], { required_error: "Please select a subject."}),
+  grade: z.enum(['10', '11', '12'], { required_error: "Please select a grade."}),
   file: z.instanceof(File).optional(),
 });
 
@@ -128,6 +128,7 @@ export function QuestionForm() {
         <DialogContent className="sm:max-w-[625px]">
             <DialogHeader>
                 <DialogTitle>Ask the Community</DialogTitle>
+                <DialogDescription>Share your question with fellow learners and educators.</DialogDescription>
             </DialogHeader>
              {!user ? (
                  <Alert>
@@ -145,8 +146,8 @@ export function QuestionForm() {
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                         <FormField name="title" control={form.control} render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Title</FormLabel>
-                                <FormControl><Input placeholder="What's your question about?" {...field} /></FormControl>
+                                <FormLabel>Question Title</FormLabel>
+                                <FormControl><Input placeholder="e.g., How to solve for x in this equation?" {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
@@ -182,14 +183,14 @@ export function QuestionForm() {
                         </div>
                         <FormField name="content" control={form.control} render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Question</FormLabel>
-                                <FormControl><Textarea placeholder="Describe your question in detail..." rows={5} {...field} /></FormControl>
+                                <FormLabel>Your Question</FormLabel>
+                                <FormControl><Textarea placeholder="Provide as much detail as possible..." rows={5} {...field} /></FormControl>
                                 <FormMessage />
                             </FormItem>
                         )} />
                         <FormField name="file" control={form.control} render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Attach a file (optional)</FormLabel>
+                                <FormLabel>Attach an image or PDF (optional)</FormLabel>
                                 <div className="flex items-center gap-2">
                                     <Button type="button" variant="outline" asChild>
                                         <label htmlFor="file-upload" className="cursor-pointer">
@@ -216,7 +217,7 @@ export function QuestionForm() {
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <div className="flex justify-end">
+                        <div className="flex justify-end pt-2">
                             <Button type="submit" disabled={isSubmitting}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 {isSubmitting ? 'Posting...' : 'Post Question'}

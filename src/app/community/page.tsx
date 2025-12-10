@@ -45,7 +45,11 @@ export default function CommunityPage() {
             } as Question));
             setQuestions(fetchedQuestions);
             if (fetchedQuestions.length > 0 && !selectedQuestion) {
-              setSelectedQuestion(fetchedQuestions.find(q => q.title.toLowerCase().includes(searchTerm.toLowerCase())) || fetchedQuestions[0]);
+              const matchingQuestion = fetchedQuestions.find(q => 
+                  q.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                  q.content.toLowerCase().includes(searchTerm.toLowerCase())
+              );
+              setSelectedQuestion(matchingQuestion || fetchedQuestions[0]);
             }
             setLoading(false);
         }, (error) => {
@@ -54,7 +58,7 @@ export default function CommunityPage() {
         });
 
         return () => unsubscribe();
-    }, [selectedQuestion, searchTerm]);
+    }, []);
 
     const filteredQuestions = useMemo(() => {
         return questions.filter(question => 
@@ -80,7 +84,6 @@ export default function CommunityPage() {
     const handleQuestionDelete = async (deletedQuestionId: string) => {
         const firestore = getFirestore();
         try {
-            // Delete all comments within the question's subcollection
             const commentsRef = collection(firestore, 'questions', deletedQuestionId, 'comments');
             const commentsSnapshot = await getDocs(commentsRef);
             const batch = writeBatch(firestore);
@@ -89,42 +92,36 @@ export default function CommunityPage() {
             });
             await batch.commit();
             
-            // Delete the question itself
             await deleteDoc(doc(firestore, 'questions', deletedQuestionId));
 
-            setQuestions(prev => prev.filter(q => q.id !== deletedQuestionId));
+            const newQuestions = questions.filter(q => q.id !== deletedQuestionId);
+            setQuestions(newQuestions);
+            
             if (selectedQuestion?.id === deletedQuestionId) {
-                const currentIndex = questions.findIndex(q => q.id === deletedQuestionId);
-                if (questions.length > 1) {
-                    const newIndex = currentIndex > 0 ? currentIndex - 1 : 0;
-                    setSelectedQuestion(questions[newIndex] || null);
-                } else {
-                    setSelectedQuestion(null);
-                }
+                setSelectedQuestion(newQuestions.length > 0 ? newQuestions[0] : null);
             }
         } catch (error) {
             console.error("Error deleting question and its comments: ", error);
         }
     };
 
-
     return (
         <div className="bg-background text-foreground">
             <PublicHeader />
-            <main className="max-w-7xl mx-auto px-6 py-12 pt-24 space-y-6">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 pt-24 space-y-8">
                  <div className="text-left">
-                    <h1 className="text-3xl font-bold tracking-tight">Community Forum</h1>
-                    <p className="text-lg text-muted-foreground mt-1">Ask questions, share knowledge, and connect with fellow students.</p>
+                    <h1 className="text-4xl font-bold tracking-tight">Community Forum</h1>
+                    <p className="text-lg text-muted-foreground mt-2">Ask questions, share knowledge, and connect with fellow learners.</p>
                 </div>
-                <Card className="flex flex-col md:flex-row h-full min-h-[calc(100vh-16rem)]">
-                    <div className="w-full md:w-1/3 border-b md:border-r md:border-b-0">
+                <Card className="flex flex-col md:flex-row h-full min-h-[calc(100vh-20rem)] shadow-lg">
+                    <div className="w-full md:w-[350px] border-b md:border-r md:border-b-0 flex flex-col">
                         <div className="p-4 border-b">
                             <QuestionForm />
                             <div className="relative mt-4">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                 <Input 
                                     placeholder="Search questions..."
-                                    className="pl-8"
+                                    className="pl-9"
                                     value={searchTerm}
                                     onChange={(e) => {
                                         setSearchTerm(e.target.value);
@@ -140,14 +137,14 @@ export default function CommunityPage() {
                             loading={loading}
                         />
                         {totalPages > 1 && (
-                            <div className="p-2 border-t flex justify-center items-center gap-2">
+                            <div className="p-2 border-t flex justify-center items-center gap-2 mt-auto">
                                 <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
                                 <span className="text-xs text-muted-foreground">Page {currentPage} of {totalPages}</span>
                                 <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
                             </div>
                         )}
                     </div>
-                    <div className="w-full md:w-2/3">
+                    <div className="flex-1">
                         <CommentSection 
                             question={selectedQuestion} 
                             onUpdateQuestion={handleQuestionUpdate}
