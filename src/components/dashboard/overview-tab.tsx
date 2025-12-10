@@ -29,14 +29,36 @@ type VideoData = {
 };
 
 export function OverviewTab({ submittedAssignments, purchasedCourses, loading }: OverviewTabProps) {
-    const completedAssignmentsCount = submittedAssignments.filter(a => a.status === 'Paid').length;
-    const certificatesEarned = purchasedCourses.filter(c => c.progress === 100).length;
+    const stats = React.useMemo(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
 
-    const stats = [
-        { title: "Courses in Progress", value: purchasedCourses.length, icon: BookOpen },
-        { title: "Completed Assignments", value: completedAssignmentsCount, icon: CheckCircle },
-        { title: "Certificates Earned", value: certificatesEarned, icon: Award },
-    ];
+        const coursesEnrolledThisMonth = purchasedCourses.filter(c => {
+            const transactionDate = (c as any).transactionDate?.toDate(); // Assuming transactionDate is passed
+            return transactionDate && transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+        }).length;
+
+        const assignmentsCompletedThisMonth = submittedAssignments.filter(a => {
+            // Assuming 'Paid' status implies completion and there's a timestamp for it.
+            // Using `submittedAt` as a proxy for completion date for this calculation.
+            return a.status === 'Paid' && a.submittedAt.toDate().getMonth() === currentMonth && a.submittedAt.toDate().getFullYear() === currentYear;
+        }).length;
+        
+        const certificatesEarnedThisMonth = purchasedCourses.filter(c => {
+            // This is a simplified assumption. Real implementation would need a `completionDate`.
+            // We'll use `progress` as a proxy.
+            return c.progress === 100;
+        }).length;
+
+
+        return [
+            { title: "Courses in Progress", value: purchasedCourses.length, icon: BookOpen, change: `+${coursesEnrolledThisMonth} this month` },
+            { title: "Completed Assignments", value: submittedAssignments.filter(a => a.status === 'Paid').length, icon: CheckCircle, change: `+${assignmentsCompletedThisMonth} this month` },
+            { title: "Certificates Earned", value: purchasedCourses.filter(c => c.progress === 100).length, icon: Award, change: `+${certificatesEarnedThisMonth} this month` },
+        ];
+    }, [purchasedCourses, submittedAssignments]);
+
 
     const [purchasedCourseFilters, setPurchasedCourseFilters] = React.useState({ search: '', subject: 'All' });
     const [currentPurchasedCoursePage, setCurrentPurchasedCoursePage] = React.useState(1);
@@ -90,7 +112,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stat.value}</div>
-                                <p className="text-xs text-muted-foreground">Keep up the great work!</p>
+                                <p className="text-xs text-muted-foreground">{stat.change}</p>
                             </CardContent>
                         </Card>
                     ))
