@@ -1,7 +1,7 @@
 
 'use client';
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { type User } from 'firebase/auth';
 import {
   type Course,
@@ -46,14 +46,41 @@ export function InstructorOverviewTab({
   onReviewAssignment
 }: InstructorOverviewTabProps) {
 
-  const totalRevenue = transactions.filter(t => t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale').reduce((sum, t) => sum + t.amount, 0);
+  const stats = useMemo(() => {
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-  const stats = [
-    { title: "Enrolled Students", value: students.length, icon: Users, change: `+${students.filter(s => new Date(s.joined).getMonth() === new Date().getMonth()).length} this month` },
-    { title: "Active Courses", value: courses.filter(c => c.status === 'Published').length, icon: Book, change: "" },
-    { title: "Total Revenue", value: `R ${totalRevenue.toFixed(2)}`, icon: DollarSign, change: "+21%" },
-    { title: "Pending Assignments", value: assignments.filter(a => a.status === 'Pending Review').length, icon: Clock, change: `${assignments.filter(a => a.status === 'Pending Review' && new Date(a.submittedAt.toDate()).toDateString() === new Date().toDateString()).length} new today` },
-  ];
+    const currentMonthRevenue = transactions
+        .filter(t => (t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale') && t.createdAt.toDate().getMonth() === currentMonth && t.createdAt.toDate().getFullYear() === currentYear)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    const lastMonthRevenue = transactions
+        .filter(t => (t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale') && t.createdAt.toDate().getMonth() === lastMonth && t.createdAt.toDate().getFullYear() === lastMonthYear)
+        .reduce((sum, t) => sum + t.amount, 0);
+
+    let revenueChange = '0%';
+    if (lastMonthRevenue > 0) {
+        const change = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+        revenueChange = `${change >= 0 ? '+' : ''}${change.toFixed(0)}%`;
+    } else if (currentMonthRevenue > 0) {
+        revenueChange = '+100%';
+    }
+
+    const newStudentsThisMonth = students.filter(s => new Date(s.joined).getMonth() === currentMonth && new Date(s.joined).getFullYear() === currentYear).length;
+    const pendingAssignments = assignments.filter(a => a.status === 'Pending Review').length;
+    const newAssignmentsToday = assignments.filter(a => a.status === 'Pending Review' && new Date(a.submittedAt.toDate()).toDateString() === now.toDateString()).length;
+    const totalRevenue = transactions.filter(t => t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale').reduce((sum, t) => sum + t.amount, 0);
+
+    return [
+      { title: "Enrolled Students", value: students.length, icon: Users, change: `+${newStudentsThisMonth} this month` },
+      { title: "Active Courses", value: courses.filter(c => c.status === 'Published').length, icon: Book, change: "" },
+      { title: "Total Revenue", value: `R ${totalRevenue.toFixed(2)}`, icon: DollarSign, change: `${revenueChange} this month` },
+      { title: "Pending Assignments", value: pendingAssignments, icon: Clock, change: `${newAssignmentsToday} new today` },
+    ];
+  }, [students, courses, transactions, assignments]);
 
   const recentPendingAssignments = assignments.filter(a => a.status === 'Pending Review').slice(0, 5);
 
