@@ -7,7 +7,7 @@ import { type Question } from '@/lib/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { MessageSquare, ThumbsUp, FileText } from 'lucide-react';
+import { MessageSquare, ThumbsUp, FileText, Paperclip } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Badge } from '../ui/badge';
@@ -57,6 +57,7 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion, lo
                     <Badge variant="outline" className="text-xs">Grade {q.grade}</Badge>
                 </div>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
+                  {q.fileUrl && <span className="flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5" /> Media</span>}
                   <span className="flex items-center gap-1.5"><ThumbsUp className="h-3.5 w-3.5" /> {q.likeCount || 0}</span>
                   <span className="flex items-center gap-1.5"><MessageSquare className="h-3.5 w-3.5" /> {q.commentCount || 0}</span>
                 </div>
