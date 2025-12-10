@@ -162,7 +162,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
   
-    const handleUpdateComment = async () => {
+  const handleUpdateComment = async () => {
     if (!editingComment || !question || user?.uid !== comments.find(c => c.id === editingComment.id)?.studentId) return;
 
     setIsSubmitting(true);
@@ -303,7 +303,10 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
   };
 
   const handleToggleComments = async (disabled: boolean) => {
-    if (userRole !== 'admin' || !question) return;
+    if (userRole !== 'admin' || !question) {
+        toast({ variant: 'destructive', title: 'Permission Denied', description: 'Only admins can perform this action.' });
+        return;
+    }
 
     const firestore = getFirestore();
     const questionRef = doc(firestore, 'questions', question.id);
@@ -319,19 +322,19 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
     }
   };
-
+  
   const getReplies = (commentId: string): Comment[] => {
     return comments
       .filter((comment) => comment.parentId === commentId)
       .sort((a, b) => (a.createdAt?.toDate()?.getTime() || 0) - (b.createdAt?.toDate()?.getTime() || 0));
   };
-  
+
   const toggleCollapse = (commentId: string) => {
     setCollapsedComments(prev => 
       prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
     );
   };
-
+  
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
     if (!item.fileUrl) return null;
     return (
@@ -360,7 +363,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       </div>
     );
   };
-  
+
   const renderComment = (comment: Comment, isReply: boolean = false) => {
     const replies = isReply ? [] : getReplies(comment.id);
     const isEditing = editingComment?.id === comment.id;
@@ -560,18 +563,18 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
                             placeholder="Add your answer..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            disabled={isSubmitting}
+                            disabled={isSubmitting || !user}
                             className="text-sm"
                         />
                         {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
                         <div className="flex justify-between items-center">
                             <Button type="button" variant="ghost" size="icon" asChild>
-                            <label htmlFor="comment-file" className={cn("cursor-pointer")}>
+                            <label htmlFor="comment-file" className={cn("cursor-pointer", !user && 'cursor-not-allowed opacity-50')}>
                                 <Paperclip className="h-4 w-4"/>
                             </label>
                             </Button>
-                            <Input id="comment-file" type="file" className="hidden" onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
-                            <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile)}>
+                            <Input id="comment-file" type="file" className="hidden" onChange={e => setNewCommentFile(e.target.files?.[0] || null)} disabled={!user} />
+                            <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile) || !user}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 <Send className="mr-2 h-4 w-4" />
                                 Post Answer
