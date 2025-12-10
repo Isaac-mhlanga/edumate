@@ -76,11 +76,7 @@ function PaymentForm() {
     const onSuccess = (reference: any) => {
         console.log(reference);
         toast({ title: 'Payment Successful!', description: 'Your transaction has been received and is being processed.' });
-        if (paymentType === 'ai-tutor') {
-            router.push('/ai-tutor?payment=success');
-        } else {
-            router.push('/dashboard?tab=assignments');
-        }
+        router.push('/dashboard?tab=assignments');
     };
 
     const onClose = () => {
@@ -109,8 +105,8 @@ function PaymentForm() {
         )
     }
 
-    const backLink = paymentType === 'ai-tutor' ? '/ai-tutor' : '/dashboard?tab=assignments';
-    const icon = paymentType === 'ai-tutor' ? <Wand2 className="mr-2"/> : <CreditCard className="mr-2" />;
+    const backLink = '/dashboard?tab=assignments';
+    const icon = <CreditCard className="mr-2" />;
 
     return (
         <div className="min-h-screen bg-muted/40 p-4 sm:p-6 lg:p-8 flex items-center justify-center">
