@@ -61,16 +61,46 @@ export function AdminOverviewTab({
     const totalActivityPages = Math.ceil(recentActivity.length / activitiesPerPage);
     const paginatedActivities = recentActivity.slice((currentActivityPage - 1) * activitiesPerPage, currentActivityPage * activitiesPerPage);
 
-    const totalRevenue = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
-    const activeSubscriptions = subscriptions.filter(s => s.status === 'Active').length;
-    const activeCourses = courses.filter(c => c.status === 'Published').length;
+    const stats = React.useMemo(() => {
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
 
-    const stats = [
-        { title: "Total Revenue", value: `R ${totalRevenue.toFixed(2)}`, icon: DollarSign, change: "+15% this month" },
-        { title: "Total Users", value: users.length, icon: Users, change: "+5 new users" },
-        { title: "Active Subscriptions", value: activeSubscriptions, icon: CreditCard, change: "+2 this month" },
-        { title: "Active Courses", value: activeCourses, icon: Book, change: "+2 this month" },
-    ];
+        const currentMonthRevenue = transactions
+            .filter(t => t.createdAt.toDate().getMonth() === currentMonth && t.createdAt.toDate().getFullYear() === currentYear && t.amount > 0)
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        const lastMonthRevenue = transactions
+            .filter(t => t.createdAt.toDate().getMonth() === lastMonth && t.createdAt.toDate().getFullYear() === lastMonthYear && t.amount > 0)
+            .reduce((sum, t) => sum + t.amount, 0);
+
+        let revenueChange = '0%';
+        if (lastMonthRevenue > 0) {
+            const change = ((currentMonthRevenue - lastMonthRevenue) / lastMonthRevenue) * 100;
+            revenueChange = `${change >= 0 ? '+' : ''}${change.toFixed(0)}%`;
+        } else if (currentMonthRevenue > 0) {
+            revenueChange = '+100%';
+        }
+        
+        const newUsersThisMonth = users.filter(u => u.originalJoinedDate.getMonth() === currentMonth && u.originalJoinedDate.getFullYear() === currentYear).length;
+
+        const newSubscriptionsThisMonth = transactions.filter(t => t.itemType === 'subscription' && t.createdAt.toDate().getMonth() === currentMonth && t.createdAt.toDate().getFullYear() === currentYear).length;
+        
+        const newCoursesThisMonth = courses.filter(c => c.createdAt.toDate().getMonth() === currentMonth && c.createdAt.toDate().getFullYear() === currentYear).length;
+
+        const totalRevenue = transactions.filter(t => t.amount > 0).reduce((sum, t) => sum + t.amount, 0);
+        const activeSubscriptions = subscriptions.filter(s => s.status === 'Active').length;
+        const activeCourses = courses.filter(c => c.status === 'Published').length;
+
+        return [
+            { title: "Total Revenue", value: `R ${totalRevenue.toFixed(2)}`, icon: DollarSign, change: `${revenueChange} this month` },
+            { title: "Total Users", value: users.length, icon: Users, change: `+${newUsersThisMonth} new users` },
+            { title: "Active Subscriptions", value: activeSubscriptions, icon: CreditCard, change: `+${newSubscriptionsThisMonth} this month` },
+            { title: "Active Courses", value: activeCourses, icon: Book, change: `+${newCoursesThisMonth} new this month` },
+        ];
+    }, [transactions, users, subscriptions, courses]);
 
     return (
         <div className="space-y-8">
@@ -249,7 +279,3 @@ export function AdminOverviewTab({
         </div>
     );
 }
-
-    
-
-    
