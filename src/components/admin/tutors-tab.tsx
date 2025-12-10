@@ -106,7 +106,7 @@ export function AdminTutorsTab({ tutors, onTutorApproval, onViewProfile }: Admin
             </Card>
 
             <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
-                <DialogContent className="w-full max-w-full h-[95vh] flex flex-col">
+                <DialogContent className="w-full max-w-5xl h-[95vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle>Qualification Document</DialogTitle>
                         <DialogDescription>Review the document provided by the tutor.</DialogDescription>
