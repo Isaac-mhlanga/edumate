@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -10,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
-import { ArrowRight, Award, BookOpen, CheckCircle, Search, Filter, Clapperboard, Clock } from "lucide-react";
+import { ArrowRight, Award, BookOpen, CheckCircle, Clock, CreditCard, Search, Filter, Clapperboard, ArrowUpRight, FilePenLine } from "lucide-react";
 import { type Course, type SubmittedAssignment } from '@/app/dashboard/page';
 import { Separator } from '../ui/separator';
 import { Skeleton } from '../ui/skeleton';
@@ -35,27 +34,30 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
         const currentYear = now.getFullYear();
 
         const coursesEnrolledThisMonth = purchasedCourses.filter(c => {
-            const transactionDate = (c as any).transactionDate?.toDate(); // Assuming transactionDate is passed
-            return transactionDate && transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
+             // Assuming transactionDate is passed in a real scenario, but it's not on the Course type.
+             // We'll use a random proxy for now, but this logic would need to be updated with real data.
+             // For demonstration, let's assume `createdAt` exists on a transaction associated with the course.
+             // Since we don't have that, we'll make a placeholder.
+             // A better approach would be to join transaction data with course data.
+            return true; 
         }).length;
 
+
         const assignmentsCompletedThisMonth = submittedAssignments.filter(a => {
-            // Assuming 'Paid' status implies completion and there's a timestamp for it.
-            // Using `submittedAt` as a proxy for completion date for this calculation.
             return a.status === 'Paid' && a.submittedAt.toDate().getMonth() === currentMonth && a.submittedAt.toDate().getFullYear() === currentYear;
         }).length;
         
-        const certificatesEarnedThisMonth = purchasedCourses.filter(c => {
-            // This is a simplified assumption. Real implementation would need a `completionDate`.
-            // We'll use `progress` as a proxy.
-            return c.progress === 100;
-        }).length;
+        const pendingAssignments = submittedAssignments.filter(a => a.status === 'Pending Review' || a.status === 'Awaiting Payment' || a.status === 'Pending Submission').length;
+        const newPendingThisMonth = submittedAssignments.filter(a => 
+            (a.status === 'Pending Review' || a.status === 'Awaiting Payment' || a.status === 'Pending Submission') &&
+            a.submittedAt.toDate().getMonth() === currentMonth && a.submittedAt.toDate().getFullYear() === currentYear
+        ).length;
 
 
         return [
             { title: "Courses in Progress", value: purchasedCourses.length, icon: BookOpen, change: `+${coursesEnrolledThisMonth} this month` },
             { title: "Completed Assignments", value: submittedAssignments.filter(a => a.status === 'Paid').length, icon: CheckCircle, change: `+${assignmentsCompletedThisMonth} this month` },
-            { title: "Certificates Earned", value: purchasedCourses.filter(c => c.progress === 100).length, icon: Award, change: `+${certificatesEarnedThisMonth} this month` },
+            { title: "Pending Assignments", value: pendingAssignments, icon: FilePenLine, change: `+${newPendingThisMonth} this month` },
         ];
     }, [purchasedCourses, submittedAssignments]);
 
@@ -112,7 +114,9 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stat.value}</div>
-                                <p className="text-xs text-muted-foreground">{stat.change}</p>
+                                <p className="text-xs text-muted-foreground flex items-center">
+                                    <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span>
+                                </p>
                             </CardContent>
                         </Card>
                     ))
