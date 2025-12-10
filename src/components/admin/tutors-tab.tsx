@@ -106,12 +106,12 @@ export function AdminTutorsTab({ tutors, onTutorApproval, onViewProfile }: Admin
             </Card>
 
             <Dialog open={isViewerOpen} onOpenChange={setIsViewerOpen}>
-                <DialogContent className="max-w-4xl h-[95vh]">
+                <DialogContent className="w-full max-w-full h-[95vh] flex flex-col">
                     <DialogHeader>
                         <DialogTitle>Qualification Document</DialogTitle>
                         <DialogDescription>Review the document provided by the tutor.</DialogDescription>
                     </DialogHeader>
-                    <div className="h-full w-full border rounded-md overflow-hidden">
+                    <div className="h-full w-full border rounded-md overflow-hidden flex-1">
                         {isImage ? (
                             <div className="relative w-full h-full">
                                 <Image src={selectedDocumentUrl!} alt="Tutor Qualification" layout="fill" objectFit="contain" />
