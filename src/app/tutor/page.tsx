@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight, Book, GraduationCap } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight, Book, GraduationCap, ArrowUpRight } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -31,10 +31,12 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadio
 type Booking = {
     id: string;
     studentName: string;
+    studentId: string;
     date: string;
     time: string;
     subject: string;
     status: 'Confirmed' | 'Completed' | 'Pending Confirmation';
+    createdAt: Timestamp;
 };
 
 type Mode = "Online" | "In-person";
@@ -283,16 +285,44 @@ function TutorPage() {
     };
 
     const overviewStats = useMemo(() => {
-        const totalStudents = new Set(bookings.map(b => b.studentName)).size;
-        const upcomingBookings = bookings.filter(b => b.status === 'Confirmed').length;
-        const monthlyEarnings = bookings.filter(b => b.status === 'Completed').length * (profile?.hourlyRate || 0);
+        const now = new Date();
+        const currentMonth = now.getMonth();
+        const currentYear = now.getFullYear();
+        const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+        const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+
+        const newStudentsThisMonth = new Set(bookings
+            .filter(b => b.createdAt && b.createdAt.toDate().getMonth() === currentMonth && b.createdAt.toDate().getFullYear() === currentYear)
+            .map(b => b.studentId)).size;
+
+        const bookingsThisMonth = bookings.filter(b => {
+            const bookingDate = new Date(b.date);
+            return bookingDate.getMonth() === currentMonth && bookingDate.getFullYear() === currentYear;
+        }).length;
+
+        const currentMonthEarnings = bookings
+            .filter(b => b.status === 'Completed' && new Date(b.date).getMonth() === currentMonth && new Date(b.date).getFullYear() === currentYear)
+            .length * (profile?.hourlyRate || 0);
+            
+        const lastMonthEarnings = bookings
+            .filter(b => b.status === 'Completed' && new Date(b.date).getMonth() === lastMonth && new Date(b.date).getFullYear() === lastMonthYear)
+            .length * (profile?.hourlyRate || 0);
+
+        let earningsChange = '0%';
+        if (lastMonthEarnings > 0) {
+            const change = ((currentMonthEarnings - lastMonthEarnings) / lastMonthEarnings) * 100;
+            earningsChange = `${change.toFixed(0)}%`;
+        } else if (currentMonthEarnings > 0) {
+            earningsChange = '+100%';
+        }
+
         const unreadMessages = messageThreads.filter(t => !t.isReadByTutor).length;
 
         return [
-            { title: "Total Students", value: totalStudents, icon: Users },
-            { title: "Upcoming Bookings", value: upcomingBookings, icon: Calendar },
-            { title: "Monthly Earnings", value: `R ${monthlyEarnings.toFixed(2)}`, icon: DollarSign },
-            { title: "Unread Messages", value: unreadMessages, icon: MessageSquare },
+            { title: "New Students", value: newStudentsThisMonth, icon: Users, change: `this month` },
+            { title: "Bookings", value: bookingsThisMonth, icon: Calendar, change: `this month` },
+            { title: "Earnings", value: `R ${currentMonthEarnings.toFixed(2)}`, icon: DollarSign, change: `${earningsChange} this month` },
+            { title: "Unread Messages", value: unreadMessages, icon: MessageSquare, change: "" },
         ];
     }, [bookings, profile?.hourlyRate, messageThreads]);
     
@@ -382,6 +412,16 @@ function TutorPage() {
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{stat.value}</div>
+                                    {stat.change && (
+                                        <p className="text-xs text-muted-foreground flex items-center">
+                                            {stat.title === 'Earnings' && stat.change.includes('-') ? null : (
+                                                 <span className="text-green-600 mr-1 flex items-center">
+                                                    <ArrowUpRight className="h-4 w-4"/> 
+                                                </span>
+                                            )}
+                                            {stat.change}
+                                        </p>
+                                    )}
                                 </CardContent>
                             </Card>
                         ))}
