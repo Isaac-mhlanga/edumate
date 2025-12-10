@@ -328,7 +328,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       .filter((comment) => comment.parentId === commentId)
       .sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
   };
-
+  
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
     if (!item.fileUrl) return null;
     return (
@@ -581,3 +581,5 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     </div>
   );
 }
+
+    
