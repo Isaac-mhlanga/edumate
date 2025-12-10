@@ -103,6 +103,10 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
   }, [question, toast]);
 
   const handlePostComment = async (content: string, parentId: string | null, file: File | null) => {
+    if (!user) {
+        toast({ variant: 'destructive', title: 'Not Logged In', description: 'You must be logged in to post a comment.' });
+        return;
+    }
     if (!question || (!content.trim() && !file)) return;
     
     setIsSubmitting(true);
@@ -160,7 +164,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
   };
   
     const handleUpdateComment = async () => {
-    if (!editingComment || !question) return;
+    if (!editingComment || !question || user?.uid !== comments.find(c => c.id === editingComment.id)?.studentId) return;
 
     setIsSubmitting(true);
     const firestore = getFirestore();
@@ -323,7 +327,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     );
   };
   
-  const getReplies = (commentId: string): Comment[] => {
+   const getReplies = (commentId: string): Comment[] => {
     return comments
       .filter((comment) => comment.parentId === commentId)
       .sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
@@ -582,4 +586,3 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
   );
 }
 
-    
