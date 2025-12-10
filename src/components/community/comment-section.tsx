@@ -323,6 +323,12 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     );
   };
   
+  const getReplies = (commentId: string): Comment[] => {
+    return comments
+      .filter((comment) => comment.parentId === commentId)
+      .sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
+  };
+
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
     if (!item.fileUrl) return null;
     return (
