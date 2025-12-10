@@ -30,7 +30,7 @@ type VideoData = {
 
 export function OverviewTab({ submittedAssignments, purchasedCourses, loading }: OverviewTabProps) {
     const completedAssignmentsCount = submittedAssignments.filter(a => a.status === 'Paid').length;
-    const certificatesEarned = 1; 
+    const certificatesEarned = purchasedCourses.filter(c => c.progress === 100).length;
 
     const stats = [
         { title: "Courses in Progress", value: purchasedCourses.length, icon: BookOpen },
@@ -251,5 +251,3 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
         </div>
     );
 }
-
-    
