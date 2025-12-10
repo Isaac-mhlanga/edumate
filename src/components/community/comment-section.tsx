@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -236,7 +235,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     }
   };
   
-    const handleDelete = async (type: 'question' | 'comment', id: string) => {
+  const handleDelete = async (type: 'question' | 'comment', id: string) => {
     if (userRole !== 'admin') {
       toast({ variant: 'destructive', title: 'Permission Denied', description: 'You are not authorized to perform this action.' });
       return;
@@ -320,19 +319,19 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
         toast({ variant: 'destructive', title: 'Error', description: 'Could not update the comment status.' });
     }
   };
+
+  const getReplies = (commentId: string): Comment[] => {
+    return comments
+      .filter((comment) => comment.parentId === commentId)
+      .sort((a, b) => (a.createdAt?.toDate()?.getTime() || 0) - (b.createdAt?.toDate()?.getTime() || 0));
+  };
   
   const toggleCollapse = (commentId: string) => {
     setCollapsedComments(prev => 
       prev.includes(commentId) ? prev.filter(id => id !== commentId) : [...prev, commentId]
     );
   };
-  
-   const getReplies = (commentId: string): Comment[] => {
-    return comments
-      .filter((comment) => comment.parentId === commentId)
-      .sort((a, b) => a.createdAt.toDate().getTime() - b.createdAt.toDate().getTime());
-  };
-  
+
   const renderAttachment = (item: { fileUrl?: string | null, fileType?: 'image' | 'pdf' | undefined }) => {
     if (!item.fileUrl) return null;
     return (
@@ -361,7 +360,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
       </div>
     );
   };
-
+  
   const renderComment = (comment: Comment, isReply: boolean = false) => {
     const replies = isReply ? [] : getReplies(comment.id);
     const isEditing = editingComment?.id === comment.id;
@@ -585,4 +584,3 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion }:
     </div>
   );
 }
-
