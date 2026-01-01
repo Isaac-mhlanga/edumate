@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, Bot, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -83,29 +83,15 @@ type UserDoc = {
 
 const Globe = () => {
     return (
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 md:w-[40rem] md:h-[40rem] z-0">
-            <div className="relative w-full h-full globe">
-                <div className="absolute inset-0 rounded-full border-2 border-primary/10"></div>
-                <div className="absolute inset-0 rounded-full border border-primary/10 animate-pulse globe-glow opacity-50"></div>
-
-                {/* Vertical Lines */}
-                {[...Array(12)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute top-0 left-1/2 w-px h-full bg-primary/20"
-                        style={{ transform: `rotateY(${i * 30}deg)` }}
-                    />
-                ))}
-
-                {/* Horizontal Lines */}
-                {[...Array(5)].map((_, i) => (
-                    <div
-                        key={i}
-                        className="absolute left-0 top-1/2 h-px w-full bg-primary/20"
-                        style={{ transform: `rotateX(${i * 36 - 90}deg) scale(${Math.sin((i * 36) * Math.PI / 180)})` }}
-                    />
-                ))}
-            </div>
+        <div className="absolute inset-0 z-0 overflow-hidden bg-blue-950/80">
+            <Image
+                src="https://storage.googleapis.com/monite-0323.appspot.com/prompt-gallery/1722889212170_globe.jpg"
+                alt="Futuristic Globe"
+                layout="fill"
+                objectFit="cover"
+                className="opacity-30"
+            />
+             <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
         </div>
     );
 };
@@ -113,10 +99,8 @@ const Globe = () => {
 
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
-    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-background">
-      <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10"></div>
-      <Globe />
-      
+    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-background h-[80vh] md:h-auto flex items-center justify-center">
+        <Globe />
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -223,9 +207,9 @@ export default function Home() {
 
   const features = [
     {
-      icon: <Bot className="w-8 h-8 text-primary" />,
-      title: 'AI-Powered Learning',
-      description: 'Adaptive AI tutors that personalize your learning path and clarify complex topics 24/7.'
+      icon: <GraduationCap className="w-8 h-8 text-primary" />,
+      title: 'Expert-Led Video Lessons',
+      description: 'Access a comprehensive library of video lessons for Grades 10-12 in Maths & Sciences.'
     },
     {
       icon: <Users className="w-8 h-8 text-primary" />,
@@ -782,4 +766,5 @@ export default function Home() {
     </div>
   );
 }
+
 
