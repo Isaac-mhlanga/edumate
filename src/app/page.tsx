@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User, Atom, FlaskConical, Sigma } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -81,17 +81,25 @@ type UserDoc = {
     role: 'student' | 'instructor' | 'admin' | 'tutor';
 };
 
-const Globe = () => {
+const HeroBackground = () => {
+    const icons = [
+        { icon: Atom, size: 'w-16 h-16', position: 'top-1/4 left-1/4', animation: 'float-1' },
+        { icon: Dna, size: 'w-20 h-20', position: 'top-1/2 right-1/4', animation: 'float-2' },
+        { icon: Sigma, size: 'w-12 h-12', position: 'bottom-1/4 left-1/3', animation: 'float-3' },
+        { icon: FlaskConical, size: 'w-24 h-24', position: 'top-1/3 right-1/2', animation: 'float-1' },
+        { icon: FunctionSquare, size: 'w-16 h-16', position: 'bottom-1/3 right-1/3', animation: 'float-2' },
+        { icon: Atom, size: 'w-12 h-12', position: 'bottom-1/2 left-1/2', animation: 'float-3' },
+    ];
+
     return (
-        <div className="absolute inset-0 z-0 overflow-hidden bg-blue-950/80">
-            <Image
-                src="https://storage.googleapis.com/monite-0323.appspot.com/prompt-gallery/1722889212170_globe.jpg"
-                alt="Futuristic Globe"
-                layout="fill"
-                objectFit="cover"
-                className="opacity-30"
-            />
-             <div className="absolute inset-0 bg-gradient-to-t from-background to-transparent"></div>
+        <div className="absolute inset-0 z-0 overflow-hidden bg-background">
+            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
+            {icons.map((item, index) => (
+                <item.icon 
+                    key={index}
+                    className={`absolute text-primary/10 ${item.size} ${item.position} ${item.animation}`}
+                />
+            ))}
         </div>
     );
 };
@@ -99,8 +107,8 @@ const Globe = () => {
 
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
-    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-background h-[80vh] md:h-auto flex items-center justify-center">
-        <Globe />
+    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-transparent h-[80vh] md:h-auto flex items-center justify-center">
+        <HeroBackground />
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -766,5 +774,6 @@ export default function Home() {
     </div>
   );
 }
+
 
 
