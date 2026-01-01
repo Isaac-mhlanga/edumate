@@ -81,23 +81,42 @@ type UserDoc = {
     role: 'student' | 'instructor' | 'admin' | 'tutor';
 };
 
+const Globe = () => {
+    return (
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-96 h-96 md:w-[40rem] md:h-[40rem] z-0">
+            <div className="relative w-full h-full globe">
+                <div className="absolute inset-0 rounded-full border-2 border-primary/10"></div>
+                <div className="absolute inset-0 rounded-full border border-primary/10 animate-pulse globe-glow opacity-50"></div>
+
+                {/* Vertical Lines */}
+                {[...Array(12)].map((_, i) => (
+                    <div
+                        key={i}
+                        className="absolute top-0 left-1/2 w-px h-full bg-primary/20"
+                        style={{ transform: `rotateY(${i * 30}deg)` }}
+                    />
+                ))}
+
+                {/* Horizontal Lines */}
+                {[...Array(5)].map((_, i) => (
+                    <div
+                        key={i}
+                        className="absolute left-0 top-1/2 h-px w-full bg-primary/20"
+                        style={{ transform: `rotateX(${i * 36 - 90}deg) scale(${Math.sin((i * 36) * Math.PI / 180)})` }}
+                    />
+                ))}
+            </div>
+        </div>
+    );
+};
+
 
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
     <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-background">
       <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10"></div>
-      <div className="absolute inset-0 z-0">
-          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/5 rounded-full blur-3xl animate-pulse" />
-          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-pulse delay-1000" />
-          <div className="absolute top-0 left-0 w-full h-full">
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[60rem] h-[60rem] border-2 border-primary/10 rounded-full" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[45rem] h-[45rem] border border-primary/10 rounded-full" />
-            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[30rem] h-[30rem] border border-primary/10 rounded-full" />
-          </div>
-          <div className="absolute -top-1/4 -right-1/4 w-[50rem] h-96 -rotate-45 bg-primary/10 rounded-full blur-3xl" />
-          <div className="absolute -bottom-1/4 -left-1/4 w-[50rem] h-96 -rotate-45 bg-primary/10 rounded-full blur-3xl" />
-      </div>
-
+      <Globe />
+      
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -763,3 +782,4 @@ export default function Home() {
     </div>
   );
 }
+

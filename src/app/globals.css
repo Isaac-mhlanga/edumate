@@ -129,4 +129,16 @@
   .fc .fc-list-event:hover td {
       background-color: hsl(var(--muted)) !important;
   }
+  .globe {
+    animation: rotate 20s linear infinite;
+    transform-style: preserve-3d;
+  }
+  @keyframes rotate {
+    0% { transform: rotateY(0deg) rotateX(10deg); }
+    100% { transform: rotateY(360deg) rotateX(10deg); }
+  }
+  .globe-glow {
+    box-shadow: 0 0 10px hsl(var(--primary)), 0 0 20px hsl(var(--primary)), 0 0 30px hsl(var(--primary) / 0.5);
+  }
 }
+
