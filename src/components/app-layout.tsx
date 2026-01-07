@@ -92,7 +92,7 @@ type MenuItem = {
 const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Course Catalog', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
-  { href: '/tutors', label: 'Find Tutors', icon: Users, basePath: '/tutors' },
+  { href: '/dashboard/tutors', label: 'Find Tutors', icon: Users, basePath: '/dashboard/tutors' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
