@@ -198,7 +198,6 @@ export const subscriptionPlans = [
         features: [
             'Access to free introductory courses',
             'Community forum access',
-            'Limited AI Tutor queries'
         ],
     },
     {
@@ -208,7 +207,6 @@ export const subscriptionPlans = [
         features: [
             'Access to all courses for ONE subject',
             'Community forum access',
-            'Standard AI Tutor access',
         ],
     },
     {
@@ -217,8 +215,8 @@ export const subscriptionPlans = [
         price: 180,
         features: [
             'Access to ALL courses for ALL subjects',
+            '2 private tutor sessions per month',
             'Priority support',
-            'Unlimited AI Tutor queries',
         ],
     },
     {
@@ -227,8 +225,8 @@ export const subscriptionPlans = [
         price: 250,
         features: [
             'Access to ALL courses & subjects',
+            '4 private tutor sessions per month',
             'Priority support & exclusive webinars',
-            'Unlimited AI Tutor & premium features',
             '10% off all assignment solutions',
         ],
     }
@@ -573,3 +571,6 @@ export const adminData = {
         { id: 3, type: 'Payout', description: 'Payout of R 2500.00 to Dr. Evelyn Reed was completed.', timestamp: '3 days ago' },
     ]
 };
+
+
+    
