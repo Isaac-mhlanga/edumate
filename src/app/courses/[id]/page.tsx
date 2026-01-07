@@ -33,7 +33,7 @@ type Course = {
     instructorId: string;
     title: string;
     description: string;
-    subject: 'Maths' | 'Physical Sciences';
+    subject: 'Maths' | 'Physical Sciences' | 'Life Sciences';
     grade: '10' | '11' | '12';
     thumbnail: string;
     pricing: {
@@ -304,3 +304,5 @@ export default function PublicCoursePage() {
         </div>
     );
 }
+
+    

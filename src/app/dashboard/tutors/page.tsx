@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -16,7 +17,7 @@ import React, { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
 import { Icons } from "@/components/icons";
 import Link from "next/link";
-import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import withAuth from "@/components/with-auth";
@@ -230,7 +231,7 @@ function TutorsDashboardPage() {
             <Card>
                 <CardHeader>
                     <div className="flex flex-col md:flex-row items-start md:items-end gap-4">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow">
                             <div className="space-y-2">
                                 <Label>Subject</Label>
                                 <Select value={subject} onValueChange={setSubject}>
@@ -239,6 +240,7 @@ function TutorsDashboardPage() {
                                         <SelectItem value="All">All Subjects</SelectItem>
                                         <SelectItem value="Maths">Maths</SelectItem>
                                         <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                        <SelectItem value="Life Sciences">Life Sciences</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>
@@ -402,3 +404,5 @@ function TutorsDashboardPage() {
 }
 
 export default withAuth(TutorsDashboardPage, ['student']);
+
+    

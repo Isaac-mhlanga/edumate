@@ -422,3 +422,5 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         </Dialog>
     );
 }
+
+    
