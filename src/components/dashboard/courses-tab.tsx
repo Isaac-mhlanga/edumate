@@ -49,7 +49,7 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
 
     const totalCoursePages = Math.ceil(filteredCourses.length / coursesPerPage);
     const paginatedCourses = filteredCourses.slice((currentCoursePage - 1) * coursesPerPage, currentCoursePage * coursesPerPage);
-    const allSubjects = ['All', 'Maths', 'Physical Sciences'];
+    const allSubjects = ['All', 'Maths', 'Physical Sciences', 'Life Sciences'];
     const allGrades = ['All', '10', '11', '12'];
     
     const formatDuration = (videos: VideoData[] = []) => {
@@ -130,7 +130,7 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
                         {paginatedCourses.map((course) => (
                             <Card key={course.id} className="overflow-hidden group flex flex-col">
                                 <CardHeader className="p-0">
-                                    <Link href={`/courses/${course.id}?from=dashboard`}>
+                                    <Link href={`/dashboard/courses/${course.id}?from=dashboard`}>
                                         <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="aspect-video object-cover transition-transform group-hover:scale-105" data-ai-hint="online course" />
                                     </Link>
                                 </CardHeader>
