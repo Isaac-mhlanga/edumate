@@ -9,10 +9,6 @@ export const faqData = [
         answer: "We primarily focus on Grade 10, 11, and 12 curricula for Mathematics, Physical Sciences, and Life Sciences. Our course catalog is always expanding, so be sure to check back for new subjects!"
     },
     {
-        question: "How does the AI tutor work?",
-        answer: "Our AI tutor provides personalized, 24/7 assistance. You can upload past papers or worksheets, and the AI will break down questions, provide step-by-step solutions, and simplify complex concepts, helping you learn at your own pace."
-    },
-    {
         question: "Can I get help from a real person?",
         answer: "Absolutely! Alongside our AI tutor, you can book one-on-one sessions with our expert human tutors. They provide personalized guidance and support tailored to your specific learning needs."
     },
@@ -207,6 +203,7 @@ export const subscriptionPlans = [
         features: [
             'Access to all courses for ONE subject',
             'Community forum access',
+            'Downloadable course notes',
         ],
     },
     {
@@ -217,6 +214,8 @@ export const subscriptionPlans = [
             'Access to ALL courses for ALL subjects',
             '2 private tutor sessions per month',
             'Priority support',
+            '5 assignment solution credits per month',
+            'Exclusive access to live revision workshops'
         ],
     },
     {
@@ -227,7 +226,9 @@ export const subscriptionPlans = [
             'Access to ALL courses & subjects',
             '4 private tutor sessions per month',
             'Priority support & exclusive webinars',
-            '10% off all assignment solutions',
+            'Unlimited assignment solution credits',
+            'Personalized study plan',
+            'On-demand exam prep sessions'
         ],
     }
 ];
