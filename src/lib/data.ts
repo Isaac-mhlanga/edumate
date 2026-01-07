@@ -225,8 +225,7 @@ export const subscriptionPlans = [
         features: [
             'Access to ALL courses & subjects',
             '4 private tutor sessions per month',
-            'Priority support & exclusive webinars',
-            'Unlimited assignment solution credits',
+            '15 assignment solution credits per month',
             'Personalized study plan',
             'On-demand exam prep sessions'
         ],
