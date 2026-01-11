@@ -130,16 +130,16 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
           </div>
           <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
             <p className="text-sm text-muted-foreground mb-4">Follow us on</p>
-            <div className="flex justify-center gap-6">
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <FaFacebook className="h-6 w-6" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <FaTiktok className="h-6 w-6" />
-              </Link>
-              <Link href="#" className="text-muted-foreground hover:text-primary transition-colors">
-                <FaYoutube className="h-6 w-6" />
-              </Link>
+            <div className="flex justify-center gap-4">
+                <Link href="#" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                    <FaFacebook className="h-5 w-5" />
+                </Link>
+                <Link href="#" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                    <FaTiktok className="h-5 w-5" />
+                </Link>
+                <Link href="#" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                    <FaYoutube className="h-5 w-5" />
+                </Link>
             </div>
           </div>
         </div>
