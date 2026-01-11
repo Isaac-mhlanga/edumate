@@ -34,7 +34,7 @@ const formSchema = z.object({
   content: z.string().min(10, 'Question must be at least 10 characters long.'),
   subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences'], { required_error: "Please select a subject."}),
   grade: z.enum(['10', '11', '12'], { required_error: "Please select a grade."}),
-  file: z.instanceof(File).optional(),
+  file: z.any().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -79,12 +79,13 @@ export function QuestionForm() {
       const storage = getStorage(app);
       let fileUrl: string | undefined;
       let fileType: 'image' | 'pdf' | undefined;
-
-      if (data.file) {
-        const fileRef = ref(storage, `questions/${user.uid}/${Date.now()}-${data.file.name}`);
-        await uploadBytes(fileRef, data.file);
+      
+      const file = data.file?.[0];
+      if (file) {
+        const fileRef = ref(storage, `questions/${user.uid}/${Date.now()}-${file.name}`);
+        await uploadBytes(fileRef, file);
         fileUrl = await getDownloadURL(fileRef);
-        fileType = data.file.type.startsWith('image/') ? 'image' : 'pdf';
+        fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
       }
 
       await addDoc(collection(firestore, 'questions'), {
@@ -208,9 +209,8 @@ export function QuestionForm() {
                                         accept="image/*,.pdf"
                                         {...fileRef}
                                         onChange={e => {
-                                            const file = e.target.files?.[0];
-                                            field.onChange(file);
-                                            setFileName(file ? file.name : null);
+                                            field.onChange(e.target.files);
+                                            setFileName(e.target.files?.[0]?.name || null);
                                         }}
                                     />
                                 </FormControl>

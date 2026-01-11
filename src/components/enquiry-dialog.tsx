@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Paperclip } from 'lucide-react';
+import { Loader2, Paperclip } from 'lucide-react';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
@@ -30,7 +30,7 @@ const formSchema = z.object({
   email: z.string().email('Please enter a valid email address.'),
   phone: z.string().optional(),
   enquiry: z.string().min(10, 'Enquiry must be at least 10 characters long.'),
-  file: z.instanceof(File).optional(),
+  file: z.any().optional(),
 });
 
 type EnquiryFormValues = z.infer<typeof formSchema>;
@@ -58,14 +58,17 @@ export function EnquiryDialog({ isOpen, setIsOpen }: EnquiryDialogProps) {
 
     try {
       let fileUrl: string | null = null;
-      if (data.file) {
-        const fileRef = ref(storage, `enquiries/${Date.now()}-${data.file.name}`);
-        await uploadBytes(fileRef, data.file);
+      const file = data.file?.[0];
+      if (file) {
+        const fileRef = ref(storage, `enquiries/${Date.now()}-${file.name}`);
+        await uploadBytes(fileRef, file);
         fileUrl = await getDownloadURL(fileRef);
       }
+      
+      const { file: _, ...enquiryData } = data;
 
       await addDoc(collection(firestore, 'enquiries'), {
-        ...data,
+        ...enquiryData,
         fileUrl,
         status: 'New',
         assigneeId: null,
@@ -154,9 +157,8 @@ export function EnquiryDialog({ isOpen, setIsOpen }: EnquiryDialogProps) {
                             className="hidden"
                             {...fileRef}
                             onChange={e => {
-                                const file = e.target.files?.[0];
-                                field.onChange(file);
-                                setFileName(file ? file.name : null);
+                                field.onChange(e.target.files);
+                                setFileName(e.target.files?.[0]?.name || null);
                             }}
                         />
                     </FormControl>
