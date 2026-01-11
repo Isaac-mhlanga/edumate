@@ -119,7 +119,7 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students.
+            Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             <Button onClick={onExploreClick} size="lg" className="w-full sm:w-auto">
@@ -395,7 +395,7 @@ export default function Home() {
                                 {[
                                     "Computer Science 1: Fundamentals",
                                     "Computer Science 2: Data Structures",
-                                    "Computer Science 3: Algorithms",
+                                    "Computer Science 3: Algorithms & Data Structures",
                                 ].map((item, index) => (
                                     <div key={index} className="flex items-center gap-3">
                                         <CheckCircle className="w-5 h-5 text-primary" />
