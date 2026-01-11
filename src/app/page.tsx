@@ -115,14 +115,14 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Unlock Your Academic Potential
+            Elevate Your Learning, Master Your Future
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             From high school exams to university assignments, Edumate provides the tools you need to succeed. Explore video lessons, get one-on-one tutoring, and access expert help for your projects.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             <Button onClick={onExploreClick} size="lg" className="w-full sm:w-auto">
-              Explore Curriculum <ArrowRight className="ml-2" />
+              Curriculum <ArrowRight className="ml-2" />
             </Button>
             <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
               <Link href="/tutors">Find a Tutor</Link>
