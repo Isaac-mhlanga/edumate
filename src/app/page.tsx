@@ -28,6 +28,8 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
+import { CommunityPreview } from "@/components/community-preview";
+
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -84,12 +86,12 @@ type UserDoc = {
 
 const HeroBackground = () => {
     const icons = [
-        { icon: Atom, size: 'w-16 h-16', position: 'top-1/4 left-1/4', animation: 'float-1' },
-        { icon: Dna, size: 'w-20 h-20', position: 'top-1/2 right-1/4', animation: 'float-2' },
-        { icon: Sigma, size: 'w-12 h-12', position: 'bottom-1/4 left-1/3', animation: 'float-3' },
-        { icon: FlaskConical, size: 'w-24 h-24', position: 'top-1/3 right-1/2', animation: 'float-1' },
-        { icon: FunctionSquare, size: 'w-16 h-16', position: 'bottom-1/3 right-1/3', animation: 'float-2' },
-        { icon: Atom, size: 'w-12 h-12', position: 'bottom-1/2 left-1/2', animation: 'float-3' },
+        { icon: BrainCircuit, size: 'w-16 h-16', position: 'top-1/4 left-1/4', animation: 'float-1' },
+        { icon: ShieldCheck, size: 'w-20 h-20', position: 'top-1/2 right-1/4', animation: 'float-2' },
+        { icon: Files, size: 'w-12 h-12', position: 'bottom-1/4 left-1/3', animation: 'float-3' },
+        { icon: User, size: 'w-24 h-24', position: 'top-1/3 right-1/2', animation: 'float-1' },
+        { icon: GraduationCap, size: 'w-16 h-16', position: 'bottom-1/3 right-1/3', animation: 'float-2' },
+        { icon: BookOpen, size: 'w-12 h-12', position: 'bottom-1/2 left-1/2', animation: 'float-3' },
     ];
 
     return (
@@ -113,10 +115,10 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Master Maths & Science
+            Unlock Your Academic Potential
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            Ace your exams with our comprehensive video lessons, AI-powered tutors, and expert-led tutorials.
+          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            From high school exams to university assignments, Edumate provides the tools you need to succeed. Explore video lessons, get one-on-one tutoring, and access expert help for your projects.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             <Button onClick={onExploreClick} size="lg" className="w-full sm:w-auto">
@@ -228,8 +230,8 @@ export default function Home() {
     },
     {
       icon: <PenSquare className="w-8 h-8 text-primary" />,
-      title: 'Exam Preparation',
-      description: 'Access comprehensive test prep materials, past papers, and expert guidance to ace your exams.'
+      title: 'Project & Assignment Help',
+      description: 'Get expert assistance for your high school and university-level assignments and projects.'
     }
   ];
 
@@ -340,10 +342,10 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center mb-16 animate-fade-in-up">
                 <h2 className="text-3xl md:text-4xl font-bold mb-4">
-                  The Future of Learning is Here
+                  A Smarter Way to Learn
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                  Experience a revolutionary way to learn, powered by artificial intelligence and expert knowledge.
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                  We believe that every student deserves the best tools to succeed. Our platform combines cutting-edge technology with expert-led instruction to create a learning experience that is effective, engaging, and accessible to everyone.
                 </p>
               </div>
 
@@ -679,6 +681,8 @@ export default function Home() {
             </div>
           </section>
 
+          <CommunityPreview />
+          
           <section id="faq" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
