@@ -342,7 +342,8 @@ export default function Home() {
           <section id="about" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center mb-16 animate-fade-in-up">
-                <h2 className="text-3xl md:text-4xl font-bold mb-4">
+                <Badge>About Us</Badge>
+                <h2 className="text-3xl md:text-4xl font-bold my-4">
                   A Smarter Way to Learn
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -441,7 +442,8 @@ export default function Home() {
            <section id="curriculum" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our High School Curriculum</h2>
+                    <Badge>High School</Badge>
+                    <h2 className="text-3xl md:text-4xl font-bold my-4">Explore Our High School Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
@@ -522,7 +524,8 @@ export default function Home() {
           <section id="events" className="py-20 bg-muted/50">
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
-                      <h2 className="text-3xl md:text-4xl font-bold mb-4">Upcoming Events</h2>
+                      <Badge>Live Events</Badge>
+                      <h2 className="text-3xl md:text-4xl font-bold my-4">Upcoming Events</h2>
                       <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -575,7 +578,8 @@ export default function Home() {
           <section id="courses" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                  <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Courses</h2>
+                  <Badge>Our Courses</Badge>
+                  <h2 className="text-3xl md:text-4xl font-bold my-4">Featured Courses</h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
                 </div>
                  {loadingCourses ? (
@@ -690,7 +694,8 @@ export default function Home() {
           <section id="faq" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
+                    <Badge>Need Help?</Badge>
+                    <h2 className="text-3xl md:text-4xl font-bold my-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
