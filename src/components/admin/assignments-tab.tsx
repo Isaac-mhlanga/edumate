@@ -60,7 +60,7 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="gap-1 w-full md:w-auto">
                             <ListFilter className="h-3.5 w-3.5" />
-                            <span>Filter by Instructor</span>
+                            <span className="sm:whitespace-nowrap">Filter by Instructor</span>
                         </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">

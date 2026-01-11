@@ -103,7 +103,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
 
     return (
         <div className="space-y-8">
-            <section className="grid gap-6 md:grid-cols-3">
+            <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {loading ? (
                     Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)
                 ) : (
@@ -115,9 +115,9 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stat.value}</div>
-                                <p className="text-xs text-muted-foreground flex items-center">
+                                {stat.change && <p className="text-xs text-muted-foreground flex items-center">
                                     <span className="text-green-600 mr-1 flex items-center"><ArrowUpRight className="h-4 w-4"/> {stat.change}</span>
-                                </p>
+                                </p>}
                             </CardContent>
                         </Card>
                     ))
@@ -127,12 +127,12 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
             <section>
                 <h2 className="text-xl font-semibold mb-4">Continue Learning</h2>
                 {loading ? (
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <Skeleton className="h-64 rounded-xl" />
                         <Skeleton className="h-64 rounded-xl" />
                     </div>
                 ) : purchasedCourses.length > 0 ? (
-                    <div className="grid md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {purchasedCourses.slice(0, 2).map((course) => (
                             <Card key={course.id} className="flex flex-col">
                                 <CardHeader>
@@ -220,11 +220,11 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                     </CardHeader>
                     <CardContent>
                         {loading ? (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {Array.from({length:3}).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)}
                             </div>
                         ) : paginatedPurchasedCourses.length > 0 ? (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                                 {paginatedPurchasedCourses.map((course) => (
                                      <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1">
                                         <Link href={`/dashboard/courses/${course.id}?from=dashboard`} className="block">

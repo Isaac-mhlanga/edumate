@@ -89,7 +89,7 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="gap-1 w-full">
                                     <ListFilter className="h-3.5 w-3.5" />
-                                    <span>Subject</span>
+                                    <span className="sm:whitespace-nowrap">Subject</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -104,7 +104,7 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" className="gap-1 w-full">
                                     <ListFilter className="h-3.5 w-3.5" />
-                                    <span>Grade</span>
+                                    <span className="sm:whitespace-nowrap">Grade</span>
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent align="end">
@@ -120,13 +120,13 @@ export function CoursesTab({ allCourses, loadingCourses, onFreeEnrollment }: Cou
             </CardHeader>
             <CardContent>
                 {loadingCourses ? (
-                   <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {Array.from({length: 6}).map((_, i) => (
                             <Card key={i}><CardHeader><Skeleton className="h-40 w-full" /></CardHeader><CardContent className="space-y-2 pt-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /></CardContent><CardFooter><Skeleton className="h-10 w-full" /></CardFooter></Card>
                         ))}
                     </div>
                 ) : paginatedCourses.length > 0 ? (
-                    <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {paginatedCourses.map((course) => (
                             <Card key={course.id} className="overflow-hidden group flex flex-col">
                                 <CardHeader className="p-0">
