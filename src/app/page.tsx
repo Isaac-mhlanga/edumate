@@ -371,65 +371,66 @@ export default function Home() {
 
            <section id="varsity-support" className="py-20 bg-muted/50">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="grid md:grid-cols-2 gap-12 items-center">
-                        <div className="animate-fade-in-up">
-                            <Badge>Varsity & College Support</Badge>
-                            <h2 className="text-3xl md:text-4xl font-bold my-4">
-                                Excel in Your Tertiary Studies
-                            </h2>
-                            <p className="text-lg text-muted-foreground mb-6">
-                                Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students at all levels.
-                            </p>
-                            <div className="space-y-6">
-                                <div>
-                                    <h3 className="font-semibold text-primary mb-3">Undergraduate Modules</h3>
-                                    <div className="space-y-3">
-                                        {[
-                                            { icon: Files, text: "Computer Science 1, 2 & 3" },
-                                        ].map((item, index) => (
-                                            <div key={index} className="flex items-center gap-3">
-                                                <div className="bg-primary/10 text-primary p-2 rounded-full">
-                                                    <item.icon className="w-5 h-5" />
-                                                </div>
-                                                <span className="font-medium">{item.text}</span>
-                                            </div>
-                                        ))}
+                    <div className="text-center mb-16 animate-fade-in-up">
+                        <Badge>Varsity & College Support</Badge>
+                        <h2 className="text-3xl md:text-4xl font-bold my-4">
+                            Excel in Your Tertiary Studies
+                        </h2>
+                        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                            Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students at all levels.
+                        </p>
+                    </div>
+
+                    <div className="grid md:grid-cols-2 gap-8 items-start">
+                        <Card className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: '0.2s' }}>
+                            <CardHeader>
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-primary/10 text-primary p-3 rounded-full">
+                                        <Files className="w-6 h-6" />
                                     </div>
+                                    <CardTitle>Undergraduate Modules</CardTitle>
                                 </div>
-                                <div>
-                                    <h3 className="font-semibold text-primary mb-3">Honours Modules</h3>
-                                    <div className="space-y-3">
-                                        {[
-                                            { icon: ShieldCheck, text: "Information Security" },
-                                            { icon: BrainCircuit, text: "Information Security Risk Analysis" },
-                                            { icon: User, text: "Computer Forensics" },
-                                        ].map((item, index) => (
-                                            <div key={index} className="flex items-center gap-3">
-                                                <div className="bg-primary/10 text-primary p-2 rounded-full">
-                                                    <item.icon className="w-5 h-5" />
-                                                </div>
-                                                <span className="font-medium">{item.text}</span>
-                                            </div>
-                                        ))}
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <p className="text-muted-foreground">Get help with foundational concepts and challenging assignments in your early university years.</p>
+                                {[
+                                    "Computer Science 1, 2 & 3",
+                                ].map((item, index) => (
+                                    <div key={index} className="flex items-center gap-3">
+                                        <CheckCircle className="w-5 h-5 text-primary" />
+                                        <span className="font-medium">{item}</span>
                                     </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                        <Card className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: '0.4s' }}>
+                             <CardHeader>
+                                <div className="flex items-center gap-4">
+                                    <div className="bg-primary/10 text-primary p-3 rounded-full">
+                                        <ShieldCheck className="w-6 h-6" />
+                                    </div>
+                                    <CardTitle>Honours & Postgraduate</CardTitle>
                                 </div>
-                            </div>
-                             <Button size="lg" className="mt-8" onClick={() => setIsEnquiryDialogOpen(true)}>
-                                Enquire Now <ArrowRight className="ml-2" />
-                            </Button>
-                        </div>
-                        <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                            <Card className="shadow-lg transform-gpu transition-transform duration-500 hover:rotate-1 hover:scale-105">
-                                <Image 
-                                    src="https://picsum.photos/seed/coding/600/500" 
-                                    alt="University students collaborating" 
-                                    width={600} 
-                                    height={500} 
-                                    className="rounded-lg object-cover"
-                                    data-ai-hint="university students coding"
-                                />
-                            </Card>
-                        </div>
+                            </CardHeader>
+                            <CardContent className="space-y-3">
+                                <p className="text-muted-foreground">Specialized support for advanced topics, research projects, and in-depth analysis.</p>
+                                {[
+                                    "Information Security",
+                                    "Information Security Risk Analysis",
+                                    "Computer Forensics",
+                                ].map((item, index) => (
+                                    <div key={index} className="flex items-center gap-3">
+                                        <CheckCircle className="w-5 h-5 text-primary" />
+                                        <span className="font-medium">{item}</span>
+                                    </div>
+                                ))}
+                            </CardContent>
+                        </Card>
+                    </div>
+                     <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+                        <Button size="lg" onClick={() => setIsEnquiryDialogOpen(true)}>
+                            Enquire Now for Tertiary Support <ArrowRight className="ml-2" />
+                        </Button>
                     </div>
                 </div>
             </section>
