@@ -454,7 +454,7 @@ export default function Home() {
                             </CardHeader>
                             <CardContent>
                                 <Tabs defaultValue="12" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-3">
+                                    <TabsList className="grid w-full grid-cols-3 border">
                                         <TabsTrigger value="10">Grade 10</TabsTrigger>
                                         <TabsTrigger value="11">Grade 11</TabsTrigger>
                                         <TabsTrigger value="12">Grade 12</TabsTrigger>
