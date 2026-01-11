@@ -372,23 +372,43 @@ export default function Home() {
                                 Excel in Your Tertiary Studies
                             </h2>
                             <p className="text-lg text-muted-foreground mb-6">
-                                Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students in demanding fields.
+                                Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students at all levels.
                             </p>
-                            <div className="space-y-3 mb-8">
-                                {[
-                                    { icon: Files, text: "Computer Science 1, 2 & 3" },
-                                    { icon: ShieldCheck, text: "Information Security & Computer Forensics" },
-                                    { icon: BrainCircuit, text: "Advanced Information Systems & Networking" },
-                                ].map((item, index) => (
-                                    <div key={index} className="flex items-center gap-3">
-                                        <div className="bg-primary/10 text-primary p-2 rounded-full">
-                                            <item.icon className="w-5 h-5" />
-                                        </div>
-                                        <span className="font-medium">{item.text}</span>
+                            <div className="space-y-6">
+                                <div>
+                                    <h3 className="font-semibold text-primary mb-3">Undergraduate Modules</h3>
+                                    <div className="space-y-3">
+                                        {[
+                                            { icon: Files, text: "Computer Science 1, 2 & 3" },
+                                        ].map((item, index) => (
+                                            <div key={index} className="flex items-center gap-3">
+                                                <div className="bg-primary/10 text-primary p-2 rounded-full">
+                                                    <item.icon className="w-5 h-5" />
+                                                </div>
+                                                <span className="font-medium">{item.text}</span>
+                                            </div>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold text-primary mb-3">Honours Modules</h3>
+                                    <div className="space-y-3">
+                                        {[
+                                            { icon: ShieldCheck, text: "Information Security" },
+                                            { icon: BrainCircuit, text: "Information Security Risk Analysis" },
+                                            { icon: User, text: "Computer Forensics" },
+                                        ].map((item, index) => (
+                                            <div key={index} className="flex items-center gap-3">
+                                                <div className="bg-primary/10 text-primary p-2 rounded-full">
+                                                    <item.icon className="w-5 h-5" />
+                                                </div>
+                                                <span className="font-medium">{item.text}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
-                            <Button asChild size="lg">
+                             <Button asChild size="lg" className="mt-8">
                                 <Link href="/community">
                                     Ask a Question <ArrowRight className="ml-2" />
                                 </Link>
@@ -397,7 +417,7 @@ export default function Home() {
                         <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                             <Card className="shadow-lg transform-gpu transition-transform duration-500 hover:rotate-1 hover:scale-105">
                                 <Image 
-                                    src="https://picsum.photos/seed/varsity/600/500" 
+                                    src="https://picsum.photos/seed/coding/600/500" 
                                     alt="University students collaborating" 
                                     width={600} 
                                     height={500} 
