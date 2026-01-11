@@ -115,7 +115,9 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
       <div className="container mx-auto px-6 relative z-10">
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            Elevate Your Learning, Master Your Future
+            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+              Elevate Your Learning, Master Your Future
+            </span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
             From high school exams to university assignments, Edumate provides the tools you need to succeed. Explore video lessons, get one-on-one tutoring, and access expert help for your projects.
