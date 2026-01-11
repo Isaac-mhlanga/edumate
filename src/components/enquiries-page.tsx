@@ -1,8 +1,7 @@
-
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { getFirestore, collection, query, where, onSnapshot, doc, updateDoc, Unsubscribe, Timestamp } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { getFirestore, collection, query, onSnapshot, doc, updateDoc, Timestamp, orderBy } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, type User } from 'firebase/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -49,21 +48,25 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
             setUser(currentUser);
         });
         
-        const q = query(collection(firestore, 'enquiries'));
+        const q = query(collection(firestore, 'enquiries'), orderBy('createdAt', 'desc'));
         const unsubscribeEnquiries = onSnapshot(q, (querySnapshot) => {
             const fetchedEnquiries: Enquiry[] = [];
             querySnapshot.forEach((doc) => {
                 fetchedEnquiries.push({ id: doc.id, ...doc.data() } as Enquiry);
             });
-            setEnquiries(fetchedEnquiries.sort((a, b) => b.createdAt.toMillis() - a.createdAt.toMillis()));
+            setEnquiries(fetchedEnquiries);
             setLoading(false);
+        }, (error) => {
+            console.error("Error fetching enquiries:", error);
+            setLoading(false);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not load enquiries.' });
         });
 
         return () => {
             unsubscribeAuth();
             unsubscribeEnquiries();
         };
-    }, []);
+    }, [toast]);
 
     const handleViewEnquiry = (enquiry: Enquiry) => {
         setSelectedEnquiry(enquiry);
@@ -139,7 +142,7 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                                         <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
                                         <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                                         <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
-                                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                                     </TableRow>
                                 ))
                             ) : enquiries.length > 0 ? (
@@ -196,12 +199,12 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Close</Button>
                         {selectedEnquiry?.status === 'New' && (
-                            <Button onClick={() => handleAssign(selectedEnquiry)}>
+                            <Button onClick={() => handleAssign(selectedEnquiry!)}>
                                 Assign to Me
                             </Button>
                         )}
                         {selectedEnquiry?.status === 'In Progress' && selectedEnquiry.assigneeId === user?.uid && (
-                             <Button onClick={() => handleComplete(selectedEnquiry)}>
+                             <Button onClick={() => handleComplete(selectedEnquiry!)}>
                                 Mark as Complete
                             </Button>
                         )}
