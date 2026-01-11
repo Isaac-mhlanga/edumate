@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -10,7 +11,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
-import { Eye, CheckCircle, Clock, FileText, Phone } from 'lucide-react';
+import { Eye, CheckCircle, Clock, FileText, Phone, UserCheck, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -87,7 +88,9 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                 title: 'Already Assigned',
                 description: 'This enquiry has already been taken by another team member.',
             });
-            setIsDialogOpen(false);
+            // No need to close the dialog, just inform the user
+            // Refresh the selected enquiry to show the latest status
+            setSelectedEnquiry({ id: currentEnquirySnap.id, ...currentEnquirySnap.data() } as Enquiry);
             return;
         }
 
@@ -141,9 +144,9 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                     <Table>
                         <TableHeader>
                             <TableRow>
-                                <TableHead>From</TableHead>
-                                <TableHead className="hidden sm:table-cell">Received</TableHead>
-                                <TableHead>Status</TableHead>
+                                <TableHead><div className="flex items-center gap-2"><UserCheck className="h-4 w-4"/>From</div></TableHead>
+                                <TableHead className="hidden sm:table-cell"><div className="flex items-center gap-2"><Clock className="h-4 w-4"/>Received</div></TableHead>
+                                <TableHead><div className="flex items-center gap-2"><CheckCircle className="h-4 w-4"/>Status</div></TableHead>
                                 <TableHead className="hidden md:table-cell">Assigned To</TableHead>
                                 <TableHead className="text-right">Actions</TableHead>
                             </TableRow>
@@ -210,15 +213,20 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                             )}
                         </div>
                     )}
-                    <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>Close</Button>
+                    <DialogFooter className="gap-2">
+                        <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
+                            <X className="mr-2 h-4 w-4"/>
+                            Close
+                        </Button>
                         {selectedEnquiry?.status === 'New' && (
                             <Button onClick={() => handleAssign(selectedEnquiry!)}>
+                                <UserCheck className="mr-2 h-4 w-4" />
                                 Assign to Me
                             </Button>
                         )}
                         {selectedEnquiry?.status === 'In Progress' && selectedEnquiry.assigneeId === user?.uid && (
                              <Button onClick={() => handleComplete(selectedEnquiry!)}>
+                                <CheckCircle className="mr-2 h-4 w-4" />
                                 Mark as Complete
                             </Button>
                         )}
