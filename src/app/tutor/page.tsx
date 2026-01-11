@@ -27,6 +27,7 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { EnquiriesPage } from "@/components/enquiries-page";
 
 type Booking = {
     id: string;
@@ -476,6 +477,8 @@ function TutorPage() {
                     </section>
                 </div>
             )}
+            
+            {currentTab === 'enquiries' && <EnquiriesPage userRole="tutor" />}
 
             {currentTab === 'profile' && (
                 <div className="space-y-6">
