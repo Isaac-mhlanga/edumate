@@ -41,6 +41,7 @@ import {
   Send,
   Wand2,
   UserCog,
+  HelpCircle,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
@@ -103,6 +104,7 @@ const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/instructor', tab: 'overview' },
   { href: '/instructor?tab=courses', label: 'Courses', icon: GraduationCap, basePath: '/instructor', tab: 'courses' },
   { href: '/instructor?tab=quizzes', label: 'Quizzes', icon: FileQuestion, basePath: '/instructor', tab: 'quizzes' },
+  { href: '/instructor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/instructor', tab: 'enquiries' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
   { href: '/instructor?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/instructor', tab: 'calendar' },
@@ -112,6 +114,7 @@ const instructorMenuItems: MenuItem[] = [
 
 const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/admin', tab: 'overview' },
+  { href: '/admin?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/admin', tab: 'enquiries' },
   { href: '/admin?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/admin', tab: 'courses' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/admin?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/admin', tab: 'assignments' },
@@ -124,6 +127,7 @@ const adminMenuItems: MenuItem[] = [
 
 const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/tutor', tab: 'overview' },
+  { href: '/tutor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/tutor', tab: 'enquiries' },
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },

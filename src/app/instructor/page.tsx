@@ -26,6 +26,7 @@ import { CalendarDialogs } from "@/components/instructor/calendar-dialogs";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { format } from "date-fns";
+import { EnquiriesPage } from "@/components/enquiries-page";
 
 
 const firebaseConfig = {
@@ -556,12 +557,6 @@ function InstructorPage() {
                 videoUrl = video.youtubeUrl.replace("watch?v=", "embed/");
             }
 
-            if (video.notesFile instanceof File) {
-                const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${video.notesFile.name}`);
-                await uploadBytes(notesRef, video.notesFile);
-                notesUrl = await getDownloadURL(notesRef);
-            }
-            
             if (videoUrl) {
                  newVideos.push({
                     id: `vid_${Date.now()}_${Math.random()}`,
@@ -829,6 +824,10 @@ function InstructorPage() {
         />
       )}
       
+      {currentTab === 'enquiries' && (
+        <EnquiriesPage userRole="instructor" />
+      )}
+
       {currentTab === 'calendar' && (
         <InstructorCalendarTab 
           events={events}
@@ -932,5 +931,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    

@@ -24,6 +24,10 @@ service cloud.firestore {
     function isAdmin() {
       return isSignedIn() && getUserRole(request.auth.uid) == 'admin';
     }
+    
+    function isTutor() {
+      return isSignedIn() && getUserRole(request.auth.uid) == 'tutor';
+    }
 
     // Rules for the 'users' collection
     match /users/{userId} {
@@ -154,6 +158,16 @@ service cloud.firestore {
          allow get, list: if isSignedIn() && (get(/databases/$(database)/documents/messages/$(threadId)).data.studentId == request.auth.uid || get(/databases/$(database)/documents/messages/$(threadId)).data.tutorId == request.auth.uid);
          allow create: if isSignedIn() && (request.resource.data.senderId == request.auth.uid);
       }
+    }
+    
+    // Rules for enquiries
+    match /enquiries/{enquiryId} {
+      // Anyone can create an enquiry
+      allow create: if true;
+      // Only Instructors, Tutors, and Admins can read enquiries
+      allow read: if isInstructor() || isTutor() || isAdmin();
+      // Only the assigned user or an admin can update the enquiry
+      allow update: if (isSignedIn() && resource.data.assigneeId == request.auth.uid) || isAdmin();
     }
   }
 }

@@ -27,6 +27,7 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
+import { EnquiryDialog } from "@/components/enquiry-dialog";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -156,6 +157,7 @@ export default function Home() {
   
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
   const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<Course | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<UpcomingEvent | null>(null);
   const [activeVideo, setActiveVideo] = useState<VideoData | undefined>(undefined);
@@ -408,10 +410,8 @@ export default function Home() {
                                     </div>
                                 </div>
                             </div>
-                             <Button asChild size="lg" className="mt-8">
-                                <Link href="/community">
-                                    Ask a Question <ArrowRight className="ml-2" />
-                                </Link>
+                             <Button size="lg" className="mt-8" onClick={() => setIsEnquiryDialogOpen(true)}>
+                                Enquire Now <ArrowRight className="ml-2" />
                             </Button>
                         </div>
                         <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -831,6 +831,8 @@ export default function Home() {
         onClose={() => setIsEventDialogOpen(false)}
         onEventSelect={handleEventClick}
       />
+
+      <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
 
       <Link href="https://wa.me/27123456789" target="_blank" rel="noopener noreferrer" className="fixed bottom-6 right-6 bg-green-500 text-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg hover:bg-green-600 transition-transform hover:scale-110">
         <FaWhatsapp className="w-7 h-7" />

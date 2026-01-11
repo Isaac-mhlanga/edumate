@@ -24,6 +24,7 @@ import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/adm
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
 import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { format, formatDistanceToNow } from "date-fns";
+import { EnquiriesPage } from "@/components/enquiries-page";
 
 
 const firebaseConfig = {
@@ -370,6 +371,7 @@ function AdminPage() {
                     recentActivity={recentActivity}
                 />
             )}
+            {currentTab === 'enquiries' && <EnquiriesPage userRole="admin" />}
             {currentTab === 'users' && <AdminUsersTab users={users} onUserAction={handleUserAction} />}
             {currentTab === 'tutors' && <AdminTutorsTab tutors={tutors} onTutorApproval={handleTutorApproval} onViewProfile={handleViewTutorProfile} />}
             {currentTab === 'courses' && (
