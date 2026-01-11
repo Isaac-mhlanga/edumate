@@ -35,8 +35,6 @@ export const PublicHeader = () => {
     { name: 'Courses', href: '/#courses', isScroll: true },
     { name: 'Tutors', href: '/tutors', isScroll: false },
     { name: 'Community', href: '/community', isScroll: false },
-    { name: 'About', href: '/#about', isScroll: true },
-    { name: 'Contact', href: '/#contact', isScroll: true },
   ];
 
   return (
