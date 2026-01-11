@@ -28,6 +28,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
+import { event } from '@/components/google-analytics';
 
 
 const firebaseConfig = {
@@ -122,11 +123,14 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
             Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-            <Button onClick={onExploreClick} size="lg" className="w-full sm:w-auto">
+            <Button onClick={() => {
+                onExploreClick();
+                event({ action: 'click_curriculum', category: 'homepage', label: 'Hero Section Button' });
+            }} size="lg" className="w-full sm:w-auto">
               Curriculum <ArrowRight className="ml-2" />
             </Button>
             <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-              <Link href="/tutors">Find a Tutor</Link>
+              <Link href="/tutors" onClick={() => event({ action: 'click_find_tutor', category: 'homepage', label: 'Hero Section Button' })}>Find a Tutor</Link>
             </Button>
           </div>
           <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
@@ -726,7 +730,7 @@ export default function Home() {
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button size="lg" asChild>
-                    <Link href="/register">
+                    <Link href="/register" onClick={() => event({ action: 'click_register', category: 'homepage', label: 'Footer CTA' })}>
                         Start Free Trial
                     </Link>
                   </Button>

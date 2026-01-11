@@ -8,6 +8,7 @@ import { AppLayout } from '@/components/app-layout';
 import React, { Suspense } from 'react';
 import 'katex/dist/katex.min.css';
 import { Skeleton } from '@/components/ui/skeleton';
+import { GoogleAnalytics } from '@/components/google-analytics';
 
 const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors', '/community'];
 
@@ -55,6 +56,7 @@ export default function RootLayout({
             disableTransitionOnChange
         >
             <Suspense fallback={<AppLoadingSkeleton />}>
+              <GoogleAnalytics />
               {showAppLayout ? <AppLayout>{children}</AppLayout> : children}
             </Suspense>
             <Toaster />
