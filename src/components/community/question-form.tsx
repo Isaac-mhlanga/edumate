@@ -63,16 +63,16 @@ export function QuestionForm() {
   });
 
   const onSubmit = async (data: FormValues) => {
-    setIsSubmitting(true);
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
-    const user = auth.currentUser;
+    const currentUser = auth.currentUser;
 
-    if (!user) {
+    if (!currentUser) {
       toast({ variant: 'destructive', title: 'Not authenticated', description: 'You must be logged in to ask a question.' });
-      setIsSubmitting(false);
       return;
     }
+    
+    setIsSubmitting(true);
 
     try {
       const firestore = getFirestore(app);
@@ -82,16 +82,16 @@ export function QuestionForm() {
       
       const file = data.file?.[0];
       if (file) {
-        const fileRef = ref(storage, `questions/${user.uid}/${Date.now()}-${file.name}`);
+        const fileRef = ref(storage, `questions/${currentUser.uid}/${Date.now()}-${file.name}`);
         await uploadBytes(fileRef, file);
         fileUrl = await getDownloadURL(fileRef);
         fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
       }
 
       await addDoc(collection(firestore, 'questions'), {
-        studentId: user.uid,
-        studentName: user.displayName || 'Anonymous',
-        studentAvatar: user.photoURL,
+        studentId: currentUser.uid,
+        studentName: currentUser.displayName || 'Anonymous',
+        studentAvatar: currentUser.photoURL,
         title: data.title,
         content: data.content,
         subject: data.subject,
