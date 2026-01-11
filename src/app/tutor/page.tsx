@@ -122,9 +122,11 @@ function TutorPage() {
                 setBookings(bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}) as Booking));
 
                 // Subscribe to Message Threads
-                const messagesQuery = query(collection(firestore, 'messages'), where('tutorId', '==', currentUser.uid), orderBy('lastMessageTimestamp', 'desc'));
+                const messagesQuery = query(collection(firestore, 'messages'), where('tutorId', '==', currentUser.uid));
                 const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
                     const threads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MessageThread));
+                    // Sort on the client side to avoid needing a composite index
+                    threads.sort((a, b) => (b.lastMessageTimestamp?.toMillis() || 0) - (a.lastMessageTimestamp?.toMillis() || 0));
                     setMessageThreads(threads);
                 });
                 
@@ -821,5 +823,3 @@ const firebaseConfig = {
 };
 
 export default withAuth(TutorPage, ['tutor']);
-
-    
