@@ -76,8 +76,22 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
 
     const handleAssign = async (enquiry: Enquiry) => {
         if (!user) return;
+
+        // Re-fetch the document to get the latest status before updating
         const firestore = getFirestore();
         const enquiryRef = doc(firestore, 'enquiries', enquiry.id);
+        const currentEnquirySnap = await getDoc(enquiryRef);
+        
+        if (currentEnquirySnap.exists() && currentEnquirySnap.data().status !== 'New') {
+            toast({
+                variant: 'destructive',
+                title: 'Already Assigned',
+                description: 'This enquiry has already been taken by another team member.',
+            });
+            setIsDialogOpen(false);
+            return;
+        }
+
         try {
             await updateDoc(enquiryRef, {
                 status: 'In Progress',
