@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User, Atom, FlaskConical, Sigma, Files, ShieldCheck, BrainCircuit, CheckCircle } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User, ShieldCheck, BrainCircuit, Files, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -28,7 +28,6 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Alert, AlertTitle, AlertDescription } from "@/components/ui/alert";
 import { useToast } from "@/hooks/use-toast";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
-import { CommunityPreview } from "@/components/community-preview";
 
 
 const firebaseConfig = {
@@ -120,7 +119,7 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
             </span>
           </h1>
           <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            From high school exams to university assignments, Edumate provides the tools you need to succeed. Explore video lessons, get one-on-one tutoring, and access expert help for your projects.
+            Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students.
           </p>
           <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
             <Button onClick={onExploreClick} size="lg" className="w-full sm:w-auto">
@@ -394,13 +393,16 @@ export default function Home() {
                             <CardContent className="space-y-3">
                                 <p className="text-muted-foreground">Get help with foundational concepts and challenging assignments in your early university years.</p>
                                 {[
-                                    "Computer Science 1, 2 & 3",
+                                    "Computer Science 1: Fundamentals",
+                                    "Computer Science 2: Data Structures",
+                                    "Computer Science 3: Algorithms",
                                 ].map((item, index) => (
                                     <div key={index} className="flex items-center gap-3">
                                         <CheckCircle className="w-5 h-5 text-primary" />
                                         <span className="font-medium">{item}</span>
                                     </div>
                                 ))}
+                                <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
                         <Card className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: '0.4s' }}>
@@ -424,6 +426,7 @@ export default function Home() {
                                         <span className="font-medium">{item}</span>
                                     </div>
                                 ))}
+                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
                     </div>
@@ -683,8 +686,6 @@ export default function Home() {
                 )}
             </div>
           </section>
-
-          <CommunityPreview />
           
           <section id="faq" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
