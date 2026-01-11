@@ -222,7 +222,7 @@ function InstructorPage() {
 
         const quizzesQuery = query(collection(firestore, 'quizzes'), where('instructorId', '==', currentUser.uid));
         const quizzesSnapshot = await getDocs(quizzesQuery);
-        const fetchedQuizzes = quizzesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quiz[];
+        const fetchedQuizzes = quizzesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Quiz));
         setQuizzes(fetchedQuizzes);
         setLoadingQuizzes(false);
         
