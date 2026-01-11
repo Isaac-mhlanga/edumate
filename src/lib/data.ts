@@ -5,20 +5,24 @@ import { type PayoutRequest as AdminPayoutRequest } from "@/app/admin/page";
 
 export const faqData = [
     {
-        question: "What subjects and grades do you cover?",
+        question: "What subjects and grades do you cover for high school?",
         answer: "We primarily focus on Grade 10, 11, and 12 curricula for Mathematics, Physical Sciences, and Life Sciences. Our course catalog is always expanding, so be sure to check back for new subjects!"
     },
     {
-        question: "Can I get help from a real person?",
-        answer: "Absolutely! Alongside our AI tutor, you can book one-on-one sessions with our expert human tutors. They provide personalized guidance and support tailored to your specific learning needs."
+        question: "Do you help with university-level assignments?",
+        answer: "Yes! We offer specialized assistance for university and college students with assignments, projects, and research in Computer Science, Information Security, and related IT modules. You can post a question in our community forum to get a quote and connect with an expert."
+    },
+    {
+        question: "How does the assignment assistance work?",
+        answer: "You can submit your assignment brief through our community forum or student dashboard. An expert will review it and provide you with a quote. Once you approve, they will provide a detailed, original solution to guide you."
+    },
+    {
+        question: "Can I get help from a real person for tutoring?",
+        answer: "Absolutely! Alongside our video lessons, you can browse our approved tutors and book one-on-one sessions. They provide personalized guidance and support tailored to your specific learning needs."
     },
     {
         question: "What is the difference between a subscription and a one-time purchase?",
         answer: "A one-time purchase gives you lifetime access to a single course. A subscription gives you access to all courses within a subject (or all subjects, depending on the plan) for the duration of your subscription."
-    },
-    {
-        question: "Do you offer a free trial?",
-        answer: "Yes, you can sign up for a free account to get a feel for our platform. While some content is free, full access to premium courses and features requires a subscription or purchase."
     }
 ];
 
@@ -213,7 +217,6 @@ export const subscriptionPlans = [
         features: [
             'Access to ALL courses for ALL subjects',
             '2 private tutor sessions per month',
-            'Priority support',
             '5 assignment solution credits per month',
             'Exclusive access to live revision workshops'
         ],

@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User, Atom, FlaskConical, Sigma } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User, Atom, FlaskConical, Sigma, Files, ShieldCheck, BrainCircuit } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -234,8 +234,8 @@ export default function Home() {
   const stats = [
     { number: '95%', label: 'Improved Scores' },
     { number: '2.3x', label: 'Faster Learning' },
-    { number: '24/7', label: 'AI Tutor Access' },
-    { number: '10k+', label: 'Happy Students' }
+    { number: '10k+', label: 'Happy Students' },
+    { number: 'Top 1%', label: 'Expert Tutors' }
   ];
   
   const curriculumIcons: { [key: string]: React.ElementType } = {
@@ -362,11 +362,58 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+           <section id="varsity-support" className="py-20 bg-muted/50">
+                <div className="max-w-7xl mx-auto px-6">
+                    <div className="grid md:grid-cols-2 gap-12 items-center">
+                        <div className="animate-fade-in-up">
+                            <Badge>Varsity & College Support</Badge>
+                            <h2 className="text-3xl md:text-4xl font-bold my-4">
+                                Excel in Your Tertiary Studies
+                            </h2>
+                            <p className="text-lg text-muted-foreground mb-6">
+                                Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students in demanding fields.
+                            </p>
+                            <div className="space-y-3 mb-8">
+                                {[
+                                    { icon: Files, text: "Computer Science 1, 2 & 3" },
+                                    { icon: ShieldCheck, text: "Information Security & Computer Forensics" },
+                                    { icon: BrainCircuit, text: "Advanced Information Systems & Networking" },
+                                ].map((item, index) => (
+                                    <div key={index} className="flex items-center gap-3">
+                                        <div className="bg-primary/10 text-primary p-2 rounded-full">
+                                            <item.icon className="w-5 h-5" />
+                                        </div>
+                                        <span className="font-medium">{item.text}</span>
+                                    </div>
+                                ))}
+                            </div>
+                            <Button asChild size="lg">
+                                <Link href="/community">
+                                    Ask a Question <ArrowRight className="ml-2" />
+                                </Link>
+                            </Button>
+                        </div>
+                        <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                            <Card className="shadow-lg transform-gpu transition-transform duration-500 hover:rotate-1 hover:scale-105">
+                                <Image 
+                                    src="https://picsum.photos/seed/varsity/600/500" 
+                                    alt="University students collaborating" 
+                                    width={600} 
+                                    height={500} 
+                                    className="rounded-lg object-cover"
+                                    data-ai-hint="university students coding"
+                                />
+                            </Card>
+                        </div>
+                    </div>
+                </div>
+            </section>
           
-           <section id="curriculum" className="py-20 bg-muted/50">
+           <section id="curriculum" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our Comprehensive Curriculum</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Explore Our High School Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
@@ -444,7 +491,7 @@ export default function Home() {
             </div>
         </section>
 
-          <section id="events" className="py-20">
+          <section id="events" className="py-20 bg-muted/50">
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <h2 className="text-3xl md:text-4xl font-bold mb-4">Upcoming Events</h2>
@@ -497,7 +544,7 @@ export default function Home() {
               </div>
           </section>
 
-          <section id="courses" className="py-20 bg-muted/50">
+          <section id="courses" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                   <h2 className="text-3xl md:text-4xl font-bold mb-4">Featured Courses</h2>
@@ -612,7 +659,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="faq" className="py-20">
+          <section id="faq" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-bold mb-4">Frequently Asked Questions</h2>
@@ -635,7 +682,7 @@ export default function Home() {
             </div>
         </section>
 
-          <section id="contact" className="py-20 bg-muted/50">
+          <section id="contact" className="py-20">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
               <Card className="p-8 sm:p-12 bg-card border-transparent shadow-2xl shadow-primary/10">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
