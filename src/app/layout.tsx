@@ -5,10 +5,28 @@ import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from '@/components/theme-provider';
 import { usePathname } from 'next/navigation';
 import { AppLayout } from '@/components/app-layout';
-import React from 'react';
+import React, { Suspense } from 'react';
 import 'katex/dist/katex.min.css';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors', '/community'];
+
+const AppLoadingSkeleton = () => (
+    <div className="space-y-8 p-4 md:p-6 lg:p-8">
+        <div className="space-y-2">
+            <Skeleton className="h-8 w-1/3" />
+            <Skeleton className="h-4 w-1/2" />
+        </div>
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+            <Skeleton className="h-28 rounded-xl" />
+        </div>
+        <Skeleton className="h-96 w-full rounded-xl" />
+    </div>
+);
+
 
 export default function RootLayout({
   children,
@@ -36,8 +54,10 @@ export default function RootLayout({
             enableSystem
             disableTransitionOnChange
         >
-          {showAppLayout ? <AppLayout>{children}</AppLayout> : children}
-          <Toaster />
+            <Suspense fallback={<AppLoadingSkeleton />}>
+              {showAppLayout ? <AppLayout>{children}</AppLayout> : children}
+            </Suspense>
+            <Toaster />
         </ThemeProvider>
       </body>
     </html>
