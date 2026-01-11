@@ -95,11 +95,6 @@ export const PublicHeader = () => {
                        <Link href="/" className="flex items-center gap-2">
                           <Icons.logo className="w-auto h-8" />
                         </Link>
-                      <SheetClose asChild>
-                        <Button variant="ghost" size="icon">
-                          <X className="h-6 w-6" />
-                        </Button>
-                      </SheetClose>
                     </div>
                     <div className="flex flex-col gap-4 py-8">
                       {navItems.map((item) => (
