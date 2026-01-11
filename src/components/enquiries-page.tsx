@@ -1,9 +1,10 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, query, onSnapshot, doc, updateDoc, Timestamp, orderBy } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
-import { getAuth, type User } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
