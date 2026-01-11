@@ -1,8 +1,7 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, onSnapshot, doc, updateDoc, Timestamp, orderBy } from 'firebase/firestore';
+import { getFirestore, collection, query, onSnapshot, doc, updateDoc, Timestamp, orderBy, getDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { formatDistanceToNow } from 'date-fns';
-import { Eye, CheckCircle, Clock, FileText } from 'lucide-react';
+import { Eye, CheckCircle, Clock, FileText, Phone } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 
@@ -200,7 +199,7 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                              <p className="whitespace-pre-wrap bg-muted p-4 rounded-md">{selectedEnquiry.enquiry}</p>
                              <div className="space-y-1">
                                 <p><span className="font-semibold">Email:</span> <a href={`mailto:${selectedEnquiry.email}`} className="text-primary hover:underline">{selectedEnquiry.email}</a></p>
-                                {selectedEnquiry.phone && <p><span className="font-semibold">Phone:</span> {selectedEnquiry.phone}</p>}
+                                {selectedEnquiry.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-muted-foreground"/> <span className="font-semibold">Phone:</span> {selectedEnquiry.phone}</p>}
                             </div>
                             {selectedEnquiry.fileUrl && (
                                 <Button asChild variant="outline">
