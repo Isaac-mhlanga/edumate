@@ -18,7 +18,6 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ArrowLeft, ArrowRight, Lightbulb, CheckCircle, XCircle, Check, Award, ChevronLeft, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { clarifyQuestion } from '@/ai/flows/clarify-question';
 import { gradeQuiz, type GradeQuizInput, type GradeQuizOutput } from '@/ai/flows/grade-quiz';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
@@ -134,8 +133,9 @@ function QuizViewerPage() {
     setIsHintLoading(true);
     setHint({ questionIndex, text: 'Thinking...' });
     try {
-      const response = await clarifyQuestion({ question: questionText });
-      setHint({ questionIndex, text: response.clarification });
+      // AI functionality removed. You can replace this with a static hint system.
+      // For now, we'll show a "feature not available" message.
+      setHint({ questionIndex, text: "The AI hint feature is currently unavailable." });
     } catch (error) {
       console.error('Error getting hint:', error);
       toast({ variant: 'destructive', title: 'Error', description: 'Could not get a hint at this time.' });
