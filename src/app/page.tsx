@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, User, ShieldCheck, BrainCircuit, Files, CheckCircle } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -84,68 +84,43 @@ type UserDoc = {
     role: 'student' | 'instructor' | 'admin' | 'tutor';
 };
 
-const HeroBackground = () => {
-    const icons = [
-        { icon: BrainCircuit, size: 'w-16 h-16', position: 'top-1/4 left-1/4', animation: 'float-1' },
-        { icon: ShieldCheck, size: 'w-20 h-20', position: 'top-1/2 right-1/4', animation: 'float-2' },
-        { icon: Files, size: 'w-12 h-12', position: 'bottom-1/4 left-1/3', animation: 'float-3' },
-        { icon: User, size: 'w-24 h-24', position: 'top-1/3 right-1/2', animation: 'float-1' },
-        { icon: GraduationCap, size: 'w-16 h-16', position: 'bottom-1/3 right-1/3', animation: 'float-2' },
-        { icon: BookOpen, size: 'w-12 h-12', position: 'bottom-1/2 left-1/2', animation: 'float-3' },
-    ];
-
-    return (
-        <div className="absolute inset-0 z-0 overflow-hidden bg-background">
-            <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent"></div>
-            {icons.map((item, index) => (
-                <item.icon 
-                    key={index}
-                    className={`absolute text-primary/10 ${item.size} ${item.position} ${item.animation}`}
-                />
-            ))}
-        </div>
-    );
-};
-
-
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
-    <section id="home" className="relative py-20 md:py-32 overflow-hidden text-center bg-transparent h-[80vh] md:h-auto flex items-center justify-center">
-        <HeroBackground />
+    <section id="home" className="relative pt-24 pb-20 md:pt-32 md:pb-24 overflow-hidden bg-background">
+      <div className="absolute inset-0 z-0 opacity-50 dark:opacity-20 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
       <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto">
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-            <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
-              Learn Smarter, Not Harder
-            </span>
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl mx-auto leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-            Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
-          </p>
-          <div className="flex flex-col sm:flex-row justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-            <Button onClick={() => {
-                onExploreClick();
-                event({ action: 'click_curriculum', category: 'homepage', label: 'Hero Section Button' });
-            }} size="lg" className="w-full sm:w-auto">
-              Curriculum <ArrowRight className="ml-2" />
-            </Button>
-            <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
-              <Link href="/tutors" onClick={() => event({ action: 'click_find_tutor', category: 'homepage', label: 'Hero Section Button' })}>Find a Tutor</Link>
-            </Button>
-          </div>
-          <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
-            <p className="text-sm text-muted-foreground mb-4">Follow us on</p>
-            <div className="flex justify-center gap-4">
-                <Link href="#" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                    <FaFacebook className="h-5 w-5" />
-                </Link>
-                <Link href="#" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                    <FaTiktok className="h-5 w-5" />
-                </Link>
-                <Link href="#" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                    <FaYoutube className="h-5 w-5" />
-                </Link>
+        <div className="grid md:grid-cols-2 gap-12 items-center">
+          <div className="text-left">
+            <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+              <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+                Learn Smarter, Not Harder
+              </span>
+            </h1>
+            <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
+            </p>
+            <div className="flex flex-col sm:flex-row items-start gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+              <Button onClick={() => {
+                  onExploreClick();
+                  event({ action: 'click_curriculum', category: 'homepage', label: 'Hero Section Button' });
+              }} size="lg" className="w-full sm:w-auto">
+                Curriculum <ArrowRight className="ml-2" />
+              </Button>
+              <Button asChild size="lg" variant="outline" className="w-full sm:w-auto">
+                <Link href="/tutors" onClick={() => event({ action: 'click_find_tutor', category: 'homepage', label: 'Hero Section Button' })}>Find a Tutor</Link>
+              </Button>
             </div>
+          </div>
+          <div className="relative hidden md:flex items-center justify-center h-full min-h-[300px]">
+              <Card className="p-4 bg-background/50 backdrop-blur-sm relative rotate-[-10deg] float-1 shadow-lg border">
+                  <BookOpen className="w-16 h-16 text-primary"/>
+              </Card>
+              <Card className="p-4 bg-background/50 backdrop-blur-sm relative rotate-[5deg] translate-x-8 translate-y-12 float-2 shadow-lg border">
+                  <GraduationCap className="w-20 h-20 text-primary"/>
+              </Card>
+              <Card className="p-4 bg-background/50 backdrop-blur-sm relative rotate-[15deg] -translate-x-4 -translate-y-16 float-3 shadow-lg border">
+                  <PenSquare className="w-12 h-12 text-primary"/>
+              </Card>
           </div>
         </div>
       </div>
@@ -345,19 +320,19 @@ export default function Home() {
 
           <section id="about" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-              <div className="text-center mb-16 animate-fade-in-up">
+              <div className="text-left mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold my-4">
                   A Smarter Way to Learn
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                <p className="text-lg text-muted-foreground max-w-3xl">
                   We believe that every student deserves the best tools to succeed. Our platform combines cutting-edge technology with expert-led instruction to create a learning experience that is effective, engaging, and accessible to everyone.
                 </p>
               </div>
 
               <div className="grid md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <Card key={index} className="text-center p-8 bg-card border-transparent shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                  <Card key={index} className="text-center p-8 bg-card border shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                     <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6">
                         {feature.icon}
                     </div>
@@ -375,18 +350,18 @@ export default function Home() {
 
            <section id="varsity-support" className="py-20 bg-muted/50">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-16 animate-fade-in-up">
+                    <div className="text-left mb-16 animate-fade-in-up">
                         <Badge>Varsity & College Support</Badge>
                         <h2 className="text-3xl md:text-4xl font-bold my-4">
                             Excel in Your Tertiary Studies
                         </h2>
-                        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                        <p className="text-lg text-muted-foreground max-w-3xl">
                             Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students at all levels.
                         </p>
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-8 items-start">
-                        <Card className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: '0.2s' }}>
+                        <Card className="animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.2s' }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -410,7 +385,7 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
-                        <Card className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: '0.4s' }}>
+                        <Card className="animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.4s' }}>
                              <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -445,17 +420,17 @@ export default function Home() {
           
            <section id="curriculum" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
+                <div className="text-left mb-12 animate-fade-in-up">
                     <Badge>High School</Badge>
                     <h2 className="text-3xl md:text-4xl font-bold my-4">Explore Our High School Curriculum</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
+                    <p className="text-lg text-muted-foreground max-w-3xl">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
                 <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
-                        <Card key={subject} className="animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={subject} className="animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                 {Icon && <Icon className="h-8 w-8 text-primary" />}
@@ -527,16 +502,16 @@ export default function Home() {
 
           <section id="events" className="py-20 bg-muted/50">
               <div className="max-w-7xl mx-auto px-6">
-                  <div className="text-center mb-12 animate-fade-in-up">
+                  <div className="text-left mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
                       <h2 className="text-3xl md:text-4xl font-bold my-4">Upcoming Events</h2>
-                      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
+                      <p className="text-lg text-muted-foreground max-w-2xl">Join our live classes and revision sessions to boost your preparation.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
-                          <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-start gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
                                       <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
@@ -581,15 +556,15 @@ export default function Home() {
 
           <section id="courses" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
+                <div className="text-left mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
                   <h2 className="text-3xl md:text-4xl font-bold my-4">Featured Courses</h2>
-                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
+                  <p className="text-lg text-muted-foreground max-w-2xl">Hand-picked courses to help you excel in your studies.</p>
                 </div>
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                        {Array.from({ length: 6 }).map((_, i) => (
-                           <Card key={i} className="bg-card shadow-lg animate-fade-in-up">
+                           <Card key={i} className="bg-card shadow-md animate-fade-in-up border">
                                <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
                                <CardContent className="pt-4 space-y-2">
                                    <Skeleton className="h-4 w-1/4"/>
@@ -610,7 +585,7 @@ export default function Home() {
                  ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {paginatedCourses.map((course, index) => (
-                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-md border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                 <Image 
                                 src={course.thumbnail}
@@ -633,7 +608,7 @@ export default function Home() {
                                 </div>
                                 <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                                    <User className="h-4 w-4" />
+                                    <Users className="h-4 w-4" />
                                     <span>{course.instructor}</span>
                                 </div>
                             </CardHeader>
@@ -697,14 +672,14 @@ export default function Home() {
           
           <section id="faq" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
+                <div className="text-left mb-12 animate-fade-in-up">
                     <Badge>Need Help?</Badge>
                     <h2 className="text-3xl md:text-4xl font-bold my-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card shadow-lg hover:shadow-primary/20 hover:-translate-y-1 transition-all duration-300">
+                         <Card key={index} className="overflow-hidden bg-card shadow-md border hover:shadow-lg transition-all duration-300">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
                                 <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}
@@ -721,7 +696,7 @@ export default function Home() {
 
           <section id="contact" className="py-20">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
-              <Card className="p-8 sm:p-12 bg-card border-transparent shadow-2xl shadow-primary/10">
+              <Card className="p-8 sm:p-12 bg-card border shadow-xl shadow-primary/5">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
