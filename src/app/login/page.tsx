@@ -71,14 +71,14 @@ export default function LoginPage() {
             const user = userCredential.user;
 
             if (!user.emailVerified) {
-                await sendEmailVerification(user); // Automatically send verification email
+                // Don't automatically resend. Just show the alert with the resend button.
                 setEmailNotVerified(true);
                 setCurrentUser(user);
                 setIsLoading(false);
                 toast({
                     variant: "destructive",
                     title: "Email Not Verified",
-                    description: "A new verification link has been sent to your inbox. Please verify your email to continue.",
+                    description: "Please check your inbox and click the verification link to continue.",
                 });
                 return;
             }
@@ -164,7 +164,7 @@ export default function LoginPage() {
                                     <Terminal className="h-4 w-4" />
                                     <AlertTitle>Email Not Verified</AlertTitle>
                                     <AlertDescription className="flex flex-col gap-2">
-                                        A new verification email has been sent. Please check your inbox.
+                                        Your email address has not been verified. Please check your inbox for the verification link.
                                         <Button type="button" variant="secondary" size="sm" onClick={handleResendVerification} disabled={isLoading}>
                                             {isLoading ? 'Sending...' : 'Resend Verification Email'}
                                         </Button>
