@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -320,12 +319,12 @@ export default function Home() {
 
           <section id="about" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-              <div className="text-left mb-16 animate-fade-in-up">
+              <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
                 <h2 className="text-3xl md:text-4xl font-bold my-4">
                   A Smarter Way to Learn
                 </h2>
-                <p className="text-lg text-muted-foreground max-w-3xl">
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                   We believe that every student deserves the best tools to succeed. Our platform combines cutting-edge technology with expert-led instruction to create a learning experience that is effective, engaging, and accessible to everyone.
                 </p>
               </div>
@@ -350,12 +349,12 @@ export default function Home() {
 
            <section id="varsity-support" className="py-20 bg-muted/50">
                 <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-left mb-16 animate-fade-in-up">
+                    <div className="text-center mb-16 animate-fade-in-up">
                         <Badge>Varsity & College Support</Badge>
                         <h2 className="text-3xl md:text-4xl font-bold my-4">
                             Excel in Your Tertiary Studies
                         </h2>
-                        <p className="text-lg text-muted-foreground max-w-3xl">
+                        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                             Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students at all levels.
                         </p>
                     </div>
@@ -373,7 +372,7 @@ export default function Home() {
                             <CardContent className="space-y-3">
                                 <p className="text-muted-foreground">Get help with foundational concepts and challenging assignments in your early university years.</p>
                                 {[
-                                    "Computer Science 1: Fundamentals",
+                                    "Computer Science 1: Fundamentals of Programming",
                                     "Computer Science 2: Data Structures & Algorithms",
                                     "Computer Science 3: Advanced Algorithms & AI",
                                 ].map((item, index) => (
@@ -397,9 +396,9 @@ export default function Home() {
                             <CardContent className="space-y-3">
                                 <p className="text-muted-foreground">Specialized support for advanced topics, research projects, and in-depth analysis.</p>
                                 {[
-                                    "Advanced Information Security",
-                                    "Information Security Risk Analysis",
-                                    "Forensic Computing & Investigations",
+                                    "Advanced Information Security & Cryptography",
+                                    "Information Security Risk Analysis & Management",
+                                    "Forensic Computing & Digital Investigations",
                                 ].map((item, index) => (
                                     <div key={index} className="flex items-center gap-3">
                                         <CheckCircle className="w-5 h-5 text-primary" />
@@ -420,10 +419,10 @@ export default function Home() {
           
            <section id="curriculum" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-left mb-12 animate-fade-in-up">
+                <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>High School</Badge>
                     <h2 className="text-3xl md:text-4xl font-bold my-4">Explore Our High School Curriculum</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
                 <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
@@ -502,10 +501,10 @@ export default function Home() {
 
           <section id="events" className="py-20 bg-muted/50">
               <div className="max-w-7xl mx-auto px-6">
-                  <div className="text-left mb-12 animate-fade-in-up">
+                  <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
                       <h2 className="text-3xl md:text-4xl font-bold my-4">Upcoming Events</h2>
-                      <p className="text-lg text-muted-foreground max-w-2xl">Join our live classes and revision sessions to boost your preparation.</p>
+                      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
@@ -556,10 +555,10 @@ export default function Home() {
 
           <section id="courses" className="py-20">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-left mb-12 animate-fade-in-up">
+                <div className="text-center mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
                   <h2 className="text-3xl md:text-4xl font-bold my-4">Featured Courses</h2>
-                  <p className="text-lg text-muted-foreground max-w-2xl">Hand-picked courses to help you excel in your studies.</p>
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
                 </div>
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -672,7 +671,7 @@ export default function Home() {
           
           <section id="faq" className="py-20 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
-                <div className="text-left mb-12 animate-fade-in-up">
+                <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Need Help?</Badge>
                     <h2 className="text-3xl md:text-4xl font-bold my-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
