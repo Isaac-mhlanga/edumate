@@ -19,7 +19,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        headline: ['Switzer', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
