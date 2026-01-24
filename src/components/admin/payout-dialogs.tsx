@@ -25,7 +25,7 @@ export function PayoutActionDialog({ isOpen, setIsOpen, selectedPayout, payoutAc
                 <AlertDialogHeader>
                     <AlertDialogTitle>Confirm Payout {payoutAction}</AlertDialogTitle>
                     <AlertDialogDescription>
-                       Are you sure you want to <strong>{payoutAction?.toLowerCase()}</strong> the payout request of <strong>R {selectedPayout?.amount ? Math.abs(selectedPayout.amount).toFixed(2) : '0.00'}</strong> for <strong>{selectedPayout?.instructor}</strong>?
+                       Are you sure you want to <strong>{payoutAction?.toLowerCase()}</strong> the payout request of <strong>R {selectedPayout?.amount ? Math.abs(selectedPayout.amount).toFixed(2) : '0.00'}</strong> for <strong>{selectedPayout?.userName}</strong>?
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -77,3 +77,5 @@ export function PayoutReceiptDialog({ isOpen, setIsOpen, selectedPayout }: Payou
         </Dialog>
     );
 }
+
+    

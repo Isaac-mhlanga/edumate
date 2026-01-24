@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -212,9 +213,9 @@ export function AdminOverviewTab({
                                 {paginatedPayoutRequests.map(payout => (
                                     <li key={payout.id} className="flex items-center justify-between gap-4">
                                         <div className="flex items-center gap-3">
-                                            <Avatar className="h-9 w-9"><AvatarFallback>{payout.instructor.charAt(0)}</AvatarFallback></Avatar>
+                                            <Avatar className="h-9 w-9"><AvatarFallback>{payout.userName.charAt(0)}</AvatarFallback></Avatar>
                                             <div>
-                                                <p className="font-medium">{payout.instructor}</p>
+                                                <p className="font-medium">{payout.userName}</p>
                                                 <p className="text-sm text-muted-foreground">Requested on {payout.date}</p>
                                             </div>
                                         </div>
@@ -246,3 +247,5 @@ export function AdminOverviewTab({
         </div>
     );
 }
+
+    
