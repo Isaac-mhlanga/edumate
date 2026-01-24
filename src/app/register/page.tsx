@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useToast } from "@/hooks/use-toast";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -47,16 +48,11 @@ type RegisterFormValues = z.infer<typeof registerFormSchema>;
 
 export default function RegisterPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = React.useState(false);
     const [auth, setAuth] = React.useState<Auth | null>(null);
     const [db, setDb] = React.useState<import('firebase/firestore').Firestore | null>(null);
-
-    React.useEffect(() => {
-        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
-        setAuth(getAuth(app));
-        setDb(getFirestore(app));
-    }, []);
 
     const form = useForm<RegisterFormValues>({
         resolver: zodResolver(registerFormSchema),
@@ -69,6 +65,19 @@ export default function RegisterPage() {
             referralCode: "",
         }
     });
+
+    React.useEffect(() => {
+        const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
+        setAuth(getAuth(app));
+        setDb(getFirestore(app));
+
+        const refCode = searchParams.get('ref');
+        if (refCode) {
+            form.setValue('referralCode', refCode);
+        }
+
+    }, [searchParams, form]);
+
 
     const handleRegister = async (data: RegisterFormValues) => {
         if (!auth || !db) {

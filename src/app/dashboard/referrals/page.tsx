@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Copy, Gift, DollarSign, Landmark, User as UserIcon, Hash, Loader2 } from 'lucide-react';
+import { Copy, Gift, DollarSign, Landmark, User as UserIcon, Hash, Loader2, Share2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const firebaseConfig = {
@@ -85,21 +85,31 @@ function ReferralsPage() {
         return () => unsubscribe();
     }, []);
 
-    const displayReferralCode = useMemo(() => {
-        if (user && user.displayName) {
-            const namePart = user.displayName.substring(0, 3).toUpperCase();
-            const uidPart = user.uid.substring(0, 6);
-            return `${namePart}${uidPart}`;
-        }
-        return user?.uid.substring(0, 9) || ''; // Fallback
+    const referralLink = useMemo(() => {
+        if (!user) return '';
+        return `https://www.edumate.co.za/register?ref=${user.uid}`;
     }, [user]);
 
     const handleCopyToClipboard = () => {
-        if (user) {
-            // Important: We copy the FULL UID to ensure the backend can find the user.
-            // The display code is just for user-friendliness.
-            navigator.clipboard.writeText(user.uid);
-            toast({ title: 'Copied!', description: 'Your referral code has been copied to the clipboard.' });
+        navigator.clipboard.writeText(referralLink);
+        toast({ title: 'Copied!', description: 'Your referral link has been copied.' });
+    };
+
+     const handleShare = async () => {
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: 'Join me on Edumate Pro!',
+                    text: 'I\'m inviting you to join Edumate Pro. Use my link to sign up!',
+                    url: referralLink,
+                });
+                toast({ title: 'Shared successfully!' });
+            } catch (error) {
+                console.error('Error sharing:', error);
+                toast({ variant: 'destructive', title: 'Could not share', description: 'There was an error trying to share.' });
+            }
+        } else {
+            handleCopyToClipboard();
         }
     };
     
@@ -150,15 +160,17 @@ function ReferralsPage() {
                 <p className="text-muted-foreground">Share your code and earn R20 for every new user who signs up!</p>
             </div>
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                <Card>
+                 <Card className="lg:col-span-1">
                     <CardHeader>
-                        <CardTitle>Your Referral Code</CardTitle>
+                        <CardTitle>Share Your Referral Link</CardTitle>
+                        <CardDescription>Share your link with friends. When they sign up, you get rewarded!</CardDescription>
                     </CardHeader>
                     <CardContent>
                         {loading ? <Skeleton className="h-10 w-full" /> : (
                             <div className="flex items-center gap-2">
-                                <Input value={displayReferralCode} readOnly className="font-mono text-center text-lg" />
+                                <Input value={referralLink} readOnly className="font-mono text-sm" />
                                 <Button size="icon" variant="outline" onClick={handleCopyToClipboard}><Copy className="h-4 w-4" /></Button>
+                                <Button size="icon" variant="outline" onClick={handleShare}><Share2 className="h-4 w-4" /></Button>
                             </div>
                         )}
                     </CardContent>
@@ -193,11 +205,11 @@ function ReferralsPage() {
                         <CardTitle>Request Payout</CardTitle>
                         <CardDescription>Withdraw your available referral earnings.</CardDescription>
                     </CardHeader>
-                    <CardContent className="flex-1 flex flex-col items-center justify-center text-center gap-2">
+                    <CardContent className="flex-1 flex flex-col items-center justify-center text-center gap-2 bg-muted/50 rounded-lg">
                          <p className="text-sm text-muted-foreground">Available to withdraw</p>
                          <p className="text-5xl font-bold text-primary">R {referralBalance.toFixed(2)}</p>
                     </CardContent>
-                    <CardFooter>
+                    <CardFooter className="mt-4">
                          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                             <DialogTrigger asChild>
                                 <Button className="w-full" size="lg" disabled={loading || referralBalance <= 0}>
@@ -248,7 +260,7 @@ function ReferralsPage() {
                             referredUsers.length > 0 ? (
                                 <ul className="space-y-2">
                                     {referredUsers.map(refUser => (
-                                        <li key={refUser.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg border">
+                                        <li key={refUser.id} className="flex justify-between items-center p-3 bg-muted rounded-lg border">
                                             <span className="font-medium text-sm">{refUser.fullName}</span>
                                             <span className="text-xs text-muted-foreground">Joined: {refUser.createdAt}</span>
                                         </li>

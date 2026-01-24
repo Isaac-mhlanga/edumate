@@ -280,7 +280,7 @@ export default function Home() {
             </div>
           </section>
           
-           <section id="refer" className="py-24 bg-violet-50">
+           <section id="refer" className="py-24 bg-violet-50 dark:bg-violet-900/10">
             <div className="max-w-4xl mx-auto px-6 animate-fade-in-up">
               <div className="text-center">
                 <div className="inline-block p-6 bg-primary/10 rounded-full text-primary mb-4">
@@ -291,33 +291,29 @@ export default function Home() {
                   Refer a Friend, Earn R20!
                 </h2>
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed max-w-2xl mx-auto">
-                  Love our platform? Share your unique referral code with
-                  friends. When they sign up, you'll be rewarded. It's our way
-                  of saying thanks!
+                   Love our platform? Share your unique referral code with friends. When they sign up, you'll be rewarded. It's our way of saying thanks!
                 </p>
+                <p className="text-sm text-muted-foreground mb-4">To be eligible for rewards, subscribe and follow us on our platforms for tips, updates, and more!</p>
+                <div className="flex justify-center space-x-4 mb-8">
+                  <Link href="#" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                    <FaFacebook className="h-5 w-5" />
+                  </Link>
+                  <Link href="#" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                    <FaTiktok className="h-5 w-5" />
+                  </Link>
+                  <Link href="#" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                    <FaYoutube className="h-5 w-5" />
+                  </Link>
+                  <Link href="#" aria-label="Instagram" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                    <FaInstagram className="h-5 w-5" />
+                  </Link>
+                </div>
                 <Button size="lg" asChild>
                   <Link href="/register">
                     Sign Up &amp; Get Your Code{" "}
                     <ArrowRight className="ml-2" />
                   </Link>
                 </Button>
-                <div className="mt-8 text-center">
-                  <p className="text-sm text-muted-foreground mb-4">To be eligible for rewards, subscribe and follow us on our platforms for tips, updates, and more!</p>
-                  <div className="flex justify-center space-x-4">
-                    <Link href="#" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                      <FaFacebook className="h-5 w-5" />
-                    </Link>
-                    <Link href="#" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                      <FaTiktok className="h-5 w-5" />
-                    </Link>
-                    <Link href="#" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                      <FaYoutube className="h-5 w-5" />
-                    </Link>
-                    <Link href="#" aria-label="Instagram" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                      <FaInstagram className="h-5 w-5" />
-                    </Link>
-                  </div>
-                </div>
               </div>
             </div>
           </section>
