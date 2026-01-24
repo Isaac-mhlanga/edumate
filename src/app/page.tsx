@@ -85,13 +85,13 @@ type UserDoc = {
 
 const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
   return (
-    <section id="home" className="relative pt-24 pb-20 md:pt-32 md:pb-24 overflow-hidden bg-background">
+    <section id="home" className="relative pt-24 pb-20 md:py-32 overflow-hidden bg-background">
       <div className="absolute inset-0 z-0 opacity-50 dark:opacity-20 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
           <div className="text-center md:text-left">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-              <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
+              <span className="text-primary">
                 Learn Smarter, Not Harder
               </span>
             </h1>
@@ -111,15 +111,14 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
             </div>
           </div>
           <div className="relative hidden md:flex items-center justify-center h-full min-h-[300px]">
-              <Card className="p-4 bg-background/50 backdrop-blur-sm relative rotate-[-10deg] float-1 shadow-lg border">
-                  <BookOpen className="w-16 h-16 text-primary"/>
-              </Card>
-              <Card className="p-4 bg-background/50 backdrop-blur-sm relative rotate-[5deg] translate-x-8 translate-y-12 float-2 shadow-lg border">
-                  <GraduationCap className="w-20 h-20 text-primary"/>
-              </Card>
-              <Card className="p-4 bg-background/50 backdrop-blur-sm relative rotate-[15deg] -translate-x-4 -translate-y-16 float-3 shadow-lg border">
-                  <PenSquare className="w-12 h-12 text-primary"/>
-              </Card>
+             <Image 
+                src="https://picsum.photos/seed/edumate-hero/800/600"
+                width={800}
+                height={600}
+                alt="Abstract representation of learning"
+                className="rounded-lg shadow-lg"
+                data-ai-hint="abstract education technology"
+              />
           </div>
         </div>
       </div>
@@ -300,7 +299,7 @@ export default function Home() {
          <div>
           <Hero onExploreClick={scrollToCurriculum} />
           
-          <section className="py-16 bg-muted/50">
+          <section className="py-24 bg-muted/50">
             <div className="max-w-7xl mx-auto px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {stats.map((stat, index) => (
@@ -317,7 +316,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="about" className="py-20">
+          <section id="about" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
               <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
@@ -331,7 +330,7 @@ export default function Home() {
 
               <div className="grid md:grid-cols-3 gap-8">
                 {features.map((feature, index) => (
-                  <Card key={index} className="text-center p-8 bg-card border shadow-md hover:shadow-lg transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                  <Card key={index} className="text-center p-8 bg-card border shadow-sm hover:shadow-lg transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                     <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6">
                         {feature.icon}
                     </div>
@@ -347,7 +346,7 @@ export default function Home() {
             </div>
           </section>
 
-           <section id="varsity-support" className="py-20 bg-muted/50">
+           <section id="varsity-support" className="py-24 bg-muted/50">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16 animate-fade-in-up">
                         <Badge>Varsity & College Support</Badge>
@@ -360,7 +359,7 @@ export default function Home() {
                     </div>
 
                     <div className="grid md:grid-cols-2 gap-8 items-start">
-                        <Card className="animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.2s' }}>
+                        <Card className="animate-fade-in-up shadow-sm border hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.2s' }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -384,7 +383,7 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
-                        <Card className="animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.4s' }}>
+                        <Card className="animate-fade-in-up shadow-sm border hover:shadow-lg transition-all duration-300" style={{ animationDelay: '0.4s' }}>
                              <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -417,7 +416,7 @@ export default function Home() {
                 </div>
             </section>
           
-           <section id="curriculum" className="py-20">
+           <section id="curriculum" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>High School</Badge>
@@ -429,7 +428,7 @@ export default function Home() {
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
-                        <Card key={subject} className="animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={subject} className="animate-fade-in-up shadow-sm border hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                 {Icon && <Icon className="h-8 w-8 text-primary" />}
@@ -499,7 +498,7 @@ export default function Home() {
             </div>
         </section>
 
-          <section id="events" className="py-20 bg-muted/50">
+          <section id="events" className="py-24 bg-muted/50">
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
@@ -510,7 +509,7 @@ export default function Home() {
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
-                          <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-md border hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-sm border hover:shadow-lg transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-start gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
                                       <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
@@ -553,7 +552,7 @@ export default function Home() {
               </div>
           </section>
 
-          <section id="courses" className="py-20">
+          <section id="courses" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
@@ -563,7 +562,7 @@ export default function Home() {
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                        {Array.from({ length: 6 }).map((_, i) => (
-                           <Card key={i} className="bg-card shadow-md animate-fade-in-up border">
+                           <Card key={i} className="bg-card shadow-sm animate-fade-in-up border">
                                <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
                                <CardContent className="pt-4 space-y-2">
                                    <Skeleton className="h-4 w-1/4"/>
@@ -584,7 +583,7 @@ export default function Home() {
                  ) : (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {paginatedCourses.map((course, index) => (
-                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-md border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card shadow-sm border hover:shadow-lg transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                 <Image 
                                 src={course.thumbnail}
@@ -669,7 +668,7 @@ export default function Home() {
             </div>
           </section>
           
-          <section id="faq" className="py-20 bg-muted/50">
+          <section id="faq" className="py-24 bg-muted/50">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Need Help?</Badge>
@@ -678,7 +677,7 @@ export default function Home() {
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card shadow-md border hover:shadow-lg transition-all duration-300">
+                         <Card key={index} className="overflow-hidden bg-card shadow-sm border hover:shadow-lg transition-all duration-300">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
                                 <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}
@@ -693,9 +692,9 @@ export default function Home() {
             </div>
         </section>
 
-          <section id="contact" className="py-20">
+          <section id="contact" className="py-24">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
-              <Card className="p-8 sm:p-12 bg-card border shadow-xl shadow-primary/5">
+              <Card className="p-8 sm:p-12 bg-card border shadow-lg shadow-primary/5">
                 <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
