@@ -303,7 +303,7 @@ export default function Home() {
                   </div>
                   <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                      <Card key={index} className="p-6 flex items-start gap-6 animate-fade-in-up transition-shadow hover:shadow-xl rounded-xl" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                      <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up transition-shadow hover:shadow-xl rounded-xl" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                         <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                             {feature.icon}
                         </div>
