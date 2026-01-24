@@ -89,16 +89,16 @@ const Hero = ({ onExploreClick }: { onExploreClick: () => void }) => {
       <div className="absolute inset-0 z-0 opacity-50 dark:opacity-20 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
       <div className="container mx-auto px-6 relative z-10">
         <div className="grid md:grid-cols-2 gap-12 items-center">
-          <div className="text-left">
+          <div className="text-center md:text-left">
             <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               <span className="bg-gradient-to-r from-primary to-blue-400 bg-clip-text text-transparent animate-shimmer bg-[length:200%_100%]">
                 Learn Smarter, Not Harder
               </span>
             </h1>
-            <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+            <p className="text-lg md:text-xl text-muted-foreground mb-12 max-w-3xl leading-relaxed animate-fade-in-up mx-auto md:mx-0" style={{ animationDelay: '0.4s' }}>
               Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
             </p>
-            <div className="flex flex-col sm:flex-row items-start gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+            <div className="flex flex-col sm:flex-row items-start sm:justify-center md:justify-start gap-4 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
               <Button onClick={() => {
                   onExploreClick();
                   event({ action: 'click_curriculum', category: 'homepage', label: 'Hero Section Button' });
@@ -308,7 +308,7 @@ export default function Home() {
                     <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
                       {stat.number}
                     </div>
-                    <div className="text-muted-foreground font-medium">
+                    <div className="text-muted-foreground font-medium text-base">
                       {stat.label}
                     </div>
                   </div>
@@ -518,7 +518,7 @@ export default function Home() {
                                   </div>
                                   <div className="flex-1">
                                       <Badge variant="secondary" className="mb-1">{event.subject} - Grade {event.grade}</Badge>
-                                      <CardTitle className="text-lg line-clamp-2">{event.title}</CardTitle>
+                                      <CardTitle className="text-xl line-clamp-2">{event.title}</CardTitle>
                                   </div>
                               </CardHeader>
                               <CardContent className="flex-grow space-y-3">
@@ -605,7 +605,7 @@ export default function Home() {
                                         <span>{course.rating || 4.8}</span>
                                     </div>
                                 </div>
-                                <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
+                                <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
                                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                                     <Users className="h-4 w-4" />
                                     <span>{course.instructor}</span>
