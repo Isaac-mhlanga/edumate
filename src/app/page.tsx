@@ -262,6 +262,23 @@ export default function Home() {
             </div>
           </section>
 
+          <section className="py-24 bg-slate-50">
+            <div className="max-w-7xl mx-auto px-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+                {stats.map((stat, index) => (
+                  <div key={index} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                    <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
+                      {stat.number}
+                    </div>
+                    <div className="text-muted-foreground font-medium text-base">
+                      {stat.label}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </section>
+
           <section id="refer" className="py-24 bg-violet-50">
             <div className="max-w-4xl mx-auto px-6 animate-fade-in-up">
               <div className="flex flex-col md:flex-row items-center gap-8">
@@ -289,23 +306,6 @@ export default function Home() {
             </div>
           </section>
           
-          <section className="py-24 bg-slate-50">
-            <div className="max-w-7xl mx-auto px-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                    <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
-                      {stat.number}
-                    </div>
-                    <div className="text-muted-foreground font-medium text-base">
-                      {stat.label}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </section>
-
           <section id="about" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
                <div className="text-center mb-16 animate-fade-in-up">
