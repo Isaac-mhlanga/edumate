@@ -39,12 +39,19 @@ export type User = { id: string; fullName: string; name:string; email: string; r
 export type Course = { id: string; instructorId: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft'; createdAt: Timestamp };
 export type PayoutRequest = {
     id: string;
-    instructor: string;
-    instructorId: string;
+    userName: string;
+    userId: string;
     amount: number;
     requestedAt: Timestamp;
     date: string; // for display
     status: 'Pending' | 'Completed' | 'Declined';
+    type: 'Instructor' | 'Referral';
+    bankDetails?: {
+        bankName: string;
+        accountHolder: string;
+        accountNumber: string;
+        branchCode: string;
+    }
 };
 export type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review'; fileUrl: string; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
@@ -260,7 +267,7 @@ function AdminPage() {
         await updateDoc(doc(firestore, 'payouts', selectedPayout.id), { status: newStatus });
         
         setPayoutRequests(payouts => payouts.map(p => p.id === selectedPayout.id ? {...p, status: newStatus } : p));
-        toast({ title: `Payout ${payoutAction}d`, description: `The payout request for ${selectedPayout.instructor} has been ${newStatus.toLowerCase()}.` });
+        toast({ title: `Payout ${payoutAction}d`, description: `The payout request for ${selectedPayout.userName} has been ${newStatus.toLowerCase()}.` });
         setIsPayoutActionDialogOpen(false);
     };
 
@@ -458,6 +465,8 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
+
+    
 
     
 

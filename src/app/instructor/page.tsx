@@ -691,10 +691,11 @@ function InstructorPage() {
 
     try {
         await addDoc(collection(firestore, 'payouts'), {
-            instructorId: user.uid,
-            instructor: user.displayName || 'Unnamed Instructor',
-            amount: -Math.abs(amount), // Store as a negative value
+            userId: user.uid,
+            userName: user.displayName,
+            amount: amount,
             status: 'Pending',
+            type: 'Instructor',
             requestedAt: serverTimestamp()
         });
         toast({ title: "Payout Requested", description: `Your request to withdraw R ${amount.toFixed(2)} has been submitted.` });
@@ -931,3 +932,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
