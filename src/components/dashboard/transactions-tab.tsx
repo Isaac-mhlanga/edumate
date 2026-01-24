@@ -112,7 +112,7 @@ export function TransactionsTab({ transactions, loadingTransactions, onRefundReq
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell">{transaction.date}</TableCell>
                                 <TableCell className={`font-semibold ${transaction.status === 'Refunded' ? 'text-red-600' : ''}`}>
-                                    {transaction.amount.toFixed(2)}
+                                    R {transaction.amount.toFixed(2)}
                                 </TableCell>
                                 <TableCell className="text-right">
                                     {transaction.status !== 'Refunded' && transaction.amount > 0 && (

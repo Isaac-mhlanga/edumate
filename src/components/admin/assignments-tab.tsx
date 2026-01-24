@@ -94,7 +94,7 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">{assignment.studentName}</TableCell>
                             <TableCell className="hidden md:table-cell">{assignment.instructor}</TableCell>
-                            <TableCell className="font-semibold">{assignment.price ? assignment.price.toFixed(2) : 'N/A'}</TableCell>
+                            <TableCell className="font-semibold">{assignment.price ? `R ${assignment.price.toFixed(2)}` : 'N/A'}</TableCell>
                             <TableCell className="hidden lg:table-cell">
                                 <Badge
                                     variant={"outline"}

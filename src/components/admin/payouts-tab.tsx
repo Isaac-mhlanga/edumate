@@ -94,7 +94,7 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
                                     {payout.type}
                                 </Badge>
                             </TableCell>
-                            <TableCell className={`font-semibold ${payout.amount < 0 ? 'text-red-600' : ''}`}>{Math.abs(payout.amount).toFixed(2)}</TableCell>
+                            <TableCell className={`font-semibold ${payout.amount < 0 ? 'text-red-600' : ''}`}>R {Math.abs(payout.amount).toFixed(2)}</TableCell>
                             <TableCell className="hidden md:table-cell">{payout.date}</TableCell>
                             <TableCell>
                                 <Badge variant={"outline"} className={
