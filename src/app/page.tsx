@@ -233,10 +233,10 @@ export default function Home() {
       <main className="flex-grow pt-16">
          <div>
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
-            <div className="absolute inset-0 -z-0 opacity-30 dark:opacity-20">
-                <div className="absolute bg-primary/10 w-96 h-96 rounded-full -top-20 -left-20 animate-float-1" />
-                <div className="absolute bg-accent/10 w-80 h-80 rounded-full bottom-0 -right-20 animate-float-2" />
-                <div className="absolute bg-primary/5 w-48 h-48 rounded-full bottom-1/4 right-1/4 animate-float-3" />
+            <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30">
+                <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-full -top-24 -left-24 animate-float-1" />
+                <div className="absolute bg-accent/10 w-96 h-96 rounded-full -bottom-20 -right-24 animate-float-2" />
+                <div className="absolute bg-primary/5 w-64 h-64 rounded-full bottom-1/3 right-1/4 animate-float-3" />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
@@ -244,7 +244,7 @@ export default function Home() {
                 <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 leading-tight animate-fade-in-up bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
                   Learn Smarter, Not Harder
                 </h1>
-                <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-fade-in-up mx-auto" style={{ animationDelay: '0.2s' }}>
+                <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                   Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
@@ -789,4 +789,3 @@ export default function Home() {
     </div>
   );
 }
-
