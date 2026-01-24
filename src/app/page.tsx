@@ -297,7 +297,7 @@ export default function Home() {
                   </div>
                   <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                      <div key={index} className="flex items-start gap-6 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                      <div key={index} className="border bg-card p-6 rounded-2xl flex items-start gap-6 animate-fade-in-up transition-shadow hover:shadow-xl" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                         <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                             {feature.icon}
                         </div>
@@ -329,7 +329,7 @@ export default function Home() {
                     </div>
 
                     <div className="max-w-3xl mx-auto space-y-8">
-                        <Card className="animate-fade-in-up border transition-all duration-300 hover:shadow-lg hover:-translate-y-1" style={{ animationDelay: '0.2s' }}>
+                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: '0.2s' }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -353,7 +353,7 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
-                        <Card className="animate-fade-in-up border transition-all duration-300 hover:shadow-lg hover:-translate-y-1" style={{ animationDelay: '0.4s' }}>
+                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: '0.4s' }}>
                              <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -390,7 +390,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>High School</Badge>
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Explore Our High School Curriculum</h2>
+                    <h2 className="text-4xl md:text-5xl font-headline font-bold my-4">Explore Our High School Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
@@ -398,7 +398,7 @@ export default function Home() {
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
-                        <Card key={subject} className="animate-fade-in-up border transition-all duration-300 hover:shadow-lg hover:-translate-y-1" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={subject} className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                 {Icon && <Icon className="h-8 w-8 text-primary" />}
@@ -479,7 +479,7 @@ export default function Home() {
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
-                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-all duration-300 hover:shadow-lg hover:-translate-y-1" style={{ animationDelay: `${0.1 * index}s` }}>
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-start gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
                                       <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
@@ -562,7 +562,7 @@ export default function Home() {
                         {allCourses.map((course, index) => (
                           <CarouselItem key={course.id} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1">
-                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
                                 <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                   <Image 
                                     src={course.thumbnail}
@@ -632,7 +632,7 @@ export default function Home() {
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card border transition-colors hover:border-primary/50">
+                         <Card key={index} className="overflow-hidden bg-card border transition-shadow duration-300 hover:shadow-xl">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
                                 <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}
