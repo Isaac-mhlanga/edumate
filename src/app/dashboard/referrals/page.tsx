@@ -1,10 +1,10 @@
 
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import withAuth from '@/components/with-auth';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
-import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, doc, getDoc, collection, addDoc, serverTimestamp, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
@@ -85,8 +85,19 @@ function ReferralsPage() {
         return () => unsubscribe();
     }, []);
 
+    const displayReferralCode = useMemo(() => {
+        if (user && user.displayName) {
+            const namePart = user.displayName.substring(0, 3).toUpperCase();
+            const uidPart = user.uid.substring(0, 6);
+            return `${namePart}${uidPart}`;
+        }
+        return user?.uid.substring(0, 9) || ''; // Fallback
+    }, [user]);
+
     const handleCopyToClipboard = () => {
         if (user) {
+            // Important: We copy the FULL UID to ensure the backend can find the user.
+            // The display code is just for user-friendliness.
             navigator.clipboard.writeText(user.uid);
             toast({ title: 'Copied!', description: 'Your referral code has been copied to the clipboard.' });
         }
@@ -146,7 +157,7 @@ function ReferralsPage() {
                     <CardContent>
                         {loading ? <Skeleton className="h-10 w-full" /> : (
                             <div className="flex items-center gap-2">
-                                <Input value={user?.uid || ''} readOnly className="font-mono" />
+                                <Input value={displayReferralCode} readOnly className="font-mono" />
                                 <Button size="icon" variant="outline" onClick={handleCopyToClipboard}><Copy className="h-4 w-4" /></Button>
                             </div>
                         )}
@@ -257,5 +268,3 @@ function ReferralsPage() {
 }
 
 export default withAuth(ReferralsPage, ['student']);
-
-    

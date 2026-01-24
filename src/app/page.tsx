@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -260,6 +261,32 @@ export default function Home() {
               </div>
             </div>
           </section>
+
+          <section id="refer" className="py-24 bg-violet-50">
+                <div className="max-w-4xl mx-auto px-6">
+                    <Card className="p-8 sm:p-12 bg-card border rounded-xl shadow-lg animate-fade-in-up">
+                         <div className="flex flex-col md:flex-row items-center gap-8">
+                             <div className="p-6 bg-primary/10 rounded-full text-primary">
+                                 <Gift className="w-16 h-16" />
+                             </div>
+                             <div className="flex-1 text-center md:text-left">
+                                <Badge>Refer &amp; Earn</Badge>
+                                <h2 className="text-3xl md:text-4xl font-headline font-bold my-3">
+                                   Refer a Friend, Earn R20!
+                                </h2>
+                                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
+                                   Love our platform? Share your unique referral code with friends. When they sign up, you'll be rewarded. It's our way of saying thanks!
+                                </p>
+                                <Button size="lg" asChild>
+                                    <Link href="/register">
+                                        Sign Up &amp; Get Your Code <ArrowRight className="ml-2" />
+                                    </Link>
+                                </Button>
+                             </div>
+                         </div>
+                    </Card>
+                </div>
+           </section>
           
           <section className="py-24 bg-slate-50">
             <div className="max-w-7xl mx-auto px-6">
@@ -321,31 +348,7 @@ export default function Home() {
             </div>
           </section>
           
-           <section id="refer" className="py-24 bg-violet-50">
-                <div className="max-w-4xl mx-auto px-6">
-                    <Card className="p-8 sm:p-12 bg-card border rounded-xl shadow-lg animate-fade-in-up">
-                         <div className="flex flex-col md:flex-row items-center gap-8">
-                             <div className="p-6 bg-primary/10 rounded-full text-primary">
-                                 <Gift className="w-16 h-16" />
-                             </div>
-                             <div className="flex-1 text-center md:text-left">
-                                <Badge>Refer &amp; Earn</Badge>
-                                <h2 className="text-3xl md:text-4xl font-headline font-bold my-3">
-                                   Refer a Friend, Earn R20!
-                                </h2>
-                                <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                                   Love our platform? Share your unique referral code with friends. When they sign up, you'll be rewarded. It's our way of saying thanks!
-                                </p>
-                                <Button size="lg" asChild>
-                                    <Link href="/register">
-                                        Sign Up &amp; Get Your Code <ArrowRight className="ml-2" />
-                                    </Link>
-                                </Button>
-                             </div>
-                         </div>
-                    </Card>
-                </div>
-           </section>
+           
 
            <section id="varsity-support" className="py-24 bg-violet-50">
                 <div className="max-w-7xl mx-auto px-6">
