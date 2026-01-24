@@ -12,7 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Copy, Gift, DollarSign, Bank, User as UserIcon, Hash, Loader2 } from 'lucide-react';
+import { Copy, Gift, DollarSign, Landmark, User as UserIcon, Hash, Loader2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const firebaseConfig = {
@@ -213,7 +213,7 @@ function ReferralsPage() {
                                 </DialogHeader>
                                 <div className="py-4 space-y-4">
                                      <div className="space-y-2">
-                                        <Label htmlFor="bankName"><Bank className="inline-block mr-2 h-4 w-4"/>Bank Name</Label>
+                                        <Label htmlFor="bankName"><Landmark className="inline-block mr-2 h-4 w-4"/>Bank Name</Label>
                                         <Input id="bankName" value={bankDetails.bankName} onChange={e => setBankDetails({...bankDetails, bankName: e.target.value})} placeholder="e.g. Standard Bank" />
                                     </div>
                                     <div className="space-y-2">
