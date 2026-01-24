@@ -244,11 +244,10 @@ export default function Home() {
 
       <main className="flex-grow pt-16">
          <div>
-          <section id="home" className="relative pt-24 pb-20 md:py-32 overflow-hidden bg-background">
-            <div className="absolute inset-0 z-0 opacity-50 dark:opacity-20 bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.3),rgba(255,255,255,0))]"></div>
+          <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
             <div className="container mx-auto px-6 relative z-10">
               <div className="max-w-3xl mx-auto text-center">
-                <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 leading-tight animate-fade-in-up">
+                <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up">
                   Learn Smarter, Not Harder
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-fade-in-up mx-auto" style={{ animationDelay: '0.2s' }}>
@@ -266,38 +265,6 @@ export default function Home() {
                   </Button>
                 </div>
               </div>
-               <div className="relative mt-20 h-96 hidden md:flex items-center justify-center">
-                    <div className="absolute inset-0 flex items-center justify-center">
-                        <Image 
-                            src="https://picsum.photos/seed/hero-main/700/450"
-                            width={700}
-                            height={450}
-                            alt="A student focused on learning"
-                            className="rounded-2xl shadow-2xl z-10"
-                            data-ai-hint="student learning online"
-                        />
-                    </div>
-                    <div className="absolute top-0 left-20 w-48 h-32 rounded-2xl bg-primary/10 backdrop-blur-sm float-1 shadow-lg"></div>
-                    <div className="absolute bottom-0 right-20 w-56 h-40 rounded-2xl bg-accent/10 backdrop-blur-sm float-2 shadow-lg"></div>
-                    <Card className="absolute top-10 right-32 p-3 float-3">
-                        <div className="flex items-center gap-2">
-                           <div className="p-2 bg-green-100 dark:bg-green-900 rounded-md"><CheckCircle className="h-5 w-5 text-green-500"/></div>
-                           <div>
-                                <p className="font-bold text-sm">Assignments Solved</p>
-                                <p className="text-xs text-muted-foreground">1,200+ this year</p>
-                           </div>
-                        </div>
-                    </Card>
-                     <Card className="absolute bottom-10 left-32 p-3 float-2">
-                        <div className="flex items-center gap-2">
-                           <div className="p-2 bg-blue-100 dark:bg-blue-900 rounded-md"><BookOpen className="h-5 w-5 text-blue-500"/></div>
-                           <div>
-                                <p className="font-bold text-sm">Video Lessons</p>
-                                <p className="text-xs text-muted-foreground">250+ hours available</p>
-                           </div>
-                        </div>
-                    </Card>
-                </div>
             </div>
           </section>
           
@@ -306,7 +273,7 @@ export default function Home() {
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                    <div className="text-4xl md:text-5xl font-bold text-primary mb-2 font-headline">
+                    <div className="text-4xl md:text-5xl font-bold text-primary mb-2">
                       {stat.number}
                     </div>
                     <div className="text-muted-foreground font-medium text-base">
@@ -322,16 +289,15 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
-                <h2 className="text-3xl md:text-4xl font-bold font-headline my-4">
+                <h2 className="text-3xl md:text-4xl font-bold my-4">
                   A Smarter Way to Learn
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                   We believe that every student deserves the best tools to succeed. Our platform combines cutting-edge technology with expert-led instruction to create a learning experience that is effective, engaging, and accessible to everyone.
                 </p>
               </div>
-
-              <div className="grid md:grid-cols-2 gap-12 items-center">
-                  <div className="relative h-96">
+              <div className="max-w-4xl mx-auto">
+                  <div className="relative h-96 mb-12">
                       <Image 
                           src="https://picsum.photos/seed/about-us-image/600/800"
                           alt="Diverse group of students"
@@ -341,14 +307,14 @@ export default function Home() {
                           data-ai-hint="diverse students learning"
                       />
                   </div>
-                  <div className="space-y-8">
+                  <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
                       <div key={index} className="flex items-start gap-6 animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                         <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                             {feature.icon}
                         </div>
                         <div>
-                            <h3 className="text-xl font-bold mb-2 font-headline">
+                            <h3 className="text-xl font-bold mb-2">
                               {feature.title}
                             </h3>
                             <p className="text-muted-foreground leading-relaxed">
@@ -366,7 +332,7 @@ export default function Home() {
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16 animate-fade-in-up">
                         <Badge>Varsity & College Support</Badge>
-                        <h2 className="text-3xl md:text-4xl font-bold font-headline my-4">
+                        <h2 className="text-3xl md:text-4xl font-bold my-4">
                             Excel in Your Tertiary Studies
                         </h2>
                         <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -374,8 +340,8 @@ export default function Home() {
                         </p>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-8 items-start">
-                        <Card className="animate-fade-in-up shadow-sm border hover:shadow-card-glow transition-all duration-300" style={{ animationDelay: '0.2s' }}>
+                    <div className="max-w-3xl mx-auto space-y-8">
+                        <Card className="animate-fade-in-up border" style={{ animationDelay: '0.2s' }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -399,7 +365,7 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
-                        <Card className="animate-fade-in-up shadow-sm border hover:shadow-card-glow transition-all duration-300" style={{ animationDelay: '0.4s' }}>
+                        <Card className="animate-fade-in-up border" style={{ animationDelay: '0.4s' }}>
                              <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -436,7 +402,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>High School</Badge>
-                    <h2 className="text-3xl md:text-4xl font-bold font-headline my-4">Explore Our High School Curriculum</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold my-4">Explore Our High School Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
@@ -444,11 +410,11 @@ export default function Home() {
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
-                        <Card key={subject} className="animate-fade-in-up shadow-sm border hover:shadow-card-glow transition-all duration-300" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={subject} className="animate-fade-in-up border" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                 {Icon && <Icon className="h-8 w-8 text-primary" />}
-                                <CardTitle className="text-2xl font-headline">{subject}</CardTitle>
+                                <CardTitle className="text-2xl">{subject}</CardTitle>
                                 </div>
                             </CardHeader>
                             <CardContent>
@@ -518,22 +484,22 @@ export default function Home() {
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
-                      <h2 className="text-3xl md:text-4xl font-bold font-headline my-4">Upcoming Events</h2>
+                      <h2 className="text-3xl md:text-4xl font-bold my-4">Upcoming Events</h2>
                       <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
-                          <Card key={event.id} className="group flex flex-col animate-fade-in-up shadow-sm border hover:shadow-card-glow transition-all duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-start gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
-                                      <span className="text-sm font-bold uppercase font-headline">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
-                                      <span className="text-3xl font-bold font-headline">{isClient ? format(new Date(event.start), 'd') : ''}</span>
+                                      <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
+                                      <span className="text-3xl font-bold">{isClient ? format(new Date(event.start), 'd') : ''}</span>
                                   </div>
                                   <div className="flex-1">
                                       <Badge variant="secondary" className="mb-1">{event.subject} - Grade {event.grade}</Badge>
-                                      <CardTitle className="text-xl line-clamp-2 font-headline">{event.title}</CardTitle>
+                                      <CardTitle className="text-xl line-clamp-2">{event.title}</CardTitle>
                                   </div>
                               </CardHeader>
                               <CardContent className="flex-grow space-y-3">
@@ -572,13 +538,13 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold font-headline my-4">Featured Courses</h2>
+                  <h2 className="text-3xl md:text-4xl font-bold my-4">Featured Courses</h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
                 </div>
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                        {Array.from({ length: 3 }).map((_, i) => (
-                           <Card key={i} className="bg-card shadow-sm animate-fade-in-up border">
+                           <Card key={i} className="bg-card animate-fade-in-up border">
                                <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
                                <CardContent className="pt-4 space-y-2">
                                    <Skeleton className="h-4 w-1/4"/>
@@ -608,7 +574,7 @@ export default function Home() {
                         {allCourses.map((course, index) => (
                           <CarouselItem key={course.id} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1">
-                              <Card className="group overflow-hidden flex flex-col h-full bg-card shadow-sm border hover:shadow-card-glow transition-all duration-300 hover:-translate-y-1">
+                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-all duration-300">
                                 <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                   <Image 
                                     src={course.thumbnail}
@@ -629,7 +595,7 @@ export default function Home() {
                                       <span className="font-semibold">{course.rating || 4.8}</span>
                                     </div>
                                   </div>
-                                  <CardTitle className="text-xl pt-2 font-headline">{course.title}</CardTitle>
+                                  <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow">
                                   <p className="text-base text-muted-foreground line-clamp-3">
@@ -649,7 +615,7 @@ export default function Home() {
                                   </div>
                                   <Separator />
                                   <div className="flex items-center justify-between w-full">
-                                    <span className="text-2xl font-bold font-headline">
+                                    <span className="text-2xl font-bold">
                                       {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
                                     </span>
                                     <Button asChild size="sm">
@@ -673,14 +639,14 @@ export default function Home() {
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Need Help?</Badge>
-                    <h2 className="text-3xl md:text-4xl font-bold font-headline my-4">Frequently Asked Questions</h2>
+                    <h2 className="text-3xl md:text-4xl font-bold my-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card shadow-sm border hover:shadow-card-glow transition-all duration-300">
+                         <Card key={index} className="overflow-hidden bg-card border">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
-                                <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left font-headline">
+                                <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}
                                 </AccordionTrigger>
                                 <AccordionContent className="px-6 pb-6 text-muted-foreground text-base">
@@ -691,12 +657,12 @@ export default function Home() {
                     ))}
                 </Accordion>
             </div>
-        </section>
+          </section>
 
           <section id="contact" className="py-24">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
-              <Card className="p-8 sm:p-12 bg-card border shadow-lg shadow-primary/5">
-                <h2 className="text-3xl md:text-4xl font-bold font-headline mb-6">
+              <Card className="p-8 sm:p-12 bg-card border">
+                <h2 className="text-3xl md:text-4xl font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -767,7 +733,7 @@ export default function Home() {
                   </div>
                    <div className="p-6 space-y-2 overflow-y-auto">
                         <Badge variant="secondary" className="mb-2">{selectedCourseForPlayer.subject} - Grade {selectedCourseForPlayer.grade}</Badge>
-                        <h2 className="text-2xl font-bold font-headline">{selectedCourseForPlayer.title}</h2>
+                        <h2 className="text-2xl font-bold">{selectedCourseForPlayer.title}</h2>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
                             <div className="flex items-center gap-1">
                                 <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />

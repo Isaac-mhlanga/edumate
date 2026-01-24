@@ -18,8 +18,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Lora', 'serif'],
+        body: ['Satoshi', 'sans-serif'],
+        headline: ['Satoshi', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
