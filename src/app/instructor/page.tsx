@@ -128,6 +128,13 @@ export type CalendarEvent = {
   description?: string;
 };
 
+type BankDetails = {
+    bankName: string;
+    accountHolder: string;
+    accountNumber: string;
+    branchCode: string;
+};
+
 function InstructorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -680,9 +687,13 @@ function InstructorPage() {
     setSelectedTransaction(null);
   };
 
-  const handlePayoutRequest = async (amount: number) => {
+  const handlePayoutRequest = async (amount: number, bankDetails: BankDetails) => {
     if (!user || amount <= 0) {
         toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Payout amount must be greater than zero.'});
+        return;
+    }
+    if (!bankDetails.bankName || !bankDetails.accountHolder || !bankDetails.accountNumber || !bankDetails.branchCode) {
+        toast({ variant: 'destructive', title: 'Bank Details Incomplete', description: 'Please fill out all bank details.'});
         return;
     }
 
@@ -696,6 +707,7 @@ function InstructorPage() {
             amount: amount,
             status: 'Pending',
             type: 'Instructor',
+            bankDetails,
             requestedAt: serverTimestamp()
         });
         toast({ title: "Payout Requested", description: `Your request to withdraw R ${amount.toFixed(2)} has been submitted.` });

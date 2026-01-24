@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -50,7 +51,21 @@ export const PayoutReceipt = React.forwardRef<HTMLDivElement, PayoutReceiptProps
                             <p className="text-lg font-bold">{payout.userName}</p>
                             <p className="text-sm text-muted-foreground">User ID: {payout.userId}</p>
                         </div>
+
+                        {payout.bankDetails && (
+                            <div>
+                                <h2 className="text-base font-semibold text-muted-foreground mb-2">BANKING DETAILS</h2>
+                                <div className="text-sm space-y-1">
+                                    <div className="flex justify-between"><span className="text-muted-foreground">Bank Name:</span><span className="font-medium">{payout.bankDetails.bankName}</span></div>
+                                    <div className="flex justify-between"><span className="text-muted-foreground">Account Holder:</span><span className="font-medium">{payout.bankDetails.accountHolder}</span></div>
+                                    <div className="flex justify-between"><span className="text-muted-foreground">Account Number:</span><span className="font-medium">{payout.bankDetails.accountNumber}</span></div>
+                                    <div className="flex justify-between"><span className="text-muted-foreground">Branch Code:</span><span className="font-medium">{payout.bankDetails.branchCode}</span></div>
+                                </div>
+                            </div>
+                        )}
+                        
                         <Separator />
+
                         <div className="space-y-4">
                             <h3 className="text-base font-semibold text-muted-foreground">SUMMARY</h3>
                             <div className="flex justify-between items-center">
