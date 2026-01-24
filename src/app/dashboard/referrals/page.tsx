@@ -157,7 +157,7 @@ function ReferralsPage() {
                     <CardContent>
                         {loading ? <Skeleton className="h-10 w-full" /> : (
                             <div className="flex items-center gap-2">
-                                <Input value={displayReferralCode} readOnly className="font-mono" />
+                                <Input value={displayReferralCode} readOnly className="font-mono text-center text-lg" />
                                 <Button size="icon" variant="outline" onClick={handleCopyToClipboard}><Copy className="h-4 w-4" /></Button>
                             </div>
                         )}
@@ -188,21 +188,19 @@ function ReferralsPage() {
             </div>
 
             <div className="grid gap-6 lg:grid-cols-2">
-                 <Card>
+                 <Card className="flex flex-col">
                     <CardHeader>
                         <CardTitle>Request Payout</CardTitle>
-                        <CardDescription>Withdraw your referral earnings.</CardDescription>
+                        <CardDescription>Withdraw your available referral earnings.</CardDescription>
                     </CardHeader>
-                    <CardContent className="space-y-4">
-                         <div className="rounded-lg border bg-card text-card-foreground shadow-sm p-4 text-center">
-                            <p className="text-sm text-muted-foreground">Available to withdraw</p>
-                            <p className="text-4xl font-bold text-primary">R {referralBalance.toFixed(2)}</p>
-                        </div>
+                    <CardContent className="flex-1 flex flex-col items-center justify-center text-center gap-2">
+                         <p className="text-sm text-muted-foreground">Available to withdraw</p>
+                         <p className="text-5xl font-bold text-primary">R {referralBalance.toFixed(2)}</p>
                     </CardContent>
                     <CardFooter>
                          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                             <DialogTrigger asChild>
-                                <Button className="w-full" disabled={loading || referralBalance <= 0}>
+                                <Button className="w-full" size="lg" disabled={loading || referralBalance <= 0}>
                                     Request Payout
                                 </Button>
                             </DialogTrigger>
@@ -246,18 +244,22 @@ function ReferralsPage() {
                         <CardDescription>Users who signed up with your code.</CardDescription>
                     </CardHeader>
                     <CardContent>
-                        {loading ? Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-10 w-full mb-2" />) : (
+                        {loading ? Array.from({length: 3}).map((_, i) => <Skeleton key={i} className="h-12 w-full mb-2" />) : (
                             referredUsers.length > 0 ? (
                                 <ul className="space-y-2">
                                     {referredUsers.map(refUser => (
-                                        <li key={refUser.id} className="flex justify-between items-center p-2 bg-muted rounded-md">
+                                        <li key={refUser.id} className="flex justify-between items-center p-3 bg-muted/50 rounded-lg border">
                                             <span className="font-medium text-sm">{refUser.fullName}</span>
                                             <span className="text-xs text-muted-foreground">Joined: {refUser.createdAt}</span>
                                         </li>
                                     ))}
                                 </ul>
                             ) : (
-                                <p className="text-sm text-muted-foreground text-center py-8">You haven't referred any users yet.</p>
+                                <div className="flex flex-col items-center justify-center text-center py-8 border-2 border-dashed rounded-lg">
+                                    <Gift className="h-12 w-12 text-muted-foreground mb-4" />
+                                    <h3 className="font-semibold">No Referrals Yet</h3>
+                                    <p className="text-sm text-muted-foreground mt-1">Share your code to start earning!</p>
+                                </div>
                             )
                         )}
                     </CardContent>
