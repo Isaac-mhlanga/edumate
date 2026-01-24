@@ -9,12 +9,12 @@ import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Search, ListFilter, CreditCard, MoreVertical, UserMinus, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ListFilter, CreditCard, MoreVertical, UserMinus, Trash2, ChevronLeft, ChevronRight, Eye } from "lucide-react";
 import { type User } from "@/app/admin/page";
 
 interface AdminUsersTabProps {
     users: User[];
-    onUserAction: (user: User, action: 'suspend' | 'delete') => void;
+    onUserAction: (user: User, action: 'suspend' | 'delete' | 'view') => void;
 }
 
 export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
@@ -122,6 +122,9 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
                                  <DropdownMenu>
                                     <DropdownMenuTrigger asChild><Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button></DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
+                                        <DropdownMenuItem onClick={() => onUserAction(user, 'view')}>
+                                            <Eye className="mr-2 h-4 w-4" /> View Details
+                                        </DropdownMenuItem>
                                         <DropdownMenuItem onClick={() => onUserAction(user, 'suspend')}><UserMinus className="mr-2 h-4 w-4"/>{user.status === 'Active' ? 'Suspend' : 'Unsuspend'}</DropdownMenuItem>
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={() => onUserAction(user, 'delete')} className="text-destructive focus:text-destructive"><Trash2 className="mr-2 h-4 w-4"/>Delete User</DropdownMenuItem>
@@ -144,5 +147,7 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
         </Card>
     );
 }
+
+    
 
     

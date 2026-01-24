@@ -17,7 +17,7 @@ import { AdminCalendarTab } from "@/components/admin/calendar-tab";
 import { AdminPayoutsTab } from "@/components/admin/payouts-tab";
 import { AdminSubscriptionsTab } from "@/components/admin/subscriptions-tab";
 import { AdminTutorsTab, TutorProfileDialog } from "@/components/admin/tutors-tab";
-import { UserActionDialogs } from "@/components/admin/user-action-dialogs";
+import { UserActionDialogs, UserDetailsDialog } from "@/components/admin/user-action-dialogs";
 import { CourseActionDialog } from "@/components/admin/course-action-dialog";
 import { PayoutActionDialog, PayoutReceiptDialog } from "@/components/admin/payout-dialogs";
 import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/admin/assignment-action-dialogs";
@@ -104,6 +104,7 @@ function AdminPage() {
     const [selectedSubscription, setSelectedSubscription] = React.useState<Subscription | null>(null);
     const [selectedTutorProfile, setSelectedTutorProfile] = React.useState<TutorProfile | null>(null);
 
+    const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = React.useState(false);
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
     const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = React.useState(false);
     const [isCourseActionDialogOpen, setIsCourseActionDialogOpen] = React.useState(false);
@@ -219,10 +220,11 @@ function AdminPage() {
     }, [users, courses, transactions]);
 
 
-    const handleUserAction = (user: User, action: 'suspend' | 'delete') => {
+    const handleUserAction = (user: User, action: 'suspend' | 'delete' | 'view') => {
         setSelectedUser(user);
         if (action === 'suspend') setIsSuspendUserDialogOpen(true);
         if (action === 'delete') setIsDeleteUserDialogOpen(true);
+        if (action === 'view') setIsUserDetailsDialogOpen(true);
     };
 
     const confirmSuspendUser = async () => {
@@ -392,6 +394,11 @@ function AdminPage() {
                 />
             )}
 
+            <UserDetailsDialog
+                isOpen={isUserDetailsDialogOpen}
+                setIsOpen={setIsUserDetailsDialogOpen}
+                selectedUser={selectedUser}
+            />
             <UserActionDialogs 
                 isSuspendOpen={isSuspendUserDialogOpen}
                 setIsSuspendOpen={setIsSuspendUserDialogOpen}
@@ -451,5 +458,7 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
+
+    
 
     
