@@ -8,7 +8,7 @@ import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, User
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { faqData, curriculumData, UpcomingEvent as UpcomingEventType } from "@/lib/data";
+import { faqData, curriculumData } from "@/lib/data";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -27,6 +27,7 @@ import { useToast } from "@/hooks/use-toast";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { event } from '@/components/google-analytics';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { type UpcomingEvent } from "@/lib/data";
 
 
 const firebaseConfig = {
@@ -61,19 +62,6 @@ type Course = {
     videos: VideoData[];
     rating?: number;
     instructor?: string;
-};
-
-type UpcomingEvent = {
-  id: string;
-  title: string;
-  start: string;
-  end?: string;
-  allDay: boolean;
-  instructor: string;
-  grade: string;
-  subject: string;
-  scope: string;
-  platforms?: ('tiktok' | 'youtube' | 'zoom')[];
 };
 
 type UserDoc = {
@@ -247,7 +235,7 @@ export default function Home() {
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
             <div className="container mx-auto px-6 relative z-10">
               <div className="max-w-3xl mx-auto text-center">
-                <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight animate-fade-in-up">
+                <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 leading-tight animate-fade-in-up">
                   Learn Smarter, Not Harder
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-fade-in-up mx-auto" style={{ animationDelay: '0.2s' }}>
@@ -268,7 +256,7 @@ export default function Home() {
             </div>
           </section>
           
-          <section className="py-24 bg-muted/50">
+          <section className="py-24 bg-secondary">
             <div className="max-w-7xl mx-auto px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {stats.map((stat, index) => (
@@ -289,7 +277,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
-                <h2 className="text-3xl md:text-4xl font-bold my-4">
+                <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
                   A Smarter Way to Learn
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -328,11 +316,11 @@ export default function Home() {
             </div>
           </section>
 
-           <section id="varsity-support" className="py-24 bg-muted/50">
+           <section id="varsity-support" className="py-24 bg-[#fbfaff]">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16 animate-fade-in-up">
-                        <Badge>Varsity & College Support</Badge>
-                        <h2 className="text-3xl md:text-4xl font-bold my-4">
+                        <Badge>Varsity &amp; College Support</Badge>
+                        <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
                             Excel in Your Tertiary Studies
                         </h2>
                         <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -371,7 +359,7 @@ export default function Home() {
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
                                         <ShieldCheck className="w-6 h-6" />
                                     </div>
-                                    <CardTitle>Honours & Postgraduate</CardTitle>
+                                    <CardTitle>Honours &amp; Postgraduate</CardTitle>
                                 </div>
                             </CardHeader>
                             <CardContent className="space-y-3">
@@ -402,7 +390,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>High School</Badge>
-                    <h2 className="text-3xl md:text-4xl font-bold my-4">Explore Our High School Curriculum</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Explore Our High School Curriculum</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
                 </div>
                 
@@ -480,11 +468,11 @@ export default function Home() {
             </div>
         </section>
 
-          <section id="events" className="py-24 bg-muted/50">
+          <section id="events" className="py-24 bg-[#f7fdfb]">
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
-                      <h2 className="text-3xl md:text-4xl font-bold my-4">Upcoming Events</h2>
+                      <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
                       <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -538,7 +526,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
-                  <h2 className="text-3xl md:text-4xl font-bold my-4">Featured Courses</h2>
+                  <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Featured Courses</h2>
                   <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
                 </div>
                  {loadingCourses ? (
@@ -635,11 +623,11 @@ export default function Home() {
             </div>
           </section>
           
-          <section id="faq" className="py-24 bg-muted/50">
+          <section id="faq" className="py-24 bg-secondary">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Need Help?</Badge>
-                    <h2 className="text-3xl md:text-4xl font-bold my-4">Frequently Asked Questions</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
@@ -662,7 +650,7 @@ export default function Home() {
           <section id="contact" className="py-24">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
               <Card className="p-8 sm:p-12 bg-card border">
-                <h2 className="text-3xl md:text-4xl font-bold mb-6">
+                <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
@@ -718,7 +706,7 @@ export default function Home() {
                                               <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
                                               <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
                                               <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
-                                              <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
+                                              <DropdownMenuRadioItem value="360p (Auto)">360p (Auto)</DropdownMenuRadioItem>
                                           </DropdownMenuRadioGroup>
                                       </DropdownMenuContent>
                                   </DropdownMenu>
