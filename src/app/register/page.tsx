@@ -95,6 +95,31 @@ export default function RegisterPage() {
                 subscriptionPlan: 'Free', // Default to Free plan
                 status: 'Active'
             });
+            
+            // If the user is a tutor, create a default tutor profile
+            if (data.role === 'tutor') {
+                const tutorProfileRef = doc(db, "tutors", user.uid);
+                const availabilityPlaceholder = [
+                    { day: "Monday", slots: [] }, { day: "Tuesday", slots: [] }, { day: "Wednesday", slots: [] },
+                    { day: "Thursday", slots: [] }, { day: "Friday", slots: [] }, { day: "Saturday", slots: [] }, { day: "Sunday", slots: [] },
+                ];
+                await setDoc(tutorProfileRef, {
+                    id: user.uid,
+                    name: data.fullName,
+                    email: data.email,
+                    avatar: user.photoURL || 'https://placehold.co/100x100.png',
+                    bio: '',
+                    hourlyRate: 200,
+                    subjects: [],
+                    grades: [],
+                    varsityModules: [],
+                    location: '',
+                    modes: [],
+                    availability: availabilityPlaceholder,
+                    qualifications: '',
+                    approvalStatus: 'Pending'
+                });
+            }
 
             toast({
                 title: "Registration Successful!",
