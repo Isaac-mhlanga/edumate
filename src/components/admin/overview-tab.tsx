@@ -12,9 +12,6 @@ import { type PayoutRequest, type CalendarEvent, type RecentActivity, type User,
 
 interface AdminOverviewTabProps {
     loading: boolean;
-    aiSummary: string;
-    loadingAiSummary: boolean;
-    onRegenerateSummary: () => void;
     events: CalendarEvent[];
     payoutRequests: PayoutRequest[];
     users: User[];
@@ -26,9 +23,6 @@ interface AdminOverviewTabProps {
 
 export function AdminOverviewTab({ 
     loading, 
-    aiSummary, 
-    loadingAiSummary, 
-    onRegenerateSummary, 
     events, 
     payoutRequests,
     users,
@@ -122,32 +116,6 @@ export function AdminOverviewTab({
             </section>
 
             <section className="grid gap-6 lg:grid-cols-2">
-                 <Card>
-                    <CardHeader>
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Sparkles className="text-primary h-6 w-6" />
-                                <CardTitle className="text-xl">AI Performance Summary</CardTitle>
-                            </div>
-                            <Button variant="ghost" size="sm" disabled={loadingAiSummary} onClick={onRegenerateSummary}>
-                                <RefreshCw className={`mr-2 h-4 w-4 ${loadingAiSummary ? 'animate-spin' : ''}`} />
-                                Regenerate
-                            </Button>
-                        </div>
-                        <CardDescription>An AI-powered analysis of your platform's performance.</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        {loadingAiSummary ? (
-                            <div className="space-y-2">
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-full" />
-                                <Skeleton className="h-4 w-3/4" />
-                            </div>
-                        ) : (
-                            <p className="text-muted-foreground">{aiSummary}</p>
-                        )}
-                    </CardContent>
-                </Card>
                 <Card className="flex flex-col">
                     <CardHeader>
                         <CardTitle className="text-xl">Recent Platform Activity</CardTitle>
@@ -190,9 +158,6 @@ export function AdminOverviewTab({
                         </CardFooter>
                     )}
                 </Card>
-            </section>
-            
-            <section className="grid gap-6 lg:grid-cols-2">
                 <Card className="flex flex-col">
                     <CardHeader>
                         <CardTitle className="text-xl">Upcoming Events</CardTitle>
@@ -234,6 +199,9 @@ export function AdminOverviewTab({
                         </CardFooter>
                     )}
                 </Card>
+            </section>
+            
+            <section className="grid gap-6">
                 <Card className="flex flex-col">
                     <CardHeader>
                         <CardTitle className="text-xl">Pending Payouts</CardTitle>

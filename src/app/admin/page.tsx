@@ -22,7 +22,6 @@ import { CourseActionDialog } from "@/components/admin/course-action-dialog";
 import { PayoutActionDialog, PayoutReceiptDialog } from "@/components/admin/payout-dialogs";
 import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/admin/assignment-action-dialogs";
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
-import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { format, formatDistanceToNow } from "date-fns";
 import { EnquiriesPage } from "@/components/enquiries-page";
 
@@ -95,8 +94,6 @@ function AdminPage() {
     const [tutors, setTutors] = React.useState<TutorProfile[]>([]);
     
     const [loading, setLoading] = React.useState(true);
-    const [aiSummary, setAiSummary] = React.useState('');
-    const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
     
     const [selectedUser, setSelectedUser] = React.useState<User | null>(null);
     const [selectedCourse, setSelectedCourse] = React.useState<Course | null>(null);
@@ -116,28 +113,6 @@ function AdminPage() {
     const [isDeleteAssignmentDialogOpen, setIsDeleteAssignmentDialogOpen] = React.useState(false);
     const [isCancelSubscriptionDialogOpen, setIsCancelSubscriptionDialogOpen] = React.useState(false);
     const [isTutorProfileDialogOpen, setIsTutorProfileDialogOpen] = React.useState(false);
-
-    const generatePerformanceSummary = React.useCallback(async (courses: Course[], users: User[], assignments: Assignment[], transactions: Transaction[]) => {
-        setLoadingAiSummary(true);
-        try {
-            const totalRevenue = transactions
-                .filter(t => t.itemType === 'course' || t.itemType === 'assignment' && t.status !== 'Refunded')
-                .reduce((sum, t) => sum + t.amount, 0);
-
-            const response = await summarizeInstructorPerformance({
-                instructorName: "Admin",
-                totalStudents: users.filter(u => u.role === 'student').length,
-                totalCourses: courses.length,
-                totalEarnings: totalRevenue,
-                pendingAssignments: assignments.filter(a => a.status === 'Pending Review').length,
-                courseTitles: courses.map(c => c.title)
-            });
-            setAiSummary(response.summary);
-        } catch (error) {
-            console.error("Error generating AI summary: ", error);
-            setAiSummary("Could not generate performance summary at this time.");
-        } finally { setLoadingAiSummary(false); }
-    }, []);
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -197,16 +172,14 @@ function AdminPage() {
                 });
                 setPayoutRequests(fetchedPayouts);
                 
-                await generatePerformanceSummary(fetchedCourses, usersWithSubscriptions, fetchedAssignments, fetchedTransactions);
             } catch (error) {
                 console.error("Error fetching admin data:", error);
                 toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch platform data.' });
-                 setLoadingAiSummary(false);
             }
             setLoading(false);
         };
         fetchData();
-    }, [firestore, toast, generatePerformanceSummary]);
+    }, [firestore, toast]);
 
     const recentActivity = React.useMemo(() => {
         const userMap = new Map(users.map(u => [u.id, u.fullName]));
@@ -359,11 +332,8 @@ function AdminPage() {
             {currentTab === 'overview' && (
                 <AdminOverviewTab
                     loading={loading}
-                    aiSummary={aiSummary}
-                    loadingAiSummary={loadingAiSummary}
                     events={events}
                     payoutRequests={payoutRequests}
-                    onRegenerateSummary={() => generatePerformanceSummary(courses, users, assignments, transactions)}
                     users={users}
                     courses={courses}
                     transactions={transactions}

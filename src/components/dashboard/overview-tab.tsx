@@ -134,7 +134,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                 ) : purchasedCourses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {purchasedCourses.slice(0, 2).map((course) => (
-                            <Card key={course.id} className="flex flex-col">
+                            <Card key={course.id} className="flex flex-col transition-shadow duration-300 hover:shadow-xl">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
                                         <CardTitle className="text-base truncate">{course.title}</CardTitle>

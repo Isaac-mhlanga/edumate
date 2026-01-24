@@ -275,7 +275,7 @@ function TutorsDashboardPage() {
                     ) : paginatedTutors.length > 0 ? (
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {paginatedTutors.map(tutor => (
-                            <Card key={tutor.id} className="flex flex-col">
+                            <Card key={tutor.id} className="flex flex-col transition-shadow duration-300 hover:shadow-xl">
                                 <CardHeader className="flex-row gap-4 items-center">
                                     <Avatar className="w-16 h-16 border">
                                         <AvatarImage src={tutor.avatar} alt={tutor.name} data-ai-hint="person profile" />
