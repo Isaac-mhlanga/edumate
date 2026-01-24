@@ -33,7 +33,7 @@ const firebaseConfig = {
 const registerFormSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),
     email: z.string().email("Please enter a valid email address."),
-    phoneNumber: z.string().optional(),
+    phoneNumber: z.string().min(1, 'Phone number is required'),
     password: z.string().min(6, "Password must be at least 6 characters long."),
     confirmPassword: z.string(),
     role: z.enum(["student", "instructor", "tutor"], { required_error: "Please select a role." }),
@@ -179,7 +179,7 @@ export default function RegisterPage() {
                     errorMessage = 'Firebase API Key is invalid. Please check your configuration.';
                 }
                 else {
-                    errorMessage = `An error occurred: '${error.message}'`;
+                    errorMessage = `An error occurred: '${'''.message}'`;
                 }
             } else if (error instanceof Error) {
                 errorMessage = error.message;
@@ -248,7 +248,7 @@ export default function RegisterPage() {
                                         name="phoneNumber"
                                         render={({ field }) => (
                                             <FormItem>
-                                                <FormLabel>Phone Number (Optional)</FormLabel>
+                                                <FormLabel>Phone Number</FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
                                                         <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
