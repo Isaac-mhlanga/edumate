@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -7,14 +6,13 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getAuth, signInWithEmailAndPassword, sendEmailVerification, type User } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, type User } from "firebase/auth";
 import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { Terminal, Mail, KeyRound } from "lucide-react";
+import { Mail, KeyRound } from "lucide-react";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -33,35 +31,11 @@ export default function LoginPage() {
     const router = useRouter();
     const { toast } = useToast();
     const [isLoading, setIsLoading] = React.useState(false);
-    const [emailNotVerified, setEmailNotVerified] = React.useState(false);
-    const [currentUser, setCurrentUser] = React.useState<User | null>(null);
-
-    const handleResendVerification = async () => {
-        if (!currentUser) return;
-        setIsLoading(true);
-        try {
-            await sendEmailVerification(currentUser);
-            toast({
-                title: "Verification Email Sent",
-                description: "A new verification link has been sent to your email address.",
-            });
-        } catch (error) {
-             toast({
-                variant: "destructive",
-                title: "Error",
-                description: "Failed to send verification email. Please try again later.",
-            });
-        } finally {
-            setIsLoading(false);
-        }
-    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
         
         setIsLoading(true);
-        setEmailNotVerified(false);
-        setCurrentUser(null);
         
         const email = (e.currentTarget.querySelector('#email') as HTMLInputElement).value;
         const password = (e.currentTarget.querySelector('#password') as HTMLInputElement).value;
@@ -69,19 +43,6 @@ export default function LoginPage() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
-
-            if (!user.emailVerified) {
-                // Don't automatically resend. Just show the alert with the resend button.
-                setEmailNotVerified(true);
-                setCurrentUser(user);
-                setIsLoading(false);
-                toast({
-                    variant: "destructive",
-                    title: "Email Not Verified",
-                    description: "Please check your inbox and click the verification link to continue.",
-                });
-                return;
-            }
 
             // Fetch user role from Firestore
             const db = getFirestore(auth.app);
@@ -138,9 +99,7 @@ export default function LoginPage() {
                 description: errorMessage,
             });
         } finally {
-            if (!emailNotVerified) {
-                setIsLoading(false);
-            }
+            setIsLoading(false);
         }
     }
     
@@ -159,30 +118,18 @@ export default function LoginPage() {
                             <CardDescription>Enter your credentials to access your account.</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
-                            {emailNotVerified && (
-                                <Alert variant="destructive">
-                                    <Terminal className="h-4 w-4" />
-                                    <AlertTitle>Email Not Verified</AlertTitle>
-                                    <AlertDescription className="flex flex-col gap-2">
-                                        Your email address has not been verified. Please check your inbox for the verification link.
-                                        <Button type="button" variant="secondary" size="sm" onClick={handleResendVerification} disabled={isLoading}>
-                                            {isLoading ? 'Sending...' : 'Resend Verification Email'}
-                                        </Button>
-                                    </AlertDescription>
-                                </Alert>
-                            )}
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
                                 <div className="relative">
                                     <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="email" type="email" placeholder="name@example.com" required disabled={emailNotVerified} className="pl-10" />
+                                    <Input id="email" type="email" placeholder="name@example.com" required className="pl-10" />
                                 </div>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="password">Password</Label>
                                 <div className="relative">
                                     <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="password" type="password" required disabled={emailNotVerified} className="pl-10" />
+                                    <Input id="password" type="password" required className="pl-10" />
                                 </div>
                             </div>
                             <div className="flex items-center justify-between">
