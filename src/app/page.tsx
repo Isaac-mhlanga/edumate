@@ -28,6 +28,7 @@ import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { event } from '@/components/google-analytics';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { type UpcomingEvent } from "@/lib/data";
+import { FaFacebook, FaTiktok, FaYoutube, FaInstagram } from "react-icons/fa";
 
 
 const firebaseConfig = {
@@ -278,34 +279,49 @@ export default function Home() {
               </div>
             </div>
           </section>
-
+          
           <section id="refer" className="py-24 bg-violet-50">
             <div className="max-w-4xl mx-auto px-6 animate-fade-in-up">
-              <div className="flex flex-col md:flex-row items-center gap-8">
-                <div className="p-6 bg-primary/10 rounded-full text-primary">
+              <div className="text-center">
+                <div className="inline-block p-6 bg-primary/10 rounded-full text-primary mb-4">
                   <Gift className="w-16 h-16" />
                 </div>
-                <div className="flex-1 text-center md:text-left">
-                  <Badge>Refer &amp; Earn</Badge>
-                  <h2 className="text-3xl md:text-4xl font-headline font-bold my-3">
-                    Refer a Friend, Earn R20!
-                  </h2>
-                  <p className="text-lg text-muted-foreground mb-6 leading-relaxed">
-                    Love our platform? Share your unique referral code with
-                    friends. When they sign up, you'll be rewarded. It's our way
-                    of saying thanks!
-                  </p>
-                  <Button size="lg" asChild>
-                    <Link href="/register">
-                      Sign Up &amp; Get Your Code{" "}
-                      <ArrowRight className="ml-2" />
+                <Badge>Refer &amp; Earn</Badge>
+                <h2 className="text-3xl md:text-4xl font-headline font-bold my-3">
+                  Refer a Friend, Earn R20!
+                </h2>
+                <p className="text-lg text-muted-foreground mb-6 leading-relaxed max-w-2xl mx-auto">
+                  Love our platform? Share your unique referral code with
+                  friends. When they sign up, you'll be rewarded. It's our way
+                  of saying thanks!
+                </p>
+                <Button size="lg" asChild>
+                  <Link href="/register">
+                    Sign Up &amp; Get Your Code{" "}
+                    <ArrowRight className="ml-2" />
+                  </Link>
+                </Button>
+                <div className="mt-8 text-center">
+                  <p className="text-sm text-muted-foreground mb-4">Follow us for tips, updates, and more ways to earn!</p>
+                  <div className="flex justify-center space-x-4">
+                    <Link href="#" aria-label="Facebook" className="p-2 border rounded-full text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      <FaFacebook className="h-6 w-6" />
                     </Link>
-                  </Button>
+                    <Link href="#" aria-label="TikTok" className="p-2 border rounded-full text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      <FaTiktok className="h-6 w-6" />
+                    </Link>
+                    <Link href="#" aria-label="YouTube" className="p-2 border rounded-full text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      <FaYoutube className="h-6 w-6" />
+                    </Link>
+                    <Link href="#" aria-label="Instagram" className="p-2 border rounded-full text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                      <FaInstagram className="h-6 w-6" />
+                    </Link>
+                  </div>
                 </div>
               </div>
             </div>
           </section>
-          
+
           <section id="about" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
                <div className="text-center mb-16 animate-fade-in-up">
