@@ -6,13 +6,14 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
-import { getAuth, signInWithEmailAndPassword, type User } from "firebase/auth";
+import { getAuth, signInWithEmailAndPassword, sendEmailVerification, signOut, type User } from "firebase/auth";
 import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Mail, KeyRound } from "lucide-react";
+import { ToastAction } from "@/components/ui/toast";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -43,6 +44,36 @@ export default function LoginPage() {
         try {
             const userCredential = await signInWithEmailAndPassword(auth, email, password);
             const user = userCredential.user;
+            
+            if (!user.emailVerified) {
+                toast({
+                    variant: "destructive",
+                    title: "Email Not Verified",
+                    description: "Please check your inbox and verify your email address to continue.",
+                    action: (
+                        <ToastAction altText="Resend" onClick={async () => {
+                            try {
+                                await sendEmailVerification(user);
+                                toast({
+                                    title: "Verification Email Sent",
+                                    description: "A new verification link has been sent to your email address.",
+                                });
+                            } catch (error) {
+                                toast({
+                                    variant: "destructive",
+                                    title: "Error",
+                                    description: "Failed to send verification email. Please try again later.",
+                                });
+                            }
+                        }}>
+                            Resend Email
+                        </ToastAction>
+                    ),
+                });
+                await signOut(auth); // Sign out to prevent a partial login state
+                setIsLoading(false);
+                return;
+            }
 
             // Fetch user role from Firestore
             const db = getFirestore(auth.app);
@@ -50,6 +81,7 @@ export default function LoginPage() {
             const userDoc = await getDoc(userDocRef);
 
             if (!userDoc.exists()) {
+                await signOut(auth);
                 throw new Error("User profile not found. Please contact support.");
             }
             
@@ -98,7 +130,6 @@ export default function LoginPage() {
                 title: "Login Failed",
                 description: errorMessage,
             });
-        } finally {
             setIsLoading(false);
         }
     }
