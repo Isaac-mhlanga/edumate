@@ -179,7 +179,7 @@ export default function RegisterPage() {
                     errorMessage = 'Firebase API Key is invalid. Please check your configuration.';
                 }
                 else {
-                    errorMessage = `An error occurred: '${'''.message}'`;
+                    errorMessage = `An error occurred: ${error.message}`;
                 }
             } else if (error instanceof Error) {
                 errorMessage = error.message;
