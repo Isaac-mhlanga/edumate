@@ -146,9 +146,9 @@ export default function CoursePreviewPage() {
 
             <div className="grid lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2 space-y-6">
-                    <Card className="overflow-hidden shadow-lg rounded-xl">
+                    <Card className="overflow-hidden shadow-lg rounded-lg">
                         <CardHeader className="p-0">
-                            <div className="relative aspect-video bg-black rounded-t-xl overflow-hidden">
+                            <div className="relative aspect-video bg-black rounded-t-lg overflow-hidden">
                                 {activeVideo ? (
                                      isYouTube ? (
                                         <iframe
@@ -234,7 +234,7 @@ export default function CoursePreviewPage() {
                 </div>
 
                 <div className="lg:col-span-1 space-y-6">
-                    <Card className="overflow-hidden shadow-lg rounded-xl">
+                    <Card className="overflow-hidden shadow-lg rounded-lg">
                          <Image
                             src={course.thumbnail}
                             alt={course.title}
@@ -255,7 +255,7 @@ export default function CoursePreviewPage() {
                             <p className="text-xs text-muted-foreground text-center mt-2">30-Day Money-Back Guarantee</p>
                         </CardContent>
                     </Card>
-                    <Card className="shadow-lg rounded-xl">
+                    <Card className="shadow-lg rounded-lg">
                         <CardHeader>
                             <CardTitle>Course Content</CardTitle>
                             <CardDescription>
@@ -290,5 +290,7 @@ export default function CoursePreviewPage() {
         </div>
     );
 }
+
+    
 
     

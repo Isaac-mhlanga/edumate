@@ -336,13 +336,13 @@ export default function Home() {
                           alt="Diverse group of students"
                           width={600}
                           height={800}
-                          className="rounded-xl shadow-lg object-cover h-full w-full"
+                          className="rounded-lg shadow-lg object-cover h-full w-full"
                           data-ai-hint="diverse students learning"
                       />
                   </div>
                   <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                      <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up transition-shadow hover:shadow-xl rounded-xl" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                      <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up transition-shadow hover:shadow-xl rounded-lg" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                         <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                             {feature.icon}
                         </div>
@@ -376,7 +376,7 @@ export default function Home() {
                     </div>
 
                     <div className="max-w-3xl mx-auto space-y-8">
-                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-xl" style={{ animationDelay: '0.2s' }}>
+                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: '0.2s' }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -400,7 +400,7 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
-                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-xl" style={{ animationDelay: '0.4s' }}>
+                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: '0.4s' }}>
                              <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -445,7 +445,7 @@ export default function Home() {
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
-                        <Card key={subject} className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-xl" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={subject} className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                 {Icon && <Icon className="h-8 w-8 text-primary" />}
@@ -526,7 +526,7 @@ export default function Home() {
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
-                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-xl" style={{ animationDelay: `${0.1 * index}s` }}>
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-start gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
                                       <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
@@ -579,7 +579,7 @@ export default function Home() {
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                        {Array.from({ length: 3 }).map((_, i) => (
-                           <Card key={i} className="bg-card animate-fade-in-up border rounded-xl">
+                           <Card key={i} className="bg-card animate-fade-in-up border rounded-lg">
                                <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
                                <CardContent className="pt-4 space-y-2">
                                    <Skeleton className="h-4 w-1/4"/>
@@ -609,7 +609,7 @@ export default function Home() {
                         {allCourses.map((course, index) => (
                           <CarouselItem key={course.id} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1">
-                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl rounded-xl">
+                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl rounded-lg">
                                 <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                   <Image 
                                     src={course.thumbnail}
@@ -679,7 +679,7 @@ export default function Home() {
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card border transition-shadow duration-300 hover:shadow-xl rounded-xl">
+                         <Card key={index} className="overflow-hidden bg-card border transition-shadow duration-300 hover:shadow-xl rounded-lg">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
                                 <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}
@@ -696,7 +696,7 @@ export default function Home() {
 
           <section id="contact" className="py-24">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
-              <Card className="p-8 sm:p-12 bg-card border rounded-xl">
+              <Card className="p-8 sm:p-12 bg-card border rounded-lg">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
@@ -830,3 +830,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
