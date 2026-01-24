@@ -23,7 +23,6 @@ import { AssignmentReviewDialog } from "@/components/instructor/assignment-revie
 import { StudentActionDialogs } from "@/components/instructor/student-action-dialogs";
 import { TransactionDialogs } from "@/components/instructor/transaction-dialogs";
 import { CalendarDialogs } from "@/components/instructor/calendar-dialogs";
-import { summarizeInstructorPerformance } from "@/ai/flows/summarize-instructor-performance";
 import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { format } from "date-fns";
 import { EnquiriesPage } from "@/components/enquiries-page";
@@ -149,8 +148,6 @@ function InstructorPage() {
   const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
   const [enrolledStudents, setEnrolledStudents] = React.useState<EnrolledStudent[]>([]);
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
-  const [aiSummary, setAiSummary] = React.useState('');
-  const [loadingAiSummary, setLoadingAiSummary] = React.useState(true);
   const [events, setEvents] = React.useState<CalendarEvent[]>([]);
 
 
@@ -183,27 +180,6 @@ function InstructorPage() {
   const [selectedEvent, setSelectedEvent] = React.useState<CalendarEvent | null>(null);
   const [manualEvent, setManualEvent] = React.useState<Partial<CalendarEvent>>({});
   
-  const generatePerformanceSummary = React.useCallback(async (instructor: User, courses: Course[], students: EnrolledStudent[], assignments: SubmittedAssignment[], transactions: Transaction[]) => {
-    if (!instructor) return;
-    setLoadingAiSummary(true);
-    try {
-        const response = await summarizeInstructorPerformance({
-            instructorName: instructor.displayName || 'Instructor',
-            totalStudents: students.length,
-            totalCourses: courses.length,
-            totalEarnings: transactions.filter(t => (t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale') && t.status !== 'Refunded').reduce((acc, t) => acc + t.amount, 0),
-            pendingAssignments: assignments.filter(a => a.status === 'Pending Review').length,
-            courseTitles: courses.map(c => c.title)
-        });
-        setAiSummary(response.summary);
-    } catch (error) {
-        console.error("Error generating AI summary: ", error);
-        setAiSummary("Could not generate performance summary at this time.");
-    } finally {
-        setLoadingAiSummary(false);
-    }
-  }, []);
-
   React.useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
@@ -215,7 +191,6 @@ function InstructorPage() {
       setLoadingAssignments(true);
       setLoadingTransactions(true);
       setLoadingStudents(true);
-      setLoadingAiSummary(true);
 
       try {
         const eventsSnapshot = await getDocs(collection(firestore, "events"));
@@ -282,8 +257,6 @@ function InstructorPage() {
         setLoadingTransactions(false);
         setLoadingStudents(false);
 
-        await generatePerformanceSummary(currentUser, fetchedCourses, fetchedStudents, fetchedAssignments, fetchedTransactions);
-
       } catch (error) {
         console.error("Error fetching instructor data: ", error);
         toast({ variant: "destructive", title: "Error", description: "Could not fetch your dashboard data." });
@@ -292,7 +265,6 @@ function InstructorPage() {
         setLoadingAssignments(false);
         setLoadingTransactions(false);
         setLoadingStudents(false);
-        setLoadingAiSummary(false);
       }
     };
     
@@ -313,12 +285,11 @@ function InstructorPage() {
         setLoadingAssignments(false);
         setLoadingTransactions(false);
         setLoadingStudents(false);
-        setLoadingAiSummary(false);
       }
     });
 
     return () => unsubscribe();
-  }, [toast, generatePerformanceSummary]);
+  }, [toast]);
 
   const handleCourseDialogOpenChange = (open: boolean) => {
     setIsCourseDialogOpen(open);
@@ -804,15 +775,12 @@ function InstructorPage() {
           students={enrolledStudents}
           assignments={submittedAssignments}
           transactions={transactions}
-          aiSummary={aiSummary}
           loading={{
             courses: loadingCourses,
             students: loadingStudents,
             assignments: loadingAssignments,
             transactions: loadingTransactions,
-            aiSummary: loadingAiSummary
           }}
-          onRegenerateSummary={() => user && generatePerformanceSummary(user, courses, enrolledStudents, submittedAssignments, transactions)}
           onReviewAssignment={handleReviewAssignment}
         />
       )}
@@ -944,5 +912,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    

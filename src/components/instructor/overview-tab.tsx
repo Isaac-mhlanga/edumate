@@ -22,15 +22,12 @@ interface InstructorOverviewTabProps {
   students: EnrolledStudent[];
   assignments: SubmittedAssignment[];
   transactions: Transaction[];
-  aiSummary: string;
   loading: {
     courses: boolean;
     students: boolean;
     assignments: boolean;
     transactions: boolean;
-    aiSummary: boolean;
   };
-  onRegenerateSummary: () => void;
   onReviewAssignment: (assignment: SubmittedAssignment) => void;
 }
 
@@ -40,9 +37,7 @@ export function InstructorOverviewTab({
   students,
   assignments,
   transactions,
-  aiSummary,
   loading,
-  onRegenerateSummary,
   onReviewAssignment
 }: InstructorOverviewTabProps) {
 
@@ -103,34 +98,8 @@ export function InstructorOverviewTab({
         ))}
       </section>
 
-      <section className="grid gap-6 lg:grid-cols-5">
-        <Card className="lg:col-span-3">
-          <CardHeader>
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Sparkles className="text-primary h-6 w-6" />
-                <CardTitle className="text-xl">AI Performance Summary</CardTitle>
-              </div>
-              <Button variant="ghost" size="sm" disabled={loading.aiSummary} onClick={onRegenerateSummary}>
-                <RefreshCw className={`mr-2 h-4 w-4 ${loading.aiSummary ? 'animate-spin' : ''}`} />
-                Regenerate
-              </Button>
-            </div>
-            <CardDescription>An AI-powered analysis of your performance.</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {loading.aiSummary ? (
-              <div className="space-y-2">
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-full" />
-                <Skeleton className="h-4 w-3/4" />
-              </div>
-            ) : (
-              <p className="text-muted-foreground">{aiSummary}</p>
-            )}
-          </CardContent>
-        </Card>
-        <Card className="lg:col-span-2 flex flex-col">
+      <section className="grid gap-6">
+        <Card className="flex flex-col">
             <CardHeader>
                 <CardTitle className="text-xl">Quick Actions</CardTitle>
                 <CardDescription>Urgent tasks that need your attention.</CardDescription>

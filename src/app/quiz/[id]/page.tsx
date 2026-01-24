@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -18,7 +19,6 @@ import { Label } from '@/components/ui/label';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { ArrowLeft, ArrowRight, Lightbulb, CheckCircle, XCircle, Check, Award, ChevronLeft, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { gradeQuiz, type GradeQuizInput, type GradeQuizOutput } from '@/ai/flows/grade-quiz';
 import 'katex/dist/katex.min.css';
 import { InlineMath, BlockMath } from 'react-katex';
 import { Progress } from '@/components/ui/progress';
@@ -51,7 +51,9 @@ type Quiz = {
 type SubmissionHistory = {
     id: string;
     submittedAt: Timestamp;
-    result: GradeQuizOutput;
+    result: {
+        overallScore: number;
+    };
 }
 
 const generateFormSchema = (questions: Question[]) => {
@@ -73,7 +75,6 @@ function QuizViewerPage() {
   const [hint, setHint] = useState<{ questionIndex: number; text: string } | null>(null);
   const [isHintLoading, setIsHintLoading] = useState(false);
   const [isGrading, setIsGrading] = useState(false);
-  const [quizResult, setQuizResult] = useState<GradeQuizOutput | null>(null);
   const [submissionHistory, setSubmissionHistory] = useState<SubmissionHistory[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
@@ -149,37 +150,12 @@ function QuizViewerPage() {
     if (!quiz || !user) return;
     setIsGrading(true);
 
-    const submission: GradeQuizInput = {
-      questionsAndAnswers: quiz.questions.map((q, i) => ({
-        question: q.questionText,
-        correctAnswer: q.correctAnswer,
-        studentAnswer: data[`answer-${i}`],
-      })),
-    };
+    toast({
+        title: "Submission Received",
+        description: "AI grading is currently disabled. We have received your submission.",
+    });
 
-    try {
-      const result = await gradeQuiz(submission);
-      setQuizResult(result);
-      
-      const firestore = getFirestore();
-      await addDoc(collection(firestore, 'quizSubmissions'), {
-          quizId,
-          quizTitle: quiz.title,
-          studentId: user.uid,
-          studentEmail: user.email,
-          submission,
-          result,
-          submittedAt: serverTimestamp(),
-      });
-
-      toast({ title: 'Quiz Graded!', description: `Your score is ${result.overallScore}%.` });
-
-    } catch (error) {
-      console.error('Error grading quiz:', error);
-      toast({ variant: 'destructive', title: 'Grading Failed', description: 'There was an error grading your quiz.' });
-    } finally {
-      setIsGrading(false);
-    }
+    setIsGrading(false);
   };
 
   if (loading) {
@@ -193,44 +169,6 @@ function QuizViewerPage() {
 
   if (!quiz) {
     return <div>Quiz not found.</div>;
-  }
-  
-  if (quizResult) {
-    const studentAnswers = form.getValues();
-    return (
-      <div className="space-y-6 max-w-4xl mx-auto">
-         <Button variant="outline" onClick={() => router.push('/instructor?tab=quizzes')} className="mb-4">
-            <ChevronLeft className="mr-2 h-4 w-4" /> Back to Quizzes
-         </Button>
-        <Card className="shadow-lg border-primary">
-          <CardHeader className="text-center bg-muted/50">
-            <div className="mx-auto bg-primary text-primary-foreground rounded-full h-16 w-16 flex items-center justify-center mb-4">
-                <Award className="h-8 w-8" />
-            </div>
-            <CardTitle className="text-3xl">Quiz Results: {quiz.title}</CardTitle>
-            <CardDescription className="text-xl">Your Score: <span className="font-bold text-primary">{quizResult.overallScore}%</span></CardDescription>
-            <p className="text-muted-foreground pt-2">{quizResult.summary}</p>
-          </CardHeader>
-          <CardContent className="space-y-6 p-6">
-            <h3 className="text-xl font-semibold">Detailed Review</h3>
-            {quizResult.gradedQuestions.map((gradedQ, index) => (
-              <Card key={index} className={cn('overflow-hidden', gradedQ.isCorrect ? 'border-green-200 dark:border-green-800' : 'border-red-200 dark:border-red-800')}>
-                <CardHeader className={cn('p-4', gradedQ.isCorrect ? 'bg-green-50 dark:bg-green-950' : 'bg-red-50 dark:bg-red-950')}>
-                    <div className="flex justify-between items-start gap-4">
-                        <div className="font-semibold text-base"><InlineMath math={gradedQ.question} /></div>
-                        {gradedQ.isCorrect ? <CheckCircle className="text-green-500 h-5 w-5 shrink-0" /> : <XCircle className="text-red-500 h-5 w-5 shrink-0" />}
-                    </div>
-                </CardHeader>
-                <CardContent className="p-4 space-y-2 text-sm">
-                  <p>Your answer: <code className="font-medium bg-muted px-2 py-1 rounded">{studentAnswers[`answer-${index}`]}</code></p>
-                  <p>Feedback: <span className="text-muted-foreground">{gradedQ.feedback}</span></p>
-                </CardContent>
-              </Card>
-            ))}
-          </CardContent>
-        </Card>
-      </div>
-    );
   }
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
@@ -351,7 +289,7 @@ function QuizViewerPage() {
                             </Button>
                         ) : (
                              <Button type="submit" size="lg" disabled={isGrading || answeredQuestionsCount < quiz.questions.length}>
-                                {isGrading ? 'Grading...' : 'Submit Quiz'}
+                                {isGrading ? 'Submitting...' : 'Submit Quiz'}
                              </Button>
                         )}
                     </CardFooter>

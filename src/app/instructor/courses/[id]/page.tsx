@@ -14,7 +14,6 @@ import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { summarizeLesson } from "@/ai/flows/summarize-lesson";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 
