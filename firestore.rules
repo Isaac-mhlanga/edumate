@@ -40,7 +40,12 @@ service cloud.firestore {
 
       // Users can update their own profile
       // Admins can update any user profile (e.g., to change roles)
-      allow update: if isSignedIn() && (isOwner(userId) || isAdmin());
+      // Allow incrementing referral balance by 20 IF the user being created was referred by this user
+      allow update: if isSignedIn() && 
+                    (isOwner(userId) || isAdmin() || 
+                    (request.resource.data.referralBalance == resource.data.referralBalance + 20 && 
+                     getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.referredBy == userId));
+
 
       // Only admins can delete users
       allow delete: if isAdmin();
@@ -115,9 +120,9 @@ service cloud.firestore {
     // Rules for payouts
     match /payouts/{payoutId} {
         // Instructors can create their own payout requests
-        allow create: if isInstructor() && isOwner(request.resource.data.instructorId);
-        // Instructors can read their own payout requests
-        allow get, list: if isInstructor() && isOwner(resource.data.instructorId);
+        allow create: if (isInstructor() && isOwner(request.resource.data.userId)) || isOwner(request.resource.data.userId);
+        // Instructors and users can read their own payout requests
+        allow get, list: if (isInstructor() && isOwner(resource.data.userId)) || isOwner(resource.data.userId);
         // Admins can read and update any payout request (to approve/decline)
         allow get, list, update: if isAdmin();
     }

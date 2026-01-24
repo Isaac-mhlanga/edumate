@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -48,14 +47,14 @@ export const PayoutReceipt = React.forwardRef<HTMLDivElement, PayoutReceiptProps
                     <CardContent className="p-6 space-y-6">
                         <div>
                             <h2 className="text-base font-semibold text-muted-foreground mb-2">PAYOUT TO</h2>
-                            <p className="text-lg font-bold">{payout.instructor}</p>
-                            <p className="text-sm text-muted-foreground">Instructor ID: {payout.instructorId}</p>
+                            <p className="text-lg font-bold">{payout.userName}</p>
+                            <p className="text-sm text-muted-foreground">User ID: {payout.userId}</p>
                         </div>
                         <Separator />
                         <div className="space-y-4">
                             <h3 className="text-base font-semibold text-muted-foreground">SUMMARY</h3>
                             <div className="flex justify-between items-center">
-                                <p>Payout Request ({payout.date})</p>
+                                <p>Payout Request ({payout.type})</p>
                                 <p className="font-medium">R {Math.abs(payout.amount).toFixed(2)}</p>
                             </div>
                              <div className="flex justify-between items-center">

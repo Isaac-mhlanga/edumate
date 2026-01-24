@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -8,7 +7,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSepar
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ListFilter, ReceiptText, CheckCircle, XCircle, Hourglass, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ListFilter, ReceiptText, CheckCircle, XCircle, Hourglass, ChevronLeft, ChevronRight, User, DollarSign } from "lucide-react";
 import { type PayoutRequest } from "@/app/admin/page";
 
 interface AdminPayoutsTabProps {
@@ -18,8 +17,8 @@ interface AdminPayoutsTabProps {
 }
 
 export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: AdminPayoutsTabProps) {
-    const [payoutFilters, setPayoutFilters] = React.useState({ search: '', status: 'All' });
-    const [currentPayoutPage, setCurrentPayoutPage] = React.useState(1);
+    const [payoutFilters, setPayoutFilters = React.useState({ search: '', status: 'All' });
+    const [currentPayoutPage, setCurrentPayoutPage = React.useState(1);
     const payoutsPerPage = 7;
 
     const handlePayoutFilterChange = (key: keyof typeof payoutFilters, value: string) => {
@@ -30,7 +29,7 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
     const filteredPayouts = React.useMemo(() => {
         return payouts.filter(payout => {
             const searchMatch = payoutFilters.search.trim().toLowerCase() === '' ||
-                payout.instructor.toLowerCase().includes(payoutFilters.search.trim().toLowerCase());
+                payout.userName.toLowerCase().includes(payoutFilters.search.trim().toLowerCase());
             const statusMatch = payoutFilters.status === 'All' || payout.status === payoutFilters.status;
             return searchMatch && statusMatch;
         });
@@ -41,14 +40,14 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
     return (
         <Card>
              <CardHeader>
-                <CardTitle className="text-xl">Instructor Payouts</CardTitle>
-                <CardDescription>Review and process pending payout requests from instructors.</CardDescription>
+                <CardTitle className="text-xl">Payouts</CardTitle>
+                <CardDescription>Review and process pending instructor and referral payouts.</CardDescription>
             </CardHeader>
             <div className="flex flex-col md:flex-row items-center justify-between gap-2 p-4 border-y">
                 <div className="relative flex-1 w-full">
                     <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                     <Input
-                        placeholder="Search by instructor..."
+                        placeholder="Search by user..."
                         className="pl-8"
                         value={payoutFilters.search}
                         onChange={(e) => handlePayoutFilterChange('search', e.target.value)}
@@ -76,7 +75,8 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Instructor</TableHead>
+                        <TableHead>User</TableHead>
+                        <TableHead>Type</TableHead>
                         <TableHead>Amount (R)</TableHead>
                         <TableHead className="hidden md:table-cell">Request Date</TableHead>
                         <TableHead>Status</TableHead>
@@ -86,7 +86,13 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
                 <TableBody>
                     {paginatedPayouts.map(payout => (
                         <TableRow key={payout.id}>
-                            <TableCell className="font-medium">{payout.instructor}</TableCell>
+                            <TableCell className="font-medium">{payout.userName}</TableCell>
+                            <TableCell>
+                                <Badge variant="outline" className="flex items-center gap-1.5 w-fit">
+                                    {payout.type === 'Instructor' ? <DollarSign className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                                    {payout.type}
+                                </Badge>
+                            </TableCell>
                             <TableCell className={`font-semibold ${payout.amount < 0 ? 'text-red-600' : ''}`}>{Math.abs(payout.amount).toFixed(2)}</TableCell>
                             <TableCell className="hidden md:table-cell">{payout.date}</TableCell>
                             <TableCell>

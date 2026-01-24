@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -42,6 +41,7 @@ import {
   Wand2,
   UserCog,
   HelpCircle,
+  Gift,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
@@ -96,6 +96,7 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard/tutors', label: 'Find Tutors', icon: Users, basePath: '/dashboard/tutors' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
+  { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
   { href: '/dashboard?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/dashboard', tab: 'subscriptions' },
 ];

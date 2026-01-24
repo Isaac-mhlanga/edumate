@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -15,9 +14,9 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, type Auth } from "firebase/auth";
-import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, doc, setDoc, serverTimestamp, getDoc, writeBatch, increment } from "firebase/firestore";
 import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
-import { User, Mail, KeyRound, Phone } from "lucide-react";
+import { User, Mail, KeyRound, Phone, Gift } from "lucide-react";
 
 // Define the configuration directly for client-side use.
 const firebaseConfig = {
@@ -37,6 +36,7 @@ const registerFormSchema = z.object({
     password: z.string().min(6, "Password must be at least 6 characters long."),
     confirmPassword: z.string(),
     role: z.enum(["student", "instructor", "tutor"], { required_error: "Please select a role." }),
+    referralCode: z.string().optional(),
 }).refine(data => data.password === data.confirmPassword, {
     message: "Passwords do not match.",
     path: ["confirmPassword"],
@@ -50,10 +50,12 @@ export default function RegisterPage() {
     const { toast } = useToast();
     const [isLoading, setIsLoading] = React.useState(false);
     const [auth, setAuth] = React.useState<Auth | null>(null);
+    const [db, setDb] = React.useState<import('firebase/firestore').Firestore | null>(null);
 
     React.useEffect(() => {
         const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApp();
         setAuth(getAuth(app));
+        setDb(getFirestore(app));
     }, []);
 
     const form = useForm<RegisterFormValues>({
@@ -64,11 +66,12 @@ export default function RegisterPage() {
             phoneNumber: "",
             password: "",
             confirmPassword: "",
+            referralCode: "",
         }
     });
 
     const handleRegister = async (data: RegisterFormValues) => {
-        if (!auth) {
+        if (!auth || !db) {
             toast({
                 variant: "destructive",
                 title: "Registration Failed",
@@ -78,7 +81,22 @@ export default function RegisterPage() {
         }
 
         setIsLoading(true);
+        let referrerDocRef: import('firebase/firestore').DocumentReference | null = null;
+        
+        // 1. Validate referral code if provided
+        if (data.referralCode) {
+            referrerDocRef = doc(db, "users", data.referralCode);
+            const referrerSnap = await getDoc(referrerDocRef);
+            if (!referrerSnap.exists()) {
+                toast({ variant: "destructive", title: "Invalid Referral Code", description: "The referral code you entered does not exist." });
+                setIsLoading(false);
+                return;
+            }
+        }
+
+
         try {
+            // 2. Create user
             const userCredential = await createUserWithEmailAndPassword(auth, data.email, data.password);
             const user = userCredential.user;
             await updateProfile(user, { displayName: data.fullName });
@@ -86,18 +104,23 @@ export default function RegisterPage() {
             // Send verification email
             await sendEmailVerification(user);
 
-            // Create user document in Firestore
-            const db = getFirestore(auth.app);
-            await setDoc(doc(db, "users", user.uid), {
+            const batch = writeBatch(db);
+
+            // 3. Create user document
+            const newUserDocRef = doc(db, "users", user.uid);
+            const newUserDocData = {
                 uid: user.uid,
                 fullName: data.fullName,
                 email: data.email,
                 phoneNumber: data.phoneNumber,
                 role: data.role,
                 createdAt: serverTimestamp(),
-                subscriptionPlan: 'Free', // Default to Free plan
-                status: 'Active'
-            });
+                subscriptionPlan: 'Free',
+                status: 'Active',
+                referralBalance: 0,
+                ...(data.referralCode && { referredBy: data.referralCode }),
+            };
+            batch.set(newUserDocRef, newUserDocData);
             
             // If the user is a tutor, create a default tutor profile
             if (data.role === 'tutor') {
@@ -106,7 +129,7 @@ export default function RegisterPage() {
                     { day: "Monday", slots: [] }, { day: "Tuesday", slots: [] }, { day: "Wednesday", slots: [] },
                     { day: "Thursday", slots: [] }, { day: "Friday", slots: [] }, { day: "Saturday", slots: [] }, { day: "Sunday", slots: [] },
                 ];
-                await setDoc(tutorProfileRef, {
+                batch.set(tutorProfileRef, {
                     id: user.uid,
                     name: data.fullName,
                     email: data.email,
@@ -123,6 +146,14 @@ export default function RegisterPage() {
                     approvalStatus: 'Pending'
                 });
             }
+
+            // 4. Update referrer's balance if code was valid
+            if (referrerDocRef) {
+                batch.update(referrerDocRef, { referralBalance: increment(20) });
+            }
+            
+            // 5. Commit all writes
+            await batch.commit();
 
             toast({
                 title: "Registration Successful!",
@@ -274,6 +305,22 @@ export default function RegisterPage() {
                                         )}
                                     />
                                 </div>
+                                <FormField
+                                    control={form.control}
+                                    name="referralCode"
+                                    render={({ field }) => (
+                                        <FormItem>
+                                            <FormLabel>Referral Code (Optional)</FormLabel>
+                                            <FormControl>
+                                                <div className="relative">
+                                                    <Gift className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                    <Input placeholder="Enter a friend's referral code" {...field} className="pl-10" />
+                                                </div>
+                                            </FormControl>
+                                            <FormMessage />
+                                        </FormItem>
+                                    )}
+                                />
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4">
                                 <Button type="submit" className="w-full" disabled={isLoading || !auth}>
@@ -293,5 +340,3 @@ export default function RegisterPage() {
         </div>
     );
 }
-
-    

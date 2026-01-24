@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -465,9 +464,3 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
-
-    
-
-    
-
-    
