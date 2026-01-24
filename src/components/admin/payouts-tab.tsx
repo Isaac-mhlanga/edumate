@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -17,8 +18,8 @@ interface AdminPayoutsTabProps {
 }
 
 export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: AdminPayoutsTabProps) {
-    const [payoutFilters, setPayoutFilters = React.useState({ search: '', status: 'All' });
-    const [currentPayoutPage, setCurrentPayoutPage = React.useState(1);
+    const [payoutFilters, setPayoutFilters] = React.useState({ search: '', status: 'All' });
+    const [currentPayoutPage, setCurrentPayoutPage] = React.useState(1);
     const payoutsPerPage = 7;
 
     const handlePayoutFilterChange = (key: keyof typeof payoutFilters, value: string) => {
