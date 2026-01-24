@@ -17,7 +17,7 @@ import { z } from "zod";
 import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, type Auth } from "firebase/auth";
 import { getFirestore, doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
-import { User, Mail, KeyRound } from "lucide-react";
+import { User, Mail, KeyRound, Phone } from "lucide-react";
 
 // Define the configuration directly for client-side use.
 const firebaseConfig = {
@@ -33,6 +33,7 @@ const firebaseConfig = {
 const registerFormSchema = z.object({
     fullName: z.string().min(1, "Full name is required"),
     email: z.string().email("Please enter a valid email address."),
+    phoneNumber: z.string().optional(),
     password: z.string().min(6, "Password must be at least 6 characters long."),
     confirmPassword: z.string(),
     role: z.enum(["student", "instructor", "tutor"], { required_error: "Please select a role." }),
@@ -60,6 +61,7 @@ export default function RegisterPage() {
         defaultValues: {
             fullName: "",
             email: "",
+            phoneNumber: "",
             password: "",
             confirmPassword: "",
         }
@@ -90,6 +92,7 @@ export default function RegisterPage() {
                 uid: user.uid,
                 fullName: data.fullName,
                 email: data.email,
+                phoneNumber: data.phoneNumber,
                 role: data.role,
                 createdAt: serverTimestamp(),
                 subscriptionPlan: 'Free', // Default to Free plan
@@ -200,6 +203,44 @@ export default function RegisterPage() {
                                             </FormItem>
                                         )}
                                     />
+                                     <FormField
+                                        control={form.control}
+                                        name="phoneNumber"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel>Phone Number (Optional)</FormLabel>
+                                                <FormControl>
+                                                    <div className="relative">
+                                                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                                        <Input placeholder="+27 12 345 6789" {...field} className="pl-10" />
+                                                    </div>
+                                                </FormControl>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
+                                    <FormField
+                                        control={form.control}
+                                        name="role"
+                                        render={({ field }) => (
+                                           <FormItem>
+                                                <FormLabel>I am a...</FormLabel>
+                                                 <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                                    <FormControl>
+                                                        <SelectTrigger>
+                                                            <SelectValue placeholder="Select your role" />
+                                                        </SelectTrigger>
+                                                    </FormControl>
+                                                    <SelectContent>
+                                                        <SelectItem value="student">Student</SelectItem>
+                                                        <SelectItem value="instructor">Instructor</SelectItem>
+                                                        <SelectItem value="tutor">Tutor</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                                <FormMessage />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="password"
@@ -233,28 +274,6 @@ export default function RegisterPage() {
                                         )}
                                     />
                                 </div>
-                                <FormField
-                                    control={form.control}
-                                    name="role"
-                                    render={({ field }) => (
-                                       <FormItem>
-                                            <FormLabel>I am a...</FormLabel>
-                                             <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                                <FormControl>
-                                                    <SelectTrigger>
-                                                        <SelectValue placeholder="Select your role" />
-                                                    </SelectTrigger>
-                                                </FormControl>
-                                                <SelectContent>
-                                                    <SelectItem value="student">Student</SelectItem>
-                                                    <SelectItem value="instructor">Instructor</SelectItem>
-                                                    <SelectItem value="tutor">Tutor</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                            <FormMessage />
-                                        </FormItem>
-                                    )}
-                                />
                             </CardContent>
                             <CardFooter className="flex flex-col gap-4">
                                 <Button type="submit" className="w-full" disabled={isLoading || !auth}>
@@ -274,3 +293,5 @@ export default function RegisterPage() {
         </div>
     );
 }
+
+    

@@ -35,7 +35,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; originalJoinedDate: Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; };
+export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; originalJoinedDate: Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; phoneNumber?: string; };
 export type Course = { id: string; instructorId: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft'; createdAt: Timestamp };
 export type PayoutRequest = {
     id: string;
@@ -141,7 +141,7 @@ function AdminPage() {
                 setSubscriptions(fetchedSubscriptions);
                 const subscriptionMap = new Map<string, string>();
                 fetchedSubscriptions.forEach(sub => { if (sub.status === 'Active') { subscriptionMap.set(sub.studentId, sub.planName); } });
-                const usersWithSubscriptions = fetchedUsers.map(user => ({ ...user, subscriptionPlan: subscriptionMap.get(user.id) }));
+                const usersWithSubscriptions = fetchedUsers.map(user => ({ ...user, subscriptionPlan: subscriptionMap.get(user.id) || user.subscriptionPlan }));
                 setUsers(usersWithSubscriptions);
 
                 const tutorsSnapshot = await getDocs(collection(firestore, "tutors"));
@@ -451,3 +451,5 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
+
+    

@@ -16,7 +16,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { useToast } from '@/hooks/use-toast';
 import { Skeleton } from '@/components/ui/skeleton';
 import withAuth from '@/components/with-auth';
-import { UserCircle, Save } from 'lucide-react';
+import { UserCircle, Save, Phone } from 'lucide-react';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -32,6 +32,7 @@ type Role = 'student' | 'instructor' | 'admin' | 'tutor';
 const settingsFormSchema = z.object({
   fullName: z.string().min(1, 'Full name is required'),
   email: z.string().email(),
+  phoneNumber: z.string().optional(),
   role: z.enum(['student', 'instructor', 'tutor', 'admin']),
 });
 
@@ -64,6 +65,7 @@ function SettingsPage() {
             form.reset({
                 fullName: currentUser.displayName || userData.fullName || '',
                 email: currentUser.email || '',
+                phoneNumber: userData.phoneNumber || '',
                 role: userData.role || 'student',
             });
         }
@@ -88,6 +90,7 @@ function SettingsPage() {
       const userDocRef = doc(db, "users", user.uid);
       await updateDoc(userDocRef, {
         fullName: data.fullName,
+        phoneNumber: data.phoneNumber,
       });
 
       toast({
@@ -158,6 +161,22 @@ function SettingsPage() {
                   </FormItem>
                 )}
               />
+               <FormField
+                control={form.control}
+                name="phoneNumber"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Phone Number</FormLabel>
+                    <FormControl>
+                      <div className="relative">
+                        <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="+27 12 345 6789" {...field} className="pl-10" />
+                      </div>
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
               <FormField
                 control={form.control}
                 name="role"
@@ -200,3 +219,5 @@ function SettingsPage() {
 
 // Protect the settings page with authentication, allowing any role.
 export default withAuth(SettingsPage, ['student', 'instructor', 'admin', 'tutor']);
+
+    

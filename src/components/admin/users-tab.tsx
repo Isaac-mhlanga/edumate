@@ -93,6 +93,7 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
                                     <div>
                                         <p className="font-medium">{user.name}</p>
                                         <p className="text-xs text-muted-foreground">{user.email}</p>
+                                        {user.phoneNumber && <p className="text-xs text-muted-foreground">{user.phoneNumber}</p>}
                                     </div>
                                 </div>
                             </TableCell>
@@ -143,3 +144,5 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
         </Card>
     );
 }
+
+    
