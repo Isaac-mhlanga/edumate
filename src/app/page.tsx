@@ -235,9 +235,9 @@ export default function Home() {
          <div>
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
             <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30">
-                <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-full -top-24 -left-24 animate-float-1" />
-                <div className="absolute bg-accent/10 w-96 h-96 rounded-full -bottom-20 -right-24 animate-float-2" />
-                <div className="absolute bg-primary/5 w-64 h-64 rounded-full bottom-1/3 right-1/4 animate-float-3" />
+                <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-full -top-24 -left-24 float-1" />
+                <div className="absolute bg-accent/10 w-96 h-96 rounded-full -bottom-20 -right-24 float-2" />
+                <div className="absolute bg-primary/5 w-64 h-64 rounded-full bottom-1/3 right-1/4 float-3" />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
@@ -300,7 +300,7 @@ export default function Home() {
                   <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaTiktok className="h-5 w-5" />
                   </Link>
-                  <Link href="#" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                  <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaYoutube className="h-5 w-5" />
                   </Link>
                 </div>
@@ -338,7 +338,7 @@ export default function Home() {
                   </div>
                   <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                      <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up transition-shadow hover:shadow-xl rounded-lg" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                      <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up transition-shadow hover:shadow-xl" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                         <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                             {feature.icon}
                         </div>
@@ -372,7 +372,7 @@ export default function Home() {
                     </div>
 
                     <div className="max-w-3xl mx-auto space-y-8">
-                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: '0.2s' }}>
+                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: '0.2s' }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -396,7 +396,7 @@ export default function Home() {
                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
                             </CardContent>
                         </Card>
-                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: '0.4s' }}>
+                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: '0.4s' }}>
                              <CardHeader>
                                 <div className="flex items-center gap-4">
                                     <div className="bg-primary/10 text-primary p-3 rounded-full">
@@ -441,7 +441,7 @@ export default function Home() {
                     {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
                     const Icon = curriculumIcons[subject];
                     return (
-                        <Card key={subject} className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={subject} className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex items-center gap-4">
                                 {Icon && <Icon className="h-8 w-8 text-primary" />}
@@ -522,7 +522,7 @@ export default function Home() {
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
-                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl rounded-lg" style={{ animationDelay: `${0.1 * index}s` }}>
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-start gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
                                       <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
@@ -575,7 +575,7 @@ export default function Home() {
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                        {Array.from({ length: 3 }).map((_, i) => (
-                           <Card key={i} className="bg-card animate-fade-in-up border rounded-lg">
+                           <Card key={i} className="bg-card animate-fade-in-up border">
                                <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
                                <CardContent className="pt-4 space-y-2">
                                    <Skeleton className="h-4 w-1/4"/>
@@ -605,7 +605,7 @@ export default function Home() {
                         {allCourses.map((course, index) => (
                           <CarouselItem key={course.id} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1">
-                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl rounded-lg">
+                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
                                 <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                   <Image 
                                     src={course.thumbnail}
@@ -675,7 +675,7 @@ export default function Home() {
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card border transition-shadow duration-300 hover:shadow-xl rounded-lg">
+                         <Card key={index} className="overflow-hidden bg-card border transition-shadow duration-300 hover:shadow-xl">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
                                 <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}
@@ -692,7 +692,7 @@ export default function Home() {
 
           <section id="contact" className="py-24 bg-muted">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
-              <Card className="p-8 sm:p-12 bg-card border rounded-lg">
+              <Card className="p-8 sm:p-12 bg-card border">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
                   Start Your Learning Journey Today
                 </h2>
