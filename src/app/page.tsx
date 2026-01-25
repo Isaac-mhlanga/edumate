@@ -263,7 +263,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section className="py-24 bg-slate-50">
+          <section className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
                 {stats.map((stat, index) => (
@@ -280,7 +280,7 @@ export default function Home() {
             </div>
           </section>
           
-           <section id="refer" className="py-24 bg-violet-50 dark:bg-violet-900/10">
+           <section id="refer" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6 animate-fade-in-up">
               <div className="text-center">
                 <div className="inline-block p-6 bg-primary/10 rounded-full text-primary mb-4">
@@ -318,7 +318,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="about" className="py-24">
+          <section id="about" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
@@ -363,7 +363,7 @@ export default function Home() {
           
            
 
-           <section id="varsity-support" className="py-24 bg-violet-50">
+           <section id="varsity-support" className="py-24 bg-background">
                 <div className="max-w-7xl mx-auto px-6">
                     <div className="text-center mb-16 animate-fade-in-up">
                         <Badge>Varsity &amp; College Support</Badge>
@@ -433,7 +433,7 @@ export default function Home() {
                 </div>
             </section>
           
-           <section id="curriculum" className="py-24">
+           <section id="curriculum" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>High School</Badge>
@@ -515,7 +515,7 @@ export default function Home() {
             </div>
         </section>
 
-          <section id="events" className="py-24 bg-teal-50">
+          <section id="events" className="py-24 bg-background">
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
@@ -569,7 +569,7 @@ export default function Home() {
               </div>
           </section>
 
-          <section id="courses" className="py-24">
+          <section id="courses" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
@@ -670,7 +670,7 @@ export default function Home() {
             </div>
           </section>
           
-          <section id="faq" className="py-24 bg-slate-50">
+          <section id="faq" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Need Help?</Badge>
@@ -694,7 +694,7 @@ export default function Home() {
             </div>
           </section>
 
-          <section id="contact" className="py-24">
+          <section id="contact" className="py-24 bg-muted">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
               <Card className="p-8 sm:p-12 bg-card border rounded-lg">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
@@ -830,5 +830,7 @@ export default function Home() {
     </div>
   );
 }
+
+    
 
     
