@@ -1,4 +1,3 @@
-
 'use client'
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -9,6 +8,7 @@ import React, { Suspense } from 'react';
 import 'katex/dist/katex.min.css';
 import { Skeleton } from '@/components/ui/skeleton';
 import { GoogleAnalytics } from '@/components/google-analytics';
+import Script from 'next/script';
 
 const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors', '/community'];
 
@@ -49,6 +49,12 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVEMmg9ikOAiqRT5bDLA+UY+qCFs1IIF1oFHbkdsUgUjdVYEzpv" crossOrigin="anonymous" />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning={true}>
+        <div id="fb-root"></div>
+        <Script
+          id="facebook-sdk"
+          src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"
+          strategy="afterInteractive"
+        />
         <ThemeProvider
             attribute="class"
             defaultTheme="light"
@@ -65,5 +71,3 @@ export default function RootLayout({
     </html>
   );
 }
-
-    

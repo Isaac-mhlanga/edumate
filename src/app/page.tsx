@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -294,7 +293,7 @@ export default function Home() {
                    To be eligible for rewards, subscribe and follow us on our platforms for tips, updates, and more!
                 </p>
                 <div className="flex justify-center space-x-4 mb-8">
-                  <Link href="#" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                  <Link href="https://www.facebook.com/your-page" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaFacebook className="h-5 w-5" />
                   </Link>
                   <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
@@ -303,6 +302,22 @@ export default function Home() {
                   <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaYoutube className="h-5 w-5" />
                   </Link>
+                </div>
+                <div className="my-8 flex justify-center">
+                    <div 
+                        className="fb-page" 
+                        data-href="https://www.facebook.com/facebook" 
+                        data-tabs="" 
+                        data-width="" 
+                        data-height="130" 
+                        data-small-header="false" 
+                        data-adapt_container_width="true" 
+                        data-hide_cover="false" 
+                        data-show-facepile="true">
+                        <blockquote cite="https://www.facebook.com/facebook" className="fb-xfbml-parse-ignore">
+                            <a href="https://www.facebook.com/facebook">Meta for Developers</a>
+                        </blockquote>
+                    </div>
                 </div>
                 <Button size="lg" asChild>
                   <Link href="/register">
@@ -332,7 +347,7 @@ export default function Home() {
                           alt="Diverse group of students"
                           width={600}
                           height={800}
-                          className="rounded-lg shadow-lg object-cover h-full w-full"
+                          className="object-cover h-full w-full"
                           data-ai-hint="diverse students learning"
                       />
                   </div>
