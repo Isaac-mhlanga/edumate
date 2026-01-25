@@ -28,7 +28,7 @@ import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { event } from '@/components/google-analytics';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { type UpcomingEvent } from "@/lib/data";
-import { FaFacebook, FaTiktok, FaYoutube, FaInstagram } from "react-icons/fa";
+import { FaFacebook, FaTiktok, FaYoutube } from "react-icons/fa";
 
 
 const firebaseConfig = {
@@ -291,21 +291,17 @@ export default function Home() {
                   Refer a Friend, Earn R20!
                 </h2>
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed max-w-2xl mx-auto">
-                   Love our platform? Share your unique referral code with friends. When they sign up, you'll be rewarded. It's our way of saying thanks!
+                   To be eligible for rewards, subscribe and follow us on our platforms for tips, updates, and more!
                 </p>
-                <p className="text-sm text-muted-foreground mb-4">To be eligible for rewards, subscribe and follow us on our platforms for tips, updates, and more!</p>
                 <div className="flex justify-center space-x-4 mb-8">
                   <Link href="#" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaFacebook className="h-5 w-5" />
                   </Link>
-                  <Link href="#" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                  <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaTiktok className="h-5 w-5" />
                   </Link>
                   <Link href="#" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaYoutube className="h-5 w-5" />
-                  </Link>
-                  <Link href="#" aria-label="Instagram" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                    <FaInstagram className="h-5 w-5" />
                   </Link>
                 </div>
                 <Button size="lg" asChild>
@@ -830,7 +826,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
-
-    
