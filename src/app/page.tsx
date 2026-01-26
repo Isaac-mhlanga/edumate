@@ -140,17 +140,17 @@ export default function Home() {
     {
       icon: <GraduationCap className="w-8 h-8 text-primary" />,
       title: 'Expert-Led Video Lessons',
-      description: 'Access a comprehensive library of video lessons for Grades 10-12 in Maths & Sciences.'
+      description: 'Dive into our extensive library of on-demand video lessons. Created by subject-matter experts, each lesson breaks down complex topics into clear, digestible segments.'
     },
     {
       icon: <Users className="w-8 h-8 text-primary" />,
-      title: 'One-on-One Sessions',
-      description: 'Book personal tutoring sessions with subject-matter experts tailored to your specific needs.'
+      title: 'One-on-One Tutoring',
+      description: 'Connect with our vetted professional tutors for personalized sessions. Whether you\'re stuck on a specific problem or need to build a stronger foundation, our experts are here to help.'
     },
     {
       icon: <PenSquare className="w-8 h-8 text-primary" />,
-      title: 'Project & Assignment Help',
-      description: 'Get expert assistance for your high school and university-level assignments and projects.'
+      title: 'Assignment & Project Help',
+      description: 'Overcome academic hurdles with our assignment assistance service. Get expert guidance and model solutions for your high school and university projects to ensure you learn and excel.'
     }
   ];
 
@@ -228,10 +228,10 @@ export default function Home() {
             <div className="container mx-auto px-6 relative z-10">
               <div className="max-w-3xl mx-auto text-center">
                 <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 leading-tight animate-fade-in-up bg-gradient-to-r from-primary via-foreground to-primary bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
-                  Learn Smarter, Not Harder
+                  Unlock Your Academic Potential
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                  Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
+                  Master complex subjects with our expert-led video lessons, personalized one-on-one tutoring, and dedicated assignment assistance. Edumate Pro is the all-in-one platform designed to help high school and university students learn smarter, achieve higher grades, and build confidence.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                   <Button asChild size="lg">
@@ -272,10 +272,10 @@ export default function Home() {
                 </div>
                 <Badge>Refer &amp; Earn</Badge>
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-3">
-                  Refer a Friend, Earn R20!
+                  Share the Knowledge, Get Rewarded
                 </h2>
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed max-w-2xl mx-auto">
-                   To be eligible for rewards, subscribe and follow us on our platforms for tips, updates, and more!
+                  Invite your friends to join Edumate Pro! For every friend that signs up using your unique referral link, you'll earn R20 in credits. It's our way of saying thank you for helping our community grow.
                 </p>
                 <div className="flex justify-center space-x-4 mb-8">
                   <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
@@ -303,10 +303,10 @@ export default function Home() {
                <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
-                  A Smarter Way to Learn
+                  Our Mission: To Make Quality Education Accessible
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                  We believe that every student deserves the best tools to succeed. Our platform combines cutting-edge technology with expert-led instruction to create a learning experience that is effective, engaging, and accessible to everyone.
+                  At Edumate Pro, we're passionate about breaking down educational barriers. We believe that every student, regardless of their background, deserves access to high-quality learning resources and expert guidance. Our platform is meticulously designed to combine state-of-the-art technology with proven teaching methodologies, creating a learning experience that is not only effective but also engaging and empowering.
                 </p>
               </div>
               <div className="max-w-4xl mx-auto">
@@ -345,8 +345,8 @@ export default function Home() {
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
-                      <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
-                      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live classes and revision sessions to boost your preparation.</p>
+                      <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Don't Miss Our Live Events</h2>
+                      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Tune into our free, interactive live classes and intensive revision sessions. It's a great way to consolidate your knowledge, ask questions, and prepare for exams with our top instructors.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
@@ -399,8 +399,8 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
-                  <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Featured Courses</h2>
-                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Hand-picked courses to help you excel in your studies.</p>
+                  <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Explore Our Featured Courses</h2>
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Get a glimpse of our most popular courses, designed and taught by industry experts to help you master challenging subjects with confidence.</p>
                 </div>
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -527,10 +527,10 @@ export default function Home() {
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
               <Card className="p-8 sm:p-12 bg-card border">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
-                  Start Your Learning Journey Today
+                  Ready to Elevate Your Learning?
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  Join thousands of students transforming their education with AI.
+                  Join thousands of students who are already achieving their academic goals with Edumate Pro. Sign up today and take the first step towards academic excellence.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button size="lg" asChild>
