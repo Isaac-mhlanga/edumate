@@ -137,6 +137,12 @@ export default function Home() {
     fetchEvents();
   }, []);
 
+  useEffect(() => {
+    if (isClient && typeof (window as any).FB !== 'undefined') {
+      (window as any).FB.XFBML.parse();
+    }
+  }, [isClient]);
+
   const features = [
     {
       icon: <GraduationCap className="w-8 h-8 text-primary" />,
@@ -206,6 +212,8 @@ export default function Home() {
     const element = document.getElementById(id);
     if (element) {
         element.scrollIntoView({ behavior: 'smooth' });
+    } else {
+        window.location.href = `/#${id}`;
     }
   };
 
@@ -304,20 +312,26 @@ export default function Home() {
                   </Link>
                 </div>
                 <div className="my-8 flex justify-center">
-                    <div 
-                        className="fb-page" 
-                        data-href="https://www.facebook.com/facebook" 
-                        data-tabs="" 
-                        data-width="" 
-                        data-height="130" 
-                        data-small-header="false" 
-                        data-adapt_container_width="true" 
-                        data-hide_cover="false" 
-                        data-show-facepile="true">
-                        <blockquote cite="https://www.facebook.com/facebook" className="fb-xfbml-parse-ignore">
-                            <a href="https://www.facebook.com/facebook">Meta for Developers</a>
-                        </blockquote>
-                    </div>
+                    {isClient ? (
+                        <div 
+                            className="fb-page" 
+                            data-href="https://www.facebook.com/facebook" 
+                            data-tabs="" 
+                            data-width="" 
+                            data-height="130" 
+                            data-small-header="false" 
+                            data-adapt_container_width="true" 
+                            data-hide_cover="false" 
+                            data-show-facepile="true">
+                            <blockquote cite="https://www.facebook.com/facebook" className="fb-xfbml-parse-ignore">
+                                <a href="https://www.facebook.com/facebook">Meta for Developers</a>
+                            </blockquote>
+                        </div>
+                    ) : (
+                        <div className="h-[130px] w-full max-w-[500px] flex items-center justify-center bg-muted rounded-lg">
+                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
+                        </div>
+                    )}
                 </div>
                 <Button size="lg" asChild>
                   <Link href="/register">
