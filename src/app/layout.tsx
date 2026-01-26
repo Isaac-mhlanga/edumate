@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import Script from 'next/script';
 
-const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors', '/community'];
+const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors', '/community', '/courses', '/high-school', '/varsity'];
 
 const AppLoadingSkeleton = () => (
     <div className="space-y-8 p-4 md:p-6 lg:p-8">
