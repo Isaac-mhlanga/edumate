@@ -1,13 +1,14 @@
+
 'use client';
 
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift, Facebook } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
-import { faqData, curriculumData } from "@/lib/data";
+import { faqData } from "@/lib/data";
 import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
@@ -23,7 +24,6 @@ import { getFirestore, collection, query, where, getDocs, orderBy } from 'fireba
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 import { useToast } from "@/hooks/use-toast";
-import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { event } from '@/components/google-analytics';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { type UpcomingEvent } from "@/lib/data";
@@ -79,7 +79,6 @@ export default function Home() {
   
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-  const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
   const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<Course | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<UpcomingEvent | null>(null);
   const [activeVideo, setActiveVideo] = useState<VideoData | undefined>(undefined);
@@ -161,12 +160,6 @@ export default function Home() {
     { number: '10k+', label: 'Happy Students' },
     { number: 'Top 1%', label: 'Expert Tutors' }
   ];
-  
-  const curriculumIcons: { [key: string]: React.ElementType } = {
-    'Mathematics': FunctionSquare,
-    'Physical Sciences': Rocket,
-    'Life Sciences': Dna,
-  };
 
   const platformLabels: {[key: string]: string} = {
     youtube: 'YouTube',
@@ -201,15 +194,6 @@ export default function Home() {
       setActiveVideo(selectedCourseForPlayer.videos[0]);
     }
   }, [selectedCourseForPlayer]);
-  
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    } else {
-        window.location.href = `/#${id}`;
-    }
-  };
 
   const formatDuration = (videos: VideoData[] = []) => {
       const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
@@ -250,11 +234,10 @@ export default function Home() {
                   Expert-led video lessons, one-on-one tutoring, and assignment help for high school and university students. Unlock your potential with our comprehensive learning platform.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                  <Button onClick={() => {
-                      scrollToSection('curriculum');
-                      event({ action: 'click_curriculum', category: 'homepage', label: 'Hero Section Button' });
-                  }} size="lg">
-                    Explore Curriculum <ArrowRight className="ml-2" />
+                  <Button asChild size="lg">
+                    <Link href="/courses" onClick={() => event({ action: 'click_courses', category: 'homepage', label: 'Hero Section Button' })}>
+                        Explore Courses <ArrowRight className="ml-2" />
+                    </Link>
                   </Button>
                   <Button asChild size="lg" variant="outline">
                     <Link href="/tutors" onClick={() => event({ action: 'click_find_tutor', category: 'homepage', label: 'Hero Section Button' })}>Find a Tutor</Link>
@@ -357,160 +340,6 @@ export default function Home() {
               </div>
             </div>
           </section>
-          
-           
-
-           <section id="varsity-support" className="py-24 bg-background">
-                <div className="max-w-7xl mx-auto px-6">
-                    <div className="text-center mb-16 animate-fade-in-up">
-                        <Badge>Varsity &amp; College Support</Badge>
-                        <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
-                            Excel in Your Tertiary Studies
-                        </h2>
-                        <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                            Stuck on a complex assignment, project, or research paper? Our team of experts provides specialized assistance for university and college students at all levels.
-                        </p>
-                    </div>
-
-                    <div className="max-w-3xl mx-auto space-y-8">
-                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: '0.2s' }}>
-                            <CardHeader>
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 text-primary p-3 rounded-full">
-                                        <Files className="w-6 h-6" />
-                                    </div>
-                                    <CardTitle>Undergraduate Modules</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <p className="text-muted-foreground">Get help with foundational concepts and challenging assignments in your early university years.</p>
-                                {[
-                                    "Computer Science 1: Fundamentals of Programming",
-                                    "Computer Science 2: Data Structures & Algorithms",
-                                    "Computer Science 3: Advanced Algorithms & AI",
-                                ].map((item, index) => (
-                                    <div key={index} className="flex items-center gap-3">
-                                        <CheckCircle className="w-5 h-5 text-primary" />
-                                        <span className="font-medium">{item}</span>
-                                    </div>
-                                ))}
-                                <p className="text-sm text-muted-foreground pt-2">...and more.</p>
-                            </CardContent>
-                        </Card>
-                        <Card className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: '0.4s' }}>
-                             <CardHeader>
-                                <div className="flex items-center gap-4">
-                                    <div className="bg-primary/10 text-primary p-3 rounded-full">
-                                        <ShieldCheck className="w-6 h-6" />
-                                    </div>
-                                    <CardTitle>Honours &amp; Postgraduate</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="space-y-3">
-                                <p className="text-muted-foreground">Specialized support for advanced topics, research projects, and in-depth analysis.</p>
-                                {[
-                                    "Advanced Information Security & Cryptography",
-                                    "Information Security Risk Analysis & Management",
-                                    "Forensic Computing & Digital Investigations",
-                                ].map((item, index) => (
-                                    <div key={index} className="flex items-center gap-3">
-                                        <CheckCircle className="w-5 h-5 text-primary" />
-                                        <span className="font-medium">{item}</span>
-                                    </div>
-                                ))}
-                                 <p className="text-sm text-muted-foreground pt-2">...and more.</p>
-                            </CardContent>
-                        </Card>
-                    </div>
-                     <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-                        <Button size="lg" onClick={() => setIsEnquiryDialogOpen(true)}>
-                            Enquire Now for Tertiary Support <ArrowRight className="ml-2" />
-                        </Button>
-                    </div>
-                </div>
-            </section>
-          
-           <section id="curriculum" className="py-24 bg-muted">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
-                    <Badge>High School</Badge>
-                    <h2 className="text-4xl md:text-5xl font-headline font-bold my-4">Explore Our High School Curriculum</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Our curriculum is expertly crafted and easy to use for high school students, covering all essential topics for Grades 10, 11, and 12.</p>
-                </div>
-                
-                <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-8">
-                    {(Object.keys(curriculumData['12']) as Array<keyof typeof curriculumData['12']>).map((subject, index) => {
-                    const Icon = curriculumIcons[subject];
-                    return (
-                        <Card key={subject} className="animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
-                            <CardHeader>
-                                <div className="flex items-center gap-4">
-                                {Icon && <Icon className="h-8 w-8 text-primary" />}
-                                <CardTitle className="text-2xl">{subject}</CardTitle>
-                                </div>
-                            </CardHeader>
-                            <CardContent>
-                                <Tabs defaultValue="12" className="w-full">
-                                    <TabsList className="grid w-full grid-cols-3 border">
-                                        <TabsTrigger value="10">Grade 10</TabsTrigger>
-                                        <TabsTrigger value="11">Grade 11</TabsTrigger>
-                                        <TabsTrigger value="12">Grade 12</TabsTrigger>
-                                    </TabsList>
-                                    {(['10', '11', '12'] as const).map(grade => (
-                                        <TabsContent key={grade} value={grade} className="mt-4">
-                                            {(curriculumData[grade][subject] as any[]).map((chapter) => (
-                                                <div key={chapter.chapter} className="mb-4">
-                                                    <h4 className="font-semibold text-sm flex items-center gap-2 mb-2">
-                                                        <BookOpen className="h-4 w-4 text-muted-foreground" />
-                                                        {chapter.chapter}
-                                                    </h4>
-                                                    <Accordion type="single" collapsible className="w-full pl-6">
-                                                        {chapter.topics.map((topic: string) => {
-                                                            const relevantCourses = allCourses.filter(course => 
-                                                                course.subject === subject && 
-                                                                course.grade === grade &&
-                                                                (course.title.toLowerCase().includes(topic.toLowerCase()) || 
-                                                                topic.toLowerCase().includes(course.title.toLowerCase()))
-                                                            );
-
-                                                            return (
-                                                            <AccordionItem value={topic} key={topic}>
-                                                                <AccordionTrigger className="text-sm py-2 hover:no-underline">
-                                                                    {topic}
-                                                                </AccordionTrigger>
-                                                                <AccordionContent>
-                                                                    {relevantCourses.length > 0 ? (
-                                                                        <div className="grid grid-cols-1 gap-2 pt-2">
-                                                                            {relevantCourses.map(course => (
-                                                                                <div key={course.id} onClick={() => handleCourseClick(course)} className="flex items-center gap-3 p-2 rounded-md hover:bg-primary/10 cursor-pointer">
-                                                                                    <Image src={course.thumbnail} alt={course.title} width={80} height={45} className="rounded-md object-cover aspect-video" data-ai-hint="online course" />
-                                                                                    <div>
-                                                                                        <p className="font-semibold text-xs line-clamp-1">{course.title}</p>
-                                                                                        <p className="text-xs text-muted-foreground">{course.videos.length} lessons</p>
-                                                                                    </div>
-                                                                                </div>
-                                                                            ))}
-                                                                        </div>
-                                                                    ) : (
-                                                                        <p className="text-xs text-muted-foreground px-2 py-4 text-center">No specific courses for this topic yet.</p>
-                                                                    )}
-                                                                </AccordionContent>
-                                                            </AccordionItem>
-                                                            )
-                                                        })}
-                                                    </Accordion>
-                                                </div>
-                                            ))}
-                                        </TabsContent>
-                                    ))}
-                                </Tabs>
-                            </CardContent>
-                        </Card>
-                    )
-                    })}
-                </div>
-            </div>
-        </section>
 
           <section id="events" className="py-24 bg-background">
               <div className="max-w-7xl mx-auto px-6">
@@ -578,11 +407,7 @@ export default function Home() {
                        {Array.from({ length: 3 }).map((_, i) => (
                            <Card key={i} className="bg-card animate-fade-in-up border">
                                <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
-                               <CardContent className="pt-4 space-y-2">
-                                   <Skeleton className="h-4 w-1/4"/>
-                                   <Skeleton className="h-5 w-3/4"/>
-                                   <Skeleton className="h-10 w-full"/>
-                               </CardContent>
+                               <CardContent className="pt-4 space-y-2"><Skeleton className="h-4 w-1/4"/><Skeleton className="h-5 w-3/4"/><Skeleton className="h-10 w-full"/></CardContent>
                                <CardFooter className="flex-col items-start gap-4">
                                    <Skeleton className="h-4 w-full"/>
                                    <Separator/>
@@ -664,6 +489,13 @@ export default function Home() {
                       <CarouselNext className="hidden lg:flex" />
                     </Carousel>
                 )}
+                 <div className="text-center mt-12 animate-fade-in-up">
+                    <Button size="lg" asChild>
+                        <Link href="/courses">
+                            View All Courses <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
+                </div>
             </div>
           </section>
           
@@ -824,7 +656,6 @@ export default function Home() {
         onEventSelect={handleEventClick}
       />
 
-      <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
     </div>
   );
 }

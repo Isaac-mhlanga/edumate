@@ -152,7 +152,7 @@ export default function PublicCoursePage() {
                 <div className="max-w-7xl mx-auto px-6 py-12 pt-24 space-y-6">
                     <div>
                         <Button variant="outline" asChild>
-                            <Link href="/#courses">
+                            <Link href="/courses">
                                 <ArrowLeft className="mr-2 h-4 w-4" />
                                 Back to All Courses
                             </Link>
@@ -161,7 +161,7 @@ export default function PublicCoursePage() {
 
                     <div className="grid lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-6">
-                            <Card className="overflow-hidden shadow-lg rounded-lg">
+                            <Card className="overflow-hidden shadow-lg">
                                 <CardHeader className="p-0">
                                     <div className="relative aspect-video bg-black rounded-t-lg overflow-hidden">
                                         {activeVideo ? (
@@ -249,7 +249,7 @@ export default function PublicCoursePage() {
                         </div>
 
                         <div className="lg:col-span-1 space-y-6">
-                            <Card className="overflow-hidden shadow-lg rounded-lg">
+                            <Card className="overflow-hidden shadow-lg">
                                 <Image
                                     src={course.thumbnail}
                                     alt={course.title}
@@ -270,7 +270,7 @@ export default function PublicCoursePage() {
                                     <p className="text-xs text-muted-foreground text-center mt-2">30-Day Money-Back Guarantee</p>
                                 </CardContent>
                             </Card>
-                            <Card className="shadow-lg rounded-lg">
+                            <Card className="shadow-lg">
                                 <CardHeader>
                                     <CardTitle>Course Content</CardTitle>
                                     <CardDescription>{course.videos.length} lessons</CardDescription>

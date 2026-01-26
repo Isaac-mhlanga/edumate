@@ -21,20 +21,13 @@ export const PublicHeader = () => {
     };
   }, []);
 
-  const scrollToSection = (id: string) => {
-    const element = document.getElementById(id);
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth' });
-    } else {
-        window.location.href = `/#${id}`;
-    }
-  };
-
   const navItems = [
-    { name: 'Home', href: '/#home', isScroll: true },
-    { name: 'Courses', href: '/#courses', isScroll: true },
-    { name: 'Tutors', href: '/tutors', isScroll: false },
-    { name: 'Community', href: '/community', isScroll: false },
+    { name: 'Home', href: '/' },
+    { name: 'High School', href: '/high-school' },
+    { name: 'Varsity', href: '/varsity' },
+    { name: 'Courses', href: '/courses' },
+    { name: 'Tutors', href: '/tutors' },
+    { name: 'Community', href: '/community' },
   ];
 
   return (
@@ -53,19 +46,9 @@ export const PublicHeader = () => {
             
              <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 space-x-8">
               {navItems.map((item) => (
-                item.isScroll ? (
-                  <button
-                    key={item.name}
-                    onClick={() => scrollToSection(item.href.substring(2))}
-                    className="text-muted-foreground hover:text-primary font-medium transition-colors duration-300"
-                  >
+                <Link key={item.name} href={item.href} className="text-muted-foreground hover:text-primary font-medium transition-colors duration-300">
                     {item.name}
-                  </button>
-                ) : (
-                  <Link key={item.name} href={item.href} className="text-muted-foreground hover:text-primary font-medium transition-colors duration-300">
-                    {item.name}
-                  </Link>
-                )
+                </Link>
               ))}
             </nav>
             
@@ -99,18 +82,9 @@ export const PublicHeader = () => {
                     <div className="flex flex-col gap-4 py-8">
                       {navItems.map((item) => (
                         <SheetClose asChild key={item.name}>
-                          {item.isScroll ? (
-                            <button
-                              onClick={() => scrollToSection(item.href.substring(2))}
-                              className="text-lg text-left text-muted-foreground hover:text-primary font-medium transition-colors duration-300"
-                            >
-                              {item.name}
-                            </button>
-                          ) : (
                             <Link href={item.href} className="text-lg text-left text-muted-foreground hover:text-primary font-medium transition-colors duration-300">
                               {item.name}
                             </Link>
-                          )}
                         </SheetClose>
                       ))}
                     </div>
