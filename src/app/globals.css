@@ -4,7 +4,7 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 210 17% 98%;
     --foreground: 222.2 84% 4.9%;
     --card: 0 0% 100%;
     --card-foreground: 222.2 84% 4.9%;
@@ -14,7 +14,7 @@
     --primary-foreground: 300 100% 98%;
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 210 40% 96.1%;
+    --muted: 210 17% 96%;
     --muted-foreground: 215.4 16.3% 46.9%;
     --accent: 173 49% 40%;
     --accent-foreground: 355.7 100% 97.3%;
@@ -28,13 +28,13 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --radius: 0rem;
+    --radius: 0.75rem;
   }
 
   .dark {
     --background: 222.2 84% 4.9%;
     --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
+    --card: 222.2 84% 6%;
     --card-foreground: 210 40% 98%;
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
@@ -42,7 +42,7 @@
     --primary-foreground: 300 100% 98%;
     --secondary: 217 33% 50%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 215 28% 22%;
+    --muted: 215 28% 15%;
     --muted-foreground: 215 20% 65%;
     --accent: 173 49% 50%;
     --accent-foreground: 210 40% 98%;
@@ -51,7 +51,7 @@
     --border: 215 28% 15%;
     --input: 215 28% 15%;
     --ring: 289 69% 50%;
-    --radius: 0rem;
+    --radius: 0.75rem;
   }
 }
  
@@ -142,19 +142,19 @@
   
   @keyframes float1 {
     0% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
-    50% { transform: translateY(-40px) translateX(20px) rotate(20deg) scale(1.05); }
+    50% { transform: translateY(-40px) translateX(20px) rotate(20deg) scale(1.1); }
     100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
   }
 
   @keyframes float2 {
     0% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
-    50% { transform: translateY(35px) translateX(-30px) rotate(-25deg) scale(1.1); }
+    50% { transform: translateY(35px) translateX(-30px) rotate(-25deg) scale(1.15); }
     100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
   }
 
   @keyframes float3 {
     0% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
-    50% { transform: translateY(-25px) translateX(35px) rotate(15deg) scale(0.95); }
+    50% { transform: translateY(-25px) translateX(35px) rotate(15deg) scale(1.05); }
     100% { transform: translateY(0) translateX(0) rotate(0deg) scale(1); }
   }
 }

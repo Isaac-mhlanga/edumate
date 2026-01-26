@@ -10,7 +10,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { GoogleAnalytics } from '@/components/google-analytics';
 import Script from 'next/script';
 
-const noLayoutRoutes = ['/', '/login', '/register', '/forgot-password', '/tutors', '/community', '/courses', '/high-school', '/varsity'];
+const noLayoutRoutes = ['/login', '/register', '/forgot-password'];
 
 const AppLoadingSkeleton = () => (
     <div className="space-y-8 p-4 md:p-6 lg:p-8">
@@ -35,8 +35,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   const pathname = usePathname();
-  const isCoursePage = /^\/courses\/.+/.test(pathname);
-  const showAppLayout = !noLayoutRoutes.includes(pathname) && !isCoursePage;
+  const isPublicPage = ['/', '/tutors', '/community', '/courses', '/high-school', '/varsity'].includes(pathname) || /^\/courses\/.+/.test(pathname);
+  const showAppLayout = !noLayoutRoutes.includes(pathname) && !isPublicPage;
 
   return (
     <html lang="en" suppressHydrationWarning>
