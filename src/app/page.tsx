@@ -213,16 +213,16 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground md:block">
+    <div className="flex flex-col min-h-screen">
       <PublicHeader />
 
-      <main className="flex-1 overflow-y-auto md:pt-0">
+      <main className="flex-1 overflow-y-auto">
          <div className="md:block">
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
             <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30">
-                <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-full -top-24 -left-24 float-1 backdrop-blur-sm" />
-                <div className="absolute bg-accent/10 w-96 h-96 rounded-full -bottom-20 -right-24 float-2 backdrop-blur-sm" />
-                <div className="absolute bg-primary/5 w-64 h-64 rounded-full bottom-1/3 right-1/4 float-3 backdrop-blur-sm" />
+                <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-full -top-24 -left-24 float-1 backdrop-blur-lg" />
+                <div className="absolute bg-accent/10 w-96 h-96 rounded-full -bottom-20 -right-24 float-2 backdrop-blur-lg" />
+                <div className="absolute bg-primary/5 w-64 h-64 rounded-full bottom-1/3 right-1/4 float-3 backdrop-blur-lg" />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
