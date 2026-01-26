@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift, Facebook } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift, Facebook, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -216,7 +216,7 @@ export default function Home() {
     <div className="flex flex-col h-screen bg-background text-foreground md:block">
       <PublicHeader />
 
-      <main className="flex-1 pt-16 overflow-y-auto pb-8 md:pb-0 md:pt-0">
+      <main className="flex-1 overflow-y-auto md:pt-0">
          <div className="md:block">
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
             <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30">
@@ -559,7 +559,7 @@ export default function Home() {
           <DialogContent className="max-w-6xl w-[95vw] h-auto sm:h-[90vh] flex flex-col p-0 gap-0">
               <div className="grid md:grid-cols-3 h-full overflow-hidden">
                 <div className="md:col-span-2 h-full flex flex-col">
-                  <div className="relative aspect-video bg-black rounded-tl-lg overflow-hidden">
+                  <div className="relative aspect-video bg-black">
                       {activeVideo ? (
                           <>
                               <video
@@ -611,7 +611,7 @@ export default function Home() {
                         <p className="text-sm text-muted-foreground pt-2">{selectedCourseForPlayer.description}</p>
                    </div>
                 </div>
-                <div className="md:col-span-1 bg-muted/50 flex flex-col h-full rounded-r-lg max-h-[90vh] sm:max-h-none">
+                <div className="md:col-span-1 bg-muted/50 flex flex-col h-full max-h-[90vh] sm:max-h-none">
                   <div className="p-4 border-b">
                     <h3 className="font-semibold">Course Content</h3>
                   </div>

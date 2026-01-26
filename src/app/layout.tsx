@@ -19,12 +19,12 @@ const AppLoadingSkeleton = () => (
             <Skeleton className="h-4 w-1/2" />
         </div>
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <Skeleton className="h-28 rounded-lg" />
-            <Skeleton className="h-28 rounded-lg" />
-            <Skeleton className="h-28 rounded-lg" />
-            <Skeleton className="h-28 rounded-lg" />
+            <Skeleton className="h-28" />
+            <Skeleton className="h-28" />
+            <Skeleton className="h-28" />
+            <Skeleton className="h-28" />
         </div>
-        <Skeleton className="h-96 w-full rounded-lg" />
+        <Skeleton className="h-96 w-full" />
     </div>
 );
 
