@@ -140,17 +140,17 @@ export default function Home() {
     {
       icon: <GraduationCap className="w-8 h-8 text-primary" />,
       title: 'Expert-Led Video Lessons',
-      description: 'Dive into our extensive library of on-demand video lessons. Created by subject-matter experts, each lesson breaks down complex topics into clear, digestible segments.'
+      description: 'Learn at your own pace with on-demand video lessons from subject-matter experts that make complex topics simple and clear.'
     },
     {
       icon: <Users className="w-8 h-8 text-primary" />,
       title: 'One-on-One Tutoring',
-      description: 'Connect with our vetted professional tutors for personalized sessions. Whether you\'re stuck on a specific problem or need to build a stronger foundation, our experts are here to help.'
+      description: 'Get personalized help when you need it. Connect with our professional tutors for one-on-one sessions tailored to your learning style.'
     },
     {
       icon: <PenSquare className="w-8 h-8 text-primary" />,
       title: 'Assignment & Project Help',
-      description: 'Overcome academic hurdles with our assignment assistance service. Get expert guidance and model solutions for your high school and university projects to ensure you learn and excel.'
+      description: 'Stuck on an assignment? Get expert guidance for your school and university projects to understand the material and boost your grades.'
     }
   ];
 
@@ -219,10 +219,10 @@ export default function Home() {
       <main className="flex-1 overflow-y-auto">
          <div className="md:block">
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
-            <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30">
-                <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-full -top-24 -left-24 float-1 backdrop-blur-lg" />
-                <div className="absolute bg-accent/10 w-96 h-96 rounded-full -bottom-20 -right-24 float-2 backdrop-blur-lg" />
-                <div className="absolute bg-primary/5 w-64 h-64 rounded-full bottom-1/3 right-1/4 float-3 backdrop-blur-lg" />
+            <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30 backdrop-blur-xl">
+                <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-[var(--radius)] -top-24 -left-24 float-1" />
+                <div className="absolute bg-accent/10 w-96 h-96 rounded-[var(--radius)] -bottom-20 -right-24 float-2" />
+                <div className="absolute bg-primary/5 w-64 h-64 rounded-[var(--radius)] bottom-1/3 right-1/4 float-3" />
             </div>
 
             <div className="container mx-auto px-6 relative z-10">
@@ -231,7 +231,7 @@ export default function Home() {
                   Unlock Your Academic Potential
                 </h1>
                 <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                  Master complex subjects with our expert-led video lessons, personalized one-on-one tutoring, and dedicated assignment assistance. Edumate Pro is the all-in-one platform designed to help high school and university students learn smarter, achieve higher grades, and build confidence.
+                  Edumate Pro is the all-in-one platform designed to help you learn smarter, achieve higher grades, and build confidence.
                 </p>
                 <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                   <Button asChild size="lg">
@@ -275,7 +275,7 @@ export default function Home() {
                   Share the Knowledge, Get Rewarded
                 </h2>
                 <p className="text-lg text-muted-foreground mb-6 leading-relaxed max-w-2xl mx-auto">
-                  Invite your friends to join Edumate Pro! For every friend that signs up using your unique referral link, you'll earn R20 in credits. It's our way of saying thank you for helping our community grow.
+                  Invite friends to Edumate Pro and earn R20 for each one who signs up. It's our way of saying thanks for growing our community.
                 </p>
                 <div className="flex justify-center space-x-4 mb-8">
                   <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
@@ -284,7 +284,7 @@ export default function Home() {
                   <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaYoutube className="h-5 w-5" />
                   </Link>
-                  <Link href="https://www.facebook.com/your-page-here" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                  <Link href="https://www.facebook.com/facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaFacebook className="h-5 w-5" />
                   </Link>
                 </div>
@@ -303,10 +303,10 @@ export default function Home() {
                <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
-                  Our Mission: To Make Quality Education Accessible
+                  Our Mission: Accessible, Quality Education
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                  At Edumate Pro, we're passionate about breaking down educational barriers. We believe that every student, regardless of their background, deserves access to high-quality learning resources and expert guidance. Our platform is meticulously designed to combine state-of-the-art technology with proven teaching methodologies, creating a learning experience that is not only effective but also engaging and empowering.
+                  We're on a mission to make top-quality education accessible. Edumate Pro combines expert-led resources with smart technology to create a learning experience that's engaging, effective, and builds confidence.
                 </p>
               </div>
               <div className="max-w-4xl mx-auto">
@@ -346,7 +346,7 @@ export default function Home() {
                   <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
                       <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Don't Miss Our Live Events</h2>
-                      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Tune into our free, interactive live classes and intensive revision sessions. It's a great way to consolidate your knowledge, ask questions, and prepare for exams with our top instructors.</p>
+                      <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our free live classes and revision sessions. Ask questions, interact with top instructors, and get ready for your exams.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
@@ -400,7 +400,7 @@ export default function Home() {
                 <div className="text-center mb-12 animate-fade-in-up">
                   <Badge>Our Courses</Badge>
                   <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Explore Our Featured Courses</h2>
-                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Get a glimpse of our most popular courses, designed and taught by industry experts to help you master challenging subjects with confidence.</p>
+                  <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Explore our most popular courses, designed by experts to help you master challenging subjects with confidence.</p>
                 </div>
                  {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -530,7 +530,7 @@ export default function Home() {
                   Ready to Elevate Your Learning?
                 </h2>
                 <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  Join thousands of students who are already achieving their academic goals with Edumate Pro. Sign up today and take the first step towards academic excellence.
+                  Join thousands of students achieving their academic goals. Sign up to start your journey with Edumate Pro today.
                 </p>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center">
                   <Button size="lg" asChild>
