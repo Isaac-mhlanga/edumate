@@ -67,7 +67,7 @@ const firebaseConfig: FirebaseOptions = {
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-type Role = 'student' | 'instructor' | 'admin' | 'tutor';
+type Role = 'student' | 'varsity-student' | 'instructor' | 'admin' | 'tutor';
 
 // Fetches user role from Firestore.
 const getUserRole = async (user: User): Promise<Role | null> => {
@@ -103,6 +103,15 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
   { href: '/dashboard?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/dashboard', tab: 'subscriptions' },
+];
+
+const varsityStudentMenuItems: MenuItem[] = [
+  { href: '/varsity-dashboard', label: 'Overview', icon: LayoutDashboard, basePath: '/varsity-dashboard'},
+  { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
+  { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
+  { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
+  { href: '/dashboard?tab=subscriptions', label: 'My Plan', icon: CreditCard, basePath: '/dashboard', tab: 'subscriptions' },
+  { href: '/calendar', label: 'Calendar', icon: Calendar, basePath: '/calendar' },
 ];
 
 const instructorMenuItems: MenuItem[] = [
@@ -192,6 +201,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const getMenuItems = () => {
     switch(userRole) {
       case 'student': return studentMenuItems;
+      case 'varsity-student': return varsityStudentMenuItems;
       case 'instructor': return instructorMenuItems;
       case 'admin': return adminMenuItems;
       case 'tutor': return tutorMenuItems;

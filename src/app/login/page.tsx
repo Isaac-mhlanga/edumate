@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -102,6 +103,9 @@ export default function LoginPage() {
                     break;
                 case 'tutor':
                     router.push('/tutor');
+                    break;
+                case 'varsity-student':
+                    router.push('/varsity-dashboard');
                     break;
                 default:
                     router.push('/dashboard');

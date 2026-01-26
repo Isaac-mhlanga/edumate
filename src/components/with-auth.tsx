@@ -17,7 +17,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-type Role = 'student' | 'instructor' | 'admin' | 'tutor';
+type Role = 'student' | 'varsity-student' | 'instructor' | 'admin' | 'tutor';
 
 // Get user role from Firestore
 const getUserRole = async (user: User | null): Promise<Role | null> => {
@@ -82,6 +82,9 @@ const withAuth = <P extends object>(
                     break;
                  case 'tutor':
                     router.replace('/tutor');
+                    break;
+                case 'varsity-student':
+                    router.replace('/varsity-dashboard');
                     break;
                 default:
                     router.replace('/dashboard');
