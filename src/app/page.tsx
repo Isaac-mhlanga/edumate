@@ -27,7 +27,7 @@ import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { event } from '@/components/google-analytics';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { type UpcomingEvent } from "@/lib/data";
-import { FaFacebook, FaTiktok, FaYoutube } from "react-icons/fa";
+import { FaTiktok, FaYoutube } from "react-icons/fa";
 
 
 const firebaseConfig = {
@@ -137,12 +137,6 @@ export default function Home() {
     fetchEvents();
   }, []);
 
-  useEffect(() => {
-    if (isClient && typeof (window as any).FB !== 'undefined') {
-      (window as any).FB.XFBML.parse();
-    }
-  }, [isClient]);
-
   const features = [
     {
       icon: <GraduationCap className="w-8 h-8 text-primary" />,
@@ -235,11 +229,11 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-background text-foreground md:block">
       <PublicHeader />
 
-      <main className="flex-1 pt-16 overflow-y-auto pb-8 md:pb-0">
-         <div>
+      <main className="flex-1 pt-16 overflow-y-auto pb-8 md:pb-0 md:pt-0">
+         <div className="md:block">
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
             <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30">
                 <div className="absolute bg-primary/10 w-[28rem] h-[28rem] rounded-full -top-24 -left-24 float-1" />
@@ -301,37 +295,12 @@ export default function Home() {
                    To be eligible for rewards, subscribe and follow us on our platforms for tips, updates, and more!
                 </p>
                 <div className="flex justify-center space-x-4 mb-8">
-                  <Link href="https://www.facebook.com/your-page" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                    <FaFacebook className="h-5 w-5" />
-                  </Link>
                   <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaTiktok className="h-5 w-5" />
                   </Link>
                   <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaYoutube className="h-5 w-5" />
                   </Link>
-                </div>
-                <div className="my-8 flex justify-center">
-                    {isClient ? (
-                        <div 
-                            className="fb-page" 
-                            data-href="https://www.facebook.com/facebook" 
-                            data-tabs="" 
-                            data-width="" 
-                            data-height="130" 
-                            data-small-header="false" 
-                            data-adapt_container_width="true" 
-                            data-hide_cover="false" 
-                            data-show-facepile="true">
-                            <blockquote cite="https://www.facebook.com/facebook" className="fb-xfbml-parse-ignore">
-                                <a href="https://www.facebook.com/facebook">Meta for Developers</a>
-                            </blockquote>
-                        </div>
-                    ) : (
-                        <div className="h-[130px] w-full max-w-[500px] flex items-center justify-center bg-muted rounded-lg">
-                            <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-                        </div>
-                    )}
                 </div>
                 <Button size="lg" asChild>
                   <Link href="/register">

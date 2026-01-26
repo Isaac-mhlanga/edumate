@@ -49,12 +49,6 @@ export default function RootLayout({
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" integrity="sha384-n8MVd4RsNIU0KOVEMmg9ikOAiqRT5bDLA+UY+qCFs1IIF1oFHbkdsUgUjdVYEzpv" crossOrigin="anonymous" />
       </head>
       <body className="font-body antialiased" suppressHydrationWarning={true}>
-        <div id="fb-root"></div>
-        <Script
-          id="facebook-sdk"
-          src="https://connect.facebook.net/en_US/sdk.js#xfbml=1&version=v19.0"
-          strategy="afterInteractive"
-        />
         <ThemeProvider
             attribute="class"
             defaultTheme="light"

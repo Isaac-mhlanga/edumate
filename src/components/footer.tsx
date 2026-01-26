@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Icons } from "./icons";
-import { FaFacebook, FaTiktok, FaYoutube } from "react-icons/fa";
+import { FaTiktok, FaYoutube } from "react-icons/fa";
 
 export function Footer() {
   return (
@@ -50,9 +50,6 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-primary mb-4">Follow Us</h3>
             <div className="flex space-x-3">
-                <Link href="https://www.facebook.com/your-page" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
-                    <FaFacebook className="h-5 w-5" />
-                </Link>
                 <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
                     <FaTiktok className="h-5 w-5" />
                 </Link>
