@@ -52,6 +52,9 @@ import { getAuth, onAuthStateChanged, signOut, type User, type Auth } from 'fire
 import { getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { BottomNavbar } from './bottom-navbar';
+import { cn } from '@/lib/utils';
 
 // Define the configuration directly for client-side use.
 const firebaseConfig: FirebaseOptions = {
@@ -92,8 +95,8 @@ type MenuItem = {
 
 const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
-  { href: '/dashboard?tab=courses', label: 'Course Catalog', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
-  { href: '/dashboard/tutors', label: 'Find Tutors', icon: Users, basePath: '/dashboard/tutors' },
+  { href: '/dashboard?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
+  { href: '/dashboard/tutors', label: 'Tutors', icon: Users, basePath: '/dashboard/tutors' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
@@ -104,34 +107,34 @@ const studentMenuItems: MenuItem[] = [
 const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/instructor', tab: 'overview' },
   { href: '/instructor?tab=courses', label: 'Courses', icon: GraduationCap, basePath: '/instructor', tab: 'courses' },
+  { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
+  { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },
+  { href: '/instructor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/instructor', tab: 'earnings' },
   { href: '/instructor?tab=quizzes', label: 'Quizzes', icon: FileQuestion, basePath: '/instructor', tab: 'quizzes' },
   { href: '/instructor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/instructor', tab: 'enquiries' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
-  { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
   { href: '/instructor?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/instructor', tab: 'calendar' },
-  { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },
-  { href: '/instructor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/instructor', tab: 'earnings' },
 ];
 
 const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/admin', tab: 'overview' },
-  { href: '/admin?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/admin', tab: 'enquiries' },
+  { href: '/admin?tab=users', label: 'Users', icon: Users, basePath: '/admin', tab: 'users' },
   { href: '/admin?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/admin', tab: 'courses' },
+  { href: '/admin?tab=payouts', label: 'Payouts', icon: Banknote, basePath: '/admin', tab: 'payouts' },
+  { href: '/admin?tab=tutors', label: 'Tutors', icon: UserCog, basePath: '/admin', tab: 'tutors' },
+  { href: '/admin?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/admin', tab: 'enquiries' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/admin?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/admin', tab: 'assignments' },
   { href: '/admin?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/admin', tab: 'calendar' },
-  { href: '/admin?tab=users', label: 'Users', icon: Users, basePath: '/admin', tab: 'users' },
-  { href: '/admin?tab=tutors', label: 'Tutors', icon: UserCog, basePath: '/admin', tab: 'tutors' },
   { href: '/admin?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/admin', tab: 'subscriptions' },
-  { href: '/admin?tab=payouts', label: 'Payouts', icon: Banknote, basePath: '/admin', tab: 'payouts' },
 ];
 
 const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/tutor', tab: 'overview' },
-  { href: '/tutor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/tutor', tab: 'enquiries' },
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
+  { href: '/tutor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/tutor', tab: 'enquiries' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
 ];
 
@@ -145,6 +148,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [auth, setAuth] = React.useState<Auth | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [userRole, setUserRole] = React.useState<Role | null>(null);
+  const isMobile = useIsMobile();
   
   React.useEffect(() => {
     // Initialize Firebase on the client
@@ -294,9 +298,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <SidebarTrigger />
             <ThemeToggle />
         </header>
-        <main className="flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto">
+        <main className={cn("flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto", isMobile && "pb-20")}>
             {children}
         </main>
+        {isMobile && menuItems.length > 0 && <BottomNavbar menuItems={menuItems} />}
       </SidebarInset>
     </SidebarProvider>
   );

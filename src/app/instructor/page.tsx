@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -23,7 +22,6 @@ import { AssignmentReviewDialog } from "@/components/instructor/assignment-revie
 import { StudentActionDialogs } from "@/components/instructor/student-action-dialogs";
 import { TransactionDialogs } from "@/components/instructor/transaction-dialogs";
 import { CalendarDialogs } from "@/components/instructor/calendar-dialogs";
-import { GradeQuizOutput } from "@/ai/flows/grade-quiz";
 import { format } from "date-fns";
 import { EnquiriesPage } from "@/components/enquiries-page";
 
@@ -73,7 +71,7 @@ export type Quiz = {
 
 export type QuizSubmission = {
     quizId: string;
-    result: GradeQuizOutput;
+    // result: GradeQuizOutput; // AI grading removed
 };
 
 export type SubmittedAssignment = {
@@ -752,7 +750,7 @@ function InstructorPage() {
           background-color: hsla(var(--primary), 0.05) !important;
         }
         .fc-event {
-          border-radius: 4px;
+          border-radius: 0rem;
           border: 0;
           padding: 4px 6px;
           cursor: pointer;

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState } from 'react';
@@ -112,8 +111,8 @@ function QuizViewerPage() {
         orderBy('submittedAt', 'desc')
       );
       const submissionsSnapshot = await getDocs(submissionsQuery);
-      const history = submissionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmissionHistory[];
-      setSubmissionHistory(history);
+      // const history = submissionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmissionHistory[];
+      // setSubmissionHistory(history);
 
       setLoading(false);
     };
@@ -258,7 +257,7 @@ function QuizViewerPage() {
                                   {currentQuestion.options?.map((opt, optIndex) => (
                                     <Label key={optIndex} htmlFor={`q${currentQuestionIndex}-opt${optIndex}`} 
                                         className={cn(
-                                            "flex items-center gap-4 rounded-lg border p-4 cursor-pointer transition-all hover:border-primary",
+                                            "flex items-center gap-4 rounded-md border p-4 cursor-pointer transition-all hover:border-primary",
                                             field.value === opt.text && "border-primary ring-2 ring-primary"
                                         )}>
                                       <RadioGroupItem value={opt.text} id={`q${currentQuestionIndex}-opt${optIndex}`} className="h-5 w-5"/>

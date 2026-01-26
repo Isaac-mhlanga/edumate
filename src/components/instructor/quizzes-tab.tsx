@@ -27,10 +27,11 @@ export function InstructorQuizzesTab({ quizzes, quizSubmissions, loading }: Inst
                 participants: 0,
             };
         }
-        const totalScore = relevantSubmissions.reduce((acc, s) => acc + s.result.overallScore, 0);
-        const averageScore = totalScore / submissionCount;
+        // const totalScore = relevantSubmissions.reduce((acc, s) => acc + s.result.overallScore, 0);
+        // const averageScore = totalScore / submissionCount;
         return {
-            averageScore: Math.round(averageScore),
+            // averageScore: Math.round(averageScore),
+            averageScore: 0, // AI grading removed
             participants: submissionCount,
         };
     };
