@@ -235,10 +235,10 @@ export default function Home() {
 
 
   return (
-    <div className="flex flex-col min-h-screen bg-background text-foreground">
+    <div className="flex flex-col h-screen bg-background text-foreground">
       <PublicHeader />
 
-      <main className="flex-grow pt-16">
+      <main className="flex-1 pt-16 overflow-y-auto pb-8 md:pb-0">
          <div>
           <section id="home" className="relative py-24 md:py-32 overflow-hidden bg-background">
             <div className="absolute inset-0 -z-0 opacity-40 dark:opacity-30">
@@ -744,6 +744,9 @@ export default function Home() {
               </Card>
             </div>
           </section>
+          <div className="hidden md:block">
+            <Footer />
+          </div>
         </div>
       </main>
 
@@ -850,8 +853,6 @@ export default function Home() {
       />
 
       <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
-      
-      <Footer />
     </div>
   );
 }

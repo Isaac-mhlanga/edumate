@@ -166,9 +166,9 @@ export default function TutorsPage() {
     };
 
     return (
-        <div className="flex flex-col min-h-screen bg-background">
+        <div className="flex flex-col h-screen bg-background">
             <PublicHeader />
-            <main className="flex-grow pt-24">
+            <main className="flex-1 overflow-y-auto pt-24 pb-8 md:pb-0">
                 <div className="max-w-7xl mx-auto px-6 py-12">
                     <div className="space-y-8">
                         <div className="mb-8">
@@ -279,8 +279,10 @@ export default function TutorsPage() {
                         )}
                     </div>
                 </div>
+                 <div className="hidden md:block">
+                    <Footer />
+                </div>
             </main>
-            <Footer />
 
             {/* Booking Dialog */}
             <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>

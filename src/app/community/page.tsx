@@ -106,54 +106,58 @@ export default function CommunityPage() {
     };
 
     return (
-        <div className="bg-background text-foreground">
+        <div className="flex flex-col h-screen bg-background text-foreground">
             <PublicHeader />
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 py-12 pt-24 space-y-8">
-                 <div className="text-left">
-                    <h1 className="text-4xl font-bold tracking-tight">Community Forum</h1>
-                    <p className="text-lg text-muted-foreground mt-2">Ask questions, share knowledge, and connect with fellow learners.</p>
-                </div>
-                <Card className="flex flex-col md:flex-row h-full min-h-[calc(100vh-20rem)] shadow-lg">
-                    <div className="w-full md:w-[350px] border-b md:border-r md:border-b-0 flex flex-col">
-                        <div className="p-4 border-b">
-                            <QuestionForm />
-                            <div className="relative mt-4">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input 
-                                    placeholder="Search questions..."
-                                    className="pl-9"
-                                    value={searchTerm}
-                                    onChange={(e) => {
-                                        setSearchTerm(e.target.value);
-                                        setCurrentPage(1);
-                                    }}
-                                />
+            <main className="flex-1 overflow-y-auto">
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 py-12 pt-24 space-y-8">
+                     <div className="text-left">
+                        <h1 className="text-4xl font-bold tracking-tight">Community Forum</h1>
+                        <p className="text-lg text-muted-foreground mt-2">Ask questions, share knowledge, and connect with fellow learners.</p>
+                    </div>
+                    <Card className="flex flex-col md:flex-row h-full min-h-[calc(100vh-20rem)] shadow-lg">
+                        <div className="w-full md:w-[350px] border-b md:border-r md:border-b-0 flex flex-col">
+                            <div className="p-4 border-b">
+                                <QuestionForm />
+                                <div className="relative mt-4">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input 
+                                        placeholder="Search questions..."
+                                        className="pl-9"
+                                        value={searchTerm}
+                                        onChange={(e) => {
+                                            setSearchTerm(e.target.value);
+                                            setCurrentPage(1);
+                                        }}
+                                    />
+                                </div>
                             </div>
+                            <QuestionList 
+                                questions={paginatedQuestions} 
+                                selectedQuestion={selectedQuestion}
+                                onSelectQuestion={setSelectedQuestion} 
+                                loading={loading}
+                            />
+                            {totalPages > 1 && (
+                                <div className="p-2 border-t flex justify-center items-center gap-2 mt-auto">
+                                    <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
+                                    <span className="text-xs text-muted-foreground">Page {currentPage} of {totalPages}</span>
+                                    <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
+                                </div>
+                            )}
                         </div>
-                        <QuestionList 
-                            questions={paginatedQuestions} 
-                            selectedQuestion={selectedQuestion}
-                            onSelectQuestion={setSelectedQuestion} 
-                            loading={loading}
-                        />
-                        {totalPages > 1 && (
-                            <div className="p-2 border-t flex justify-center items-center gap-2 mt-auto">
-                                <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}>Previous</Button>
-                                <span className="text-xs text-muted-foreground">Page {currentPage} of {totalPages}</span>
-                                <Button size="sm" variant="ghost" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage === totalPages}>Next</Button>
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex-1">
-                        <CommentSection 
-                            question={selectedQuestion} 
-                            onUpdateQuestion={handleQuestionUpdate}
-                            onDeleteQuestion={handleQuestionDelete}
-                        />
-                    </div>
-                </Card>
+                        <div className="flex-1">
+                            <CommentSection 
+                                question={selectedQuestion} 
+                                onUpdateQuestion={handleQuestionUpdate}
+                                onDeleteQuestion={handleQuestionDelete}
+                            />
+                        </div>
+                    </Card>
+                </div>
+                 <div className="hidden md:block">
+                    <Footer />
+                </div>
             </main>
-            <Footer />
         </div>
     );
 }

@@ -104,20 +104,21 @@ export default function PublicCoursePage() {
     
     if (loading) {
         return (
-            <div className="bg-background text-foreground">
+            <div className="flex flex-col h-screen bg-background text-foreground">
                 <PublicHeader />
-                <main className="max-w-7xl mx-auto px-6 py-12 pt-24 space-y-6">
-                    <div><Skeleton className="h-10 w-40" /></div>
-                    <div className="grid lg:grid-cols-3 gap-8">
-                        <div className="lg:col-span-2 space-y-6">
-                            <Card><CardHeader><Skeleton className="h-96 w-full" /></CardHeader><CardContent className="pt-4 space-y-2"><Skeleton className="h-8 w-3/4" /><Skeleton className="h-5 w-full" /></CardContent></Card>
-                        </div>
-                        <div className="lg:col-span-1 space-y-6">
-                            <Card><Skeleton className="h-64 w-full" /></Card>
+                <main className="flex-1 overflow-y-auto">
+                    <div className="max-w-7xl mx-auto px-6 py-12 pt-24 space-y-6">
+                        <div><Skeleton className="h-10 w-40" /></div>
+                        <div className="grid lg:grid-cols-3 gap-8">
+                            <div className="lg:col-span-2 space-y-6">
+                                <Card><CardHeader><Skeleton className="h-96 w-full" /></CardHeader><CardContent className="pt-4 space-y-2"><Skeleton className="h-8 w-3/4" /><Skeleton className="h-5 w-full" /></CardContent></Card>
+                            </div>
+                            <div className="lg:col-span-1 space-y-6">
+                                <Card><Skeleton className="h-64 w-full" /></Card>
+                            </div>
                         </div>
                     </div>
                 </main>
-                <Footer />
             </div>
         )
     }
@@ -145,165 +146,165 @@ export default function PublicCoursePage() {
     };
 
     return (
-        <div className="bg-background text-foreground">
+        <div className="flex flex-col h-screen bg-background text-foreground">
              <PublicHeader />
-             <main className="max-w-7xl mx-auto px-6 py-12 pt-24 space-y-6">
-                <div>
-                    <Button variant="outline" asChild>
-                        <Link href="/#courses">
-                            <ArrowLeft className="mr-2 h-4 w-4" />
-                            Back to All Courses
-                        </Link>
-                    </Button>
-                </div>
+             <main className="flex-1 overflow-y-auto">
+                <div className="max-w-7xl mx-auto px-6 py-12 pt-24 space-y-6">
+                    <div>
+                        <Button variant="outline" asChild>
+                            <Link href="/#courses">
+                                <ArrowLeft className="mr-2 h-4 w-4" />
+                                Back to All Courses
+                            </Link>
+                        </Button>
+                    </div>
 
-                <div className="grid lg:grid-cols-3 gap-8">
-                    <div className="lg:col-span-2 space-y-6">
-                        <Card className="overflow-hidden shadow-lg rounded-lg">
-                            <CardHeader className="p-0">
-                                <div className="relative aspect-video bg-black rounded-t-lg overflow-hidden">
-                                    {activeVideo ? (
-                                        isYouTube ? (
-                                            <iframe
-                                                className="w-full h-full"
-                                                src={activeVideo.url}
-                                                title={activeVideo.title}
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                            ></iframe>
+                    <div className="grid lg:grid-cols-3 gap-8">
+                        <div className="lg:col-span-2 space-y-6">
+                            <Card className="overflow-hidden shadow-lg rounded-lg">
+                                <CardHeader className="p-0">
+                                    <div className="relative aspect-video bg-black rounded-t-lg overflow-hidden">
+                                        {activeVideo ? (
+                                            isYouTube ? (
+                                                <iframe
+                                                    className="w-full h-full"
+                                                    src={activeVideo.url}
+                                                    title={activeVideo.title}
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
+                                                ></iframe>
+                                            ) : (
+                                            <>
+                                                <video
+                                                    ref={videoRef}
+                                                    key={activeVideo.url}
+                                                    className="w-full h-full"
+                                                    controls
+                                                    autoPlay
+                                                    src={activeVideo.url}
+                                                >
+                                                    Your browser does not support the video tag.
+                                                </video>
+                                                <div className="absolute bottom-4 right-4 z-10">
+                                                    <DropdownMenu>
+                                                        <DropdownMenuTrigger asChild>
+                                                            <Button variant="secondary" size="icon" className="text-white bg-black/50 hover:bg-black/80 border-white/20">
+                                                                <Settings className="h-5 w-5" />
+                                                                <span className="sr-only">Video Settings</span>
+                                                            </Button>
+                                                        </DropdownMenuTrigger>
+                                                        <DropdownMenuContent align="end">
+                                                            <DropdownMenuRadioGroup value={quality} onValueChange={setQuality}>
+                                                                <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
+                                                                <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
+                                                                <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
+                                                                <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
+                                                            </DropdownMenuRadioGroup>
+                                                        </DropdownMenuContent>
+                                                    </DropdownMenu>
+                                                </div>
+                                            </>
+                                            )
                                         ) : (
-                                        <>
-                                            <video
-                                                ref={videoRef}
-                                                key={activeVideo.url}
-                                                className="w-full h-full"
-                                                controls
-                                                autoPlay
-                                                src={activeVideo.url}
-                                            >
-                                                Your browser does not support the video tag.
-                                            </video>
-                                            <div className="absolute bottom-4 right-4 z-10">
-                                                <DropdownMenu>
-                                                    <DropdownMenuTrigger asChild>
-                                                        <Button variant="secondary" size="icon" className="text-white bg-black/50 hover:bg-black/80 border-white/20">
-                                                            <Settings className="h-5 w-5" />
-                                                            <span className="sr-only">Video Settings</span>
-                                                        </Button>
-                                                    </DropdownMenuTrigger>
-                                                    <DropdownMenuContent align="end">
-                                                        <DropdownMenuRadioGroup value={quality} onValueChange={setQuality}>
-                                                            <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
-                                                            <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
-                                                            <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
-                                                            <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
-                                                        </DropdownMenuRadioGroup>
-                                                    </DropdownMenuContent>
-                                                </DropdownMenu>
+                                            <div className="w-full h-full bg-muted flex flex-col items-center justify-center text-center p-4">
+                                                <PlayCircle className="h-16 w-16 text-muted-foreground/50" />
+                                                <p className="mt-4 text-lg font-semibold">Select a video to play</p>
+                                                <p className="text-sm text-muted-foreground">Choose a lesson from the "Course Content" list.</p>
                                             </div>
-                                        </>
-                                        )
-                                    ) : (
-                                        <div className="w-full h-full bg-muted flex flex-col items-center justify-center text-center p-4">
-                                            <PlayCircle className="h-16 w-16 text-muted-foreground/50" />
-                                            <p className="mt-4 text-lg font-semibold">Select a video to play</p>
-                                            <p className="text-sm text-muted-foreground">Choose a lesson from the "Course Content" list.</p>
-                                        </div>
-                                    )}
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-6">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <Badge variant="secondary" className="mb-2">{course.subject} - Grade {course.grade}</Badge>
-                                        <CardTitle className="text-xl">{course.title}</CardTitle>
-                                    </div>
-                                    {activeVideo && <h2 className="text-xl font-semibold text-right flex-shrink-0 pl-4">{activeVideo.title}</h2>}
-                                </div>
-                                <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1">
-                                        <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                                        <span>{course.rating || '4.8'} (24 reviews)</span>
-                                    </div>
-                                    <span>{course.instructor || 'Dr. Evelyn Reed'}</span>
-                                </div>
-                                <CardDescription className="mt-4 text-base">
-                                    {course.description}
-                                </CardDescription>
-                                <div className="mt-4 pt-4 border-t space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        {activeVideo?.notesUrl && (
-                                            <Button variant="outline" asChild>
-                                                <a href={activeVideo.notesUrl} target="_blank" rel="noopener noreferrer">
-                                                    <Download className="mr-2 h-4 w-4" />
-                                                    Download Notes
-                                                </a>
-                                            </Button>
                                         )}
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
+                                </CardHeader>
+                                <CardContent className="p-6">
+                                    <div className="flex justify-between items-start">
+                                        <div>
+                                            <Badge variant="secondary" className="mb-2">{course.subject} - Grade {course.grade}</Badge>
+                                            <CardTitle className="text-xl">{course.title}</CardTitle>
+                                        </div>
+                                        {activeVideo && <h2 className="text-xl font-semibold text-right flex-shrink-0 pl-4">{activeVideo.title}</h2>}
+                                    </div>
+                                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-1">
+                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                                            <span>{course.rating || '4.8'} (24 reviews)</span>
+                                        </div>
+                                        <span>{course.instructor || 'Dr. Evelyn Reed'}</span>
+                                    </div>
+                                    <CardDescription className="mt-4 text-base">
+                                        {course.description}
+                                    </CardDescription>
+                                    <div className="mt-4 pt-4 border-t space-y-4">
+                                        <div className="flex items-center gap-2">
+                                            {activeVideo?.notesUrl && (
+                                                <Button variant="outline" asChild>
+                                                    <a href={activeVideo.notesUrl} target="_blank" rel="noopener noreferrer">
+                                                        <Download className="mr-2 h-4 w-4" />
+                                                        Download Notes
+                                                    </a>
+                                                </Button>
+                                            )}
+                                        </div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
 
-                    <div className="lg:col-span-1 space-y-6">
-                        <Card className="overflow-hidden shadow-lg rounded-lg">
-                            <Image
-                                src={course.thumbnail}
-                                alt={course.title}
-                                width={600}
-                                height={400}
-                                className="w-full aspect-video object-cover"
-                                data-ai-hint="online course abstract"
-                            />
-                            <CardContent className="p-4">
-                               <h3 className="text-2xl font-bold mb-2">
-                                    {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : course.pricing.type === 'free' ? 'Free' : 'Included in Subscription'}
-                                </h3>
-                                <Button asChild size="lg" className="w-full">
-                                    <Link href="/register">
-                                        {course.pricing.type === 'free' ? 'Enroll for Free' : 'Buy Now'}
-                                    </Link>
-                                </Button>
-                                <p className="text-xs text-muted-foreground text-center mt-2">30-Day Money-Back Guarantee</p>
-                            </CardContent>
-                        </Card>
-                        <Card className="shadow-lg rounded-lg">
-                            <CardHeader>
-                                <CardTitle>Course Content</CardTitle>
-                                <CardDescription>{course.videos.length} lessons</CardDescription>
-                            </CardHeader>
-                            <CardContent className="p-0">
-                                <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
-                                    {course.videos.map((video, index) => (
-                                        <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
-                                            <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
-                                                <div className="flex items-center gap-3">
-                                                    <Clapperboard className="h-5 w-5 text-muted-foreground"/>
-                                                    <span>{index + 1}. {video.title}</span>
-                                                </div>
-                                            </AccordionTrigger>
-                                            <AccordionContent>
-                                                <div className="pl-8 flex flex-col items-start gap-2">
-                                                     <p className="text-sm text-muted-foreground">Click the trigger above to play this lesson.</p>
-                                                     <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
-                                                        <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
-                                                    </Button>
-                                                </div>
-                                            </AccordionContent>
-                                        </AccordionItem>
-                                    ))}
-                                </Accordion>
-                            </CardContent>
-                        </Card>
+                        <div className="lg:col-span-1 space-y-6">
+                            <Card className="overflow-hidden shadow-lg rounded-lg">
+                                <Image
+                                    src={course.thumbnail}
+                                    alt={course.title}
+                                    width={600}
+                                    height={400}
+                                    className="w-full aspect-video object-cover"
+                                    data-ai-hint="online course abstract"
+                                />
+                                <CardContent className="p-4">
+                                   <h3 className="text-2xl font-bold mb-2">
+                                        {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : course.pricing.type === 'free' ? 'Free' : 'Included in Subscription'}
+                                    </h3>
+                                    <Button asChild size="lg" className="w-full">
+                                        <Link href="/register">
+                                            {course.pricing.type === 'free' ? 'Enroll for Free' : 'Buy Now'}
+                                        </Link>
+                                    </Button>
+                                    <p className="text-xs text-muted-foreground text-center mt-2">30-Day Money-Back Guarantee</p>
+                                </CardContent>
+                            </Card>
+                            <Card className="shadow-lg rounded-lg">
+                                <CardHeader>
+                                    <CardTitle>Course Content</CardTitle>
+                                    <CardDescription>{course.videos.length} lessons</CardDescription>
+                                </CardHeader>
+                                <CardContent className="p-0">
+                                    <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
+                                        {course.videos.map((video, index) => (
+                                            <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
+                                                <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
+                                                    <div className="flex items-center gap-3">
+                                                        <Clapperboard className="h-5 w-5 text-muted-foreground"/>
+                                                        <span>{index + 1}. {video.title}</span>
+                                                    </div>
+                                                </AccordionTrigger>
+                                                <AccordionContent>
+                                                    <div className="pl-8 flex flex-col items-start gap-2">
+                                                         <p className="text-sm text-muted-foreground">Click the trigger above to play this lesson.</p>
+                                                         <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
+                                                            <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
+                                                        </Button>
+                                                    </div>
+                                                </AccordionContent>
+                                            </AccordionItem>
+                                        ))}
+                                    </Accordion>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
                 </div>
+                <div className="hidden md:block">
+                    <Footer />
+                </div>
             </main>
-            <Footer />
         </div>
     );
 }
-
-    
-
-    
