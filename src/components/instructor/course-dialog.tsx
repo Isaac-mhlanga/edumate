@@ -328,15 +328,25 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t mt-3">
                                                         <FormItem>
                                                             <FormLabel className="flex items-center gap-2 text-sm"><Paperclip className="h-4 w-4"/> Lesson Notes</FormLabel>
-                                                            {video.notesUrl && (
+                                                            {video.notesUrl ? (
                                                                 <div className="flex items-center gap-2 text-xs">
                                                                     <FileText className="h-4 w-4 text-primary"/>
                                                                     <a href={video.notesUrl} target="_blank" rel="noopener noreferrer" className="truncate hover:underline">{video.notesUrl.split('%2F').pop()?.split('?')[0]}</a>
                                                                 </div>
+                                                            ) : (
+                                                                <p className="text-xs text-muted-foreground italic">No notes currently attached.</p>
                                                             )}
-                                                            <FormControl>
-                                                                <Input type="file" accept=".pdf" className="text-xs" onChange={e => handleExistingVideoChange(video.id, 'notesFile', e.target.files?.[0])} />
-                                                            </FormControl>
+                                                             <div>
+                                                                <p className="text-xs text-muted-foreground mb-1">{video.notesUrl ? "Choose a file to replace the current notes:" : "Choose a file to add notes:"}</p>
+                                                                <FormControl>
+                                                                    <Input 
+                                                                        type="file" 
+                                                                        accept=".pdf" 
+                                                                        className="text-xs" 
+                                                                        onChange={e => handleExistingVideoChange(video.id, 'notesFile', e.target.files?.[0])} 
+                                                                    />
+                                                                </FormControl>
+                                                            </div>
                                                         </FormItem>
                                                         <FormItem>
                                                             <FormLabel className="flex items-center gap-2 text-sm"><LinkIcon className="h-4 w-4"/> Linked Quiz</FormLabel>
@@ -426,5 +436,3 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         </Dialog>
     );
 }
-
-    
