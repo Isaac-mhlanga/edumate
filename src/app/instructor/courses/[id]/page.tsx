@@ -179,24 +179,6 @@ export default function CoursePreviewPage() {
                                         >
                                             Your browser does not support the video tag.
                                         </video>
-                                        <div className="absolute bottom-4 right-4 z-10">
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="secondary" size="icon" className="text-white bg-black/50 hover:bg-black/80 border-white/20">
-                                                        <Settings className="h-5 w-5" />
-                                                        <span className="sr-only">Video Settings</span>
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuRadioGroup value={quality} onValueChange={setQuality}>
-                                                        <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
-                                                        <DropdownMenuRadioItem value="360p">360p (Auto)</DropdownMenuRadioItem>
-                                                    </DropdownMenuRadioGroup>
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
                                     </>
                                     )
                                 ) : (
@@ -226,16 +208,6 @@ export default function CoursePreviewPage() {
                             <CardDescription className="mt-4 text-base">
                                 {course.description}
                             </CardDescription>
-                            <div className="mt-4 pt-4 border-t space-y-4">
-                                <div className="flex items-center gap-2">
-                                     {activeVideo?.notesUrl && (
-                                        <Button variant="outline" onClick={() => setIsNotesOpen(true)}>
-                                            <FileText className="mr-2 h-4 w-4" />
-                                            View Notes
-                                        </Button>
-                                    )}
-                                </div>
-                            </div>
                         </CardContent>
                     </Card>
                 </div>
@@ -284,7 +256,22 @@ export default function CoursePreviewPage() {
                                                     {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2" />}
                                                 </div>
                                             </AccordionTrigger>
-                                            <AccordionContent className="p-0"></AccordionContent>
+                                            <AccordionContent className="pb-2">
+                                                {video.notesUrl && (
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="pl-8 text-muted-foreground hover:text-primary justify-start w-full"
+                                                        onClick={() => {
+                                                            setActiveVideo(video);
+                                                            setIsNotesOpen(true);
+                                                        }}
+                                                    >
+                                                        <FileText className="mr-2 h-4 w-4" />
+                                                        View Lesson Notes
+                                                    </Button>
+                                                )}
+                                            </AccordionContent>
                                         </AccordionItem>
                                     )
                                 })}
