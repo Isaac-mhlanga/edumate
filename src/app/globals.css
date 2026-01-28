@@ -64,11 +64,11 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground min-h-screen font-body text-[15px] tracking-wide leading-relaxed;
+    @apply bg-background text-foreground min-h-screen font-body text-base leading-relaxed;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold tracking-tight;
+    @apply font-headline font-bold;
   }
    ::-webkit-scrollbar {
     @apply w-2;
