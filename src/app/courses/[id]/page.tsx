@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star, Download, Loader2, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, Clapperboard, PlayCircle, Sparkles, Star, Download, Loader2, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
@@ -318,14 +318,14 @@ export default function PublicCoursePage() {
                     <Footer />
                 </div>
                 <Dialog open={isNotesOpen} onOpenChange={setIsNotesOpen}>
-                    <DialogContent className="max-w-4xl h-[90vh]">
-                        <DialogHeader>
+                    <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+                        <DialogHeader className="p-6 pb-4">
                             <DialogTitle>Lesson Notes: {activeVideo?.title}</DialogTitle>
                             <DialogDescription>
                                 Scroll to view the document. You can also download it from within the PDF viewer.
                             </DialogDescription>
                         </DialogHeader>
-                        <div className="h-full border rounded-md overflow-hidden">
+                        <div className="flex-1 border-t">
                             {activeVideo?.notesUrl && (
                                 <iframe 
                                     src={`https://docs.google.com/gview?url=${encodeURIComponent(activeVideo.notesUrl)}&embedded=true`}
