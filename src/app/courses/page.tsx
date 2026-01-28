@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ListFilter, Clapperboard, Clock, Star } from 'lucide-react';
+import { Search, ListFilter, Clapperboard, Clock } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -170,10 +170,6 @@ export default function CoursesPage() {
                                         <CardHeader>
                                             <div className="flex justify-between items-start">
                                                 <Badge variant="secondary">{course.subject}</Badge>
-                                                <div className="flex items-center gap-1 text-sm text-amber-500">
-                                                    <Star className="w-4 h-4 fill-current" />
-                                                    <span className="font-semibold">{course.rating || 4.8}</span>
-                                                </div>
                                             </div>
                                             <CardTitle className="text-base pt-2 truncate">{course.title}</CardTitle>
                                         </CardHeader>

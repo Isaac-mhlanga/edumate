@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Star, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift, Facebook, Youtube } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift, Facebook, Youtube } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -448,10 +448,6 @@ export default function Home() {
                                 <CardHeader>
                                   <div className="flex justify-between items-start">
                                     <Badge variant="secondary">{course.subject}</Badge>
-                                    <div className="flex items-center gap-1 text-sm text-amber-500">
-                                      <Star className="w-4 h-4 fill-current" />
-                                      <span className="font-semibold">{course.rating || 4.8}</span>
-                                    </div>
                                   </div>
                                   <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
                                 </CardHeader>
@@ -586,11 +582,7 @@ export default function Home() {
                         <Badge variant="secondary" className="mb-2">{selectedCourseForPlayer.subject} - Grade {selectedCourseForPlayer.grade}</Badge>
                         <h2 className="text-2xl font-bold">{selectedCourseForPlayer.title}</h2>
                         <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                                <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                                <span>{selectedCourseForPlayer.rating || '4.8'} (24 reviews)</span>
-                            </div>
-                            <span>{selectedCourseForPlayer.instructor || 'Dr. Evelyn Reed'}</span>
+                            <span>By {selectedCourseForPlayer.instructor || 'Dr. Evelyn Reed'}</span>
                         </div>
                         <p className="text-sm text-muted-foreground pt-2">{selectedCourseForPlayer.description}</p>
                    </div>

@@ -6,7 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, PlayCircle, Sparkles, Star, Download, Loader2, FileText, ChevronLeft, ChevronRight, Clock } from "lucide-react";
+import { ArrowLeft, PlayCircle, Sparkles, Download, Loader2, FileText, ChevronLeft, ChevronRight, Clock, Clapperboard } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
@@ -59,6 +59,7 @@ export default function PublicCoursePage() {
     const courseId = params.id as string;
     const [course, setCourse] = React.useState<Course | null>(null);
     const [loading, setLoading] = React.useState(true);
+    const [instructorName, setInstructorName] = React.useState<string>('Edumate Team');
 
     const [activeVideo, setActiveVideo] = React.useState<VideoData | undefined>(undefined);
     const videoRef = React.useRef<HTMLVideoElement>(null);
@@ -81,6 +82,14 @@ export default function PublicCoursePage() {
                 setCourse(courseData);
                 if (courseData.videos && courseData.videos.length > 0) {
                     setActiveVideo(courseData.videos[0]);
+                }
+                 // Fetch instructor name
+                if (courseData.instructorId) {
+                    const userRef = doc(firestore, 'users', courseData.instructorId);
+                    const userSnap = await getDoc(userRef);
+                    if (userSnap.exists()) {
+                        setInstructorName(userSnap.data().fullName);
+                    }
                 }
             } else {
                 console.error("No such course!");
@@ -192,11 +201,7 @@ export default function PublicCoursePage() {
                                         {activeVideo && <h2 className="text-xl font-semibold text-right flex-shrink-0 pl-4">{activeVideo.title}</h2>}
                                     </div>
                                     <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                                        <div className="flex items-center gap-1">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
-                                            <span>{course.rating || '4.8'} (24 reviews)</span>
-                                        </div>
-                                        <span>{course.instructor || 'Dr. Evelyn Reed'}</span>
+                                        <span>By {instructorName}</span>
                                     </div>
                                     <CardDescription className="mt-4 text-base">
                                         {course.description}
@@ -246,9 +251,7 @@ export default function PublicCoursePage() {
                                                         onClick={() => setActiveVideo(video)}
                                                     >
                                                         <div className="flex items-start gap-4 w-full">
-                                                            <span className="font-mono text-sm text-muted-foreground mt-1">
-                                                                {String(originalIndex + 1).padStart(2, '0')}
-                                                            </span>
+                                                            <Clapperboard className="h-5 w-5 text-muted-foreground mt-1" />
                                                             <div className="flex-1 text-left">
                                                                 <p className="font-medium leading-snug">{video.title}</p>
                                                                 {video.duration && (
