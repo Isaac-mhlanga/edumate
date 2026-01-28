@@ -199,7 +199,7 @@ export default function CoursesPage() {
                                                 <div className="flex justify-between items-start">
                                                     <Badge variant="secondary">{course.subject}</Badge>
                                                 </div>
-                                                <CardTitle className="text-base pt-2 truncate">{course.title}</CardTitle>
+                                                <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
                                             </CardHeader>
                                             <CardContent className="flex-grow">
                                                 <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
@@ -223,7 +223,7 @@ export default function CoursesPage() {
                                                 </div>
                                                 <Separator />
                                                 <div className="flex items-center justify-between w-full">
-                                                    <span className="text-xl font-bold">
+                                                    <span className="text-2xl font-bold">
                                                         {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
                                                     </span>
                                                     <Button asChild size="sm">
