@@ -285,14 +285,7 @@ export default function PublicCoursePage() {
                                                         <span>{index + 1}. {video.title}</span>
                                                     </div>
                                                 </AccordionTrigger>
-                                                <AccordionContent>
-                                                    <div className="pl-8 flex flex-col items-start gap-2">
-                                                         <p className="text-sm text-muted-foreground">Click the trigger above to play this lesson.</p>
-                                                         <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
-                                                            <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
-                                                        </Button>
-                                                    </div>
-                                                </AccordionContent>
+                                                <AccordionContent className="p-0"></AccordionContent>
                                             </AccordionItem>
                                         ))}
                                     </Accordion>
