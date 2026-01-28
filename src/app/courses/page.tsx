@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ListFilter, Clapperboard, Clock } from 'lucide-react';
+import { Search, ListFilter, Clapperboard, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -42,6 +42,13 @@ type Course = {
     instructor?: string;
 };
 
+type UserDoc = {
+    id: string;
+    fullName: string;
+    role: 'student' | 'instructor' | 'admin' | 'tutor';
+};
+
+
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
     authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
@@ -55,17 +62,31 @@ export default function CoursesPage() {
     const [allCourses, setAllCourses] = useState<Course[]>([]);
     const [loadingCourses, setLoadingCourses] = useState(true);
     const [filters, setFilters] = useState({ search: '', subject: 'All', grade: 'All' });
+    const [currentPage, setCurrentPage] = useState(1);
+    const coursesPerPage = 6;
+
 
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const firestore = getFirestore(app);
 
-        const fetchCourses = async () => {
+        const fetchCoursesAndInstructors = async () => {
             setLoadingCourses(true);
             try {
+                // Fetch users to map instructor IDs to names
+                const usersSnapshot = await getDocs(collection(firestore, 'users'));
+                const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as UserDoc);
+                const instructorMap = new Map(users.filter(u => u.role === 'instructor').map(i => [i.id, i.fullName]));
+
                 const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'));
                 const querySnapshot = await getDocs(coursesQuery);
-                const fetchedCourses = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
+                const fetchedCourses = querySnapshot.docs.map(doc => {
+                    const courseData = { id: doc.id, ...doc.data() } as Course;
+                    return {
+                        ...courseData,
+                        instructor: instructorMap.get(courseData.instructorId) || 'Edumate Team'
+                    };
+                });
                 setAllCourses(fetchedCourses);
             } catch (error) {
                 console.error("Error fetching courses: ", error);
@@ -74,7 +95,7 @@ export default function CoursesPage() {
             }
         };
 
-        fetchCourses();
+        fetchCoursesAndInstructors();
     }, []);
 
     const handleFilterChange = (key: 'search' | 'subject' | 'grade', value: string) => {
@@ -89,6 +110,12 @@ export default function CoursesPage() {
             return searchMatch && subjectMatch && gradeMatch;
         });
     }, [allCourses, filters]);
+    
+    const totalPages = Math.ceil(filteredCourses.length / coursesPerPage);
+    const paginatedCourses = filteredCourses.slice(
+        (currentPage - 1) * coursesPerPage,
+        currentPage * coursesPerPage
+    );
 
     const formatDuration = (videos: VideoData[] = []) => {
       const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
@@ -152,54 +179,69 @@ export default function CoursesPage() {
                                     <Card key={i}><CardHeader><Skeleton className="h-40 w-full" /></CardHeader><CardContent className="space-y-2 pt-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /></CardContent><CardFooter><Skeleton className="h-10 w-full" /></CardFooter></Card>
                                 ))}
                             </div>
-                        ) : filteredCourses.length > 0 ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {filteredCourses.map((course) => (
-                                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
-                                        <Link href={`/courses/${course.id}`} className="block">
-                                            <div className="relative h-48 overflow-hidden">
-                                                <Image
-                                                    src={course.thumbnail}
-                                                    alt={course.title}
-                                                    fill
-                                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                                    data-ai-hint="online course"
-                                                />
-                                            </div>
-                                        </Link>
-                                        <CardHeader>
-                                            <div className="flex justify-between items-start">
-                                                <Badge variant="secondary">{course.subject}</Badge>
-                                            </div>
-                                            <CardTitle className="text-base pt-2 truncate">{course.title}</CardTitle>
-                                        </CardHeader>
-                                        <CardContent className="flex-grow">
-                                            <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
-                                        </CardContent>
-                                        <CardFooter className="flex-col items-start gap-4">
-                                            <div className="flex justify-between w-full text-sm text-muted-foreground">
-                                                <div className="flex items-center gap-2">
-                                                    <Clapperboard className="w-4 h-4" />
-                                                    <span>{course.videos.length} lessons</span>
+                        ) : paginatedCourses.length > 0 ? (
+                             <>
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    {paginatedCourses.map((course) => (
+                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
+                                            <Link href={`/courses/${course.id}`} className="block">
+                                                <div className="relative h-48 overflow-hidden">
+                                                    <Image
+                                                        src={course.thumbnail}
+                                                        alt={course.title}
+                                                        fill
+                                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                                        data-ai-hint="online course"
+                                                    />
                                                 </div>
-                                                <div className="flex items-center gap-2">
-                                                    <Clock className="w-4 h-4" />
-                                                    <span>{formatDuration(course.videos) || 'N/A'}</span>
+                                            </Link>
+                                            <CardHeader>
+                                                <div className="flex justify-between items-start">
+                                                    <Badge variant="secondary">{course.subject}</Badge>
                                                 </div>
-                                            </div>
-                                            <Separator />
-                                            <div className="flex items-center justify-between w-full">
-                                                <span className="text-xl font-bold">
-                                                    {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
-                                                </span>
-                                                <Button asChild size="sm">
-                                                    <Link href={`/courses/${course.id}`}>View Course</Link>
-                                                </Button>
-                                            </div>
-                                        </CardFooter>
-                                    </Card>
-                                ))}
-                            </div>
+                                                <CardTitle className="text-base pt-2 truncate">{course.title}</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="flex-grow">
+                                                <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                                                {course.instructor && (
+                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                                                        <User className="h-3 w-3" />
+                                                        <span>By {course.instructor}</span>
+                                                    </div>
+                                                )}
+                                            </CardContent>
+                                            <CardFooter className="flex-col items-start gap-4">
+                                                <div className="flex justify-between w-full text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-2">
+                                                        <Clapperboard className="w-4 h-4" />
+                                                        <span>{course.videos.length} lessons</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="w-4 h-4" />
+                                                        <span>{formatDuration(course.videos) || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                                <Separator />
+                                                <div className="flex items-center justify-between w-full">
+                                                    <span className="text-xl font-bold">
+                                                        {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
+                                                    </span>
+                                                    <Button asChild size="sm">
+                                                        <Link href={`/courses/${course.id}`}>View Course</Link>
+                                                    </Button>
+                                                </div>
+                                            </CardFooter>
+                                        </Card>
+                                    ))}
+                                </div>
+                                 {totalPages > 1 && (
+                                    <div className="flex items-center justify-center pt-8">
+                                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                                        <span className="text-sm text-muted-foreground mx-4">Page {currentPage} of {totalPages}</span>
+                                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                                    </div>
+                                )}
+                            </>
                         ) : (
                             <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
                                 <h3 className="text-lg font-semibold">No Courses Found</h3>
