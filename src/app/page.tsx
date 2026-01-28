@@ -311,7 +311,7 @@ export default function Home() {
                 </p>
               </div>
               <div className="max-w-4xl mx-auto">
-                  <div className="relative h-96 mb-12">
+                  <div className="relative h-96 mb-12 rounded-lg overflow-hidden">
                       <Image 
                           src="https://picsum.photos/seed/about-us-image/600/800"
                           alt="Diverse group of students"
