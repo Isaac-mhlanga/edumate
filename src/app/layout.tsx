@@ -39,7 +39,7 @@ export default function RootLayout({
   const showAppLayout = !noLayoutRoutes.includes(pathname) && !isPublicPage;
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning className="dark">
       <head>
         <title>Edumate Pro</title>
         <meta name="description" content="A futuristic, professional, and student-focused multi-tenant educational web app offering video lessons, tutoring services, and paid assignments." />
@@ -51,9 +51,8 @@ export default function RootLayout({
       <body className="font-body antialiased" suppressHydrationWarning={true}>
         <ThemeProvider
             attribute="class"
-            defaultTheme="light"
-            enableSystem
-            disableTransitionOnChange
+            defaultTheme="dark"
+            forcedTheme="dark"
         >
             <Suspense fallback={<AppLoadingSkeleton />}>
               <GoogleAnalytics />

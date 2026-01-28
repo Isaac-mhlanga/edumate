@@ -157,6 +157,7 @@ function StudentCoursePage() {
                                             key={activeVideo.url}
                                             className="w-full h-full"
                                             controls
+                                            controlsList="nodownload"
                                             autoPlay
                                             src={activeVideo.url}
                                             onEnded={handleVideoEnded}

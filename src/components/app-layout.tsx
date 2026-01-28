@@ -48,7 +48,6 @@ import { Icons } from './icons';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import React from 'react';
-import { ThemeToggle } from './theme-toggle';
 import { getAuth, onAuthStateChanged, signOut, type User, type Auth } from 'firebase/auth';
 import { getApp, getApps, initializeApp, type FirebaseOptions } from 'firebase/app';
 import { getFirestore, doc, getDoc } from 'firebase/firestore';
@@ -307,7 +306,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <SidebarInset>
         <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-card px-6">
             <SidebarTrigger />
-            <ThemeToggle />
         </header>
         <main className={cn("flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto", isMobile && "pb-20")}>
             {children}

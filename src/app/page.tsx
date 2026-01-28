@@ -28,6 +28,7 @@ import { event } from '@/components/google-analytics';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { type UpcomingEvent } from "@/lib/data";
 import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
+import { cn } from "@/lib/utils";
 
 
 const firebaseConfig = {
@@ -303,10 +304,10 @@ export default function Home() {
                <div className="text-center mb-16 animate-fade-in-up">
                 <Badge>About Us</Badge>
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
-                  Our Mission: Accessible, Quality Education
+                  Accessible, Quality Education for All
                 </h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                  We're on a mission to make top-quality education accessible. Edumate Pro combines expert-led resources with smart technology to create a learning experience that's engaging, effective, and builds confidence.
+                  We believe that every student deserves the chance to succeed. Edumate Pro combines expert-led resources with smart technology to create a learning experience that's engaging, effective, and builds confidence.
                 </p>
               </div>
               <div className="max-w-4xl mx-auto">
@@ -345,7 +346,7 @@ export default function Home() {
               <div className="max-w-7xl mx-auto px-6">
                   <div className="text-center mb-12 animate-fade-in-up">
                       <Badge>Live Events</Badge>
-                      <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Don't Miss Our Live Events</h2>
+                      <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Don't Miss Our Free Live Events</h2>
                       <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our free live classes and revision sessions. Ask questions, interact with top instructors, and get ready for your exams.</p>
                   </div>
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -567,29 +568,12 @@ export default function Home() {
                                   key={activeVideo.url}
                                   className="w-full h-full"
                                   controls
+                                  controlsList="nodownload"
                                   autoPlay
                                   src={activeVideo.url}
                               >
                                   Your browser does not support the video tag.
                               </video>
-                              <div className="absolute bottom-4 right-4 z-10">
-                                  <DropdownMenu>
-                                      <DropdownMenuTrigger asChild>
-                                          <Button variant="secondary" size="icon" className="text-white bg-black/50 hover:bg-black/80 border-white/20">
-                                              <Settings className="h-5 w-5" />
-                                              <span className="sr-only">Video Settings</span>
-                                          </Button>
-                                      </DropdownMenuTrigger>
-                                      <DropdownMenuContent align="end">
-                                          <DropdownMenuRadioGroup value={quality} onValueChange={setQuality}>
-                                              <DropdownMenuRadioItem value="1080p">1080p</DropdownMenuRadioItem>
-                                              <DropdownMenuRadioItem value="720p">720p</DropdownMenuRadioItem>
-                                              <DropdownMenuRadioItem value="480p">480p</DropdownMenuRadioItem>
-                                              <DropdownMenuRadioItem value="360p (Auto)">360p (Auto)</DropdownMenuRadioItem>
-                                          </DropdownMenuRadioGroup>
-                                      </DropdownMenuContent>
-                                  </DropdownMenu>
-                              </div>
                           </>
                       ) : (
                           <div className="w-full h-full bg-muted flex flex-col items-center justify-center text-center p-4">
@@ -619,15 +603,16 @@ export default function Home() {
                     <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
                         {selectedCourseForPlayer.videos.map((video, index) => (
                             <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
-                                <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
-                                    <div className="flex items-start gap-3">
-                                        <Clapperboard className="h-5 w-5 text-muted-foreground mt-1"/>
-                                        <span>{index + 1}. {video.title}</span>
+                                <AccordionTrigger className={cn("text-left hover:no-underline", video.id === activeVideo?.id && "bg-primary/10 font-semibold")} onClick={() => setActiveVideo(video)}>
+                                    <div className="flex items-center justify-between w-full gap-2">
+                                        <div className="flex items-center gap-3 min-w-0">
+                                            <Clapperboard className="h-5 w-5 text-muted-foreground flex-shrink-0"/>
+                                            <span className="truncate">{index + 1}. {video.title}</span>
+                                        </div>
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pl-8 flex flex-col items-start gap-3">
-                                      <p className="text-sm text-muted-foreground">Click the trigger above to play this lesson.</p>
                                       <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
                                         <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
                                       </Button>
