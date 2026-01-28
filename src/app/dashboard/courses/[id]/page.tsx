@@ -62,8 +62,6 @@ function StudentCoursePage() {
     const [loading, setLoading] = React.useState(true);
     
     const [activeVideo, setActiveVideo] = React.useState<VideoData | undefined>(undefined);
-    const [quality, setQuality] = React.useState('720p');
-    const [playbackRate, setPlaybackRate] = React.useState('1');
     const videoRef = React.useRef<HTMLVideoElement>(null);
     const [isNotesOpen, setIsNotesOpen] = React.useState(false);
 
@@ -93,17 +91,12 @@ function StudentCoursePage() {
         fetchCourse();
     }, [courseId]);
 
-    React.useEffect(() => {
-        if (videoRef.current) {
-            videoRef.current.playbackRate = parseFloat(playbackRate);
+    const handleVideoEnded = () => {
+        if (!course || !activeVideo) return;
+        const currentIndex = course.videos.findIndex(v => v.id === activeVideo.id);
+        if (currentIndex > -1 && currentIndex < course.videos.length - 1) {
+            setActiveVideo(course.videos[currentIndex + 1]);
         }
-    }, [playbackRate]);
-
-    const handleSummarize = async () => {
-        toast({
-            title: 'Feature Coming Soon!',
-            description: 'Our team is hard at work on this AI-powered video analysis feature. Stay tuned!',
-        });
     };
 
     const from = searchParams.get('from');
@@ -175,6 +168,7 @@ function StudentCoursePage() {
                                             controls
                                             autoPlay
                                             src={activeVideo.url}
+                                            onEnded={handleVideoEnded}
                                         >
                                             Your browser does not support the video tag.
                                         </video>
@@ -294,7 +288,7 @@ function StudentCoursePage() {
                     <div className="h-full border rounded-md overflow-hidden">
                         {activeVideo?.notesUrl && (
                             <iframe 
-                                src={activeVideo.notesUrl}
+                                src={`https://docs.google.com/gview?url=${encodeURIComponent(activeVideo.notesUrl)}&embedded=true`}
                                 className="w-full h-full"
                                 title={`Notes for ${activeVideo.title}`}
                             />
