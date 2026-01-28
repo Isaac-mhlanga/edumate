@@ -50,13 +50,13 @@ export function Footer() {
           <div>
             <h3 className="text-lg font-semibold text-primary mb-4">Follow Us</h3>
             <div className="flex space-x-3">
-                <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
                     <FaTiktok className="h-5 w-5" />
                 </Link>
-                <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
                     <FaYoutube className="h-5 w-5" />
                 </Link>
-                 <Link href="https://www.facebook.com/your-page-here" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                 <Link href="https://www.facebook.com/your-page-here" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
                     <FaFacebook className="h-5 w-5" />
                 </Link>
             </div>

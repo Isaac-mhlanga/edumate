@@ -83,7 +83,7 @@ export function InstructorOverviewTab({
     <div className="space-y-8">
        <section className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {loading.students || loading.courses || loading.transactions || loading.assignments ? Array.from({length: 4}).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />) : stats.map((stat) => (
-            <Card key={stat.title}>
+            <Card key={stat.title} className="transition-shadow hover:shadow-lg hover:-translate-y-1">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                     <stat.icon className="h-5 w-5 text-muted-foreground" />

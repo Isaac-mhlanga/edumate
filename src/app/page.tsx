@@ -279,13 +279,13 @@ export default function Home() {
                   Invite friends to Edumate Pro and earn R20 for each one who signs up. It's our way of saying thanks for growing our community.
                 </p>
                 <div className="flex justify-center space-x-4 mb-8">
-                  <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                  <Link href="https://www.tiktok.com/@edumate.pro?is_from_webapp=1&sender_device=pc" target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
                     <FaTiktok className="h-5 w-5" />
                   </Link>
-                  <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                  <Link href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" aria-label="YouTube" className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
                     <FaYoutube className="h-5 w-5" />
                   </Link>
-                  <Link href="https://www.facebook.com/facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 border rounded-md text-muted-foreground hover:text-primary hover:border-primary transition-colors">
+                  <Link href="https://www.facebook.com/facebook" target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="h-10 w-10 flex items-center justify-center rounded-full bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors">
                     <FaFacebook className="h-5 w-5" />
                   </Link>
                 </div>
@@ -323,7 +323,7 @@ export default function Home() {
                   </div>
                   <div className="grid md:grid-cols-3 gap-8">
                     {features.map((feature, index) => (
-                      <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up transition-shadow hover:shadow-xl" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                      <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up transition-shadow hover:shadow-xl hover:shadow-primary/10" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                         <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                             {feature.icon}
                         </div>
@@ -353,7 +353,7 @@ export default function Home() {
                       {loadingEvents ? Array.from({ length: 3 }).map((_, i) => (
                           <Card key={i}><Skeleton className="h-64 w-full"/></Card>
                       )) : upcomingEvents.slice(0,3).map((event, index) => (
-                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl" style={{ animationDelay: `${0.1 * index}s` }}>
+                          <Card key={event.id} className="group flex flex-col animate-fade-in-up border transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/10" style={{ animationDelay: `${0.1 * index}s` }}>
                               <CardHeader className="flex-row items-start gap-4">
                                   <div className="flex flex-col items-center justify-center p-3 rounded-md bg-muted text-muted-foreground w-20 border">
                                       <span className="text-sm font-bold uppercase">{isClient ? format(new Date(event.start), 'MMM') : ''}</span>
@@ -432,7 +432,7 @@ export default function Home() {
                         {allCourses.map((course, index) => (
                           <CarouselItem key={course.id} className="md:basis-1/2 lg:basis-1/3">
                             <div className="p-1">
-                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
+                              <Card className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/10">
                                 <div onClick={() => handleCourseClick(course)} className="relative h-48 overflow-hidden cursor-pointer">
                                   <Image 
                                     src={course.thumbnail}
@@ -505,7 +505,7 @@ export default function Home() {
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
                     {faqData.map((item, index) => (
-                         <Card key={index} className="overflow-hidden bg-card border transition-shadow duration-300 hover:shadow-xl">
+                         <Card key={index} className="overflow-hidden bg-card border transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/10">
                             <AccordionItem value={`faq-${index}`} className="border-b-0">
                                 <AccordionTrigger className="text-lg font-semibold hover:no-underline p-6 text-left">
                                     {item.question}

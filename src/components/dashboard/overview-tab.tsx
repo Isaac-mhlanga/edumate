@@ -108,7 +108,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                     Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-28 rounded-xl" />)
                 ) : (
                     stats.map((stat) => (
-                        <Card key={stat.title}>
+                        <Card key={stat.title} className="transition-shadow hover:shadow-lg hover:-translate-y-1">
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">{stat.title}</CardTitle>
                                 <stat.icon className="h-5 w-5 text-muted-foreground" />
@@ -134,7 +134,7 @@ export function OverviewTab({ submittedAssignments, purchasedCourses, loading }:
                 ) : purchasedCourses.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {purchasedCourses.slice(0, 2).map((course) => (
-                            <Card key={course.id} className="flex flex-col transition-shadow duration-300 hover:shadow-xl">
+                            <Card key={course.id} className="flex flex-col transition-shadow duration-300 hover:shadow-xl hover:shadow-primary/10">
                                 <CardHeader>
                                     <div className="flex justify-between items-start">
                                         <CardTitle className="text-base truncate">{course.title}</CardTitle>
