@@ -40,7 +40,7 @@ export const PublicHeader = () => {
               </Link>
             </div>
             
-             <nav className="hidden md:flex absolute left-1/2 -translate-x-1/2 space-x-8">
+             <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 space-x-8">
               {navItems.map((item) => (
                 <Link key={item.name} href={item.href} className="text-muted-foreground hover:text-primary font-medium transition-colors duration-300">
                     {item.name}
@@ -48,7 +48,7 @@ export const PublicHeader = () => {
               ))}
             </nav>
             
-            <div className="hidden md:flex items-center gap-2">
+            <div className="hidden lg:flex items-center gap-2">
                 <Button variant="ghost" asChild>
                     <Link href="/login">
                       <LogIn className="mr-2 h-4 w-4" />
@@ -60,7 +60,7 @@ export const PublicHeader = () => {
                 </Button>
             </div>
 
-            <div className="md:hidden">
+            <div className="lg:hidden">
               <Sheet>
                 <SheetTrigger asChild>
                   <Button variant="ghost" size="icon">

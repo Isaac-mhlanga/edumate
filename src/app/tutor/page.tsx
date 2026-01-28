@@ -12,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight, Book, GraduationCap, ArrowUpRight } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight, Book, GraduationCap, ArrowUpRight, X } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -750,12 +750,12 @@ function TutorPage() {
             )}
             
             {currentTab === 'messages' && (
-                 <Card className="flex h-[calc(100vh-12rem)]">
-                    <div className="w-1/3 border-r flex flex-col">
+                 <Card className="flex flex-col lg:flex-row lg:h-[calc(100vh-12rem)]">
+                    <div className="w-full lg:w-1/3 border-b lg:border-r lg:border-b-0 flex flex-col">
                         <div className="p-4 border-b">
                              <CardTitle className="text-lg">Inbox</CardTitle>
                         </div>
-                        <ScrollArea className="flex-1">
+                        <ScrollArea className="flex-1 h-64 lg:h-auto">
                             {messageThreads.map(thread => (
                                 <button key={thread.id} onClick={() => handleSelectThread(thread)} className={cn("block w-full text-left p-4 border-b hover:bg-muted", selectedThread?.id === thread.id && "bg-muted")}>
                                     <div className="flex justify-between">
@@ -770,7 +770,7 @@ function TutorPage() {
                             ))}
                         </ScrollArea>
                     </div>
-                    <div className="w-2/3 flex flex-col">
+                    <div className="w-full lg:w-2/3 flex flex-col">
                         {selectedThread ? (
                              <>
                                 <div className="p-4 border-b flex items-center gap-3">
@@ -782,7 +782,7 @@ function TutorPage() {
                                         <p className="text-sm text-muted-foreground">Student</p>
                                     </div>
                                 </div>
-                                <ScrollArea className="flex-1 p-4">
+                                <ScrollArea className="flex-1 p-4 h-96 lg:h-auto">
                                      <div className="space-y-4">
                                         {currentThreadMessages.map(msg => (
                                             <div key={msg.id} className={cn("flex items-end gap-2", msg.senderId === user?.uid ? 'justify-end' : '')}>
@@ -803,7 +803,7 @@ function TutorPage() {
                                 </div>
                              </>
                         ) : (
-                            <div className="flex flex-col h-full items-center justify-center text-center text-muted-foreground">
+                            <div className="flex flex-col h-full items-center justify-center text-center text-muted-foreground p-8">
                                 <MessageSquare className="h-16 w-16 mb-4"/>
                                 <h2 className="text-xl font-semibold">Select a conversation</h2>
                                 <p>Choose a conversation from the list to view messages.</p>
