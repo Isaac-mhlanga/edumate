@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -289,7 +288,10 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                 </div>
                                                 <div className='flex-1'>
                                                     <div className="flex justify-between items-start">
-                                                        <p className="font-semibold pr-10">{video.title}</p>
+                                                        <div className="flex items-center gap-2">
+                                                            <p className="font-semibold pr-10">{video.title}</p>
+                                                            {video.notesUrl && <FileText className="h-4 w-4 text-primary" />}
+                                                        </div>
                                                         <Button type="button" variant="ghost" size="icon" className="absolute top-1 right-1 h-7 w-7" onClick={() => handleDeleteExistingVideo(video.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
                                                     </div>
                                                     
@@ -422,5 +424,3 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         </Dialog>
     );
 }
-
-    

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -8,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star, Download, Loader2 } from "lucide-react";
+import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star, Download, Loader2, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
@@ -17,6 +16,7 @@ import { getApp, getApps, initializeApp } from "firebase/app";
 import { useToast } from "@/hooks/use-toast";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import withAuth from "@/components/with-auth";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type VideoData = {
     id: string;
@@ -65,6 +65,7 @@ function StudentCoursePage() {
     const [quality, setQuality] = React.useState('720p');
     const [playbackRate, setPlaybackRate] = React.useState('1');
     const videoRef = React.useRef<HTMLVideoElement>(null);
+    const [isNotesOpen, setIsNotesOpen] = React.useState(false);
 
     React.useEffect(() => {
         const fetchCourse = async () => {
@@ -218,11 +219,9 @@ function StudentCoursePage() {
                             <div className="mt-4 pt-4 border-t space-y-4">
                                 <div className="flex items-center gap-2">
                                      {activeVideo?.notesUrl && (
-                                        <Button variant="outline" asChild>
-                                            <a href={activeVideo.notesUrl} target="_blank" rel="noopener noreferrer">
-                                                <Download className="mr-2 h-4 w-4" />
-                                                Download Notes
-                                            </a>
+                                        <Button variant="outline" onClick={() => setIsNotesOpen(true)}>
+                                            <FileText className="mr-2 h-4 w-4" />
+                                            View Notes
                                         </Button>
                                     )}
                                 </div>
@@ -244,9 +243,12 @@ function StudentCoursePage() {
                                 {course.videos.map((video, index) => (
                                     <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
                                         <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
-                                            <div className="flex items-center gap-3">
-                                                <Clapperboard className="h-5 w-5 text-muted-foreground"/>
-                                                <span>{index + 1}. {video.title}</span>
+                                            <div className="flex items-center justify-between w-full">
+                                                <div className="flex items-center gap-3">
+                                                    <Clapperboard className="h-5 w-5 text-muted-foreground"/>
+                                                    <span>{index + 1}. {video.title}</span>
+                                                </div>
+                                                {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2" />}
                                             </div>
                                         </AccordionTrigger>
                                         <AccordionContent className="p-0"></AccordionContent>
@@ -257,14 +259,27 @@ function StudentCoursePage() {
                     </Card>
                 </div>
             </div>
+            <Dialog open={isNotesOpen} onOpenChange={setIsNotesOpen}>
+                <DialogContent className="max-w-4xl h-[90vh]">
+                    <DialogHeader>
+                        <DialogTitle>Lesson Notes: {activeVideo?.title}</DialogTitle>
+                        <DialogDescription>
+                            Scroll to view the document. You can also download it from within the PDF viewer.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <div className="h-full border rounded-md overflow-hidden">
+                        {activeVideo?.notesUrl && (
+                            <iframe 
+                                src={activeVideo.notesUrl}
+                                className="w-full h-full"
+                                title={`Notes for ${activeVideo.title}`}
+                            />
+                        )}
+                    </div>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }
 
 export default withAuth(StudentCoursePage, ['student']);
-
-    
-
-    
-
-    
