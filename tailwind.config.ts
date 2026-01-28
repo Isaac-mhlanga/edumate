@@ -18,8 +18,8 @@ export default {
     },
     extend: {
       fontFamily: {
-        body: ['Satoshi', 'sans-serif'],
-        headline: ['Satoshi', 'sans-serif'],
+        body: ['Montserrat', 'sans-serif'],
+        headline: ['Montserrat', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
