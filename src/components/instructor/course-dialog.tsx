@@ -1,3 +1,5 @@
+
+
 'use client';
 
 import React, { useEffect, useState, useRef } from 'react';
@@ -61,12 +63,12 @@ const courseFormSchema = z.object({
 
 type CourseFormValues = z.infer<typeof courseFormSchema>;
 
-// Extend VideoData to include local file references for replacement
 type EditableVideoData = VideoData & {
     newVideoFile?: File;
     newVideoDuration?: number;
     newYoutubeUrl?: string;
     newVideoSource?: 'upload' | 'youtube';
+    notesFile?: File;
 };
 
 interface CourseDialogProps {
@@ -424,3 +426,5 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
         </Dialog>
     );
 }
+
+    
