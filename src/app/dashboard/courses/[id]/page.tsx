@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star, Download, Loader2, FileText } from "lucide-react";
+import { ArrowLeft, Clapperboard, PlayCircle, Settings, Sparkles, Star, Download, Loader2, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams, useSearchParams } from "next/navigation";
@@ -66,6 +66,9 @@ function StudentCoursePage() {
     const [playbackRate, setPlaybackRate] = React.useState('1');
     const videoRef = React.useRef<HTMLVideoElement>(null);
     const [isNotesOpen, setIsNotesOpen] = React.useState(false);
+
+    const [currentPage, setCurrentPage] = React.useState(1);
+    const videosPerPage = 10;
 
     React.useEffect(() => {
         const fetchCourse = async () => {
@@ -128,6 +131,12 @@ function StudentCoursePage() {
     if (!course) {
         notFound();
     }
+    
+    const totalPages = Math.ceil(course.videos.length / videosPerPage);
+    const paginatedVideos = course.videos.slice(
+        (currentPage - 1) * videosPerPage,
+        currentPage * videosPerPage
+    );
 
     const isYouTube = activeVideo?.url.includes('youtube.com/embed');
 
@@ -240,22 +249,50 @@ function StudentCoursePage() {
                         </CardHeader>
                         <CardContent className="p-0">
                             <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
-                                {course.videos.map((video, index) => (
-                                    <AccordionItem value={`item-${index}`} key={video.id} className="border-x-0 px-4">
-                                        <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
-                                            <div className="flex items-center justify-between w-full">
-                                                <div className="flex items-center gap-3">
-                                                    <Clapperboard className="h-5 w-5 text-muted-foreground"/>
-                                                    <span>{index + 1}. {video.title}</span>
+                                {paginatedVideos.map((video, index) => {
+                                    const originalIndex = (currentPage - 1) * videosPerPage + index;
+                                    return (
+                                        <AccordionItem value={`item-${originalIndex}`} key={video.id} className="border-x-0 px-4">
+                                            <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
+                                                <div className="flex items-center justify-between w-full">
+                                                    <div className="flex items-center gap-3">
+                                                        <Clapperboard className="h-5 w-5 text-muted-foreground"/>
+                                                        <span>{originalIndex + 1}. {video.title}</span>
+                                                    </div>
+                                                    {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2" />}
                                                 </div>
-                                                {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2" />}
-                                            </div>
-                                        </AccordionTrigger>
-                                        <AccordionContent className="p-0"></AccordionContent>
-                                    </AccordionItem>
-                                ))}
+                                            </AccordionTrigger>
+                                            <AccordionContent className="p-0"></AccordionContent>
+                                        </AccordionItem>
+                                    )
+                                })}
                             </Accordion>
                         </CardContent>
+                        {totalPages > 1 && (
+                            <CardFooter className="flex justify-between items-center pt-4">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    disabled={currentPage === 1}
+                                >
+                                    <ChevronLeft className="h-4 w-4 mr-1" />
+                                    Previous
+                                </Button>
+                                <span className="text-sm text-muted-foreground">
+                                    Page {currentPage} of {totalPages}
+                                </span>
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                                    disabled={currentPage === totalPages}
+                                >
+                                    Next
+                                    <ChevronRight className="h-4 w-4 ml-1" />
+                                </Button>
+                            </CardFooter>
+                        )}
                     </Card>
                 </div>
             </div>
