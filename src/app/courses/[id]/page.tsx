@@ -18,6 +18,7 @@ import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Footer } from '@/components/footer';
 import { PublicHeader } from '@/components/public-header';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { cn } from '@/lib/utils';
 
 type VideoData = {
     id: string;
@@ -153,15 +154,6 @@ export default function PublicCoursePage() {
              <PublicHeader />
              <main className="flex-1 overflow-y-auto">
                 <div className="max-w-7xl mx-auto px-6 py-12 pt-24 space-y-6">
-                    <div>
-                        <Button variant="outline" asChild>
-                            <Link href="/courses">
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Back to All Courses
-                            </Link>
-                        </Button>
-                    </div>
-
                     <div className="grid lg:grid-cols-3 gap-8">
                         <div className="lg:col-span-2 space-y-6">
                             <Card className="overflow-hidden shadow-lg">
@@ -255,13 +247,13 @@ export default function PublicCoursePage() {
                                             const originalIndex = (currentPage - 1) * videosPerPage + index;
                                             return (
                                                 <AccordionItem value={`item-${originalIndex}`} key={video.id} className="border-x-0 px-4">
-                                                    <AccordionTrigger className="text-left hover:no-underline" onClick={() => setActiveVideo(video)}>
-                                                        <div className="flex items-center justify-between w-full">
-                                                            <div className="flex items-center gap-3">
-                                                                <Clapperboard className="h-5 w-5 text-muted-foreground"/>
-                                                                <span>{originalIndex + 1}. {video.title}</span>
+                                                    <AccordionTrigger className={cn("text-left hover:no-underline", video.id === activeVideo?.id && "bg-primary/10 font-semibold")} onClick={() => setActiveVideo(video)}>
+                                                        <div className="flex items-center justify-between w-full gap-2">
+                                                            <div className="flex items-center gap-3 min-w-0">
+                                                                <Clapperboard className="h-5 w-5 text-muted-foreground flex-shrink-0"/>
+                                                                <span className="truncate">{originalIndex + 1}. {video.title}</span>
                                                             </div>
-                                                            {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2" />}
+                                                            {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2 flex-shrink-0" />}
                                                         </div>
                                                     </AccordionTrigger>
                                                     <AccordionContent className="pb-2">
