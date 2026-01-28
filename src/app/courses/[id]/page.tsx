@@ -5,16 +5,14 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
-import { ArrowLeft, Clapperboard, PlayCircle, Sparkles, Star, Download, Loader2, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowLeft, PlayCircle, Sparkles, Star, Download, Loader2, FileText, ChevronLeft, ChevronRight, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound, useParams } from "next/navigation";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { useToast } from "@/hooks/use-toast";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { Footer } from '@/components/footer';
 import { PublicHeader } from '@/components/public-header';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -132,22 +130,14 @@ export default function PublicCoursePage() {
     );
 
     const isYouTube = activeVideo?.url.includes('youtube.com/embed');
-    
-    const formatDuration = (videos: VideoData[] = []) => {
-      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
-      if (totalSeconds === 0) return null;
 
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-      if (hours > 0) {
-          return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
-      }
-      if (minutes > 0) {
-          return `${minutes}m`;
-      }
-      return `${Math.round(totalSeconds)}s`;
+    const formatDuration = (seconds: number) => {
+        if (isNaN(seconds) || seconds < 0) return 'N/A';
+        const minutes = Math.floor(seconds / 60);
+        const remainingSeconds = Math.floor(seconds % 60);
+        return `${minutes}m ${remainingSeconds}s`;
     };
+    
 
     return (
         <div className="flex flex-col h-screen bg-background text-foreground">
@@ -243,26 +233,40 @@ export default function PublicCoursePage() {
                                     <CardDescription>{course.videos.length} lessons</CardDescription>
                                 </CardHeader>
                                 <CardContent className="p-0">
-                                    <Accordion type="single" collapsible defaultValue="item-0" className="w-full">
+                                    <Accordion type="single" collapsible className="w-full">
                                         {paginatedVideos.map((video, index) => {
                                             const originalIndex = (currentPage - 1) * videosPerPage + index;
                                             return (
-                                                <AccordionItem value={`item-${originalIndex}`} key={video.id} className="border-x-0 px-4">
-                                                    <AccordionTrigger className={cn("text-left hover:no-underline", video.id === activeVideo?.id && "bg-primary/10 font-semibold")} onClick={() => setActiveVideo(video)}>
-                                                        <div className="flex items-center justify-between w-full gap-2">
-                                                            <div className="flex items-center gap-3 min-w-0">
-                                                                <Clapperboard className="h-5 w-5 text-muted-foreground flex-shrink-0"/>
-                                                                <span className="truncate">{originalIndex + 1}. {video.title}</span>
+                                                <AccordionItem value={`item-${originalIndex}`} key={video.id} className="border-b">
+                                                    <AccordionTrigger
+                                                        className={cn(
+                                                            "text-left hover:no-underline p-4 data-[state=closed]:hover:bg-muted/50 w-full",
+                                                            video.id === activeVideo?.id && "bg-primary/10 text-primary"
+                                                        )}
+                                                        onClick={() => setActiveVideo(video)}
+                                                    >
+                                                        <div className="flex items-start gap-4 w-full">
+                                                            <span className="font-mono text-sm text-muted-foreground mt-1">
+                                                                {String(originalIndex + 1).padStart(2, '0')}
+                                                            </span>
+                                                            <div className="flex-1 text-left">
+                                                                <p className="font-medium leading-snug">{video.title}</p>
+                                                                {video.duration && (
+                                                                    <span className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
+                                                                        <Clock className="h-3 w-3" />
+                                                                        {formatDuration(video.duration)}
+                                                                    </span>
+                                                                )}
                                                             </div>
-                                                            {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2 flex-shrink-0" />}
+                                                            {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2 flex-shrink-0 mt-1" />}
                                                         </div>
                                                     </AccordionTrigger>
-                                                    <AccordionContent className="pb-2">
-                                                        {video.notesUrl && (
+                                                    <AccordionContent className="pb-4 pl-14 pr-4">
+                                                        {video.notesUrl ? (
                                                             <Button
-                                                                variant="ghost"
+                                                                variant="link"
                                                                 size="sm"
-                                                                className="pl-8 text-muted-foreground hover:text-primary justify-start w-full"
+                                                                className="p-0 h-auto font-normal text-muted-foreground hover:text-primary"
                                                                 onClick={() => {
                                                                     setActiveVideo(video);
                                                                     setIsNotesOpen(true);
@@ -271,6 +275,8 @@ export default function PublicCoursePage() {
                                                                 <FileText className="mr-2 h-4 w-4" />
                                                                 View Lesson Notes
                                                             </Button>
+                                                        ) : (
+                                                            <p className="text-xs text-muted-foreground italic">No notes for this lesson.</p>
                                                         )}
                                                     </AccordionContent>
                                                 </AccordionItem>
