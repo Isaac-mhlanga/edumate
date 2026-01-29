@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useRef, useState } from 'react';
@@ -41,7 +40,7 @@ const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>((
     }, []);
 
     return (
-      <div ref={ref} className="bg-card text-card-foreground p-8">
+      <div ref={ref} className="bg-card text-card-foreground p-8 print:p-0 print:bg-white print:text-black">
           <div className="border-4 border-primary p-6 rounded-lg relative bg-background">
             <div className="text-center mb-6">
                 <div className="flex items-center justify-center gap-2 mb-2">
@@ -171,7 +170,7 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
 
   return (
       <Dialog open={isOpen} onOpenChange={onClose}>
-        <DialogContent className="max-w-3xl">
+        <DialogContent className="max-w-3xl bg-card/80 backdrop-blur-xl">
           <DialogHeader>
             <DialogTitle>Event Details: {event.title}</DialogTitle>
             <DialogDescription>View the details for the upcoming event: {event.title}. You can download the poster or share it.</DialogDescription>

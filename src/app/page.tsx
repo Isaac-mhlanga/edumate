@@ -1,10 +1,9 @@
-
 'use client';
 
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -17,7 +16,9 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { cn } from "@/lib/utils";
-
+import { upcomingEvents, type UpcomingEvent } from "@/lib/data";
+import { CommunityPreview } from "@/components/community-preview";
+import { EventDialog } from "@/components/event-dialog";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -64,6 +65,7 @@ type UserDoc = {
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [selectedEvent, setSelectedEvent] = useState<UpcomingEvent | null>(null);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -180,7 +182,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
                   {features.map((feature, index) => (
-                    <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up bg-transparent border-border/50" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                    <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up bg-card/50 border-border/50" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
                       <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                           {feature.icon}
                       </div>
@@ -207,7 +209,7 @@ export default function Home() {
                {loadingCourses ? (
                   <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                      {Array.from({ length: 3 }).map((_, i) => (
-                         <Card key={i} className="bg-card animate-fade-in-up border">
+                         <Card key={i} className="bg-card/50 border-border/50 animate-fade-in-up">
                              <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
                              <CardContent className="pt-4 space-y-2"><Skeleton className="h-4 w-1/4"/><Skeleton className="h-5 w-3/4"/><Skeleton className="h-10 w-full"/></CardContent>
                              <CardFooter className="flex-col items-start gap-4">
@@ -230,7 +232,7 @@ export default function Home() {
                       {allCourses.map((course) => (
                         <CarouselItem key={course.id} className="md:basis-1/2 lg:basis-1/3">
                           <div className="p-1">
-                            <Card className="group overflow-hidden flex flex-col h-full bg-card border-border/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1">
+                            <Card className="group overflow-hidden flex flex-col h-full bg-card/50 border-border/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1">
                               <Link href={`/courses/${course.id}`} className="block">
                                   <div className="relative h-48 overflow-hidden">
                                       <Image 
@@ -260,7 +262,7 @@ export default function Home() {
                                   </div>
                                   <div className="flex items-center gap-2">
                                     <Clock className="w-4 h-4" />
-                                    <span>{formatDuration(course.videos) || 'N/A'}</span>
+                                    <span>{formatDuration(course.videos as VideoData[]) || 'N/A'}</span>
                                   </div>
                                 </div>
                                 <Separator />
@@ -292,6 +294,39 @@ export default function Home() {
           </div>
         </section>
 
+        <CommunityPreview />
+        
+        <section id="events" className="py-24">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-12 animate-fade-in-up">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Live Events</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live sessions for interactive learning, Q&As, and exam preparation.</p>
+            </div>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event, index) => (
+                <Card key={event.id} className="animate-fade-in-up bg-card/50 border-border/50" style={{ animationDelay: `${0.1 * index}s` }}>
+                  <CardHeader>
+                    <div className="flex items-center gap-3 mb-2 text-sm text-primary font-semibold">
+                      <Calendar className="h-4 w-4" />
+                      <span>{new Date(event.start).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
+                    </div>
+                    <CardTitle className="text-lg">{event.title}</CardTitle>
+                    <CardDescription>{event.instructor}</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{event.scope}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="secondary" className="w-full" onClick={() => setSelectedEvent(event)}>
+                      View Details
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+
         <section id="contact" className="py-24">
             <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
               <Card className="p-8 sm:p-12 bg-card/50 border-border/50">
@@ -310,10 +345,18 @@ export default function Home() {
                 </div>
               </Card>
             </div>
-          </section>
+        </section>
       </main>
       
       <Footer />
+      
+      <EventDialog
+        event={selectedEvent}
+        allEvents={upcomingEvents}
+        isOpen={!!selectedEvent}
+        onClose={() => setSelectedEvent(null)}
+        onEventSelect={setSelectedEvent}
+      />
     </div>
   );
 }

@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -47,10 +46,10 @@ export function CommunityPreview() {
     }, []);
 
     return (
-        <section id="community-preview" className="py-20">
+        <section id="community-preview" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">From the Community</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">From the Community</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">See what students are asking and get involved in the discussion.</p>
                 </div>
                 <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-6">
@@ -58,7 +57,7 @@ export function CommunityPreview() {
                         Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-lg" />)
                     ) : (
                         questions.map((question, index) => (
-                            <Card key={question.id} className="animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
+                            <Card key={question.id} className="animate-fade-in-up bg-card/50 border-border/50" style={{ animationDelay: `${0.1 * index}s` }}>
                                 <CardHeader>
                                     <div className="flex items-start gap-4">
                                         <Avatar className="h-10 w-10 border">
