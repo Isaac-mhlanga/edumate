@@ -171,7 +171,9 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="py-24 bg-muted">
+        <section id="features" className="py-24 bg-muted relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
           <div className="container mx-auto px-6 relative">
                  <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
@@ -201,8 +203,9 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="courses" className="py-24">
-          <div className="max-w-7xl mx-auto px-6">
+        <section id="courses" className="py-24 relative overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          <div className="max-w-7xl mx-auto px-6 relative">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Featured Courses</h2>
                 <p className="text-lg text-muted-foreground">Explore our most popular courses to get started.</p>
@@ -214,7 +217,7 @@ export default function Home() {
                   ))
                 ) : (
                     paginatedCourses.map(course => (
-                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
+                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
                         <Link href={`/courses/${course.id}`} className="block">
                             <div className="relative h-48 overflow-hidden">
                                 <Image
@@ -276,8 +279,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="faq" className="py-24 bg-muted">
-            <div className="max-w-4xl mx-auto px-6">
+        <section id="faq" className="py-24 bg-muted relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+            <div className="max-w-4xl mx-auto px-6 relative">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
@@ -287,7 +292,7 @@ export default function Home() {
                         <AccordionItem
                             value={`item-${index}`}
                             key={index}
-                            className="border-none rounded-2xl bg-card/50 backdrop-blur-xl border border-white/10 shadow-lg overflow-hidden"
+                            className="border-none rounded-2xl bg-card/50 backdrop-blur-lg border border-border/20 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1"
                         >
                             <AccordionTrigger className="text-left p-6 text-base font-semibold hover:no-underline">
                                 {faq.question}
@@ -305,7 +310,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
           <div className="container mx-auto px-6 relative">
-            <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center">
+            <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1">
                 <CardHeader className="p-0 mb-4">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">
                         Begin Your Journey to Excellence
