@@ -14,11 +14,14 @@ import { PublicHeader } from "@/components/public-header";
 import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
-import { cn } from "@/lib/utils";
-import { upcomingEvents, type UpcomingEvent } from "@/lib/data";
-import { CommunityPreview } from "@/components/community-preview";
-import { EventDialog } from "@/components/event-dialog";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { FileText } from "lucide-react";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -65,7 +68,8 @@ type UserDoc = {
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  const [selectedEvent, setSelectedEvent] = useState<UpcomingEvent | null>(null);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
+  const [activeVideo, setActiveVideo] = useState<VideoData | null>(null);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -116,63 +120,45 @@ export default function Home() {
     }
   ];
 
-  const formatDuration = (videos: VideoData[] = []) => {
-      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
-      if (totalSeconds === 0) return null;
-
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-
-      if (hours > 0) {
-          return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
-      }
-      if (minutes > 0) {
-          return `${minutes}m`;
-      }
-      return `${Math.round(totalSeconds)}s`;
-  };
-
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <PublicHeader />
 
-      <main className="flex-1 overflow-x-hidden">
-        <section id="home" className="relative h-screen flex items-center justify-center text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-t from-background via-background/80 to-transparent z-10"></div>
-          <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="absolute inset-0 w-full h-full object-cover z-[-1] opacity-20"
-            src="https://cdn.pixabay.com/video/2023/11/13/188825-883244621_large.mp4"
+      <main className="flex-1">
+        <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center">
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
+          <Image
+            src="https://picsum.photos/seed/header/1920/1080"
+            alt="Hero background"
+            fill
+            className="object-cover -z-10 opacity-10 rounded-lg"
+            data-ai-hint="abstract background"
           />
-          <div className="container mx-auto px-6 relative z-20">
+          <div className="container mx-auto px-6 relative">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-7xl font-headline font-bold mb-6 leading-tight animate-fade-in-up bg-gradient-to-r from-primary via-foreground to-accent bg-clip-text text-transparent bg-[length:200%_auto] animate-shimmer">
-                The Future of Learning is Here.
+              <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6">
+                Accessible, Quality Education for All
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-12 leading-relaxed animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                Edumate Pro combines cutting-edge technology with expert-led instruction to create a seamless, intelligent learning experience.
+              <p className="text-lg md:text-xl text-muted-foreground mb-8">
+                Edumate Pro is a futuristic, professional, and student-focused educational platform offering video lessons, tutoring services, and paid assignments.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                <Button asChild size="lg" className="shadow-lg shadow-primary/20">
-                  <Link href="/courses">
-                      Explore Courses <ArrowRight className="ml-2" />
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                <Button asChild size="lg">
+                  <Link href="/register">
+                      Get Started Free <ArrowRight className="ml-2" />
                   </Link>
                 </Button>
-                <Button asChild size="lg" variant="ghost">
-                  <Link href="/register">Get Started</Link>
+                <Button asChild size="lg" variant="outline">
+                  <Link href="/courses">Explore Courses</Link>
                 </Button>
               </div>
             </div>
           </div>
         </section>
 
-        <section id="features" className="py-24">
+        <section id="features" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
-                 <div className="text-center mb-16 animate-fade-in-up">
+                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
                       A Smarter Way to Learn
                     </h2>
@@ -182,7 +168,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
                   {features.map((feature, index) => (
-                    <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 animate-fade-in-up bg-card/50 border-border/50" style={{ animationDelay: `${0.2 + index * 0.2}s` }}>
+                    <Card key={index} className="p-6 flex flex-col items-center text-center gap-4">
                       <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                           {feature.icon}
                       </div>
@@ -190,7 +176,7 @@ export default function Home() {
                           <h3 className="text-xl font-bold mb-2">
                             {feature.title}
                           </h3>
-                          <p className="text-muted-foreground leading-relaxed">
+                          <p className="text-muted-foreground">
                             {feature.description}
                           </p>
                       </div>
@@ -200,163 +186,113 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="courses" className="py-24 bg-muted/30">
+        <section id="courses" className="py-24">
           <div className="max-w-7xl mx-auto px-6">
-              <div className="text-center mb-12 animate-fade-in-up">
+              <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Featured Courses</h2>
-                <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Explore our most popular courses, designed by experts to help you master challenging subjects with confidence.</p>
+                <p className="text-lg text-muted-foreground">Explore our most popular courses to get started.</p>
               </div>
-               {loadingCourses ? (
-                  <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                     {Array.from({ length: 3 }).map((_, i) => (
-                         <Card key={i} className="bg-card/50 border-border/50 animate-fade-in-up">
-                             <CardHeader className="p-0"><Skeleton className="h-48 w-full"/></CardHeader>
-                             <CardContent className="pt-4 space-y-2"><Skeleton className="h-4 w-1/4"/><Skeleton className="h-5 w-3/4"/><Skeleton className="h-10 w-full"/></CardContent>
-                             <CardFooter className="flex-col items-start gap-4">
-                                 <Skeleton className="h-4 w-full"/>
-                                 <Separator/>
-                                 <div className="flex justify-between w-full">
-                                     <Skeleton className="h-8 w-1/4"/>
-                                     <Skeleton className="h-8 w-1/3"/>
-                                 </div>
-                             </CardFooter>
-                         </Card>
-                     ))}
-                  </div>
-               ) : (
-                  <Carousel
-                    opts={{ align: "start", loop: true }}
-                    className="w-full"
-                  >
-                    <CarouselContent>
-                      {allCourses.map((course) => (
-                        <CarouselItem key={course.id} className="md:basis-1/2 lg:basis-1/3">
-                          <div className="p-1">
-                            <Card className="group overflow-hidden flex flex-col h-full bg-card/50 border-border/50 transition-all duration-300 hover:shadow-xl hover:shadow-primary/10 hover:-translate-y-1">
-                              <Link href={`/courses/${course.id}`} className="block">
-                                  <div className="relative h-48 overflow-hidden">
-                                      <Image 
-                                        src={course.thumbnail}
-                                        alt={course.title}
-                                        fill
-                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                        data-ai-hint="online course"
-                                      />
-                                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
-                                      <div className="absolute bottom-4 left-4">
-                                        <Badge variant="secondary">{course.subject}</Badge>
-                                      </div>
-                                  </div>
-                              </Link>
-                              <CardHeader>
-                                <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
-                              </CardHeader>
-                              <CardContent className="flex-grow">
-                                <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
-                              </CardContent>
-                              <CardFooter className="flex-col items-start gap-4">
-                                <div className="flex justify-between w-full text-sm text-muted-foreground">
-                                  <div className="flex items-center gap-2">
-                                    <Clapperboard className="w-4 h-4" />
-                                    <span>{course.videos.length} lessons</span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4" />
-                                    <span>{formatDuration(course.videos as VideoData[]) || 'N/A'}</span>
-                                  </div>
-                                </div>
-                                <Separator />
-                                <div className="flex items-center justify-between w-full">
-                                  <span className="text-2xl font-bold">
-                                    {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
-                                  </span>
-                                  <Button asChild size="sm">
-                                    <Link href={`/courses/${course.id}`}>View Course</Link>
-                                  </Button>
-                                </div>
-                              </CardFooter>
-                            </Card>
-                          </div>
-                        </CarouselItem>
-                      ))}
-                    </CarouselContent>
-                    <CarouselPrevious className="hidden lg:flex" />
-                    <CarouselNext className="hidden lg:flex" />
-                  </Carousel>
-              )}
-               <div className="text-center mt-16 animate-fade-in-up">
-                  <Button size="lg" variant="outline" asChild>
-                      <Link href="/courses">
-                          View All Courses <ArrowRight className="ml-2" />
-                      </Link>
-                  </Button>
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {loadingCourses ? (
+                  Array.from({length: 3}).map((_, i) => (
+                    <Card key={i}><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
+                  ))
+                ) : (
+                  allCourses.slice(0, 3).map(course => (
+                    <Card key={course.id} className="group overflow-hidden">
+                      <CardHeader className="p-0">
+                        <Link href={`/courses/${course.id}`}>
+                            <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full aspect-video object-cover transition-transform group-hover:scale-105" data-ai-hint="online course" />
+                        </Link>
+                      </CardHeader>
+                      <CardContent className="p-4">
+                         <Badge variant="secondary">{course.subject}</Badge>
+                         <CardTitle className="text-xl mt-2">{course.title}</CardTitle>
+                         <Accordion type="single" collapsible className="w-full mt-4">
+                            <AccordionItem value="item-1">
+                                <AccordionTrigger>View Lessons</AccordionTrigger>
+                                <AccordionContent>
+                                    <ul className="space-y-2">
+                                        {(course.videos || []).slice(0, 3).map((video) => (
+                                            <li key={video.id} className="flex justify-between items-center text-sm">
+                                                <span className="truncate">{video.title}</span>
+                                                <div className="flex items-center gap-2">
+                                                    {video.notesUrl && course.pricing.type === 'free' && (
+                                                      <Button
+                                                          variant="ghost"
+                                                          size="icon"
+                                                          className="h-6 w-6"
+                                                          onClick={() => {
+                                                              setActiveVideo(video);
+                                                              setIsNotesOpen(true);
+                                                          }}
+                                                      >
+                                                          <FileText className="h-4 w-4" />
+                                                      </Button>
+                                                    )}
+                                                </div>
+                                            </li>
+                                        ))}
+                                        {(course.videos || []).length > 3 && (
+                                            <li className="text-xs text-muted-foreground">...and more</li>
+                                        )}
+                                        {course.videos && course.videos.length > 0 && course.pricing.type !== 'free' && (
+                                          <p className="text-xs text-muted-foreground italic pt-2">Full lesson notes are available upon enrollment.</p>
+                                        )}
+                                    </ul>
+                                </AccordionContent>
+                            </AccordionItem>
+                         </Accordion>
+                      </CardContent>
+                      <CardFooter className="p-4 pt-0">
+                         <Button asChild className="w-full">
+                           <Link href={`/courses/${course.id}`}>View Course</Link>
+                         </Button>
+                      </CardFooter>
+                    </Card>
+                  ))
+                )}
               </div>
           </div>
         </section>
 
-        <CommunityPreview />
-        
-        <section id="events" className="py-24">
-          <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-12 animate-fade-in-up">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Live Events</h2>
-              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live sessions for interactive learning, Q&As, and exam preparation.</p>
-            </div>
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event, index) => (
-                <Card key={event.id} className="animate-fade-in-up bg-card/50 border-border/50" style={{ animationDelay: `${0.1 * index}s` }}>
-                  <CardHeader>
-                    <div className="flex items-center gap-3 mb-2 text-sm text-primary font-semibold">
-                      <Calendar className="h-4 w-4" />
-                      <span>{new Date(event.start).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</span>
-                    </div>
-                    <CardTitle className="text-lg">{event.title}</CardTitle>
-                    <CardDescription>{event.instructor}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{event.scope}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="secondary" className="w-full" onClick={() => setSelectedEvent(event)}>
-                      View Details
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        <section id="contact" className="py-24">
-            <div className="max-w-4xl mx-auto px-6 text-center animate-fade-in-up">
-              <Card className="p-8 sm:p-12 bg-card/50 border-border/50">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
-                  Ready to Elevate Your Learning?
-                </h2>
-                <p className="text-lg text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-                  Join thousands of students achieving their academic goals. Sign up to start your journey with Edumate Pro today.
-                </p>
-                <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                  <Button size="lg" asChild>
-                    <Link href="/register">
-                        Start for Free
-                    </Link>
-                  </Button>
-                </div>
-              </Card>
+        <section id="contact" className="py-24 bg-muted">
+            <div className="max-w-4xl mx-auto px-6 text-center">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
+                Ready to Elevate Your Learning?
+              </h2>
+              <p className="text-lg text-muted-foreground mb-8">
+                Join thousands of students achieving their academic goals. Sign up to start your journey with Edumate Pro today.
+              </p>
+              <Button size="lg" asChild>
+                <Link href="/register">
+                    Start for Free
+                </Link>
+              </Button>
             </div>
         </section>
       </main>
       
       <Footer />
-      
-      <EventDialog
-        event={selectedEvent}
-        allEvents={upcomingEvents}
-        isOpen={!!selectedEvent}
-        onClose={() => setSelectedEvent(null)}
-        onEventSelect={setSelectedEvent}
-      />
+      <Dialog open={isNotesOpen} onOpenChange={setIsNotesOpen}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+            <DialogHeader className="p-6 pb-4">
+                <DialogTitle>Lesson Notes: {activeVideo?.title}</DialogTitle>
+                <DialogDescription>
+                    Scroll to view the document. You can also download it from within the PDF viewer.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 border-t">
+                {activeVideo?.notesUrl && (
+                    <iframe 
+                        src={`https://docs.google.com/gview?url=${encodeURIComponent(activeVideo.notesUrl)}&embedded=true`}
+                        className="w-full h-full"
+                        title={`Notes for ${activeVideo.title}`}
+                    />
+                )}
+            </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
