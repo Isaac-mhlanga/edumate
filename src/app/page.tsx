@@ -172,6 +172,29 @@ export default function Home() {
           </div>
         </section>
 
+        <section className="py-12 bg-muted/40">
+            <div className="container mx-auto px-6">
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                    <div>
+                        <h3 className="text-4xl font-bold text-primary">95%</h3>
+                        <p className="text-muted-foreground">Improved Scores</p>
+                    </div>
+                    <div>
+                        <h3 className="text-4xl font-bold text-primary">2.3x</h3>
+                        <p className="text-muted-foreground">Faster Learning</p>
+                    </div>
+                    <div>
+                        <h3 className="text-4xl font-bold text-primary">10k+</h3>
+                        <p className="text-muted-foreground">Happy Students</p>
+                    </div>
+                    <div>
+                        <h3 className="text-4xl font-bold text-primary">Top 1%</h3>
+                        <p className="text-muted-foreground">Expert Tutors</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section id="refer" className="py-24 relative overflow-hidden">
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
@@ -297,7 +320,7 @@ export default function Home() {
                                 </div>
                                 <div className="flex items-center gap-2">
                                     <Clock className="w-4 h-4" />
-                                    <span>{formatDuration(course.videos) || 'N/A'}</span>
+                                    <span>{formatDuration(course.videos as VideoData[]) || 'N/A'}</span>
                                 </div>
                             </div>
                             <Separator />
