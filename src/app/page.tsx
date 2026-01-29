@@ -141,24 +141,24 @@ export default function Home() {
       <PublicHeader />
 
       <main className="flex-1">
-        <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
+        <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10"></div>
           <Image
-            src="https://picsum.photos/seed/apple/1920/1080"
+            src="https://picsum.photos/seed/hero-bg/1920/1080"
             alt="Hero background"
             fill
-            className="object-cover -z-10 opacity-10"
+            className="object-cover -z-10 opacity-20"
             data-ai-hint="abstract background gradient"
           />
-          <div className="container mx-auto px-6 relative">
+          <div className="container mx-auto px-6 relative z-20">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 animate-shimmer bg-clip-text text-transparent">
+              <h1 className="text-4xl md:text-5xl font-headline font-bold mb-6 animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-foreground to-primary animate-shimmer">
                 Accessible, Quality Education for All
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8">
-                Edumate Pro is a futuristic, professional, and student-focused educational platform offering video lessons, tutoring services, and paid assignments.
+              <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                Unlock your potential with expert-led video lessons, one-on-one tutoring, and assignment help. Your journey to academic success starts here.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                 <Button asChild size="lg">
                   <Link href="/register">
                       Get Started Free <ArrowRight className="ml-2" />
@@ -205,7 +205,7 @@ export default function Home() {
                             Refer &amp; Earn
                         </h2>
                         <p className="text-lg text-muted-foreground mb-6">
-                            Invite friends to Edumate Pro and earn R20 for each one who signs up. It's our way of saying thanks for helping our community grow.
+                           Invite friends to Edumate Pro and earn R20 for each one who signs up. It's our way of saying thanks for helping our community grow.
                         </p>
                         <div className="flex items-center gap-4 mb-6">
                             <p className="text-sm font-medium">Share on:</p>
