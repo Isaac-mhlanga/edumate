@@ -19,7 +19,6 @@ export function Footer() {
                     <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Science</Link>
                     <Link href="#" className="text-sm text-muted-foreground hover:text-primary">English</Link>
                     <Link href="#" className="text-sm text-muted-foreground hover:text-primary">History</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Languages</Link>
                 </nav>
             </div>
              <div>
