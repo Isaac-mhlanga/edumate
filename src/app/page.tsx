@@ -144,27 +144,39 @@ export default function Home() {
         <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10" />
 
-          {/* Animated Blobs Layer */}
+          {/* Animated Background Icons Layer */}
           <div
             aria-hidden="true"
-            className="absolute inset-0 -z-10 grid place-items-center overflow-hidden"
+            className="absolute inset-0 -z-10 overflow-hidden"
           >
-            <div
-              className="absolute h-[30rem] w-[30rem] -translate-x-[20rem] -translate-y-[15rem] rounded-full bg-primary/20 blur-3xl animate-blob"
-              style={{ animationDuration: '18s' }}
-            />
-            <div
-              className="absolute h-[25rem] w-[40rem] translate-x-[25rem] translate-y-[10rem] rounded-full bg-accent/10 blur-3xl animate-blob"
-              style={{ animationDuration: '22s', animationDelay: '3s' }}
-            />
-            <div
-              className="absolute h-[20rem] w-[30rem] translate-x-[5rem] translate-y-[-20rem] rounded-full bg-primary/15 blur-3xl animate-blob"
-              style={{ animationDuration: '20s', animationDelay: '5s' }}
-            />
-            <div
-              className="absolute h-[35rem] w-[35rem] translate-x-[-25rem] translate-y-[18rem] rounded-full bg-accent/15 blur-3xl animate-blob"
-              style={{ animationDuration: '25s', animationDelay: '1s' }}
-            />
+            {/* Atom Icon */}
+            <div className="absolute -top-10 -left-10 w-24 h-24 text-primary/10 animate-float-1">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-5.91-4.04-9.96-4.06-4.06-7.93-6.08-9.96-4.04-2.03 2.04-.02 5.91 4.04 9.96 4.06 4.06 7.93 6.08 9.96 4.04Z"/><path d="M3.8 3.8c-2.04 2.03-.02 5.91 4.04 9.96 4.06 4.06 7.93 6.08 9.96 4.04 2.03-2.04.02-5.91-4.04-9.96-4.06-4.06-7.93-6.08-9.96-4.04Z"/>
+                </svg>
+            </div>
+            {/* DNA Icon */}
+             <div className="absolute top-1/2 -right-12 w-28 h-28 text-primary/10 animate-float-2 opacity-50">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M4 14.5A8.5 8.5 0 0 1 15 4M9 20a8.5 8.5 0 0 1 11-10.5"/><path d="M15 4a8.5 8.5 0 0 0-11 10.5"/><path d="M9.5 20A8.5 8.5 0 0 0 20 9"/><path d="m7 11 1 1"/><path d="m16 8 1 1"/><path d="m12.5 15.5 1 1"/><path d="m8.5 4.5 1 1"/><path d="m15 13 1 1"/>
+                </svg>
+            </div>
+            {/* Sigma Icon */}
+            <div className="absolute -bottom-12 left-1/4 w-20 h-20 text-accent/20 animate-float-3 animate-spin-slow">
+                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 7V4H6v3"/><path d="M6 20v-3h12v3"/><path d="M18 7 6 20"/>
+                </svg>
+            </div>
+             {/* Flask Icon */}
+            <div className="absolute bottom-1/4 -left-10 w-20 h-20 text-accent/10 animate-float-1 opacity-75">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M8.5 2h7"/><path d="M8.5 2v1.71c0 .9.58 1.69 1.43 1.95.85.26 1.71.26 2.56 0 .85-.26 1.43-1.05 1.43-1.95V2"/><path d="M3.29 12.46c.44-.94.7-1.46.7-2.46 0-1-.26-1.52-.7-2.46l-.06-.11A.5.5 0 0 1 3.5 7h17a.5.5 0 0 1 .27.92l-.06.11c-.44.94-.7 1.46-.7 2.46 0 1 .26 1.52.7 2.46l.06.11a.5.5 0 0 1-.27.92H3.5a.5.5 0 0 1-.27-.92l.06-.11Z"/><path d="M12 13V9"/><path d="M8.5 22h7"/>
+                </svg>
+            </div>
+             {/* Plus Icon */}
+            <div className="absolute top-10 right-10 w-16 h-16 text-primary/5 animate-spin-slow">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            </div>
           </div>
 
           <div className="container mx-auto px-6 relative z-20">

@@ -103,19 +103,21 @@ export default {
           '0%, 100%': { backgroundPosition: '200% center' },
           '50%': { backgroundPosition: '-200% center' },
         },
-        blob: {
-          '0%': {
-            transform: 'translate(0px, 0px) scale(1)',
-          },
-          '33%': {
-            transform: 'translate(80px, -100px) scale(1.4)',
-          },
-          '66%': {
-            transform: 'translate(-40px, 60px) scale(0.7)',
-          },
-          '100%': {
-            transform: 'translate(0px, 0px) scale(1)',
-          },
+        'float-1': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(-25px)' },
+        },
+        'float-2': {
+          '0%, 100%': { transform: 'translateY(0px)' },
+          '50%': { transform: 'translateY(20px)' },
+        },
+        'float-3': {
+            '0%, 100%': { transform: 'translateX(0px)' },
+            '50%': { transform: 'translateX(-20px)' },
+        },
+        'spin': {
+            '0%': { transform: 'rotate(0deg)' },
+            '100%': { transform: 'rotate(360deg)' },
         },
       },
       animation: {
@@ -123,7 +125,10 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
         'shimmer': 'shimmer 4s linear infinite',
-        'blob': 'blob 8s infinite ease-in-out',
+        'float-1': 'float-1 8s ease-in-out infinite',
+        'float-2': 'float-2 10s ease-in-out infinite',
+        'float-3': 'float-3 12s ease-in-out infinite',
+        'spin-slow': 'spin 20s linear infinite',
       },
        boxShadow: {
         'card-glow': '0 0 20px -5px hsl(var(--primary) / 0.3)',
