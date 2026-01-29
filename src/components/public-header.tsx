@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { LogIn, Menu, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import { usePathname } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 export const PublicHeader = () => {
+  const pathname = usePathname();
   const [scrolled, setScrolled] = React.useState(false);
 
   React.useEffect(() => {
@@ -30,7 +33,10 @@ export const PublicHeader = () => {
   ];
 
   return (
-     <header className={`sticky top-0 z-50 transition-all duration-300 ${scrolled ? 'border-b border-border/20 bg-background/80 backdrop-blur-xl' : ''}`}>
+     <header className={cn(
+        "sticky top-0 z-50 transition-all duration-300",
+        scrolled ? 'border-b border-border/20 bg-background/80 backdrop-blur-xl' : ''
+     )}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
@@ -39,9 +45,16 @@ export const PublicHeader = () => {
               </Link>
             </div>
             
-             <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 space-x-8">
+             <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 space-x-6">
               {navItems.map((item) => (
-                <Link key={item.name} href={item.href} className="text-muted-foreground hover:text-primary font-medium transition-colors duration-300">
+                <Link 
+                    key={item.name} 
+                    href={item.href} 
+                    className={cn(
+                        "text-sm font-medium transition-colors duration-300",
+                        pathname === item.href ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                    )}
+                >
                     {item.name}
                 </Link>
               ))}
@@ -77,7 +90,13 @@ export const PublicHeader = () => {
                     <div className="flex flex-col gap-4 py-8">
                       {navItems.map((item) => (
                         <SheetClose asChild key={item.name}>
-                            <Link href={item.href} className="text-lg text-left text-muted-foreground hover:text-primary font-medium transition-colors duration-300">
+                            <Link 
+                                href={item.href} 
+                                className={cn(
+                                    "text-lg text-left font-medium transition-colors duration-300",
+                                    pathname === item.href ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                                )}
+                            >
                               {item.name}
                             </Link>
                         </SheetClose>

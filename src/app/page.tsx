@@ -138,7 +138,7 @@ export default function Home() {
           />
           <div className="container mx-auto px-6 relative">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 animate-shimmer bg-clip-text text-transparent bg-[length:200%_100%] bg-gradient-to-r from-foreground via-primary to-foreground">
+              <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 animate-shimmer bg-clip-text text-transparent">
                 Accessible, Quality Education for All
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8">
