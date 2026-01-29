@@ -119,17 +119,17 @@ export default function Home() {
 
   const features = [
     {
-      icon: <GraduationCap className="w-6 h-6 text-primary" />,
+      icon: <GraduationCap />,
       title: 'Expert-Led Video Lessons',
       description: 'Learn at your own pace with on-demand video lessons from subject-matter experts that make complex topics simple and clear.'
     },
     {
-      icon: <Users className="w-6 h-6 text-primary" />,
+      icon: <Users />,
       title: 'One-on-One Tutoring',
       description: 'Get personalized help when you need it. Connect with our professional tutors for one-on-one sessions tailored to your learning style.'
     },
     {
-      icon: <PenSquare className="w-6 h-6 text-primary" />,
+      icon: <PenSquare />,
       title: 'Assignment & Project Help',
       description: 'Stuck on an assignment? Get expert guidance for your school and university projects to understand the material and boost your grades.'
     }
@@ -183,19 +183,17 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
                   {features.map((feature, index) => (
-                    <Card key={index} className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-shadow duration-300">
-                      <CardHeader className="flex-row items-center gap-4">
-                        <div className="inline-block bg-primary/10 text-primary p-3 rounded-full">
-                            {feature.icon}
+                    <Card key={index} className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group">
+                      <CardContent className="p-8 text-center flex flex-col items-center">
+                        <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
+                            {React.cloneElement(feature.icon, { className: "w-8 h-8 text-primary" })}
                         </div>
-                        <CardTitle className="text-xl">
+                        <CardTitle className="text-xl mb-2">
                             {feature.title}
                         </CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                          <p className="text-muted-foreground">
+                        <p className="text-muted-foreground text-sm">
                             {feature.description}
-                          </p>
+                        </p>
                       </CardContent>
                     </Card>
                   ))}
