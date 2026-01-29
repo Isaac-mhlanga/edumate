@@ -150,16 +150,20 @@ export default function Home() {
             className="absolute inset-0 -z-10 grid place-items-center overflow-hidden"
           >
             <div
-              className="absolute h-[30rem] w-[30rem] -translate-x-[20rem] -translate-y-[15rem] rounded-full bg-primary/10 blur-3xl animate-blob"
-              style={{ animationDuration: '15s' }}
+              className="absolute h-[30rem] w-[30rem] -translate-x-[20rem] -translate-y-[15rem] rounded-full bg-primary/20 blur-2xl animate-blob"
+              style={{ animationDuration: '18s' }}
             />
             <div
-              className="absolute h-[25rem] w-[40rem] translate-x-[25rem] translate-y-[10rem] rounded-full bg-primary/5 blur-3xl animate-blob"
-              style={{ animationDuration: '20s', animationDelay: '2s' }}
+              className="absolute h-[25rem] w-[40rem] translate-x-[25rem] translate-y-[10rem] rounded-full bg-accent/10 blur-2xl animate-blob"
+              style={{ animationDuration: '22s', animationDelay: '3s' }}
             />
             <div
-              className="absolute h-[20rem] w-[30rem] translate-x-[5rem] translate-y-[-20rem] rounded-full bg-primary/10 blur-3xl animate-blob"
-              style={{ animationDuration: '18s', animationDelay: '4s' }}
+              className="absolute h-[20rem] w-[30rem] translate-x-[5rem] translate-y-[-20rem] rounded-full bg-primary/15 blur-2xl animate-blob"
+              style={{ animationDuration: '20s', animationDelay: '5s' }}
+            />
+            <div
+              className="absolute h-[35rem] w-[35rem] translate-x-[-25rem] translate-y-[18rem] rounded-full bg-accent/15 blur-3xl animate-blob"
+              style={{ animationDuration: '25s', animationDelay: '1s' }}
             />
           </div>
 
