@@ -276,7 +276,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="faq" className="py-24">
+        <section id="faq" className="py-24 bg-muted">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
