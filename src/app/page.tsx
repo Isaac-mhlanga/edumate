@@ -119,17 +119,17 @@ export default function Home() {
 
   const features = [
     {
-      icon: <GraduationCap className="w-8 h-8 text-primary" />,
+      icon: <GraduationCap className="w-6 h-6 text-primary" />,
       title: 'Expert-Led Video Lessons',
       description: 'Learn at your own pace with on-demand video lessons from subject-matter experts that make complex topics simple and clear.'
     },
     {
-      icon: <Users className="w-8 h-8 text-primary" />,
+      icon: <Users className="w-6 h-6 text-primary" />,
       title: 'One-on-One Tutoring',
       description: 'Get personalized help when you need it. Connect with our professional tutors for one-on-one sessions tailored to your learning style.'
     },
     {
-      icon: <PenSquare className="w-8 h-8 text-primary" />,
+      icon: <PenSquare className="w-6 h-6 text-primary" />,
       title: 'Assignment & Project Help',
       description: 'Stuck on an assignment? Get expert guidance for your school and university projects to understand the material and boost your grades.'
     }
@@ -171,8 +171,10 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="py-24 bg-muted">
-            <div className="max-w-7xl mx-auto px-6">
+        <section id="features" className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+          <div className="container mx-auto px-6 relative">
                  <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
                       A Smarter Way to Learn
@@ -183,18 +185,20 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
                   {features.map((feature, index) => (
-                    <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-shadow duration-300">
-                      <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
-                          {feature.icon}
-                      </div>
-                      <div>
-                          <h3 className="text-xl font-bold mb-2">
+                    <Card key={index} className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-shadow duration-300">
+                      <CardHeader className="flex-row items-center gap-4">
+                        <div className="inline-block bg-primary/10 text-primary p-3 rounded-full">
+                            {feature.icon}
+                        </div>
+                        <CardTitle className="text-xl">
                             {feature.title}
-                          </h3>
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent>
                           <p className="text-muted-foreground">
                             {feature.description}
                           </p>
-                      </div>
+                      </CardContent>
                     </Card>
                   ))}
                 </div>
