@@ -57,7 +57,7 @@ export function CommunityPreview() {
                         Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-56 rounded-lg" />)
                     ) : (
                         questions.map((question, index) => (
-                            <Card key={question.id} className="animate-fade-in-up bg-card/50 border-border/50" style={{ animationDelay: `${0.1 * index}s` }}>
+                            <Card key={question.id} className="animate-fade-in-up bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-shadow duration-300" style={{ animationDelay: `${0.1 * index}s` }}>
                                 <CardHeader>
                                     <div className="flex items-start gap-4">
                                         <Avatar className="h-10 w-10 border">

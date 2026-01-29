@@ -3,7 +3,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -22,6 +22,8 @@ import {
 } from "@/components/ui/accordion";
 import { FileText } from "lucide-react";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { faqData } from "@/lib/data";
+import { CommunityPreview } from "@/components/community-preview";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -128,15 +130,15 @@ export default function Home() {
         <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center">
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background"></div>
           <Image
-            src="https://picsum.photos/seed/header/1920/1080"
+            src="https://picsum.photos/seed/apple/1920/1080"
             alt="Hero background"
             fill
-            className="object-cover -z-10 opacity-10 rounded-lg"
-            data-ai-hint="abstract background"
+            className="object-cover -z-10 opacity-10"
+            data-ai-hint="abstract background gradient"
           />
           <div className="container mx-auto px-6 relative">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6">
+              <h1 className="text-4xl md:text-6xl font-headline font-bold mb-6 animate-shimmer bg-clip-text text-transparent bg-[length:200%_100%] bg-gradient-to-r from-foreground via-primary to-foreground">
                 Accessible, Quality Education for All
               </h1>
               <p className="text-lg md:text-xl text-muted-foreground mb-8">
@@ -168,7 +170,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
                   {features.map((feature, index) => (
-                    <Card key={index} className="p-6 flex flex-col items-center text-center gap-4">
+                    <Card key={index} className="p-6 flex flex-col items-center text-center gap-4 bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-shadow duration-300">
                       <div className="inline-block bg-primary/10 text-primary p-4 rounded-full">
                           {feature.icon}
                       </div>
@@ -195,11 +197,11 @@ export default function Home() {
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {loadingCourses ? (
                   Array.from({length: 3}).map((_, i) => (
-                    <Card key={i}><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
+                    <Card key={i} className="bg-card/50 backdrop-blur-lg border-border/20"><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
                   ))
                 ) : (
                   allCourses.slice(0, 3).map(course => (
-                    <Card key={course.id} className="group overflow-hidden">
+                    <Card key={course.id} className="group overflow-hidden bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-shadow duration-300">
                       <CardHeader className="p-0">
                         <Link href={`/courses/${course.id}`}>
                             <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full aspect-video object-cover transition-transform group-hover:scale-105" data-ai-hint="online course" />
@@ -255,6 +257,49 @@ export default function Home() {
               </div>
           </div>
         </section>
+
+        <section id="faq" className="py-24 bg-muted">
+            <div className="max-w-4xl mx-auto px-6">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
+                    <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
+                </div>
+                <Accordion type="single" collapsible className="w-full bg-card/50 backdrop-blur-lg border border-border/20 rounded-lg p-2">
+                    {faqData.map((faq, index) => (
+                        <AccordionItem value={`item-${index}`} key={index}>
+                            <AccordionTrigger className="text-left p-4">{faq.question}</AccordionTrigger>
+                            <AccordionContent className="p-4 pt-0">
+                                <p className="text-muted-foreground">{faq.answer}</p>
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </div>
+        </section>
+        
+        <section id="refer" className="py-24">
+            <div className="max-w-4xl mx-auto px-6">
+                <Card className="grid md:grid-cols-2 items-center overflow-hidden bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10">
+                    <CardContent className="p-8 md:p-12">
+                        <Badge variant="secondary" className="mb-4">Refer & Earn</Badge>
+                        <h2 className="text-3xl font-bold mb-4">Share the Knowledge, Get Rewarded</h2>
+                        <p className="text-muted-foreground mb-6">
+                            Love Edumate Pro? Invite your friends to join and you'll both get rewarded. For every friend who signs up with your unique referral link, you'll earn credits toward your next purchase.
+                        </p>
+                        <Button asChild>
+                            <Link href="/register">
+                                Start Earning Now <ChevronRight className="ml-2" />
+                            </Link>
+                        </Button>
+                    </CardContent>
+                    <div className="hidden md:flex h-full w-full items-center justify-center p-8 bg-primary/10">
+                        <Gift className="h-32 w-32 text-primary opacity-50" />
+                    </div>
+                </Card>
+            </div>
+        </section>
+        
+        <CommunityPreview />
 
         <section id="contact" className="py-24 bg-muted">
             <div className="max-w-4xl mx-auto px-6 text-center">
