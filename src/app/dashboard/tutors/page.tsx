@@ -237,10 +237,7 @@ function TutorsDashboardPage() {
                                 <Label>Subject</Label>
                                 <Select value={subject} onValueChange={setSubject}>
                                     <SelectTrigger>
-                                        <div className='flex items-center gap-2'>
-                                            <Book className="h-4 w-4 text-muted-foreground" />
-                                            <SelectValue placeholder="Select subject" />
-                                        </div>
+                                        <SelectValue placeholder="Select subject" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All">All Subjects</SelectItem>
@@ -254,10 +251,7 @@ function TutorsDashboardPage() {
                                 <Label>Grade</Label>
                                 <Select value={grade} onValueChange={setGrade}>
                                     <SelectTrigger>
-                                         <div className='flex items-center gap-2'>
-                                            <GraduationCap className="h-4 w-4 text-muted-foreground" />
-                                            <SelectValue placeholder="Select grade" />
-                                        </div>
+                                        <SelectValue placeholder="Select grade" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All">All Grades</SelectItem>
@@ -417,4 +411,3 @@ function TutorsDashboardPage() {
 export default withAuth(TutorsDashboardPage, ['student']);
 
     
-
