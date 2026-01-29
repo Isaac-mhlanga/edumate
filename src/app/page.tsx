@@ -150,15 +150,15 @@ export default function Home() {
             className="absolute inset-0 -z-10 grid place-items-center overflow-hidden"
           >
             <div
-              className="absolute h-[30rem] w-[30rem] -translate-x-[20rem] -translate-y-[15rem] rounded-full bg-primary/20 blur-2xl animate-blob"
+              className="absolute h-[30rem] w-[30rem] -translate-x-[20rem] -translate-y-[15rem] rounded-full bg-primary/20 blur-3xl animate-blob"
               style={{ animationDuration: '18s' }}
             />
             <div
-              className="absolute h-[25rem] w-[40rem] translate-x-[25rem] translate-y-[10rem] rounded-full bg-accent/10 blur-2xl animate-blob"
+              className="absolute h-[25rem] w-[40rem] translate-x-[25rem] translate-y-[10rem] rounded-full bg-accent/10 blur-3xl animate-blob"
               style={{ animationDuration: '22s', animationDelay: '3s' }}
             />
             <div
-              className="absolute h-[20rem] w-[30rem] translate-x-[5rem] translate-y-[-20rem] rounded-full bg-primary/15 blur-2xl animate-blob"
+              className="absolute h-[20rem] w-[30rem] translate-x-[5rem] translate-y-[-20rem] rounded-full bg-primary/15 blur-3xl animate-blob"
               style={{ animationDuration: '20s', animationDelay: '5s' }}
             />
             <div
@@ -176,9 +176,7 @@ export default function Home() {
                 className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in-up"
                 style={{ animationDelay: '0.2s' }}
               >
-                Unlock your potential with expert-led video lessons, one-on-one
-                tutoring, and assignment help. Your journey to academic success
-                starts here.
+                It’s simple. We give you the tools, you do the work. With easy-to-follow videos and expert help on demand, you can learn faster, smarter, and with less stress.
               </p>
               <div
                 className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
@@ -201,19 +199,19 @@ export default function Home() {
             <div className="container mx-auto px-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                     <div>
-                        <h3 className="text-4xl font-bold text-primary">95%</h3>
+                        <h3 className="text-4xl font-bold text-primary font-headline">95%</h3>
                         <p className="text-muted-foreground">Improved Scores</p>
                     </div>
                     <div>
-                        <h3 className="text-4xl font-bold text-primary">2.3x</h3>
+                        <h3 className="text-4xl font-bold text-primary font-headline">2.3x</h3>
                         <p className="text-muted-foreground">Faster Learning</p>
                     </div>
                     <div>
-                        <h3 className="text-4xl font-bold text-primary">10k+</h3>
+                        <h3 className="text-4xl font-bold text-primary font-headline">10k+</h3>
                         <p className="text-muted-foreground">Happy Students</p>
                     </div>
                     <div>
-                        <h3 className="text-4xl font-bold text-primary">Top 1%</h3>
+                        <h3 className="text-4xl font-bold text-primary font-headline">Top 1%</h3>
                         <p className="text-muted-foreground">Expert Tutors</p>
                     </div>
                 </div>
