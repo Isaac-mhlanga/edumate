@@ -142,33 +142,47 @@ export default function Home() {
 
       <main className="flex-1">
         <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10"></div>
-          
-          {/* Animated Blobs */}
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute bg-primary/20 rounded-full w-96 h-96 -top-20 -left-20 animate-blob filter blur-3xl opacity-50"></div>
-            <div className="absolute bg-accent/20 rounded-full w-80 h-80 -bottom-20 -right-20 animate-blob" style={{animationDuration: '12s'}}></div>
+          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10" />
+
+          {/* Animated Blobs Layer */}
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 -z-10 grid place-items-center overflow-hidden"
+          >
+            <div
+              className="absolute h-[30rem] w-[30rem] -translate-x-[20rem] -translate-y-[15rem] rounded-full bg-primary/10 blur-3xl animate-blob"
+              style={{ animationDuration: '15s' }}
+            />
+            <div
+              className="absolute h-[25rem] w-[40rem] translate-x-[25rem] translate-y-[10rem] rounded-full bg-primary/5 blur-3xl animate-blob"
+              style={{ animationDuration: '20s', animationDelay: '2s' }}
+            />
+            <div
+              className="absolute h-[20rem] w-[30rem] translate-x-[5rem] translate-y-[-20rem] rounded-full bg-primary/10 blur-3xl animate-blob"
+              style={{ animationDuration: '18s', animationDelay: '4s' }}
+            />
           </div>
-          
-          <Image
-            src="https://picsum.photos/seed/hero-bg/1920/1080"
-            alt="Hero background"
-            fill
-            className="object-cover -z-20 opacity-10"
-            data-ai-hint="abstract background gradient"
-          />
+
           <div className="container mx-auto px-6 relative z-20">
             <div className="max-w-4xl mx-auto">
               <h1 className="text-4xl md:text-5xl font-headline font-bold mb-6 animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-foreground to-primary animate-shimmer">
                 Accessible, Quality Education for All
               </h1>
-              <p className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                Unlock your potential with expert-led video lessons, one-on-one tutoring, and assignment help. Your journey to academic success starts here.
+              <p
+                className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in-up"
+                style={{ animationDelay: '0.2s' }}
+              >
+                Unlock your potential with expert-led video lessons, one-on-one
+                tutoring, and assignment help. Your journey to academic success
+                starts here.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+              <div
+                className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
+                style={{ animationDelay: '0.4s' }}
+              >
                 <Button asChild size="lg">
                   <Link href="/register">
-                      Get Started Free <ArrowRight className="ml-2" />
+                    Get Started Free <ArrowRight className="ml-2" />
                   </Link>
                 </Button>
                 <Button asChild size="lg" variant="outline">
@@ -255,7 +269,7 @@ export default function Home() {
                       A Smarter Way to Learn
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                      Our platform is built with powerful tools for students and teachers. It's a simple, easy-to-use space designed to help you succeed.
+                      It’s a simple, easy-to-use space designed to help you succeed. Here’s how our key features help you learn better.
                     </p>
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
