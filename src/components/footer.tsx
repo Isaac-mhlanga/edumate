@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import { Icons } from "./icons";
-import { FaTiktok, FaYoutube, FaFacebook, FaInstagram, FaTwitter, FaLinkedin } from "react-icons/fa";
+import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
 
 export function Footer() {
   return (
@@ -46,9 +46,6 @@ export function Footer() {
                     <a href="#" className="text-muted-foreground hover:text-primary" aria-label="TikTok"><FaTiktok /></a>
                     <a href="#" className="text-muted-foreground hover:text-primary" aria-label="YouTube"><FaYoutube /></a>
                     <a href="#" className="text-muted-foreground hover:text-primary" aria-label="Facebook"><FaFacebook /></a>
-                    <a href="#" className="text-muted-foreground hover:text-primary" aria-label="Instagram"><FaInstagram /></a>
-                    <a href="#" className="text-muted-foreground hover:text-primary" aria-label="Twitter"><FaTwitter /></a>
-                    <a href="#" className="text-muted-foreground hover:text-primary" aria-label="LinkedIn"><FaLinkedin /></a>
                 </div>
             </div>
         </div>
