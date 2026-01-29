@@ -20,8 +20,6 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { FileText } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { faqData } from "@/lib/data";
 import { CommunityPreview } from "@/components/community-preview";
 
@@ -70,8 +68,6 @@ type UserDoc = {
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  const [isNotesOpen, setIsNotesOpen] = useState(false);
-  const [activeVideo, setActiveVideo] = useState<VideoData | null>(null);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -210,41 +206,6 @@ export default function Home() {
                       <CardContent className="p-4">
                          <Badge variant="secondary">{course.subject}</Badge>
                          <CardTitle className="text-xl mt-2">{course.title}</CardTitle>
-                         <Accordion type="single" collapsible className="w-full mt-4">
-                            <AccordionItem value="item-1">
-                                <AccordionTrigger>View Lessons</AccordionTrigger>
-                                <AccordionContent>
-                                    <ul className="space-y-2">
-                                        {(course.videos || []).slice(0, 3).map((video) => (
-                                            <li key={video.id} className="flex justify-between items-center text-sm">
-                                                <span className="truncate">{video.title}</span>
-                                                <div className="flex items-center gap-2">
-                                                    {video.notesUrl && course.pricing.type === 'free' && (
-                                                      <Button
-                                                          variant="ghost"
-                                                          size="icon"
-                                                          className="h-6 w-6"
-                                                          onClick={() => {
-                                                              setActiveVideo(video);
-                                                              setIsNotesOpen(true);
-                                                          }}
-                                                      >
-                                                          <FileText className="h-4 w-4" />
-                                                      </Button>
-                                                    )}
-                                                </div>
-                                            </li>
-                                        ))}
-                                        {(course.videos || []).length > 3 && (
-                                            <li className="text-xs text-muted-foreground">...and more</li>
-                                        )}
-                                        {course.videos && course.videos.length > 0 && course.pricing.type !== 'free' && (
-                                          <p className="text-xs text-muted-foreground italic pt-2">Full lesson notes are available upon enrollment.</p>
-                                        )}
-                                    </ul>
-                                </AccordionContent>
-                            </AccordionItem>
-                         </Accordion>
                       </CardContent>
                       <CardFooter className="p-4 pt-0">
                          <Button asChild className="w-full">
@@ -325,25 +286,6 @@ export default function Home() {
       </main>
       
       <Footer />
-      <Dialog open={isNotesOpen} onOpenChange={setIsNotesOpen}>
-        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
-            <DialogHeader className="p-6 pb-4">
-                <DialogTitle>Lesson Notes: {activeVideo?.title}</DialogTitle>
-                <DialogDescription>
-                    Scroll to view the document. You can also download it from within the PDF viewer.
-                </DialogDescription>
-            </DialogHeader>
-            <div className="flex-1 border-t">
-                {activeVideo?.notesUrl && (
-                    <iframe 
-                        src={`https://docs.google.com/gview?url=${encodeURIComponent(activeVideo.notesUrl)}&embedded=true`}
-                        className="w-full h-full"
-                        title={`Notes for ${activeVideo.title}`}
-                    />
-                )}
-            </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
