@@ -3,7 +3,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight, User, ChevronLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -67,6 +67,8 @@ type UserDoc = {
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const coursesPerPage = 6;
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -98,6 +100,22 @@ export default function Home() {
     
     fetchCoursesAndUsers();
   }, []);
+
+  const totalPages = Math.ceil(allCourses.length / coursesPerPage);
+  const paginatedCourses = allCourses.slice(
+      (currentPage - 1) * coursesPerPage,
+      currentPage * coursesPerPage
+  );
+
+  const formatDuration = (videos: VideoData[] = []) => {
+      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
+      if (totalSeconds === 0) return null;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      if (hours > 0) return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
+      if (minutes > 0) return `${minutes}m`;
+      return `${Math.round(totalSeconds)}s`;
+  };
 
   const features = [
     {
@@ -191,30 +209,70 @@ export default function Home() {
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {loadingCourses ? (
-                  Array.from({length: 3}).map((_, i) => (
+                  Array.from({length: 6}).map((_, i) => (
                     <Card key={i} className="bg-card/50 backdrop-blur-lg border-border/20"><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
                   ))
                 ) : (
-                  allCourses.slice(0, 3).map(course => (
-                    <Card key={course.id} className="group overflow-hidden bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-shadow duration-300">
-                      <CardHeader className="p-0">
-                        <Link href={`/courses/${course.id}`}>
-                            <Image src={course.thumbnail} alt={course.title} width={600} height={400} className="w-full aspect-video object-cover transition-transform group-hover:scale-105" data-ai-hint="online course" />
+                    paginatedCourses.map(course => (
+                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
+                        <Link href={`/courses/${course.id}`} className="block">
+                            <div className="relative h-48 overflow-hidden">
+                                <Image
+                                    src={course.thumbnail}
+                                    alt={course.title}
+                                    fill
+                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                    data-ai-hint="online course"
+                                />
+                            </div>
                         </Link>
-                      </CardHeader>
-                      <CardContent className="p-4">
-                         <Badge variant="secondary">{course.subject}</Badge>
-                         <CardTitle className="text-xl mt-2">{course.title}</CardTitle>
-                      </CardContent>
-                      <CardFooter className="p-4 pt-0">
-                         <Button asChild className="w-full">
-                           <Link href={`/courses/${course.id}`}>View Course</Link>
-                         </Button>
-                      </CardFooter>
+                        <CardHeader>
+                            <div className="flex justify-between items-start">
+                                <Badge variant="secondary">{course.subject}</Badge>
+                            </div>
+                            <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
+                        </CardHeader>
+                        <CardContent className="flex-grow">
+                            <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                            {course.instructor && (
+                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
+                                    <User className="h-3 w-3" />
+                                    <span>By {course.instructor}</span>
+                                </div>
+                            )}
+                        </CardContent>
+                        <CardFooter className="flex-col items-start gap-4">
+                            <div className="flex justify-between w-full text-sm text-muted-foreground">
+                                <div className="flex items-center gap-2">
+                                    <Clapperboard className="w-4 h-4" />
+                                    <span>{course.videos.length} lessons</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <Clock className="w-4 h-4" />
+                                    <span>{formatDuration(course.videos) || 'N/A'}</span>
+                                </div>
+                            </div>
+                            <Separator />
+                            <div className="flex items-center justify-between w-full">
+                                <span className="text-2xl font-bold">
+                                    {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
+                                </span>
+                                <Button asChild size="sm">
+                                    <Link href={`/courses/${course.id}`}>View Course</Link>
+                                </Button>
+                            </div>
+                        </CardFooter>
                     </Card>
-                  ))
+                    ))
                 )}
               </div>
+              {totalPages > 1 && (
+                <div className="flex items-center justify-center pt-12">
+                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
+                    <span className="text-sm text-muted-foreground mx-4">Page {currentPage} of {totalPages}</span>
+                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                </div>
+              )}
           </div>
         </section>
 
