@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,7 +12,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, Loader2, MapPin, MessageSquare, Search, Star, LogIn } from "lucide-react";
+import { Book, GraduationCap, BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, Loader2, MapPin, MessageSquare, Search, Star, LogIn } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -180,7 +181,12 @@ export default function TutorsPage() {
                                 <div>
                                     <Label>Subject</Label>
                                     <Select value={subject} onValueChange={setSubject}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectTrigger>
+                                            <div className='flex items-center gap-2'>
+                                                <Book className="h-4 w-4 text-muted-foreground" />
+                                                <SelectValue placeholder="Select subject" />
+                                            </div>
+                                        </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="All">All Subjects</SelectItem>
                                             <SelectItem value="Maths">Maths</SelectItem>
@@ -191,7 +197,12 @@ export default function TutorsPage() {
                                 <div>
                                     <Label>Grade</Label>
                                     <Select value={grade} onValueChange={setGrade}>
-                                        <SelectTrigger><SelectValue /></SelectTrigger>
+                                        <SelectTrigger>
+                                             <div className='flex items-center gap-2'>
+                                                <GraduationCap className="h-4 w-4 text-muted-foreground" />
+                                                <SelectValue placeholder="Select grade" />
+                                            </div>
+                                        </SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="All">All Grades</SelectItem>
                                             <SelectItem value="10">Grade 10</SelectItem>
