@@ -243,28 +243,6 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="refer" className="py-24">
-            <div className="max-w-4xl mx-auto px-6">
-                <Card className="grid md:grid-cols-2 items-center overflow-hidden bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10">
-                    <CardContent className="p-8 md:p-12">
-                        <Badge variant="secondary" className="mb-4">Refer & Earn</Badge>
-                        <h2 className="text-3xl font-bold mb-4">Share the Knowledge, Get Rewarded</h2>
-                        <p className="text-muted-foreground mb-6">
-                            Love Edumate Pro? Invite your friends to join and you'll both get rewarded. For every friend who signs up with your unique referral link, you'll earn credits toward your next purchase.
-                        </p>
-                        <Button asChild>
-                            <Link href="/register">
-                                Start Earning Now <ChevronRight className="ml-2" />
-                            </Link>
-                        </Button>
-                    </CardContent>
-                    <div className="hidden md:flex h-full w-full items-center justify-center p-8 bg-primary/10">
-                        <Gift className="h-32 w-32 text-primary opacity-50" />
-                    </div>
-                </Card>
-            </div>
-        </section>
-        
         <section id="contact" className="relative py-24 overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
