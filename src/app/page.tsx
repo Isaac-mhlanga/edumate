@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -169,6 +170,42 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </section>
+
+        <section id="refer" className="py-24 relative overflow-hidden">
+            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+            <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+            <div className="container mx-auto px-6 relative">
+                <div className="grid md:grid-cols-2 gap-8 items-center">
+                    <div className="animate-fade-in-up">
+                        <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
+                            Refer & Earn
+                        </h2>
+                        <p className="text-lg text-muted-foreground mb-6">
+                            Invite friends to Edumate Pro and earn R20 for each one who signs up. It's our way of saying thanks for helping our community grow.
+                        </p>
+                        <Button asChild size="lg">
+                            <Link href="/dashboard/referrals">
+                                Get Your Referral Link <ArrowRight className="ml-2" />
+                            </Link>
+                        </Button>
+                    </div>
+                    <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+                        <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 p-8 text-center">
+                            <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20">
+                                <Gift className="w-10 h-10 text-primary" />
+                            </div>
+                            <CardTitle className="text-xl mb-2">
+                                Share the Knowledge, Get Rewarded
+                            </CardTitle>
+                            <p className="text-5xl font-bold text-primary my-4">R20</p>
+                            <p className="text-muted-foreground text-sm">
+                                For every successful referral.
+                            </p>
+                        </Card>
+                    </div>
+                </div>
+            </div>
         </section>
 
         <section id="features" className="py-24 bg-muted/70 relative overflow-hidden">
