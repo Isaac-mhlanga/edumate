@@ -171,7 +171,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="py-24 bg-muted relative overflow-hidden">
+        <section id="features" className="py-24 bg-muted/70 relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
           <div className="container mx-auto px-6 relative">
@@ -180,7 +180,7 @@ export default function Home() {
                       A Smarter Way to Learn
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                      Our platform is engineered with cutting-edge features to empower both students and educators. Discover a seamless and intuitive learning environment designed for academic success.
+                      Our platform is built with powerful tools for students and teachers. It's a simple, easy-to-use space designed to help you succeed.
                     </p>
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
@@ -208,7 +208,7 @@ export default function Home() {
           <div className="max-w-7xl mx-auto px-6 relative">
               <div className="text-center mb-12">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Featured Courses</h2>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Dive into our most popular courses, curated to provide you with the best learning experience. Start your journey with expert-led content and achieve your academic goals.</p>
+                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Jump into our most popular courses. These are hand-picked to give you the best start. Learn from experts and hit your goals.</p>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {loadingCourses ? (
@@ -279,13 +279,13 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="faq" className="py-24 bg-muted relative overflow-hidden">
+        <section id="faq" className="py-24 bg-muted/70 relative overflow-hidden">
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
             <div className="max-w-4xl mx-auto px-6 relative">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Find quick answers to common questions about our platform, courses, and services. If you don't find what you're looking for, feel free to contact our support team.</p>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Got questions? We've got answers. Here are some common questions about our platform. If you can't find what you need, just ask!</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4">
                     {faqData.map((faq, index) => (
@@ -318,7 +318,7 @@ export default function Home() {
                 </CardHeader>
                 <CardContent className="p-0 mb-8">
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Join a community of forward-thinkers and unlock your full potential. Sign up today to access our suite of futuristic learning tools and start your journey towards academic excellence.
+                        Ready to get started? Join our community, unlock your potential, and start learning with our modern tools today.
                     </p>
                 </CardContent>
                 <CardFooter className="p-0 flex justify-center">
