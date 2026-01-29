@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -231,7 +232,7 @@ function StudentCoursePage() {
                                                 <div className="flex items-start gap-4 w-full">
                                                     <Clapperboard className="h-5 w-5 text-muted-foreground mt-1" />
                                                     <div className="flex-1 text-left">
-                                                        <p className="font-medium leading-snug">{video.title}</p>
+                                                        <p className="font-medium leading-snug text-sm">{video.title}</p>
                                                         {video.duration && (
                                                             <span className="text-xs text-muted-foreground flex items-center gap-1.5 mt-1">
                                                                 <Clock className="h-3 w-3" />
