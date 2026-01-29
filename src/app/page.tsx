@@ -171,9 +171,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="features" className="relative py-24 overflow-hidden">
-          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+        <section id="features" className="py-24 bg-muted">
           <div className="container mx-auto px-6 relative">
                  <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
