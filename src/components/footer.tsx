@@ -42,10 +42,10 @@ export function Footer() {
             </div>
             <div>
                 <h4 className="font-semibold text-foreground mb-4">Follow Us</h4>
-                <div className="flex space-x-4">
-                    <a href="#" className="text-muted-foreground hover:text-primary" aria-label="TikTok"><FaTiktok /></a>
-                    <a href="#" className="text-muted-foreground hover:text-primary" aria-label="YouTube"><FaYoutube /></a>
-                    <a href="#" className="text-muted-foreground hover:text-primary" aria-label="Facebook"><FaFacebook /></a>
+                <div className="flex space-x-2">
+                    <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
+                    <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                    <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
                 </div>
             </div>
         </div>
