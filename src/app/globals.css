@@ -31,11 +31,11 @@
   .dark {
     --background: 193 68% 6%;
     --foreground: 201 37% 59%;
-    --card: 187 76% 11%;
+    --card: 196 65% 12%;
     --card-foreground: 201 37% 59%;
-    --popover: 187 76% 11%;
+    --popover: 196 65% 12%;
     --popover-foreground: 201 37% 59%;
-    --sidebar: 187 76% 11%;
+    --sidebar: 196 65% 12%;
     --sidebar-foreground: 201 37% 59%;
     --primary: 182 82% 34%;
     --primary-foreground: 210 40% 98%;
@@ -63,7 +63,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold tracking-tight;
+    @apply font-headline font-bold tracking-tight text-primary;
   }
    ::-webkit-scrollbar {
     @apply w-2;
