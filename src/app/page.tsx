@@ -21,7 +21,6 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { faqData } from "@/lib/data";
-import { CommunityPreview } from "@/components/community-preview";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -266,8 +265,6 @@ export default function Home() {
             </div>
         </section>
         
-        <CommunityPreview />
-
         <section id="contact" className="relative py-24 overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
