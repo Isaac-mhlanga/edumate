@@ -11,10 +11,11 @@ import { type Question } from '@/lib/types';
 import { Separator } from '@/components/ui/separator';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Search } from 'lucide-react';
+import { Search, ChevronLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { PublicHeader } from '@/components/public-header';
 import { Footer } from '@/components/footer';
+import { cn } from '@/lib/utils';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -44,13 +45,6 @@ export default function CommunityPage() {
                 ...doc.data()
             } as Question));
             setQuestions(fetchedQuestions);
-            if (fetchedQuestions.length > 0 && !selectedQuestion) {
-              const matchingQuestion = fetchedQuestions.find(q => 
-                  q.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                  q.content.toLowerCase().includes(searchTerm.toLowerCase())
-              );
-              setSelectedQuestion(matchingQuestion || fetchedQuestions[0]);
-            }
             setLoading(false);
         }, (error) => {
             console.error("Error fetching questions:", error);
@@ -115,7 +109,7 @@ export default function CommunityPage() {
                         <p className="text-lg text-muted-foreground mt-2">Ask questions, share knowledge, and connect with fellow learners.</p>
                     </div>
                     <Card className="flex flex-col md:flex-row h-full min-h-[calc(100vh-20rem)] shadow-lg">
-                        <div className="w-full md:w-[350px] border-b md:border-r md:border-b-0 flex flex-col">
+                        <div className={cn("w-full md:w-[350px] border-b md:border-r md:border-b-0 flex flex-col", selectedQuestion && "hidden md:flex")}>
                             <div className="p-4 border-b">
                                 <QuestionForm />
                                 <div className="relative mt-4">
@@ -145,7 +139,15 @@ export default function CommunityPage() {
                                 </div>
                             )}
                         </div>
-                        <div className="flex-1">
+                        <div className={cn("flex-1 flex flex-col", !selectedQuestion && "hidden md:flex")}>
+                             {selectedQuestion && (
+                                <div className="flex items-center p-2 border-b md:hidden">
+                                    <Button variant="ghost" size="icon" onClick={() => setSelectedQuestion(null)}>
+                                        <ChevronLeft className="h-5 w-5" />
+                                    </Button>
+                                    <h3 className="font-semibold truncate ml-2">Discussion</h3>
+                                </div>
+                            )}
                             <CommentSection 
                                 question={selectedQuestion} 
                                 onUpdateQuestion={handleQuestionUpdate}

@@ -736,7 +736,7 @@ function TutorPage() {
                                 ))}
                             </TableBody>
                         </Table>
-                    </CardContent>
+                    </CardFooter>
                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
                         <div className="text-xs text-muted-foreground">
                             Showing <strong>{(currentBookingPage - 1) * bookingsPerPage + 1}-{Math.min(currentBookingPage * bookingsPerPage, filteredBookings.length)}</strong> of <strong>{filteredBookings.length}</strong> bookings.
@@ -751,7 +751,7 @@ function TutorPage() {
             
             {currentTab === 'messages' && (
                  <Card className="flex flex-col lg:flex-row lg:h-[calc(100vh-12rem)]">
-                    <div className="w-full lg:w-1/3 border-b lg:border-r lg:border-b-0 flex flex-col">
+                    <div className={cn("w-full lg:w-1/3 border-b lg:border-r lg:border-b-0 flex flex-col", selectedThread && "hidden lg:flex")}>
                         <div className="p-4 border-b">
                              <CardTitle className="text-lg">Inbox</CardTitle>
                         </div>
@@ -770,10 +770,13 @@ function TutorPage() {
                             ))}
                         </ScrollArea>
                     </div>
-                    <div className="w-full lg:w-2/3 flex flex-col">
+                    <div className={cn("w-full lg:w-2/3 flex flex-col", !selectedThread && "hidden lg:flex")}>
                         {selectedThread ? (
                              <>
                                 <div className="p-4 border-b flex items-center gap-3">
+                                     <Button variant="ghost" size="icon" className="lg:hidden" onClick={() => setSelectedThread(null)}>
+                                        <ChevronLeft />
+                                    </Button>
                                     <Avatar className="h-10 w-10 border">
                                         <AvatarFallback>{selectedThread.studentName.charAt(0)}</AvatarFallback>
                                     </Avatar>
