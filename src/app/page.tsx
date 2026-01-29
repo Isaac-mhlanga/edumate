@@ -172,7 +172,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section className="py-12 bg-muted/40">
+        <section className="py-12 bg-muted/40 animate-fade-in-up">
             <div className="container mx-auto px-6">
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
                     <div>
@@ -243,7 +243,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
           <div className="container mx-auto px-6 relative">
-                 <div className="text-center mb-12">
+                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
                       A Smarter Way to Learn
                     </h2>
@@ -253,7 +253,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-3 gap-8">
                   {features.map((feature, index) => (
-                    <Card key={index} className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group">
+                    <Card key={index} className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                       <CardContent className="p-8 text-center flex flex-col items-center">
                         <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
                             {React.cloneElement(feature.icon, { className: "w-8 h-8 text-primary" })}
@@ -274,7 +274,7 @@ export default function Home() {
         <section id="courses" className="py-24 relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="max-w-7xl mx-auto px-6 relative">
-              <div className="text-center mb-12">
+              <div className="text-center mb-12 animate-fade-in-up">
                 <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Featured Courses</h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Jump into our most popular courses. These are hand-picked to give you the best start. Learn from experts and hit your goals.</p>
               </div>
@@ -284,8 +284,8 @@ export default function Home() {
                     <Card key={i} className="bg-card/50 backdrop-blur-lg border-border/20"><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
                   ))
                 ) : (
-                    paginatedCourses.map(course => (
-                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2">
+                    paginatedCourses.map((course, index) => (
+                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + (index % 3) * 0.1}s` }}>
                         <Link href={`/courses/${course.id}`} className="block">
                             <div className="relative h-48 overflow-hidden">
                                 <Image
@@ -338,7 +338,7 @@ export default function Home() {
                 )}
               </div>
               {totalPages > 1 && (
-                <div className="flex items-center justify-center pt-12">
+                <div className="flex items-center justify-center pt-12 animate-fade-in-up">
                     <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
                     <span className="text-sm text-muted-foreground mx-4">Page {currentPage} of {totalPages}</span>
                     <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
@@ -351,7 +351,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
             <div className="max-w-4xl mx-auto px-6 relative">
-                <div className="text-center mb-12">
+                <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Got questions? We've got answers. Here are some common questions about our platform. If you can't find what you need, just ask!</p>
                 </div>
@@ -360,7 +360,8 @@ export default function Home() {
                         <AccordionItem
                             value={`item-${index}`}
                             key={index}
-                            className="border-none rounded-2xl bg-card/50 backdrop-blur-lg border border-border/20 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1"
+                            className="border-none rounded-2xl bg-card/50 backdrop-blur-lg border border-border/20 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 animate-fade-in-up"
+                            style={{ animationDelay: `${0.2 + index * 0.1}s` }}
                         >
                             <AccordionTrigger className="text-left p-6 text-base font-semibold hover:no-underline">
                                 {faq.question}
@@ -378,7 +379,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
           <div className="container mx-auto px-6 relative">
-            <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1">
+            <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 animate-fade-in-up">
                 <CardHeader className="p-0 mb-4">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">
                         Begin Your Journey to Excellence
