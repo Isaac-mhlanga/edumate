@@ -31,7 +31,7 @@ export const PublicHeader = () => {
   ];
 
   return (
-     <header className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-background/80 backdrop-blur-sm border-b">
+     <header className="sticky top-0 left-0 right-0 z-50 transition-all duration-300 bg-background/80 backdrop-blur-sm">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
