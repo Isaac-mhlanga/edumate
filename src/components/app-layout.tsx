@@ -55,6 +55,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { BottomNavbar } from './bottom-navbar';
 import { cn } from '@/lib/utils';
+import { useIdle } from '@/hooks/use-idle';
+import { InactivityDialog } from './inactivity-dialog';
+
 
 // Define the configuration directly for client-side use.
 const firebaseConfig: FirebaseOptions = {
@@ -158,6 +161,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = React.useState(true);
   const [userRole, setUserRole] = React.useState<Role | null>(null);
   const isMobile = useIsMobile();
+  const [isIdlePromptOpen, setIsIdlePromptOpen] = React.useState(false);
   
   React.useEffect(() => {
     // Initialize Firebase on the client
@@ -196,6 +200,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       });
     }
   };
+
+  const { resetTimers } = useIdle({
+    onIdle: handleLogout,
+    onPrompt: () => setIsIdlePromptOpen(true),
+    onActive: () => setIsIdlePromptOpen(false),
+    timeout: 15 * 60 * 1000, // 15 minutes
+    promptTimeout: 13 * 60 * 1000, // 13 minutes (2-minute warning)
+  });
 
   const getMenuItems = () => {
     switch(userRole) {
@@ -312,6 +324,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </main>
         {isMobile && menuItems.length > 0 && <BottomNavbar menuItems={menuItems} />}
       </SidebarInset>
+       <InactivityDialog
+        isOpen={isIdlePromptOpen}
+        onStay={() => {
+          resetTimers();
+          setIsIdlePromptOpen(false);
+        }}
+        onLogout={handleLogout}
+        countdownSeconds={120} // 2 minutes
+      />
     </SidebarProvider>
   );
 }
