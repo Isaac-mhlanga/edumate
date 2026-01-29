@@ -9,7 +9,7 @@ import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
 import { faqData } from "@/lib/data";
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Badge } from "@/components/ui/badge";
@@ -80,6 +80,7 @@ export default function Home() {
   const [loadingEvents, setLoadingEvents] = useState(true);
   
   const [isVideoPlayerOpen, setIsVideoPlayerOpen] = useState(false);
+  const [isNotesOpen, setIsNotesOpen] = useState(false);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
   const [selectedCourseForPlayer, setSelectedCourseForPlayer] = useState<Course | null>(null);
   const [selectedEvent, setSelectedEvent] = useState<UpcomingEvent | null>(null);
@@ -608,9 +609,24 @@ export default function Home() {
                                 <AccordionContent>
                                     <div className="pl-8 flex flex-col items-start gap-3">
                                         {video.notesUrl ? (
-                                            <p className="text-xs text-muted-foreground italic">Full lesson notes are available upon enrollment.</p>
+                                            selectedCourseForPlayer?.pricing.type === 'free' ? (
+                                                <Button
+                                                    variant="link"
+                                                    size="sm"
+                                                    className="p-0 h-auto font-normal text-muted-foreground hover:text-primary"
+                                                    onClick={() => {
+                                                        setActiveVideo(video);
+                                                        setIsNotesOpen(true);
+                                                    }}
+                                                >
+                                                    <FileText className="mr-2 h-4 w-4" />
+                                                    View Lesson Notes
+                                                </Button>
+                                            ) : (
+                                                <p className="text-xs text-muted-foreground italic">Full lesson notes are available upon enrollment.</p>
+                                            )
                                         ) : (
-                                             <p className="text-xs text-muted-foreground italic">No notes for this lesson.</p>
+                                            <p className="text-xs text-muted-foreground italic">No notes for this lesson.</p>
                                         )}
                                     </div>
                                 </AccordionContent>
@@ -628,6 +644,26 @@ export default function Home() {
           </DialogContent>
         </Dialog>
       )}
+
+      <Dialog open={isNotesOpen} onOpenChange={setIsNotesOpen}>
+        <DialogContent className="max-w-4xl h-[90vh] flex flex-col p-0">
+            <DialogHeader className="p-6 pb-4">
+                <DialogTitle>Lesson Notes: {activeVideo?.title}</DialogTitle>
+                <DialogDescription>
+                    Scroll to view the document. You can also download it from within the PDF viewer.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex-1 border-t">
+                {activeVideo?.notesUrl && (
+                    <iframe 
+                        src={`https://docs.google.com/gview?url=${encodeURIComponent(activeVideo.notesUrl)}&embedded=true`}
+                        className="w-full h-full"
+                        title={`Notes for ${activeVideo.title}`}
+                    />
+                )}
+            </div>
+        </DialogContent>
+      </Dialog>
 
       <EventDialog
         event={selectedEvent}
