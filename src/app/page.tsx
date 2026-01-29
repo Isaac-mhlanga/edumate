@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift, Facebook, Youtube } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clock, Users, Wand2, Clapperboard, Rocket, Dna, X, ChevronRight, FunctionSquare, Menu, Calendar, ChevronLeft, Loader2, Sparkles, Info, ShieldCheck, Files, CheckCircle, Gift, Facebook, Youtube, FileText } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect, useRef } from "react";
@@ -45,6 +45,7 @@ type VideoData = {
     title: string;
     url:string;
     duration?: number;
+    notesUrl?: string;
 };
 
 type Course = {
@@ -599,15 +600,18 @@ export default function Home() {
                                     <div className="flex items-center justify-between w-full gap-2">
                                         <div className="flex items-center gap-3 min-w-0">
                                             <Clapperboard className="h-5 w-5 text-muted-foreground flex-shrink-0"/>
-                                            <span className="truncate">{index + 1}. {video.title}</span>
+                                            <span className="truncate text-sm">{video.title}</span>
                                         </div>
+                                        {video.notesUrl && <FileText className="h-4 w-4 text-primary mr-2 flex-shrink-0" />}
                                     </div>
                                 </AccordionTrigger>
                                 <AccordionContent>
                                     <div className="pl-8 flex flex-col items-start gap-3">
-                                      <Button variant="link" size="sm" className="p-0 h-auto text-sm" onClick={handleSummarize}>
-                                        <Sparkles className="mr-2 h-4 w-4" /> Summarize with AI
-                                      </Button>
+                                        {video.notesUrl ? (
+                                            <p className="text-xs text-muted-foreground italic">Full lesson notes are available upon enrollment.</p>
+                                        ) : (
+                                             <p className="text-xs text-muted-foreground italic">No notes for this lesson.</p>
+                                        )}
                                     </div>
                                 </AccordionContent>
                             </AccordionItem>
