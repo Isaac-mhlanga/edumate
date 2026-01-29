@@ -143,11 +143,18 @@ export default function Home() {
       <main className="flex-1">
         <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10"></div>
+          
+          {/* Animated Blobs */}
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute bg-primary/20 rounded-full w-96 h-96 -top-20 -left-20 animate-blob filter blur-3xl opacity-50"></div>
+            <div className="absolute bg-accent/20 rounded-full w-80 h-80 -bottom-20 -right-20 animate-blob" style={{animationDuration: '12s'}}></div>
+          </div>
+          
           <Image
             src="https://picsum.photos/seed/hero-bg/1920/1080"
             alt="Hero background"
             fill
-            className="object-cover -z-10 opacity-20"
+            className="object-cover -z-20 opacity-10"
             data-ai-hint="abstract background gradient"
           />
           <div className="container mx-auto px-6 relative z-20">
@@ -378,6 +385,10 @@ export default function Home() {
         <section id="contact" className="relative py-24 overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+          {/* More Animated Blobs */}
+          <div className="absolute -top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full animate-blob filter blur-3xl opacity-30" style={{animationDuration: '15s'}}></div>
+          <div className="absolute -bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full animate-blob filter blur-3xl opacity-30" style={{animationDuration: '10s'}}></div>
+          
           <div className="container mx-auto px-6 relative">
             <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 animate-fade-in-up">
                 <CardHeader className="p-0 mb-4">

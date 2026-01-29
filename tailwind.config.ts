@@ -102,13 +102,28 @@ export default {
         shimmer: {
           '0%, 100%': { backgroundPosition: '200% center' },
           '50%': { backgroundPosition: '-200% center' },
-        }
+        },
+        blob: {
+          '0%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
+          '33%': {
+            transform: 'translate(30px, -50px) scale(1.2)',
+          },
+          '66%': {
+            transform: 'translate(-20px, 20px) scale(0.8)',
+          },
+          '100%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in-up': 'fade-in-up 0.5s ease-out forwards',
         'shimmer': 'shimmer 4s linear infinite',
+        'blob': 'blob 8s infinite ease-in-out',
       },
        boxShadow: {
         'card-glow': '0 0 20px -5px hsl(var(--primary) / 0.3)',
