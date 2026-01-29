@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -53,7 +54,7 @@ export function PayoutReceiptDialog({ isOpen, setIsOpen, selectedPayout }: Payou
 
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl">Payout Receipt</DialogTitle>
                     <DialogDescription>
