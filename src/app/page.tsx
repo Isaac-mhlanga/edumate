@@ -258,17 +258,23 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="faq" className="py-24 bg-muted">
+        <section id="faq" className="py-24">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground">Have questions? We've got answers.</p>
                 </div>
-                <Accordion type="single" collapsible className="w-full bg-card/50 backdrop-blur-lg border border-border/20 rounded-lg p-2">
+                <Accordion type="single" collapsible className="w-full space-y-4">
                     {faqData.map((faq, index) => (
-                        <AccordionItem value={`item-${index}`} key={index}>
-                            <AccordionTrigger className="text-left p-4">{faq.question}</AccordionTrigger>
-                            <AccordionContent className="p-4 pt-0">
+                        <AccordionItem
+                            value={`item-${index}`}
+                            key={index}
+                            className="border-none rounded-2xl bg-card/50 backdrop-blur-xl border border-white/10 shadow-lg overflow-hidden"
+                        >
+                            <AccordionTrigger className="text-left p-6 text-base font-semibold hover:no-underline">
+                                {faq.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="px-6 pb-6 pt-0">
                                 <p className="text-muted-foreground">{faq.answer}</p>
                             </AccordionContent>
                         </AccordionItem>
