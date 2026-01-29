@@ -268,20 +268,30 @@ export default function Home() {
         
         <CommunityPreview />
 
-        <section id="contact" className="py-24 bg-muted">
-            <div className="max-w-4xl mx-auto px-6 text-center">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold mb-6">
-                Ready to Elevate Your Learning?
-              </h2>
-              <p className="text-lg text-muted-foreground mb-8">
-                Join thousands of students achieving their academic goals. Sign up to start your journey with Edumate Pro today.
-              </p>
-              <Button size="lg" asChild>
-                <Link href="/register">
-                    Start for Free
-                </Link>
-              </Button>
-            </div>
+        <section id="contact" className="relative py-24 overflow-hidden">
+          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
+          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+          <div className="container mx-auto px-6 relative">
+            <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center">
+                <CardHeader className="p-0 mb-4">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">
+                        Begin Your Journey to Excellence
+                    </h2>
+                </CardHeader>
+                <CardContent className="p-0 mb-8">
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Join a community of forward-thinkers. Sign up now to unlock your full potential and access our suite of futuristic learning tools.
+                    </p>
+                </CardContent>
+                <CardFooter className="p-0 flex justify-center">
+                    <Button size="lg" asChild>
+                        <Link href="/register">
+                            Get Started Now <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
+                </CardFooter>
+            </Card>
+          </div>
         </section>
       </main>
       
