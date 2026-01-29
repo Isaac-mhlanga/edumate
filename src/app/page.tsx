@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -22,6 +21,7 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion";
 import { faqData } from "@/lib/data";
+import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -131,7 +131,7 @@ export default function Home() {
     },
     {
       icon: <PenSquare />,
-      title: 'Assignment & Project Help',
+      title: 'Assignment &amp; Project Help',
       description: 'Stuck on an assignment? Get expert guidance for your school and university projects to understand the material and boost your grades.'
     }
   ];
@@ -179,14 +179,22 @@ export default function Home() {
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div className="animate-fade-in-up">
                         <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
-                            Refer & Earn
+                            Refer &amp; Earn
                         </h2>
                         <p className="text-lg text-muted-foreground mb-6">
                             Invite friends to Edumate Pro and earn R20 for each one who signs up. It's our way of saying thanks for helping our community grow.
                         </p>
+                        <div className="flex items-center gap-4 mb-6">
+                            <p className="text-sm font-medium">Share on:</p>
+                            <div className="flex space-x-2">
+                                <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
+                                <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                                <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                            </div>
+                        </div>
                         <Button asChild size="lg">
-                            <Link href="/dashboard/referrals">
-                                Get Your Referral Link <ArrowRight className="ml-2" />
+                            <Link href="/register">
+                                Sign Up and Get Referral Code <ArrowRight className="ml-2" />
                             </Link>
                         </Button>
                     </div>
@@ -310,7 +318,7 @@ export default function Home() {
                 <div className="flex items-center justify-center pt-12">
                     <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
                     <span className="text-sm text-muted-foreground mx-4">Page {currentPage} of {totalPages}</span>
-                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
+                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
                 </div>
               )}
           </div>
