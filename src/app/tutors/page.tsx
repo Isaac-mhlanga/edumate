@@ -176,7 +176,7 @@ export default function TutorsPage() {
                             <p className="text-muted-foreground">Filter by subject and grade to find the best match for your needs.</p>
                         </div>
                         <div className="flex flex-col md:flex-row items-start md:items-end gap-4 p-4 rounded-lg bg-muted/50 border">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 flex-grow">
+                            <div className="grid grid-cols-2 gap-4 flex-grow">
                                 <div>
                                     <Label>Subject</Label>
                                     <Select value={subject} onValueChange={setSubject}>
