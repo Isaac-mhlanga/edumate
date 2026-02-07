@@ -108,11 +108,12 @@ const studentMenuItems: MenuItem[] = [
 ];
 
 const varsityStudentMenuItems: MenuItem[] = [
-  { href: '/varsity-dashboard', label: 'Overview', icon: LayoutDashboard, basePath: '/varsity-dashboard'},
+  { href: '/varsity-dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/varsity-dashboard', tab: 'overview' },
+  { href: '/varsity-dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/varsity-dashboard', tab: 'assignments' },
+  { href: '/varsity-dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/varsity-dashboard', tab: 'transactions'},
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
-  { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
-  { href: '/dashboard?tab=subscriptions', label: 'My Plan', icon: CreditCard, basePath: '/dashboard', tab: 'subscriptions' },
+  { href: '/varsity-dashboard?tab=subscriptions', label: 'My Plan', icon: CreditCard, basePath: '/varsity-dashboard', tab: 'subscriptions' },
   { href: '/calendar', label: 'Calendar', icon: Calendar, basePath: '/calendar' },
 ];
 
