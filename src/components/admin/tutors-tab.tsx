@@ -13,14 +13,16 @@ import Image from "next/image";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Separator } from "../ui/separator";
+import { Skeleton } from "../ui/skeleton";
 
 interface AdminTutorsTabProps {
     tutors: TutorProfile[];
+    loading: boolean;
     onTutorApproval: (tutor: TutorProfile, status: 'Approved' | 'Rejected') => void;
     onViewProfile: (tutor: TutorProfile) => void;
 }
 
-export function AdminTutorsTab({ tutors, onTutorApproval, onViewProfile }: AdminTutorsTabProps) {
+export function AdminTutorsTab({ tutors, loading, onTutorApproval, onViewProfile }: AdminTutorsTabProps) {
     const [isViewerOpen, setIsViewerOpen] = useState(false);
     const [selectedDocumentUrl, setSelectedDocumentUrl] = useState<string | null>(null);
 
@@ -62,11 +64,25 @@ export function AdminTutorsTab({ tutors, onTutorApproval, onViewProfile }: Admin
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {tutors.map(tutor => (
+                            {loading ? (
+                                Array.from({ length: 5 }).map((_, i) => (
+                                    <TableRow key={i}>
+                                        <TableCell>
+                                            <div className="space-y-1.5">
+                                                <Skeleton className="h-4 w-24" />
+                                                <Skeleton className="h-3 w-32" />
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-48" /></TableCell>
+                                        <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                                        <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
+                                    </TableRow>
+                                ))
+                            ) : tutors.map(tutor => (
                                 <TableRow key={tutor.id}>
                                     <TableCell>
                                         <div className="font-medium">{tutor.name}</div>
-                                        <div className="text-xs text-muted-foreground">{tutor.email}</div>
+                                        <div className="text-sm text-muted-foreground">{tutor.email}</div>
                                     </TableCell>
                                     <TableCell className="hidden sm:table-cell truncate max-w-xs">{tutor.qualifications}</TableCell>
                                     <TableCell>{getStatusBadge(tutor.approvalStatus)}</TableCell>

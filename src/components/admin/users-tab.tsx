@@ -11,13 +11,15 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Search, ListFilter, CreditCard, MoreVertical, UserMinus, Trash2, ChevronLeft, ChevronRight, Eye, UserCog } from "lucide-react";
 import { type User } from "@/app/admin/page";
+import { Skeleton } from "../ui/skeleton";
 
 interface AdminUsersTabProps {
     users: User[];
+    loading: boolean;
     onUserAction: (user: User, action: 'suspend' | 'delete' | 'view' | 'change-role') => void;
 }
 
-export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
+export function AdminUsersTab({ users, loading, onUserAction }: AdminUsersTabProps) {
     const [userFilters, setUserFilters] = React.useState({ search: '', role: 'All' });
     const [currentUserPage, setCurrentUserPage] = React.useState(1);
     const usersPerPage = 7;
@@ -85,7 +87,26 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedUsers.map(user => (
+                    {loading ? (
+                        Array.from({ length: 7 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell>
+                                    <div className="flex items-center gap-3">
+                                        <Skeleton className="h-9 w-9 rounded-full" />
+                                        <div className="space-y-1.5">
+                                            <Skeleton className="h-4 w-24" />
+                                            <Skeleton className="h-3 w-32" />
+                                        </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell"><Skeleton className="h-6 w-20" /></TableCell>
+                                <TableCell className="hidden lg:table-cell"><Skeleton className="h-6 w-24" /></TableCell>
+                                <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+                                <TableCell><Skeleton className="h-6 w-20" /></TableCell>
+                                <TableCell className="text-right"><Skeleton className="h-8 w-8 ml-auto rounded-md" /></TableCell>
+                            </TableRow>
+                        ))
+                    ) : paginatedUsers.map(user => (
                         <TableRow key={user.id}>
                             <TableCell>
                                 <div className="flex items-center gap-3">

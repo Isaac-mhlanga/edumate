@@ -11,15 +11,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, ListFilter, CheckCircle, XCircle, Clock, Eye, X, Check, MoreVertical, Trash2, ChevronLeft, ChevronRight, BookOpen, Upload, Download } from "lucide-react";
 import { type Course } from "@/app/admin/page";
+import { Skeleton } from "../ui/skeleton";
 
 interface AdminCoursesTabProps {
     courses: Course[];
+    loading: boolean;
     onCourseAction: (course: Course, action: 'Approve' | 'Reject') => void;
     onPublishCourse: (course: Course) => void;
     onUnpublishCourse: (course: Course) => void;
 }
 
-export function AdminCoursesTab({ courses, onCourseAction, onPublishCourse, onUnpublishCourse }: AdminCoursesTabProps) {
+export function AdminCoursesTab({ courses, loading, onCourseAction, onPublishCourse, onUnpublishCourse }: AdminCoursesTabProps) {
     const [courseFilters, setCourseFilters] = React.useState({ search: '', status: 'All' });
     const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
     const coursesPerPage = 7;
@@ -88,7 +90,30 @@ export function AdminCoursesTab({ courses, onCourseAction, onPublishCourse, onUn
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedCourses.map(course => (
+                    {loading ? (
+                        Array.from({ length: 5 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell>
+                                    <div className="flex items-center gap-3">
+                                        <Skeleton className="h-5 w-5" />
+                                        <div className="space-y-1.5">
+                                            <Skeleton className="h-4 w-32" />
+                                            <Skeleton className="h-3 w-48" />
+                                        </div>
+                                    </div>
+                                </TableCell>
+                                <TableCell className="hidden sm:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+                                <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-16" /></TableCell>
+                                <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                                <TableCell className="text-right">
+                                    <div className="flex justify-end gap-2">
+                                        <Skeleton className="h-8 w-8" />
+                                        <Skeleton className="h-8 w-20" />
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    ) : paginatedCourses.map(course => (
                         <TableRow key={course.id}>
                             <TableCell>
                                 <div className="flex items-center">

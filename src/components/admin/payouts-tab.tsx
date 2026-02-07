@@ -10,15 +10,17 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Badge } from "@/components/ui/badge";
 import { Search, ListFilter, ReceiptText, CheckCircle, XCircle, Hourglass, ChevronLeft, ChevronRight, User, DollarSign, Trash2 } from "lucide-react";
 import { type PayoutRequest } from "@/app/admin/page";
+import { Skeleton } from "../ui/skeleton";
 
 interface AdminPayoutsTabProps {
     payouts: PayoutRequest[];
+    loading: boolean;
     onPayoutAction: (payout: PayoutRequest, action: 'Approve' | 'Decline') => void;
     onViewReceipt: (payout: PayoutRequest) => void;
     onClearAllPayouts: () => void;
 }
 
-export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt, onClearAllPayouts }: AdminPayoutsTabProps) {
+export function AdminPayoutsTab({ payouts, loading, onPayoutAction, onViewReceipt, onClearAllPayouts }: AdminPayoutsTabProps) {
     const [payoutFilters, setPayoutFilters] = React.useState({ search: '', status: 'All' });
     const [currentPayoutPage, setCurrentPayoutPage] = React.useState(1);
     const payoutsPerPage = 7;
@@ -92,7 +94,28 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt, onClea
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {paginatedPayouts.map(payout => (
+                    {loading ? (
+                        Array.from({ length: 7 }).map((_, i) => (
+                            <TableRow key={i}>
+                                <TableCell>
+                                    <div className="flex items-center gap-2">
+                                        <Skeleton className="h-4 w-4" />
+                                        <Skeleton className="h-4 w-24" />
+                                    </div>
+                                </TableCell>
+                                <TableCell><Skeleton className="h-6 w-24" /></TableCell>
+                                <TableCell><Skeleton className="h-4 w-20" /></TableCell>
+                                <TableCell className="hidden md:table-cell"><Skeleton className="h-4 w-24" /></TableCell>
+                                <TableCell><Skeleton className="h-6 w-28" /></TableCell>
+                                <TableCell className="text-right">
+                                    <div className="flex gap-2 justify-end">
+                                        <Skeleton className="h-8 w-20" />
+                                        <Skeleton className="h-8 w-20" />
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        ))
+                    ) : paginatedPayouts.map(payout => (
                         <TableRow key={payout.id}>
                             <TableCell>
                                 <div className="flex items-center gap-2">

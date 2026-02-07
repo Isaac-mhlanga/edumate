@@ -420,11 +420,12 @@ function AdminPage() {
                 />
             )}
             {currentTab === 'enquiries' && <EnquiriesPage userRole="admin" />}
-            {currentTab === 'users' && <AdminUsersTab users={users} onUserAction={handleUserAction} />}
-            {currentTab === 'tutors' && <AdminTutorsTab tutors={tutors} onTutorApproval={handleTutorApproval} onViewProfile={handleViewTutorProfile} />}
+            {currentTab === 'users' && <AdminUsersTab users={users} loading={loading} onUserAction={handleUserAction} />}
+            {currentTab === 'tutors' && <AdminTutorsTab tutors={tutors} loading={loading} onTutorApproval={handleTutorApproval} onViewProfile={handleViewTutorProfile} />}
             {currentTab === 'courses' && (
                 <AdminCoursesTab 
                     courses={courses} 
+                    loading={loading}
                     onCourseAction={(course, action) => {
                         setSelectedCourse(course);
                         setCourseAction(action);
@@ -451,6 +452,7 @@ function AdminPage() {
             {currentTab === 'payouts' && (
                 <AdminPayoutsTab 
                     payouts={payoutRequests}
+                    loading={loading}
                     onPayoutAction={(payout, action) => {
                         setSelectedPayout(payout);
                         setPayoutAction(action);
