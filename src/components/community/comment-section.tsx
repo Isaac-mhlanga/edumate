@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
@@ -111,11 +112,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                 <AvatarFallback>{comment.studentName?.charAt(0) || 'A'}</AvatarFallback>
             </Avatar>
             <div className="flex-1">
-                <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
-                    <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
-                </div>
-
                 {isEditing ? (
                     <div className="mt-2 space-y-2">
                         <Textarea 
@@ -132,14 +128,19 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                         </div>
                     </div>
                 ) : (
-                    <>
+                    <div className="bg-muted rounded-lg p-3">
+                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+                            <span className="font-semibold text-foreground text-sm">{comment.studentName}</span>
+                            <span>•</span>
+                            <span>{comment.createdAt ? formatDistanceToNow(comment.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                        </div>
                         <p className="text-sm mt-1">{comment.content}</p>
                         {renderAttachment(comment)}
-                    </>
+                    </div>
                 )}
                 
                 {!isEditing && (
-                    <div className="flex items-center gap-1 mt-2">
+                    <div className="flex items-center gap-1 mt-1 pl-2">
                         <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-muted-foreground" onClick={() => handleLike('comment', comment.id)} disabled={!user}>
                             <ThumbsUp className={cn("h-4 w-4 mr-1", (comment.likedBy || []).includes(user?.uid || '') && "text-primary fill-primary/20")} /> {comment.likeCount || 0}
                         </Button>
@@ -155,8 +156,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                                         Edit
                                     </Button>
                                 )}
-                                <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('comment', comment.id)}>
-                                    <Trash2 className="h-4 w-4" />
+                                <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive hover:text-destructive" onClick={() => handleDelete('comment', comment.id)}>
+                                    <Trash2 className="h-3 w-3" />
                                 </Button>
                             </>
                         )}
@@ -164,7 +165,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                 )}
 
                 {replyingTo === comment.id && (
-                    <div className="mt-4 flex items-start gap-3">
+                    <div className="mt-2 flex items-start gap-3">
                         <Avatar className="h-8 w-8 border">
                             {user ? <AvatarImage src={user.photoURL || undefined} /> : <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>}
                             <AvatarFallback>{user ? user.displayName?.charAt(0) : 'A'}</AvatarFallback>
@@ -514,7 +515,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                         </div>
                     </div>
                      {canModerate && (
-                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('question', question.id)}>
+                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive hover:text-destructive" onClick={() => handleDelete('question', question.id)}>
                             <Trash2 className="h-4 w-4 mr-1" /> Delete Question
                         </Button>
                     )}

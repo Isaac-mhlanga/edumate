@@ -1,13 +1,12 @@
+
 'use client';
 
 import React from 'react';
 import { type Question } from '@/lib/types';
-import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThumbsUp, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from '../ui/skeleton';
-import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, doc, updateDoc, increment, arrayUnion, arrayRemove } from 'firebase/firestore';
@@ -86,22 +85,22 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
                 <AvatarImage src={question.studentAvatar ?? undefined} />
                 <AvatarFallback>{question.studentName?.charAt(0) || 'A'}</AvatarFallback>
             </Avatar>
-            <div className="space-y-1.5">
+            <div>
                 <p className="text-sm font-semibold">{question.studentName || 'Anonymous'}</p>
                 <p className="text-xs text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
             </div>
         </div>
         <div className="space-y-2">
-            <h3 className="font-semibold text-lg leading-snug line-clamp-2">{question.title}</h3>
+            <h3 className="font-semibold text-base leading-snug line-clamp-2">{question.title}</h3>
             <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
               {contentSnippet}
             </p>
         </div>
         <div className="flex justify-between items-center pt-2">
              <div className="flex flex-wrap gap-2">
-                {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary" className="rounded-full">{tag}</Badge>)}
+                {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary" className="rounded-full text-xs">{tag}</Badge>)}
             </div>
-            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+            <div className="flex items-center gap-4 text-xs text-muted-foreground">
                 <button onClick={handleLike} className="flex items-center gap-1.5 hover:text-primary transition-colors">
                     <ThumbsUp className={cn("h-4 w-4", user && question.likedBy?.includes(user.uid) ? "text-primary" : "")} /> 
                     <span>{question.likeCount || 0}</span>

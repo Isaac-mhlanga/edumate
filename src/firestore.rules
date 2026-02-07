@@ -134,7 +134,7 @@ service cloud.firestore {
       // Only signed-in users can create questions
       allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
       // Users can only update their own question, or update likes, or if they are an admin
-      allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy', 'commentCount', 'commentsDisabled', 'dislikeCount', 'dislikedBy']) || isAdmin());
+      allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy', 'commentCount', 'commentsDisabled']) || isAdmin());
        // Users can only delete their own questions, or if they are an admin
       allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
 
@@ -145,7 +145,7 @@ service cloud.firestore {
         // Users can create comments
         allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
         // Users can only update their own comments, or update likes
-        allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy']));
+        allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy', 'content']));
         // Users can only delete their own comments or admins can delete any
         allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
       }
