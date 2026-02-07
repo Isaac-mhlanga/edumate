@@ -1,23 +1,61 @@
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
 import { QuestionForm } from './question-form';
+import { type Question } from '@/lib/types';
+import React from 'react';
 
+interface RightSidebarProps {
+    questions: Question[];
+}
 
-export function RightSidebar() {
-  const topMembers = [
-    { name: 'Albert Flores', score: '13K', avatar: 'https://i.pravatar.cc/150?u=albert' },
-    { name: 'Kathryn Murphy', score: '11K', avatar: 'https://i.pravatar.cc/150?u=kathryn' },
-    { name: 'Savannah Nguyen', score: '10K', avatar: 'https://i.pravatar.cc/150?u=savannah' },
-    { name: 'Floyd Miles', score: '10K', avatar: 'https://i.pravatar.cc/150?u=floyd' },
-    { name: 'Darlene Robertson', score: '9K', avatar: 'https://i.pravatar.cc/150?u=darlene' },
-    { name: 'Cameron Williamson', score: '8K', avatar: 'https://i.pravatar.cc/150?u=cameron' },
-  ];
-  const popularTags = ['Gaming', 'Console', 'Hardware', 'iphone', 'Best camera', 'Jio', 'resia in inαια'];
+export function RightSidebar({ questions }: RightSidebarProps) {
+  const topMembers = React.useMemo(() => {
+    const memberStats: { [key: string]: { name: string; avatar?: string; postCount: number } } = {};
+
+    questions.forEach(question => {
+      if (!memberStats[question.studentId]) {
+        memberStats[question.studentId] = {
+          name: question.studentName,
+          avatar: question.studentAvatar,
+          postCount: 0,
+        };
+      }
+      memberStats[question.studentId].postCount++;
+    });
+
+    return Object.values(memberStats)
+      .sort((a, b) => b.postCount - a.postCount)
+      .slice(0, 6)
+      .map(member => ({
+        name: member.name,
+        score: `${member.postCount} posts`,
+        avatar: member.avatar,
+      }));
+  }, [questions]);
+  
+  const popularTags = React.useMemo(() => {
+    const tagCounts: { [key: string]: number } = {};
+    questions.forEach(q => {
+      if (q.subject) {
+        tagCounts[q.subject] = (tagCounts[q.subject] || 0) + 1;
+      }
+      if (q.grade) {
+        const gradeTag = `Grade ${q.grade}`;
+        tagCounts[gradeTag] = (tagCounts[gradeTag] || 0) + 1;
+      }
+      if (q.module) {
+        tagCounts[q.module] = (tagCounts[q.module] || 0) + 1;
+      }
+    });
+
+    return Object.entries(tagCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 7)
+      .map(([tag, _]) => tag);
+  }, [questions]);
 
   return (
     <div className="space-y-6">

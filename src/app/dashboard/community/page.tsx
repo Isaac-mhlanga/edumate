@@ -1,12 +1,14 @@
 'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe } from 'firebase/firestore';
+import React, { useState, useEffect } from 'react';
+import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, deleteDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionList } from '@/components/community/question-list';
 import { type Question } from '@/lib/types';
 import withAuth from '@/components/with-auth';
-import { RightSidebar } from '@/components/community/right-sidebar';
+import { CommentSection } from '@/components/community/comment-section';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -20,6 +22,7 @@ const firebaseConfig = {
 function CommunityDashboardPage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
     
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -32,6 +35,9 @@ function CommunityDashboardPage() {
                 ...doc.data()
             } as Question));
             setQuestions(fetchedQuestions);
+            if (!selectedQuestion && fetchedQuestions.length > 0) {
+                setSelectedQuestion(fetchedQuestions[0]);
+            }
             setLoading(false);
         }, (error) => {
             console.error("Error fetching questions:", error);
@@ -39,19 +45,49 @@ function CommunityDashboardPage() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [selectedQuestion]);
+
+    const handleUpdateQuestion = (updatedQuestion: Question) => {
+        setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
+        if (selectedQuestion?.id === updatedQuestion.id) {
+            setSelectedQuestion(updatedQuestion);
+        }
+    };
+
+    const handleDeleteQuestion = async (questionId: string) => {
+        const firestore = getFirestore();
+        await deleteDoc(doc(firestore, 'questions', questionId));
+        // The onSnapshot will handle the state update
+        if (selectedQuestion?.id === questionId) {
+            setSelectedQuestion(questions.length > 1 ? questions[1] : null);
+        }
+    };
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_300px] gap-8">
-            <div className="min-w-0">
-                 <div className="mb-4">
+        <div className="grid grid-cols-1 lg:grid-cols-[1fr_450px] gap-8 h-[calc(100vh-10rem)]">
+            <div className="min-w-0 h-full flex flex-col">
+                 <div className="mb-4 flex-shrink-0">
                     <h1 className="text-3xl font-bold tracking-tight">Community Forum</h1>
                     <p className="text-lg text-muted-foreground mt-1">Ask questions, share knowledge, and connect with fellow students.</p>
                 </div>
-                <QuestionList questions={questions} loading={loading} />
+                <ScrollArea className="flex-1 pr-4 -mr-4">
+                    <QuestionList 
+                        questions={questions} 
+                        loading={loading}
+                        onQuestionSelect={setSelectedQuestion}
+                        selectedQuestionId={selectedQuestion?.id}
+                    />
+                </ScrollArea>
             </div>
-            <aside className="hidden lg:block">
-                <RightSidebar />
+            <aside className="hidden lg:block h-full">
+                 <Card className="h-full flex flex-col">
+                    <CommentSection
+                        question={selectedQuestion}
+                        onUpdateQuestion={handleUpdateQuestion}
+                        onDeleteQuestion={handleDeleteQuestion}
+                        dashboardView={true}
+                    />
+                </Card>
             </aside>
         </div>
     );

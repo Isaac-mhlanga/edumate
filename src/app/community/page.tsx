@@ -58,7 +58,7 @@ export default function CommunityPage() {
                            <QuestionList questions={questions} loading={loading} />
                         </div>
                          <aside className="hidden xl:block">
-                           <RightSidebar />
+                           <RightSidebar questions={questions} />
                         </aside>
                      </div>
                 </div>
