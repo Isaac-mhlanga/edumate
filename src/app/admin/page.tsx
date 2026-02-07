@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -24,6 +23,7 @@ import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/adm
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
 import { format, formatDistanceToNow } from "date-fns";
 import { EnquiriesPage } from "@/components/enquiries-page";
+import { ChangeRoleDialog } from "@/components/admin/change-role-dialog";
 
 
 const firebaseConfig = {
@@ -35,7 +35,7 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'instructor' | 'admin' | 'tutor'; joined: string; originalJoinedDate: Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; phoneNumber?: string; };
+export type User = { id: string; fullName: string; name:string; email: string; role: 'student' | 'varsity-student' | 'instructor' | 'admin' | 'tutor'; joined: string; originalJoinedDate: Date; status: 'Active' | 'Suspended'; subscriptionPlan?: string; phoneNumber?: string; };
 export type Course = { id: string; instructorId: string; title: string; subject: string; grade: string; instructor: string; pricing: { type: string, price?: number }; status: 'Published' | 'Pending Approval' | 'Rejected' | 'Draft'; createdAt: Timestamp };
 export type PayoutRequest = {
     id: string;
@@ -114,6 +114,7 @@ function AdminPage() {
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = React.useState(false);
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
     const [isDeleteUserDialogOpen, setIsDeleteUserDialogOpen] = React.useState(false);
+    const [isChangeRoleDialogOpen, setIsChangeRoleDialogOpen] = React.useState(false);
     const [isCourseActionDialogOpen, setIsCourseActionDialogOpen] = React.useState(false);
     const [isPayoutActionDialogOpen, setIsPayoutActionDialogOpen] = React.useState(false);
     const [isReceiptDialogOpen, setIsReceiptDialogOpen] = React.useState(false);
@@ -227,11 +228,12 @@ function AdminPage() {
     }, [users, courses, transactions]);
 
 
-    const handleUserAction = (user: User, action: 'suspend' | 'delete' | 'view') => {
+    const handleUserAction = (user: User, action: 'suspend' | 'delete' | 'view' | 'change-role') => {
         setSelectedUser(user);
         if (action === 'suspend') setIsSuspendUserDialogOpen(true);
         if (action === 'delete') setIsDeleteUserDialogOpen(true);
         if (action === 'view') setIsUserDetailsDialogOpen(true);
+        if (action === 'change-role') setIsChangeRoleDialogOpen(true);
     };
 
     const confirmSuspendUser = async () => {
@@ -250,6 +252,19 @@ function AdminPage() {
         toast({ title: "User Deleted", description: `${selectedUser.name} has been permanently deleted.`, variant: "destructive" });
         setIsDeleteUserDialogOpen(false);
     }
+    
+    const confirmChangeRole = async (newRole: 'student' | 'varsity-student' | 'instructor' | 'admin' | 'tutor') => {
+        if (!selectedUser) return;
+        try {
+            await updateDoc(doc(firestore, 'users', selectedUser.id), { role: newRole });
+            setUsers(users.map(u => u.id === selectedUser.id ? { ...u, role: newRole } : u));
+            toast({ title: "User Role Updated", description: `${selectedUser.name}'s role has been changed to ${newRole}.` });
+            setIsChangeRoleDialogOpen(false);
+        } catch (error) {
+            console.error("Error updating user role:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update user role.' });
+        }
+    };
 
     const confirmCourseAction = async () => {
         if (!selectedCourse || !courseAction) return;
@@ -414,6 +429,12 @@ function AdminPage() {
                 selectedUser={selectedUser}
                 onConfirmSuspend={confirmSuspendUser}
                 onConfirmDelete={confirmDeleteUser}
+            />
+             <ChangeRoleDialog
+                isOpen={isChangeRoleDialogOpen}
+                setIsOpen={setIsChangeRoleDialogOpen}
+                selectedUser={selectedUser}
+                onConfirm={confirmChangeRole}
             />
             <CourseActionDialog
                 isOpen={isCourseActionDialogOpen}
