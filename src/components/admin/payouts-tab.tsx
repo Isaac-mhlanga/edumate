@@ -8,16 +8,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSepar
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ListFilter, ReceiptText, CheckCircle, XCircle, Hourglass, ChevronLeft, ChevronRight, User, DollarSign } from "lucide-react";
+import { Search, ListFilter, ReceiptText, CheckCircle, XCircle, Hourglass, ChevronLeft, ChevronRight, User, DollarSign, Trash2 } from "lucide-react";
 import { type PayoutRequest } from "@/app/admin/page";
 
 interface AdminPayoutsTabProps {
     payouts: PayoutRequest[];
     onPayoutAction: (payout: PayoutRequest, action: 'Approve' | 'Decline') => void;
     onViewReceipt: (payout: PayoutRequest) => void;
+    onClearAllPayouts: () => void;
 }
 
-export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: AdminPayoutsTabProps) {
+export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt, onClearAllPayouts }: AdminPayoutsTabProps) {
     const [payoutFilters, setPayoutFilters] = React.useState({ search: '', status: 'All' });
     const [currentPayoutPage, setCurrentPayoutPage] = React.useState(1);
     const payoutsPerPage = 7;
@@ -54,24 +55,30 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
                         onChange={(e) => handlePayoutFilterChange('search', e.target.value)}
                     />
                 </div>
-                <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                        <Button variant="outline" className="gap-1 w-full md:w-auto">
-                            <ListFilter className="h-3.5 w-3.5" />
-                            <span>Filter by Status</span>
-                        </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuRadioGroup value={payoutFilters.status} onValueChange={(value) => handlePayoutFilterChange('status', value)}>
-                            <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Completed">Completed</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Pending">Pending</DropdownMenuRadioItem>
-                            <DropdownMenuRadioItem value="Declined">Declined</DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                    </DropdownMenuContent>
-                </DropdownMenu>
+                <div className="flex items-center gap-2 w-full md:w-auto">
+                    <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                            <Button variant="outline" className="gap-1 w-full md:w-auto">
+                                <ListFilter className="h-3.5 w-3.5" />
+                                <span>Filter by Status</span>
+                            </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Filter by Status</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuRadioGroup value={payoutFilters.status} onValueChange={(value) => handlePayoutFilterChange('status', value)}>
+                                <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Completed">Completed</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Pending">Pending</DropdownMenuRadioItem>
+                                <DropdownMenuRadioItem value="Declined">Declined</DropdownMenuRadioItem>
+                            </DropdownMenuRadioGroup>
+                        </DropdownMenuContent>
+                    </DropdownMenu>
+                    <Button variant="destructive" className="gap-1 w-full md:w-auto" onClick={onClearAllPayouts}>
+                        <Trash2 className="h-3.5 w-3.5" />
+                        <span>Clear All</span>
+                    </Button>
+                </div>
             </div>
             <Table>
                 <TableHeader>
@@ -87,7 +94,12 @@ export function AdminPayoutsTab({ payouts, onPayoutAction, onViewReceipt }: Admi
                 <TableBody>
                     {paginatedPayouts.map(payout => (
                         <TableRow key={payout.id}>
-                            <TableCell className="font-medium">{payout.userName}</TableCell>
+                            <TableCell>
+                                <div className="flex items-center gap-2">
+                                    <User className="h-4 w-4 text-muted-foreground" />
+                                    <span className="font-medium">{payout.userName}</span>
+                                </div>
+                            </TableCell>
                             <TableCell>
                                 <Badge variant="outline" className="flex items-center gap-1.5 w-fit">
                                     {payout.type === 'Instructor' ? <DollarSign className="h-3 w-3" /> : <User className="h-3 w-3" />}

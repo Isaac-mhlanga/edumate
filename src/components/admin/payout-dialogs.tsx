@@ -77,3 +77,31 @@ export function PayoutReceiptDialog({ isOpen, setIsOpen, selectedPayout }: Payou
         </Dialog>
     );
 }
+
+
+interface ClearAllPayoutsDialogProps {
+    isOpen: boolean;
+    setIsOpen: (open: boolean) => void;
+    onConfirm: () => void;
+}
+
+export function ClearAllPayoutsDialog({ isOpen, setIsOpen, onConfirm }: ClearAllPayoutsDialogProps) {
+    return (
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This action cannot be undone. This will permanently delete <strong>all</strong> payout records from the database. This does not affect completed transactions, only the payout requests themselves.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={onConfirm} className={buttonVariants({ variant: "destructive" })}>
+                        Yes, Clear All Payouts
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+}

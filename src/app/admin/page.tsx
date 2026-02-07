@@ -5,7 +5,7 @@ import React from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
-import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp, addDoc, orderBy, query, getDoc, onSnapshot, setDoc } from "firebase/firestore";
+import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp, addDoc, orderBy, query, getDoc, onSnapshot, setDoc, writeBatch } from "firebase/firestore";
 import { getStorage, ref, deleteObject } from "firebase/storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
@@ -19,7 +19,7 @@ import { AdminSubscriptionsTab } from "@/components/admin/subscriptions-tab";
 import { AdminTutorsTab, TutorProfileDialog } from "@/components/admin/tutors-tab";
 import { UserActionDialogs, UserDetailsDialog } from "@/components/admin/user-action-dialogs";
 import { CourseActionDialog } from "@/components/admin/course-action-dialog";
-import { PayoutActionDialog, PayoutReceiptDialog } from "@/components/admin/payout-dialogs";
+import { PayoutActionDialog, PayoutReceiptDialog, ClearAllPayoutsDialog } from "@/components/admin/payout-dialogs";
 import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/admin/assignment-action-dialogs";
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
 import { format, formatDistanceToNow } from "date-fns";
@@ -123,6 +123,8 @@ function AdminPage() {
     const [isDeleteAssignmentDialogOpen, setIsDeleteAssignmentDialogOpen] = React.useState(false);
     const [isCancelSubscriptionDialogOpen, setIsCancelSubscriptionDialogOpen] = React.useState(false);
     const [isTutorProfileDialogOpen, setIsTutorProfileDialogOpen] = React.useState(false);
+    const [isClearAllPayoutsDialogOpen, setIsClearAllPayoutsDialogOpen] = React.useState(false);
+
 
     React.useEffect(() => {
         const fetchData = async () => {
@@ -318,6 +320,26 @@ function AdminPage() {
         setIsPayoutActionDialogOpen(false);
     };
 
+    const confirmClearAllPayouts = async () => {
+        const payoutsCollection = collection(firestore, 'payouts');
+        try {
+            const querySnapshot = await getDocs(payoutsCollection);
+            const batch = writeBatch(firestore);
+            querySnapshot.forEach(doc => {
+                batch.delete(doc.ref);
+            });
+            await batch.commit();
+
+            setPayoutRequests([]);
+            toast({ title: "All Payouts Cleared", description: "All payout records have been permanently deleted." });
+        } catch (error) {
+            console.error("Error clearing payouts:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not clear all payouts.' });
+        } finally {
+            setIsClearAllPayoutsDialogOpen(false);
+        }
+    };
+
     const confirmDeleteAssignment = async () => {
         if (!selectedAssignment) return;
         
@@ -438,6 +460,7 @@ function AdminPage() {
                         setSelectedPayout(payout);
                         setIsReceiptDialogOpen(true);
                     }}
+                    onClearAllPayouts={() => setIsClearAllPayoutsDialogOpen(true)}
                 />
             )}
             {currentTab === 'subscriptions' && (
@@ -488,6 +511,11 @@ function AdminPage() {
                 isOpen={isReceiptDialogOpen}
                 setIsOpen={setIsReceiptDialogOpen}
                 selectedPayout={selectedPayout}
+            />
+            <ClearAllPayoutsDialog
+                isOpen={isClearAllPayoutsDialogOpen}
+                setIsOpen={setIsClearAllPayoutsDialogOpen}
+                onConfirm={confirmClearAllPayouts}
             />
             <AssignmentReviewDialog
                 isOpen={isAssignmentReviewDialogOpen}
