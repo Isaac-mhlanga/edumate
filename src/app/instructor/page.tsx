@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -470,7 +471,11 @@ function InstructorPage() {
                 if (!existingVideoIds.has(originalVideo.id)) {
                     // Video was deleted
                     if (!originalVideo.url.includes('youtube.com')) {
-                        await deleteObject(ref(storage, originalVideo.url));
+                       try {
+                          await deleteObject(ref(storage, originalVideo.url));
+                       } catch (e) {
+                          console.warn("Could not delete video file, it might have been already deleted:", originalVideo.url, e);
+                       }
                     }
                 }
                 updateProgress();
@@ -486,22 +491,34 @@ function InstructorPage() {
 
             if (video.newVideoFile instanceof File) {
                  if (video.url && !video.url.includes('youtube.com')) {
-                    await deleteObject(ref(storage, video.url));
+                    try {
+                        await deleteObject(ref(storage, video.url));
+                    } catch (e) {
+                         console.warn("Could not delete old video file:", video.url, e);
+                    }
                 }
                 const newVideoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.newVideoFile.name}`);
                 await uploadBytes(newVideoRef, video.newVideoFile);
                 videoUrl = await getDownloadURL(newVideoRef);
-                duration = video.newVideoDuration;
+                duration = video.newVideoDuration || 0;
             } else if (video.newYoutubeUrl) {
                 if (video.url && !video.url.includes('youtube.com')) {
-                   await deleteObject(ref(storage, video.url));
+                   try {
+                       await deleteObject(ref(storage, video.url));
+                   } catch(e) {
+                       console.warn("Could not delete old video file:", video.url, e);
+                   }
                 }
                 videoUrl = video.newYoutubeUrl.replace("watch?v=", "embed/");
             }
 
             if (video.notesFile instanceof File) {
                  if (video.notesUrl) { // Delete old notes if they exist
-                    await deleteObject(ref(storage, video.notesUrl));
+                    try {
+                        await deleteObject(ref(storage, video.notesUrl));
+                    } catch (e) {
+                        console.warn("Could not delete old notes file:", video.notesUrl, e);
+                    }
                  }
                 const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${video.notesFile.name}`);
                 await uploadBytes(notesRef, video.notesFile);
@@ -512,25 +529,31 @@ function InstructorPage() {
                 id: video.id,
                 title: video.title,
                 url: videoUrl,
-                duration,
-                notesUrl,
+                duration: duration,
+                notesUrl: notesUrl,
                 quizId: video.quizId === 'none' ? null : video.quizId || null,
             });
             updateProgress();
         }
 
         for (const video of (videoUploads || [])) {
-             let videoUrl = video.url || '';
-            let notesUrl = video.notesUrl || null;
-            let duration = video.duration || 0;
+             let videoUrl = '';
+            let notesUrl = null;
+            let duration = 0;
 
             if (video.file instanceof File) {
                 const videoRef = ref(storage, `courses/${user.uid}/videos/${Date.now()}-${video.file.name}`);
                 await uploadBytes(videoRef, video.file);
                 videoUrl = await getDownloadURL(videoRef);
-                duration = video.fileDuration;
+                duration = video.fileDuration || 0;
             } else if (video.youtubeUrl) {
                 videoUrl = video.youtubeUrl.replace("watch?v=", "embed/");
+            }
+
+            if (video.notesFile instanceof File) {
+                const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${video.notesFile.name}`);
+                await uploadBytes(notesRef, video.notesFile);
+                notesUrl = await getDownloadURL(notesRef);
             }
 
             if (videoUrl) {
@@ -538,8 +561,8 @@ function InstructorPage() {
                     id: `vid_${Date.now()}_${Math.random()}`,
                     title: video.title,
                     url: videoUrl,
-                    duration,
-                    notesUrl,
+                    duration: duration,
+                    notesUrl: notesUrl,
                     quizId: video.quizId === 'none' ? null : video.quizId || null,
                 });
             }
