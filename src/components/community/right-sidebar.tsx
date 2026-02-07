@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,9 +13,11 @@ interface RightSidebarProps {
 
 export function RightSidebar({ questions }: RightSidebarProps) {
   const topMembers = React.useMemo(() => {
-    const memberStats: { [key: string]: { name: string; avatar?: string; postCount: number } } = {};
+    const memberStats: { [key: string]: { name: string; avatar?: string | null; postCount: number } } = {};
 
     questions.forEach(question => {
+      if (question.studentId === 'anonymous') return;
+
       if (!memberStats[question.studentId]) {
         memberStats[question.studentId] = {
           name: question.studentName,
@@ -29,7 +30,7 @@ export function RightSidebar({ questions }: RightSidebarProps) {
 
     return Object.values(memberStats)
       .sort((a, b) => b.postCount - a.postCount)
-      .slice(0, 6)
+      .slice(0, 10)
       .map(member => ({
         name: member.name,
         score: `${member.postCount} posts`,
@@ -57,6 +58,8 @@ export function RightSidebar({ questions }: RightSidebarProps) {
       .slice(0, 7)
       .map(([tag, _]) => tag);
   }, [questions]);
+  
+  const memberCount = new Set(questions.map(q => q.studentId).filter(id => id !== 'anonymous')).size;
 
   return (
     <div className="space-y-6">
@@ -68,7 +71,7 @@ export function RightSidebar({ questions }: RightSidebarProps) {
             </span>
             <span className="text-sm font-semibold">Online</span>
         </div>
-        <span className="text-sm font-semibold">35K members</span>
+        <span className="text-sm font-semibold">{memberCount} members</span>
       </div>
       
       <QuestionForm />
@@ -83,7 +86,7 @@ export function RightSidebar({ questions }: RightSidebarProps) {
               <li key={member.name} className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-3">
                   <Avatar className="h-8 w-8">
-                    <AvatarImage src={member.avatar} />
+                    <AvatarImage src={member.avatar ?? undefined} />
                     <AvatarFallback>{member.name[0]}</AvatarFallback>
                   </Avatar>
                   <span className="font-medium">{member.name}</span>
@@ -108,5 +111,3 @@ export function RightSidebar({ questions }: RightSidebarProps) {
     </div>
   );
 }
-
-    
