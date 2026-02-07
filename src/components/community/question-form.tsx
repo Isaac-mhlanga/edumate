@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState } from 'react';
@@ -16,8 +17,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Loader2, Send, Paperclip } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
-import Link from 'next/link';
-import { Alert, AlertDescription, AlertTitle } from '../ui/alert';
+import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -31,12 +31,32 @@ const firebaseConfig = {
 const formSchema = z.object({
   title: z.string().min(5, 'Title must be at least 5 characters long.').max(150, 'Title cannot exceed 150 characters.'),
   content: z.string().min(10, 'Question must be at least 10 characters long.'),
-  subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences'], { required_error: "Please select a subject."}),
-  grade: z.enum(['10', '11', '12'], { required_error: "Please select a grade."}),
+  audience: z.enum(['High School', 'Varsity/College'], { required_error: "Please select an audience."}),
+  subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences']).optional(),
+  grade: z.enum(['10', '11', '12']).optional(),
+  module: z.string().optional(),
   file: z.any().optional(),
   name: z.string().optional(),
   email: z.string().email({ message: "Please enter a valid email." }).optional(),
+}).superRefine((data, ctx) => {
+    if (data.audience === 'High School') {
+        if (!data.subject) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Subject is required for High School questions.",
+                path: ['subject'],
+            });
+        }
+        if (!data.grade) {
+            ctx.addIssue({
+                code: z.ZodIssueCode.custom,
+                message: "Grade is required for High School questions.",
+                path: ['grade'],
+            });
+        }
+    }
 });
+
 
 type FormValues = z.infer<typeof formSchema>;
 
@@ -62,8 +82,11 @@ export function QuestionForm() {
       file: undefined,
       name: '',
       email: '',
+      module: '',
     },
   });
+
+  const audience = form.watch('audience');
 
   const onSubmit = async (data: FormValues) => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -104,8 +127,10 @@ export function QuestionForm() {
         studentAvatar: currentUser?.photoURL || null,
         title: data.title,
         content: data.content,
-        subject: data.subject,
-        grade: data.grade,
+        audience: data.audience,
+        subject: data.subject || null,
+        grade: data.grade || null,
+        module: data.module || null,
         fileUrl,
         fileType,
         createdAt: serverTimestamp(),
@@ -168,36 +193,89 @@ export function QuestionForm() {
                             <FormMessage />
                         </FormItem>
                     )} />
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <FormField control={form.control} name="subject" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Subject</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select subject"/></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="Mathematics">Mathematics</SelectItem>
-                                        <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                        <SelectItem value="Life Sciences">Life Sciences</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
+
+                     <FormField
+                        control={form.control}
+                        name="audience"
+                        render={({ field }) => (
+                            <FormItem className="space-y-3">
+                            <FormLabel>This question is for...</FormLabel>
+                            <FormControl>
+                                <RadioGroup
+                                onValueChange={field.onChange}
+                                defaultValue={field.value}
+                                className="grid grid-cols-2 gap-4"
+                                >
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                    <RadioGroupItem value="High School" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                    High School
+                                    </FormLabel>
+                                </FormItem>
+                                <FormItem className="flex items-center space-x-3 space-y-0">
+                                    <FormControl>
+                                    <RadioGroupItem value="Varsity/College" />
+                                    </FormControl>
+                                    <FormLabel className="font-normal">
+                                    Varsity/College
+                                    </FormLabel>
+                                </FormItem>
+                                </RadioGroup>
+                            </FormControl>
+                            <FormMessage />
                             </FormItem>
-                        )} />
-                        <FormField control={form.control} name="grade" render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Grade</FormLabel>
-                                <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                    <FormControl><SelectTrigger><SelectValue placeholder="Select grade" /></SelectTrigger></FormControl>
-                                    <SelectContent>
-                                        <SelectItem value="10">Grade 10</SelectItem>
-                                        <SelectItem value="11">Grade 11</SelectItem>
-                                        <SelectItem value="12">Grade 12</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                    </div>
+                        )}
+                        />
+
+                    {audience === 'High School' && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <FormField control={form.control} name="subject" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Subject</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select subject"/></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                            <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                            <SelectItem value="Life Sciences">Life Sciences</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                            <FormField control={form.control} name="grade" render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Grade</FormLabel>
+                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                        <FormControl><SelectTrigger><SelectValue placeholder="Select grade" /></SelectTrigger></FormControl>
+                                        <SelectContent>
+                                            <SelectItem value="10">Grade 10</SelectItem>
+                                            <SelectItem value="11">Grade 11</SelectItem>
+                                            <SelectItem value="12">Grade 12</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                    <FormMessage />
+                                </FormItem>
+                            )} />
+                        </div>
+                    )}
+                    
+                    {audience === 'Varsity/College' && (
+                         <FormField
+                            control={form.control}
+                            name="module"
+                            render={({ field }) => (
+                                <FormItem>
+                                    <FormLabel>Module Code/Name (Optional)</FormLabel>
+                                    <FormControl><Input placeholder="e.g., COS101, Computer Science 1A" {...field} /></FormControl>
+                                    <FormMessage />
+                                </FormItem>
+                            )}
+                        />
+                    )}
+
                     <FormField name="content" control={form.control} render={({ field }) => (
                         <FormItem>
                             <FormLabel>Your Question</FormLabel>

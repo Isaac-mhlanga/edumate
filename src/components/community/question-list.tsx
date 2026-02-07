@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -58,8 +59,18 @@ export function QuestionList({ questions, selectedQuestion, onSelectQuestion, lo
               
               <div className="flex justify-between items-center mt-2 pt-2 border-t">
                 <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">{q.subject}</Badge>
-                    <Badge variant="outline" className="text-xs">Grade {q.grade}</Badge>
+                    {q.audience === 'Varsity/College' ? (
+                        q.module ? (
+                            <Badge variant="outline" className="text-xs">{q.module}</Badge>
+                        ) : (
+                            <Badge variant="outline" className="text-xs">Varsity/College</Badge>
+                        )
+                    ) : (
+                        <>
+                            <Badge variant="outline" className="text-xs">{q.subject}</Badge>
+                            <Badge variant="outline" className="text-xs">Grade {q.grade}</Badge>
+                        </>
+                    )}
                 </div>
                 <div className="flex items-center gap-4 text-xs text-muted-foreground">
                   {q.fileUrl && q.fileType !== 'image' && <span className="flex items-center gap-1.5"><Paperclip className="h-3.5 w-3.5" /> Media</span>}

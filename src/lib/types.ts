@@ -8,8 +8,10 @@ export type Question = {
     studentAvatar?: string;
     title: string;
     content: string;
-    subject: string;
-    grade: string;
+    audience: 'High School' | 'Varsity/College';
+    subject?: string;
+    grade?: string;
+    module?: string;
     fileUrl?: string;
     fileType?: 'image' | 'pdf';
     createdAt: Timestamp;
