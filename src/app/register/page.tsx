@@ -15,7 +15,7 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { getAuth, createUserWithEmailAndPassword, updateProfile, sendEmailVerification, type Auth } from "firebase/auth";
-import { getFirestore, doc, setDoc, serverTimestamp, getDoc, writeBatch, increment } from "firebase/firestore";
+import { getFirestore, doc, setDoc, serverTimestamp, getDoc, writeBatch, increment, updateDoc } from "firebase/firestore";
 import { initializeApp, getApps, getApp, FirebaseError } from "firebase/app";
 import { User, Mail, KeyRound, Phone, Gift } from "lucide-react";
 
@@ -112,9 +112,7 @@ export default function RegisterPage() {
 
             // Send verification email
             await sendEmailVerification(user);
-
-            const batch = writeBatch(db);
-
+            
             // 3. Create user document
             const newUserDocRef = doc(db, "users", user.uid);
             const newUserDocData = {
@@ -129,7 +127,7 @@ export default function RegisterPage() {
                 referralBalance: 0,
                 ...(data.referralCode && { referredBy: data.referralCode }),
             };
-            batch.set(newUserDocRef, newUserDocData);
+            await setDoc(newUserDocRef, newUserDocData);
             
             // If the user is a tutor, create a default tutor profile
             if (data.role === 'tutor') {
@@ -138,7 +136,7 @@ export default function RegisterPage() {
                     { day: "Monday", slots: [] }, { day: "Tuesday", slots: [] }, { day: "Wednesday", slots: [] },
                     { day: "Thursday", slots: [] }, { day: "Friday", slots: [] }, { day: "Saturday", slots: [] }, { day: "Sunday", slots: [] },
                 ];
-                batch.set(tutorProfileRef, {
+                await setDoc(tutorProfileRef, {
                     id: user.uid,
                     name: data.fullName,
                     email: data.email,
@@ -158,11 +156,14 @@ export default function RegisterPage() {
 
             // 4. Update referrer's balance if code was valid
             if (referrerDocRef) {
-                batch.update(referrerDocRef, { referralBalance: increment(20) });
+                try {
+                    await updateDoc(referrerDocRef, { referralBalance: increment(20) });
+                } catch (balanceError) {
+                    console.error("Failed to update referrer balance:", balanceError);
+                    // Don't fail the whole registration if balance update fails.
+                    // The referral is still logged in the new user's document.
+                }
             }
-            
-            // 5. Commit all writes
-            await batch.commit();
 
             toast({
                 title: "Registration Successful!",

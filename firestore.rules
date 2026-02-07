@@ -44,7 +44,7 @@ service cloud.firestore {
       allow update: if isSignedIn() && 
                     (isOwner(userId) || isAdmin() || 
                     (request.resource.data.referralBalance == resource.data.referralBalance + 20 && 
-                     getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.referredBy == userId));
+                     get(/databases/$(database)/documents/users/$(request.auth.uid)).data.referredBy == userId));
 
 
       // Only admins can delete users
