@@ -28,9 +28,10 @@ interface QuestionListProps {
   questions: Question[];
   loading: boolean;
   onQuestionSelect?: (question: Question) => void;
+  selectedQuestionId?: string | null; // New prop
 }
 
-function QuestionCard({ question, onQuestionSelect }: { question: Question, onQuestionSelect?: (question: Question) => void }) {
+function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Question, onQuestionSelect?: (question: Question) => void, isSelected: boolean }) {
   const { toast } = useToast();
   const [user, setUser] = React.useState<User | null>(null);
 
@@ -66,68 +67,81 @@ function QuestionCard({ question, onQuestionSelect }: { question: Question, onQu
     }
   };
 
-  const contentSnippet = question.content.length > 180 
-    ? `${question.content.substring(0, 180)}...`
+  const contentSnippet = question.content.length > 100 
+    ? `${question.content.substring(0, 100)}...`
     : question.content;
   
   const tags = [question.audience, question.subject, question.grade ? `Grade ${question.grade}` : null, question.module].filter(Boolean);
 
   return (
-     <Card 
+     <button 
       onClick={() => onQuestionSelect?.(question)}
-      className="bg-card text-card-foreground shadow-none rounded-lg border-b p-6 hover:bg-muted/50 cursor-pointer transition-colors duration-200"
+      className={cn(
+        "w-full text-left p-4 border-b hover:bg-muted/50 cursor-pointer transition-colors duration-200",
+        isSelected && "bg-muted"
+      )}
     >
-        <CardHeader className="p-0 mb-4 flex-row justify-between items-start">
-            <div className="flex items-center gap-3">
-                <Avatar className="h-10 w-10">
-                    <AvatarImage src={question.studentAvatar ?? undefined} />
-                    <AvatarFallback>{question.studentName?.charAt(0) || 'A'}</AvatarFallback>
-                </Avatar>
-                <div>
-                    <p className="text-sm font-semibold">{question.studentName || 'Anonymous'}</p>
-                    <p className="text-xs text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
-                </div>
+        <div className="flex items-center gap-3 mb-2">
+            <Avatar className="h-8 w-8">
+                <AvatarImage src={question.studentAvatar ?? undefined} />
+                <AvatarFallback>{question.studentName?.charAt(0) || 'A'}</AvatarFallback>
+            </Avatar>
+            <div>
+                <p className="text-sm font-semibold">{question.studentName || 'Anonymous'}</p>
+                <p className="text-xs text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
             </div>
-        </CardHeader>
-        <CardContent className="p-0 space-y-3">
-            <h3 className="font-bold text-lg leading-snug">{question.title}</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
+        </div>
+        <div className="space-y-2">
+            <h3 className="font-semibold text-md leading-snug line-clamp-2">{question.title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
               {contentSnippet}
             </p>
-            <div className="flex flex-wrap gap-2">
-                {tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+        </div>
+        <div className="flex justify-between items-center mt-3">
+             <div className="flex flex-wrap gap-1">
+                {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>)}
             </div>
-        </CardContent>
-        <CardFooter className="p-0 pt-4">
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <Button variant="ghost" size="sm" className="flex items-center gap-1.5 px-2 -ml-2 h-8" onClick={handleLike}>
-                    <ThumbsUp className={cn("h-4 w-4", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> 
+                <div className="flex items-center gap-1.5">
+                    <ThumbsUp className="h-4 w-4" /> 
                     <span>{question.likeCount || 0}</span>
-                </Button>
+                </div>
                 <div className="flex items-center gap-1.5">
                     <MessageSquare className="h-4 w-4" /> 
                     <span>{question.commentCount || 0}</span>
                 </div>
             </div>
-        </CardFooter>
-    </Card>
+        </div>
+    </button>
   );
 }
 
 
-export function QuestionList({ questions, loading, onQuestionSelect }: QuestionListProps) {
+export function QuestionList({ questions, loading, onQuestionSelect, selectedQuestionId }: QuestionListProps) {
   if (loading) {
     return (
-      <div className="bg-card rounded-lg border">
-        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-48 w-full bg-muted/50" />)}
+      <div className="divide-y">
+        {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="p-4 space-y-2">
+                <div className="flex items-center gap-3">
+                    <Skeleton className="h-8 w-8 rounded-full" />
+                    <div className="space-y-1">
+                        <Skeleton className="h-4 w-24" />
+                        <Skeleton className="h-3 w-16" />
+                    </div>
+                </div>
+                <Skeleton className="h-5 w-3/4" />
+                <Skeleton className="h-4 w-full" />
+            </div>
+        ))}
       </div>
     )
   }
 
   return (
-    <div className="bg-card rounded-lg border divide-y">
+    <div className="divide-y">
         {questions.length > 0 ? (
-            questions.map(q => <QuestionCard key={q.id} question={q} onQuestionSelect={onQuestionSelect} />)
+            questions.map(q => <QuestionCard key={q.id} question={q} onQuestionSelect={onQuestionSelect} isSelected={q.id === selectedQuestionId} />)
         ) : (
              <div className="text-center py-24 text-muted-foreground">
                 <h3 className="text-lg font-semibold">No Questions Yet</h3>

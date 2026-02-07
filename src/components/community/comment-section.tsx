@@ -1,10 +1,9 @@
-
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Image from 'next/image';
 import { type Question, type Comment } from '@/lib/types';
-import { CardHeader, CardContent } from '@/components/ui/card';
+import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -55,6 +54,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
 
   const [editingComment, setEditingComment] = useState<{ id: string, content: string } | null>(null);
   const [collapsedComments, setCollapsedComments] = useState<string[]>([]);
+  
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   
   const getReplies = (commentId: string): Comment[] => {
     return comments
@@ -449,13 +450,20 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     return () => unsubscribe();
   }, [question, toast]);
 
+  useEffect(() => {
+    // Scroll to top when question changes
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({ top: 0, behavior: 'auto' });
+    }
+  }, [question]);
+
   if (!question) {
     return (
-      <div className="flex flex-col h-full items-center justify-center p-8 text-center text-muted-foreground">
+      <Card className="flex flex-col h-full items-center justify-center text-center text-muted-foreground">
         <MessageSquare className="h-16 w-16 mb-4" />
         <h2 className="text-xl font-semibold">Select a Question</h2>
         <p>Choose a question from the list to see the discussion.</p>
-      </div>
+      </Card>
     );
   }
 
@@ -464,32 +472,33 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
 
 
   return (
-    <div className="flex flex-col h-full">
-        <CardHeader className="flex-shrink-0">
-            <div className="flex justify-between items-start">
-                <h2 className="text-xl font-bold">{question.title}</h2>
-                {dashboardView && userRole === 'admin' && (
-                    <div className="flex items-center space-x-2">
-                        <Label htmlFor="disable-comments" className="text-xs text-muted-foreground">Disable Comments</Label>
-                        <Switch
-                            id="disable-comments"
-                            checked={question.commentsDisabled}
-                            onCheckedChange={handleToggleComments}
-                        />
-                    </div>
-                )}
-            </div>
-             <div className="flex items-center gap-3 pt-2 text-xs text-muted-foreground">
-                <Avatar className="h-6 w-6">
-                  <AvatarImage src={question.studentAvatar} />
-                  <AvatarFallback>{question.studentName.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <span className="font-semibold text-foreground">{question.studentName}</span>
-                <span>•</span>
-                <span>{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : ''}</span>
-              </div>
-        </CardHeader>
-        <ScrollArea className="flex-grow">
+    <Card className="flex flex-col h-full">
+        <ScrollArea className="flex-1" ref={scrollAreaRef}>
+            <CardHeader className="flex-shrink-0">
+                <div className="flex justify-between items-start">
+                    <h2 className="text-xl font-bold">{question.title}</h2>
+                    {dashboardView && userRole === 'admin' && (
+                        <div className="flex items-center space-x-2">
+                            <Label htmlFor="disable-comments" className="text-xs text-muted-foreground">Disable Comments</Label>
+                            <Switch
+                                id="disable-comments"
+                                checked={question.commentsDisabled}
+                                onCheckedChange={handleToggleComments}
+                            />
+                        </div>
+                    )}
+                </div>
+                <div className="flex items-center gap-3 pt-2 text-xs text-muted-foreground">
+                    <Avatar className="h-6 w-6">
+                    <AvatarImage src={question.studentAvatar} />
+                    <AvatarFallback>{question.studentName.charAt(0)}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-semibold text-foreground">{question.studentName}</span>
+                    <span>•</span>
+                    <span>{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : ''}</span>
+                </div>
+            </CardHeader>
+        
             <CardContent className="space-y-4">
                  <p className="text-sm whitespace-pre-wrap mt-2">{question.content}</p>
                  {renderAttachment(question)}
@@ -500,7 +509,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                             <ThumbsUp className={cn("h-4 w-4 mr-1", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
                             {question.likeCount || 0}
                         </Button>
-                         <div className="flex items-center gap-1">
+                         <div className="flex items-center gap-1.5">
                             <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
                         </div>
                     </div>
@@ -525,7 +534,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                  </div>
             </CardContent>
         </ScrollArea>
-        <CardContent className="flex-shrink-0 border-t pt-6 bg-muted/50">
+        <div className="flex-shrink-0 border-t p-4 bg-muted/50">
              {question.commentsDisabled ? (
                 <div className="text-center text-sm text-muted-foreground p-4 bg-muted rounded-lg">
                     Comments have been disabled for this question.
@@ -561,7 +570,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                     </div>
                 </div>
             )}
-        </CardContent>
-    </div>
+        </div>
+    </Card>
   );
 }

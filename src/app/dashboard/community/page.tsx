@@ -2,16 +2,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, getDoc, getDocs, writeBatch, Timestamp } from 'firebase/firestore';
-import { getStorage, ref, deleteObject } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionList } from '@/components/community/question-list';
-import { type Question, type Comment } from '@/lib/types';
+import { type Question } from '@/lib/types';
 import withAuth from '@/components/with-auth';
 import { CommentSection } from '@/components/community/comment-section';
 import { useToast } from '@/hooks/use-toast';
-import { RightSidebar } from '@/components/community/right-sidebar';
 import { QuestionForm } from '@/components/community/question-form';
-import { Sheet, SheetContent } from '@/components/ui/sheet';
+import { Card } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { MessageSquare } from 'lucide-react';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -41,7 +41,6 @@ function CommunityDashboardPage() {
             setQuestions(fetchedQuestions);
             
             if (selectedQuestion) {
-                // If a question was selected, make sure it's up-to-date
                 const updatedSelected = fetchedQuestions.find(q => q.id === selectedQuestion.id);
                 setSelectedQuestion(updatedSelected || null);
             }
@@ -62,76 +61,35 @@ function CommunityDashboardPage() {
     };
 
     const handleDeleteQuestion = async (questionId: string) => {
-        const firestore = getFirestore();
-        const storage = getStorage();
-        const questionRef = doc(firestore, 'questions', questionId);
-
-        if (!window.confirm("Are you sure you want to delete this question and all its comments? This action cannot be undone.")) {
-            return;
-        }
-
-        try {
-            const questionSnap = await getDoc(questionRef);
-            if (!questionSnap.exists()) return;
-            const questionData = questionSnap.data() as Question;
-
-            if (questionData.fileUrl) {
-                try { await deleteObject(ref(storage, questionData.fileUrl)); } catch (e) { console.error("Failed to delete question file, it may not exist.", e); }
-            }
-
-            const commentsRef = collection(firestore, 'questions', questionId, 'comments');
-            const commentsSnapshot = await getDocs(commentsRef);
-            const batch = writeBatch(firestore);
-            
-            for (const commentDoc of commentsSnapshot.docs) {
-                const commentData = commentDoc.data() as Comment;
-                if (commentData.fileUrl) {
-                    try { await deleteObject(ref(storage, commentData.fileUrl)); } catch (e) { console.error("Failed to delete comment file, it may not exist.", e); }
-                }
-                batch.delete(commentDoc.ref);
-            }
-
-            batch.delete(questionRef);
-            await batch.commit();
-
-            toast({ title: "Question Deleted", description: "The question and all its content have been removed." });
-            
-            setSelectedQuestion(null);
-        } catch (error) {
-            console.error("Error deleting question:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
-        }
+        // This logic is in CommentSection now. We just need to clear the selection.
+        setSelectedQuestion(null);
     };
 
 
     return (
-        <>
-            <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-8">
-                <div className="min-w-0">
-                    <div className="mb-6">
-                        <QuestionForm />
-                    </div>
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 h-[calc(100vh-8rem)]">
+            <Card className="flex flex-col h-full">
+                <div className="p-4 border-b">
+                    <QuestionForm />
+                </div>
+                <ScrollArea className="flex-1">
                     <QuestionList 
                         questions={questions} 
                         loading={loading}
                         onQuestionSelect={setSelectedQuestion}
+                        selectedQuestionId={selectedQuestion?.id || null}
                     />
-                </div>
-                <aside className="hidden xl:block">
-                    <RightSidebar questions={questions} />
-                </aside>
+                </ScrollArea>
+            </Card>
+            <div className="h-full">
+                <CommentSection
+                    question={selectedQuestion}
+                    onUpdateQuestion={handleUpdateQuestion}
+                    onDeleteQuestion={handleDeleteQuestion}
+                    dashboardView={true}
+                />
             </div>
-             <Sheet open={!!selectedQuestion} onOpenChange={(open) => !open && setSelectedQuestion(null)}>
-                <SheetContent className="w-full max-w-full sm:max-w-2xl p-0">
-                    <CommentSection
-                        question={selectedQuestion}
-                        onUpdateQuestion={handleUpdateQuestion}
-                        onDeleteQuestion={handleDeleteQuestion}
-                        dashboardView={true}
-                    />
-                </SheetContent>
-            </Sheet>
-        </>
+        </div>
     );
 }
 
