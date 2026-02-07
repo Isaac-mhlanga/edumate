@@ -204,31 +204,47 @@ export default function Home() {
                   <Link href="/courses">Explore Courses</Link>
                 </Button>
               </div>
+              <div className="mt-8 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+                <div className="flex items-center justify-center gap-x-6 gap-y-2 flex-wrap">
+                  <span className="flex items-center gap-2">
+                    <Play className="h-4 w-4 text-primary" />
+                    On-demand Videos
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <Users className="h-4 w-4 text-primary" />
+                    Expert Tutors
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <PenSquare className="h-4 w-4 text-primary" />
+                    Assignment Help
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         </section>
 
         <section className="py-12 bg-muted/40 animate-fade-in-up">
-            <div className="container mx-auto px-6">
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                    <div>
-                        <h3 className="text-4xl font-bold text-primary font-headline">95%</h3>
-                        <p className="text-muted-foreground">Improved Scores</p>
-                    </div>
-                    <div>
-                        <h3 className="text-4xl font-bold text-primary font-headline">2.3x</h3>
-                        <p className="text-muted-foreground">Faster Learning</p>
-                    </div>
-                    <div>
-                        <h3 className="text-4xl font-bold text-primary font-headline">10k+</h3>
-                        <p className="text-muted-foreground">Happy Students</p>
-                    </div>
-                    <div>
-                        <h3 className="text-4xl font-bold text-primary font-headline">Top 1%</h3>
-                        <p className="text-muted-foreground">Expert Tutors</p>
-                    </div>
+          <div className="container mx-auto px-6">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
+                <div>
+                    <h3 className="text-4xl font-bold text-primary font-headline">95%</h3>
+                    <p className="text-muted-foreground">Improved Scores</p>
+                </div>
+                <div>
+                    <h3 className="text-4xl font-bold text-primary font-headline">2.3x</h3>
+                    <p className="text-muted-foreground">Faster Learning</p>
+                </div>
+                <div>
+                    <h3 className="text-4xl font-bold text-primary font-headline">10k+</h3>
+                    <p className="text-muted-foreground">Happy Students</p>
+                </div>
+                <div>
+                    <h3 className="text-4xl font-bold text-primary font-headline">Top 1%</h3>
+                    <p className="text-muted-foreground">Expert Tutors</p>
                 </div>
             </div>
+          </div>
         </section>
 
         <section id="refer" className="py-24 relative overflow-hidden">
