@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -72,41 +71,41 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
     ? `${question.content.substring(0, 100)}...`
     : question.content;
   
-  const tags = [question.audience, question.subject, question.grade ? `Grade ${question.grade}` : null, question.module].filter(Boolean);
+  const tags = [question.audience, question.subject, question.grade ? `Grade ${question.grade}` : null, question.module].filter(Boolean) as string[];
 
   return (
      <button 
       onClick={() => onQuestionSelect?.(question)}
       className={cn(
-        "w-full text-left p-4 border-b hover:bg-muted/50 cursor-pointer transition-colors duration-200",
+        "w-full text-left p-4 border-b hover:bg-muted/50 cursor-pointer transition-colors duration-200 space-y-3",
         isSelected && "bg-muted"
       )}
     >
-        <div className="flex items-center gap-3 mb-2">
+        <div className="flex items-center gap-3">
             <Avatar className="h-8 w-8">
                 <AvatarImage src={question.studentAvatar ?? undefined} />
                 <AvatarFallback>{question.studentName?.charAt(0) || 'A'}</AvatarFallback>
             </Avatar>
-            <div>
+            <div className="space-y-1.5">
                 <p className="text-sm font-semibold">{question.studentName || 'Anonymous'}</p>
-                <p className="text-sm text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
+                <p className="text-xs text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
             </div>
         </div>
         <div className="space-y-2">
-            <h3 className="font-semibold text-md leading-snug line-clamp-2">{question.title}</h3>
+            <h3 className="font-semibold text-lg leading-snug line-clamp-2">{question.title}</h3>
             <p className="text-muted-foreground text-sm leading-relaxed line-clamp-2">
               {contentSnippet}
             </p>
         </div>
-        <div className="flex justify-between items-center mt-3">
-             <div className="flex flex-wrap gap-1">
-                {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+        <div className="flex justify-between items-center pt-2">
+             <div className="flex flex-wrap gap-2">
+                {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary" className="rounded-full">{tag}</Badge>)}
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1.5">
-                    <ThumbsUp className="h-4 w-4" /> 
+                <button onClick={handleLike} className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                    <ThumbsUp className={cn("h-4 w-4", user && question.likedBy?.includes(user.uid) ? "text-primary" : "")} /> 
                     <span>{question.likeCount || 0}</span>
-                </div>
+                </button>
                 <div className="flex items-center gap-1.5">
                     <MessageSquare className="h-4 w-4" /> 
                     <span>{question.commentCount || 0}</span>
@@ -152,7 +151,7 @@ export function QuestionList({ questions, loading, onQuestionSelect, selectedQue
   }
 
   return (
-    <div className="divide-y">
+    <div className="divide-y border-t">
         {questions.length > 0 ? (
             questions.map(q => <QuestionCard key={q.id} question={q} onQuestionSelect={onQuestionSelect} isSelected={q.id === selectedQuestionId} />)
         ) : (
