@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -132,9 +133,12 @@ function AdminPage() {
                 const fetchedEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
                 setEvents(fetchedEvents);
 
+                // Fetch Users and create a map for instructor lookup
                 const usersSnapshot = await getDocs(query(collection(firestore, "users"), orderBy('createdAt', 'desc')));
+                const userMap = new Map<string, string>();
                 const fetchedUsers = usersSnapshot.docs.map(doc => {
                     const data = doc.data();
+                    userMap.set(doc.id, data.fullName); // Populate map
                     const joinedDate = data.createdAt.toDate();
                     return { 
                         id: doc.id, 
@@ -158,7 +162,13 @@ function AdminPage() {
                 setTutors(fetchedTutors);
 
                 const coursesSnapshot = await getDocs(query(collection(firestore, "courses"), orderBy('createdAt', 'desc')));
-                const fetchedCourses = coursesSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Course));
+                const fetchedCourses = coursesSnapshot.docs.map(doc => {
+                    const courseData = { id: doc.id, ...doc.data() } as Course;
+                    return {
+                        ...courseData,
+                        instructor: userMap.get(courseData.instructorId) || 'Unknown Instructor'
+                    };
+                });
                 setCourses(fetchedCourses);
 
                 const assignmentsSnapshot = await getDocs(collection(firestore, "assignments"));
@@ -275,6 +285,28 @@ function AdminPage() {
         setIsCourseActionDialogOpen(false);
     };
 
+    const handlePublishCourse = async (courseToPublish: Course) => {
+        try {
+            await updateDoc(doc(firestore, 'courses', courseToPublish.id), { status: 'Published' });
+            setCourses(courses.map(c => c.id === courseToPublish.id ? { ...c, status: 'Published' } : c));
+            toast({ title: "Course Published", description: `"${courseToPublish.title}" is now live.` });
+        } catch (error) {
+            console.error("Error publishing course:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not publish course.' });
+        }
+    };
+    
+    const handleUnpublishCourse = async (courseToUnpublish: Course) => {
+        try {
+            await updateDoc(doc(firestore, 'courses', courseToUnpublish.id), { status: 'Draft' });
+            setCourses(courses.map(c => c.id === courseToUnpublish.id ? { ...c, status: 'Draft' } : c));
+            toast({ title: "Course Unpublished", description: `"${courseToUnpublish.title}" is now a draft.` });
+        } catch (error) {
+            console.error("Error unpublishing course:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not unpublish course.' });
+        }
+    };
+
     const confirmPayoutAction = async () => {
         if (!selectedPayout || !payoutAction) return;
         const newStatus = payoutAction === 'Approve' ? 'Completed' : 'Declined';
@@ -376,6 +408,8 @@ function AdminPage() {
                         setCourseAction(action);
                         setIsCourseActionDialogOpen(true);
                     }}
+                    onPublishCourse={handlePublishCourse}
+                    onUnpublishCourse={handleUnpublishCourse}
                 />
             )}
             {currentTab === 'assignments' && (

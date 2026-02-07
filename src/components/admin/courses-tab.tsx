@@ -9,15 +9,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ListFilter, CheckCircle, XCircle, Clock, Eye, X, Check, MoreVertical, Trash2, ChevronLeft, ChevronRight } from "lucide-react";
+import { Search, ListFilter, CheckCircle, XCircle, Clock, Eye, X, Check, MoreVertical, Trash2, ChevronLeft, ChevronRight, BookOpen, Upload, Download } from "lucide-react";
 import { type Course } from "@/app/admin/page";
 
 interface AdminCoursesTabProps {
     courses: Course[];
     onCourseAction: (course: Course, action: 'Approve' | 'Reject') => void;
+    onPublishCourse: (course: Course) => void;
+    onUnpublishCourse: (course: Course) => void;
 }
 
-export function AdminCoursesTab({ courses, onCourseAction }: AdminCoursesTabProps) {
+export function AdminCoursesTab({ courses, onCourseAction, onPublishCourse, onUnpublishCourse }: AdminCoursesTabProps) {
     const [courseFilters, setCourseFilters] = React.useState({ search: '', status: 'All' });
     const [currentCoursePage, setCurrentCoursePage] = React.useState(1);
     const coursesPerPage = 7;
@@ -89,8 +91,13 @@ export function AdminCoursesTab({ courses, onCourseAction }: AdminCoursesTabProp
                     {paginatedCourses.map(course => (
                         <TableRow key={course.id}>
                             <TableCell>
-                                <div className="font-medium">{course.title}</div>
-                                <div className="text-xs text-muted-foreground">{course.subject} - Grade {course.grade}</div>
+                                <div className="flex items-center">
+                                    <BookOpen className="h-5 w-5 text-muted-foreground mr-3 shrink-0" />
+                                    <div>
+                                        <div className="font-medium">{course.title}</div>
+                                        <div className="text-sm text-muted-foreground">{course.subject} - Grade {course.grade}</div>
+                                    </div>
+                                </div>
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">{course.instructor}</TableCell>
                             <TableCell className="hidden md:table-cell">{course.pricing.type === 'purchase' ? course.pricing.price?.toFixed(2) : 'Subscription'}</TableCell>
@@ -127,6 +134,16 @@ export function AdminCoursesTab({ courses, onCourseAction }: AdminCoursesTabProp
                                                     <Eye className="mr-2 h-4 w-4"/>Preview Course
                                                 </Link>
                                             </DropdownMenuItem>
+                                             {course.status === 'Published' ? (
+                                                <DropdownMenuItem onClick={() => onUnpublishCourse(course)}>
+                                                    <Download className="mr-2 h-4 w-4" /> Unpublish
+                                                </DropdownMenuItem>
+                                            ) : (
+                                                <DropdownMenuItem onClick={() => onPublishCourse(course)}>
+                                                    <Upload className="mr-2 h-4 w-4" /> Publish
+                                                </DropdownMenuItem>
+                                            )}
+                                            <DropdownMenuSeparator />
                                             <DropdownMenuItem><Trash2 className="mr-2 h-4 w-4 text-destructive"/>Delete Course</DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>
