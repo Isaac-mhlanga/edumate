@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -385,7 +386,7 @@ export default function Home() {
         <section id="faq" className="py-24 bg-muted/70 relative overflow-hidden">
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
-            <div className="max-w-4xl mx-auto px-6 relative">
+            <div className="max-w-7xl mx-auto px-6 relative">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Got questions? We've got answers. Here are some common questions about our platform. If you can't find what you need, just ask!</p>
