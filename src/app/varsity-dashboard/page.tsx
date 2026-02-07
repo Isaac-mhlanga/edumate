@@ -1,11 +1,10 @@
-
 'use client';
 import withAuth from "@/components/with-auth";
 import React from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { MessageSquare, FilePenLine } from "lucide-react";
+import { MessageSquare, FilePenLine, Gift, CreditCard } from "lucide-react";
 
 function VarsityDashboardPage() {
     return (
@@ -36,6 +35,24 @@ function VarsityDashboardPage() {
                         <CardContent><p className="text-sm text-muted-foreground">Submit your assignments and projects for expert help and detailed solutions.</p></CardContent>
                         <CardFooter>
                              <Button asChild><Link href="/dashboard?tab=assignments">View Assignments</Link></Button>
+                        </CardFooter>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><Gift className="h-5 w-5 text-primary" /> Referrals</CardTitle>
+                        </CardHeader>
+                        <CardContent><p className="text-sm text-muted-foreground">Invite friends and earn rewards when they sign up and use our services.</p></CardContent>
+                        <CardFooter>
+                             <Button asChild><Link href="/dashboard/referrals">View Referrals</Link></Button>
+                        </CardFooter>
+                    </Card>
+                    <Card>
+                        <CardHeader>
+                            <CardTitle className="flex items-center gap-2"><CreditCard className="h-5 w-5 text-primary" /> My Plan</CardTitle>
+                        </CardHeader>
+                        <CardContent><p className="text-sm text-muted-foreground">Manage your subscription plan, view benefits, and update billing details.</p></CardContent>
+                        <CardFooter>
+                             <Button asChild><Link href="/dashboard?tab=subscriptions">Manage Plan</Link></Button>
                         </CardFooter>
                     </Card>
                 </CardContent>
