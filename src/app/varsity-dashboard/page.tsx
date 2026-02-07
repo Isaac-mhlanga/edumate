@@ -146,6 +146,7 @@ function VarsityDashboardPage() {
         <div className="space-y-8">
             {currentTab === 'overview' && (
                 <VarsityOverviewTab
+                    user={user}
                     submittedAssignments={submittedAssignments} 
                     loading={loadingAssignments}
                 />
