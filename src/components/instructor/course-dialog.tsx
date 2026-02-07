@@ -412,6 +412,7 @@ export function CourseDialog({ isOpen, setIsOpen, selectedCourse, quizzes, onSub
                                                     <Select onValueChange={field.onChange} value={field.value}>
                                                         <FormControl><SelectTrigger><SelectValue placeholder="Select a quiz to link..."/></SelectTrigger></FormControl>
                                                         <SelectContent>
+                                                            <SelectItem value="none">No Quiz</SelectItem>
                                                             {quizzes.map(quiz => <SelectItem key={quiz.id} value={quiz.id}>{quiz.title}</SelectItem>)}
                                                         </SelectContent>
                                                     </Select>

@@ -537,7 +537,7 @@ function InstructorPage() {
         }
 
         for (const video of (videoUploads || [])) {
-             let videoUrl = '';
+            let videoUrl = '';
             let notesUrl = null;
             let duration = 0;
 
@@ -572,7 +572,11 @@ function InstructorPage() {
         const finalVideos = [...processedExistingVideos, ...newVideos];
 
         const finalCourseData = {
-            ...courseDetails,
+            title: courseDetails.title,
+            description: courseDetails.description,
+            subject: courseDetails.subject,
+            paper: courseDetails.paper,
+            grade: courseDetails.grade,
             pricing: {
                 type: courseDetails.pricingModel,
                 price: courseDetails.price || null,
@@ -580,7 +584,6 @@ function InstructorPage() {
             thumbnail: thumbnailUrl,
             videos: finalVideos,
         };
-        delete finalCourseData.pricingModel;
 
         if (selectedCourse) {
             const courseRef = doc(firestore, 'courses', selectedCourse.id);
