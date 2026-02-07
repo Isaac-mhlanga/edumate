@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -36,8 +35,6 @@ const formSchema = z.object({
   grade: z.enum(['10', '11', '12']).optional(),
   module: z.string().optional(),
   file: z.any().optional(),
-  name: z.string().optional(),
-  email: z.string().email({ message: "Please enter a valid email." }).optional(),
 }).superRefine((data, ctx) => {
     if (data.audience === 'High School') {
         if (!data.subject) {
@@ -65,14 +62,6 @@ export function QuestionForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [user, setUser] = useState<import('firebase/auth').User | null>(null);
-
-  React.useEffect(() => {
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const unsubscribe = auth.onAuthStateChanged(setUser);
-    return () => unsubscribe();
-  }, []);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -80,8 +69,6 @@ export function QuestionForm() {
       title: '',
       content: '',
       file: undefined,
-      name: '',
-      email: '',
       module: '',
     },
   });
@@ -94,15 +81,12 @@ export function QuestionForm() {
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
-        if (!data.name) {
-            form.setError("name", { type: "manual", message: "Name is required to post as a guest." });
-        }
-        if (!data.email) {
-            form.setError("email", { type: "manual", message: "Email is required to post as a guest." });
-        }
-        if (!data.name || !data.email) {
-            return;
-        }
+        toast({
+            variant: 'destructive',
+            title: 'Not logged in',
+            description: 'You must be logged in to ask a question.'
+        });
+        return;
     }
     
     setIsSubmitting(true);
@@ -115,16 +99,16 @@ export function QuestionForm() {
       
       const file = data.file?.[0];
       if (file) {
-        const fileRef = ref(storage, `questions/${currentUser?.uid || 'anonymous'}/${Date.now()}-${file.name}`);
+        const fileRef = ref(storage, `questions/${currentUser.uid}/${Date.now()}-${file.name}`);
         await uploadBytes(fileRef, file);
         fileUrl = await getDownloadURL(fileRef);
         fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
       }
 
       await addDoc(collection(firestore, 'questions'), {
-        studentId: currentUser?.uid || 'anonymous',
-        studentName: currentUser?.displayName || data.name,
-        studentAvatar: currentUser?.photoURL || null,
+        studentId: currentUser.uid,
+        studentName: currentUser.displayName,
+        studentAvatar: currentUser.photoURL,
         title: data.title,
         content: data.content,
         audience: data.audience,
@@ -170,24 +154,6 @@ export function QuestionForm() {
             </DialogHeader>
             <Form {...form}>
                 <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    {!user && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
-                             <FormField name="name" control={form.control} render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Your Name</FormLabel>
-                                    <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-                             <FormField name="email" control={form.control} render={({ field }) => (
-                                <FormItem>
-                                    <FormLabel>Your Email</FormLabel>
-                                    <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
-                                    <FormMessage />
-                                </FormItem>
-                            )} />
-                        </div>
-                    )}
                     <FormField name="title" control={form.control} render={({ field }) => (
                         <FormItem>
                             <FormLabel>Question Title</FormLabel>

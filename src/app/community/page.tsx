@@ -7,7 +7,6 @@ import { QuestionList } from '@/components/community/question-list';
 import { type Question } from '@/lib/types';
 import { PublicHeader } from '@/components/public-header';
 import { Footer } from '@/components/footer';
-import { LeftSidebar } from '@/components/community/left-sidebar';
 import { RightSidebar } from '@/components/community/right-sidebar';
 
 
@@ -48,16 +47,12 @@ export default function CommunityPage() {
         <div className="flex flex-col min-h-screen bg-background text-foreground">
             <PublicHeader />
             <main className="flex-1">
-                <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 py-12 pt-24">
-                     <p className="text-sm text-muted-foreground mb-4">Forum / Technology / Computer / Latest</p>
-                     <div className="grid grid-cols-1 lg:grid-cols-[280px_1fr] xl:grid-cols-[300px_1fr_300px] gap-8">
-                        <aside className="hidden lg:block">
-                           <LeftSidebar />
-                        </aside>
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 pt-24">
+                     <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8">
                         <div className="min-w-0">
                            <QuestionList questions={questions} loading={loading} />
                         </div>
-                         <aside className="hidden xl:block">
+                         <aside className="hidden lg:block">
                            <RightSidebar questions={questions} />
                         </aside>
                      </div>
