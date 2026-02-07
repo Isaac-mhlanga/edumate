@@ -1,14 +1,16 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, deleteDoc } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, deleteDoc, getDoc, getDocs, writeBatch, Timestamp } from 'firebase/firestore';
+import { getStorage, ref, deleteObject } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionList } from '@/components/community/question-list';
-import { type Question } from '@/lib/types';
+import { type Question, type Comment } from '@/lib/types';
 import withAuth from '@/components/with-auth';
 import { CommentSection } from '@/components/community/comment-section';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useToast } from '@/hooks/use-toast';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -20,6 +22,7 @@ const firebaseConfig = {
 };
 
 function CommunityDashboardPage() {
+    const { toast } = useToast();
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
@@ -37,6 +40,10 @@ function CommunityDashboardPage() {
             setQuestions(fetchedQuestions);
             if (!selectedQuestion && fetchedQuestions.length > 0) {
                 setSelectedQuestion(fetchedQuestions[0]);
+            } else if (selectedQuestion) {
+                // If a question was selected, make sure it's up-to-date
+                const updatedSelected = fetchedQuestions.find(q => q.id === selectedQuestion.id);
+                setSelectedQuestion(updatedSelected || null);
             }
             setLoading(false);
         }, (error) => {
@@ -45,7 +52,7 @@ function CommunityDashboardPage() {
         });
 
         return () => unsubscribe();
-    }, [selectedQuestion]);
+    }, []);
 
     const handleUpdateQuestion = (updatedQuestion: Question) => {
         setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
@@ -56,12 +63,49 @@ function CommunityDashboardPage() {
 
     const handleDeleteQuestion = async (questionId: string) => {
         const firestore = getFirestore();
-        await deleteDoc(doc(firestore, 'questions', questionId));
-        // The onSnapshot will handle the state update
-        if (selectedQuestion?.id === questionId) {
-            setSelectedQuestion(questions.length > 1 ? questions[1] : null);
+        const storage = getStorage();
+        const questionRef = doc(firestore, 'questions', questionId);
+
+        if (!window.confirm("Are you sure you want to delete this question and all its comments? This action cannot be undone.")) {
+            return;
+        }
+
+        try {
+            const questionSnap = await getDoc(questionRef);
+            if (!questionSnap.exists()) return;
+            const questionData = questionSnap.data() as Question;
+
+            if (questionData.fileUrl) {
+                try { await deleteObject(ref(storage, questionData.fileUrl)); } catch (e) { console.error("Failed to delete question file, it may not exist.", e); }
+            }
+
+            const commentsRef = collection(firestore, 'questions', questionId, 'comments');
+            const commentsSnapshot = await getDocs(commentsRef);
+            const batch = writeBatch(firestore);
+            
+            for (const commentDoc of commentsSnapshot.docs) {
+                const commentData = commentDoc.data() as Comment;
+                if (commentData.fileUrl) {
+                    try { await deleteObject(ref(storage, commentData.fileUrl)); } catch (e) { console.error("Failed to delete comment file, it may not exist.", e); }
+                }
+                batch.delete(commentDoc.ref);
+            }
+
+            batch.delete(questionRef);
+            await batch.commit();
+
+            toast({ title: "Question Deleted", description: "The question and all its content have been removed." });
+            
+            if (selectedQuestion?.id === questionId) {
+                const remainingQuestions = questions.filter(q => q.id !== questionId);
+                setSelectedQuestion(remainingQuestions.length > 0 ? remainingQuestions[0] : null);
+            }
+        } catch (error) {
+            console.error("Error deleting question:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
         }
     };
+
 
     return (
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_450px] gap-8 h-[calc(100vh-10rem)]">

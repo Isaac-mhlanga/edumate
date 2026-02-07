@@ -131,10 +131,10 @@ service cloud.firestore {
     match /questions/{questionId} {
       // Any signed-in user can read questions
       allow get, list: if isSignedIn();
-      // Users can create their own questions
-      allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+      // Allow signed-in users or anonymous guests to create questions
+      allow create: if (isSignedIn() && isOwner(request.resource.data.studentId)) || request.resource.data.studentId == 'anonymous';
       // Users can only update their own question, or update likes, or if they are an admin
-      allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy']) || isAdmin());
+      allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy', 'commentCount', 'commentsDisabled']) || isAdmin());
        // Users can only delete their own questions, or if they are an admin
       allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
 

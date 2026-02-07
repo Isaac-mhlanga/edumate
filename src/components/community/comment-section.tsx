@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -101,6 +100,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     const replies = isReply ? [] : getReplies(comment.id);
     const isEditing = editingComment?.id === comment.id;
     const isCollapsed = collapsedComments.includes(comment.id);
+    const canModerate = userRole === 'admin' || user?.uid === comment.studentId;
 
     return (
         <div key={comment.id} className="flex items-start gap-3">
@@ -145,16 +145,18 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                             <CornerUpLeft className="mr-1 h-3 w-3" />
                             Reply
                         </Button>
-                        {user && user.uid === comment.studentId && (
-                            <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => setEditingComment({ id: comment.id, content: comment.content })}>
-                                <Edit className="mr-1 h-3 w-3" />
-                                Edit
-                            </Button>
-                        )}
-                        {dashboardView && userRole === 'admin' && (
-                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('comment', comment.id)}>
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+                        {canModerate && (
+                            <>
+                                {user && user.uid === comment.studentId && (
+                                    <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => setEditingComment({ id: comment.id, content: comment.content })}>
+                                        <Edit className="mr-1 h-3 w-3" />
+                                        Edit
+                                    </Button>
+                                )}
+                                <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('comment', comment.id)}>
+                                    <Trash2 className="h-4 w-4" />
+                                </Button>
+                            </>
                         )}
                     </div>
                 )}
@@ -250,29 +252,12 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     
     const likedBy = currentDoc.likedBy || [];
     const isLiked = likedBy.includes(user.uid);
-    const newLikeCount = isLiked ? increment(-1) : increment(1);
-    const likeUpdate = isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid);
-
+    
     try {
         await updateDoc(docRef, {
-            likeCount: newLikeCount,
-            likedBy: likeUpdate,
+            likeCount: increment(isLiked ? -1 : 1),
+            likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid),
         });
-
-        if (type === 'question') {
-            onUpdateQuestion({
-                ...question,
-                likeCount: (question.likeCount || 0) + (isLiked ? -1 : 1),
-                likedBy: isLiked ? (question.likedBy || []).filter(uid => uid !== user.uid) : [...(question.likedBy || []), user.uid],
-            });
-        } else {
-            setComments(prev => prev.map(c => c.id === id ? {
-                ...c,
-                likeCount: (c.likeCount || 0) + (isLiked ? -1 : 1),
-                likedBy: isLiked ? (c.likedBy || []).filter(uid => uid !== user.uid) : [...(c.likedBy || []), user.uid],
-            } : c));
-        }
-
     } catch (error) {
       console.error("Error updating like:", error);
       toast({ variant: 'destructive', title: 'Error', description: 'Could not process your like.' });
@@ -341,51 +326,60 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
   };
 
   const handleDelete = async (type: 'question' | 'comment', id: string) => {
-    if (!dashboardView || userRole !== 'admin') return;
-    if (!question) return;
-    
     const firestore = getFirestore();
     const storage = getStorage();
+    if (!question) return;
+
+    const isOwner = type === 'comment' 
+        ? user?.uid === comments.find(c => c.id === id)?.studentId 
+        : user?.uid === question.studentId;
+
+    if (userRole !== 'admin' && !isOwner) {
+        toast({ variant: 'destructive', title: 'Permission Denied' });
+        return;
+    }
 
     if (type === 'question') {
-        if (!window.confirm('Are you sure you want to delete this entire question and all its comments?')) return;
-        try {
-            onDeleteQuestion(id);
-        } catch (error) {
-            console.error('Error deleting question:', error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
-        }
+        onDeleteQuestion(id);
     } else {
+        if (!window.confirm("Are you sure you want to delete this comment? This will also delete all replies to it.")) return;
         const commentToDelete = comments.find(c => c.id === id);
         if (!commentToDelete) return;
 
         try {
-            if (commentToDelete.fileUrl) {
-                try { await deleteObject(ref(storage, commentToDelete.fileUrl)); } catch (e) { console.error(e); }
-            }
-            await deleteDoc(doc(firestore, 'questions', question.id, 'comments', id));
-
-            const replies = comments.filter(c => c.parentId === id);
-            if (replies.length > 0) {
-                const batch = writeBatch(firestore);
+            const allCommentsToDelete = [commentToDelete];
+            const findRepliesRecursive = (parentId: string) => {
+                const replies = comments.filter(c => c.parentId === parentId);
                 for (const reply of replies) {
-                    if (reply.fileUrl) {
-                        try { await deleteObject(ref(storage, reply.fileUrl)); } catch (e) { console.error(e); }
-                    }
-                    batch.delete(doc(firestore, 'questions', question.id, 'comments', reply.id));
+                    allCommentsToDelete.push(reply);
+                    findRepliesRecursive(reply.id);
                 }
-                await batch.commit();
+            };
+            findRepliesRecursive(commentToDelete.id);
+
+            const batch = writeBatch(firestore);
+            
+            for (const commentDoc of allCommentsToDelete) {
+                if (commentDoc.fileUrl) {
+                    try { await deleteObject(ref(storage, commentDoc.fileUrl)); } catch (e) { console.error(e); }
+                }
+                batch.delete(doc(firestore, 'questions', question.id, 'comments', commentDoc.id));
             }
+            
             if (!commentToDelete.parentId) {
-                await updateDoc(doc(firestore, 'questions', question.id), { commentCount: increment(-1) });
+                const questionRef = doc(firestore, 'questions', question.id);
+                batch.update(questionRef, { commentCount: increment(-1) });
             }
-            toast({ title: 'Comment Deleted', description: 'The comment has been removed.' });
+
+            await batch.commit();
+            toast({ title: 'Comment Deleted' });
         } catch (error) {
             console.error('Error deleting comment:', error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the comment.' });
         }
     }
   };
+
 
   const handleToggleComments = async (disabled: boolean) => {
     if (!dashboardView || userRole !== 'admin' || !question) return;
@@ -463,6 +457,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
   }
 
   const topLevelComments = comments.filter(comment => !comment.parentId);
+  const canModerate = userRole === 'admin' || user?.uid === question.studentId;
+
 
   return (
     <div className="flex flex-col h-full">
@@ -505,7 +501,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                             <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
                         </div>
                     </div>
-                     {dashboardView && userRole === 'admin' && (
+                     {canModerate && (
                         <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive" onClick={() => handleDelete('question', question.id)}>
                             <Trash2 className="h-4 w-4 mr-1" /> Delete Question
                         </Button>
