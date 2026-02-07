@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -35,6 +34,8 @@ const formSchema = z.object({
   subject: z.enum(['Mathematics', 'Physical Sciences', 'Life Sciences'], { required_error: "Please select a subject."}),
   grade: z.enum(['10', '11', '12'], { required_error: "Please select a grade."}),
   file: z.any().optional(),
+  name: z.string().optional(),
+  email: z.string().email({ message: "Please enter a valid email." }).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -59,6 +60,8 @@ export function QuestionForm() {
       title: '',
       content: '',
       file: undefined,
+      name: '',
+      email: '',
     },
   });
 
@@ -68,8 +71,15 @@ export function QuestionForm() {
     const currentUser = auth.currentUser;
 
     if (!currentUser) {
-      toast({ variant: 'destructive', title: 'Not authenticated', description: 'You must be logged in to ask a question.' });
-      return;
+        if (!data.name) {
+            form.setError("name", { type: "manual", message: "Name is required to post as a guest." });
+        }
+        if (!data.email) {
+            form.setError("email", { type: "manual", message: "Email is required to post as a guest." });
+        }
+        if (!data.name || !data.email) {
+            return;
+        }
     }
     
     setIsSubmitting(true);
@@ -82,16 +92,16 @@ export function QuestionForm() {
       
       const file = data.file?.[0];
       if (file) {
-        const fileRef = ref(storage, `questions/${currentUser.uid}/${Date.now()}-${file.name}`);
+        const fileRef = ref(storage, `questions/${currentUser?.uid || 'anonymous'}/${Date.now()}-${file.name}`);
         await uploadBytes(fileRef, file);
         fileUrl = await getDownloadURL(fileRef);
         fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
       }
 
       await addDoc(collection(firestore, 'questions'), {
-        studentId: currentUser.uid,
-        studentName: currentUser.displayName || 'Anonymous',
-        studentAvatar: currentUser.photoURL,
+        studentId: currentUser?.uid || 'anonymous',
+        studentName: currentUser?.displayName || data.name,
+        studentAvatar: currentUser?.photoURL || null,
         title: data.title,
         content: data.content,
         subject: data.subject,
@@ -131,101 +141,106 @@ export function QuestionForm() {
                 <DialogTitle>Ask the Community</DialogTitle>
                 <DialogDescription>Share your question with fellow learners and educators.</DialogDescription>
             </DialogHeader>
-             {!user ? (
-                 <Alert>
-                    <AlertTitle>You're not logged in!</AlertTitle>
-                    <AlertDescription>
-                        Please log in or create an account to ask a question.
-                        <div className="flex gap-2 mt-4">
-                            <Button asChild size="sm"><Link href="/login">Log In</Link></Button>
-                            <Button asChild size="sm" variant="outline"><Link href="/register">Register</Link></Button>
-                        </div>
-                    </AlertDescription>
-                </Alert>
-             ) : (
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <FormField name="title" control={form.control} render={({ field }) => (
-                            <FormItem>
-                                <FormLabel>Question Title</FormLabel>
-                                <FormControl><Input placeholder="e.g., How to solve for x in this equation?" {...field} /></FormControl>
-                                <FormMessage />
-                            </FormItem>
-                        )} />
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                            <FormField control={form.control} name="subject" render={({ field }) => (
+            <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    {!user && (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 border rounded-lg bg-muted/50">
+                             <FormField name="name" control={form.control} render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Subject</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl><SelectTrigger><SelectValue placeholder="Select subject"/></SelectTrigger></FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="Mathematics">Mathematics</SelectItem>
-                                            <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
-                                            <SelectItem value="Life Sciences">Life Sciences</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <FormLabel>Your Name</FormLabel>
+                                    <FormControl><Input placeholder="John Doe" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
-                            <FormField control={form.control} name="grade" render={({ field }) => (
+                             <FormField name="email" control={form.control} render={({ field }) => (
                                 <FormItem>
-                                    <FormLabel>Grade</FormLabel>
-                                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                                        <FormControl><SelectTrigger><SelectValue placeholder="Select grade" /></SelectTrigger></FormControl>
-                                        <SelectContent>
-                                            <SelectItem value="10">Grade 10</SelectItem>
-                                            <SelectItem value="11">Grade 11</SelectItem>
-                                            <SelectItem value="12">Grade 12</SelectItem>
-                                        </SelectContent>
-                                    </Select>
+                                    <FormLabel>Your Email</FormLabel>
+                                    <FormControl><Input placeholder="you@example.com" {...field} /></FormControl>
                                     <FormMessage />
                                 </FormItem>
                             )} />
                         </div>
-                        <FormField name="content" control={form.control} render={({ field }) => (
+                    )}
+                    <FormField name="title" control={form.control} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Question Title</FormLabel>
+                            <FormControl><Input placeholder="e.g., How to solve for x in this equation?" {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <FormField control={form.control} name="subject" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Your Question</FormLabel>
-                                <FormControl><Textarea placeholder="Provide as much detail as possible..." rows={5} {...field} /></FormControl>
+                                <FormLabel>Subject</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select subject"/></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="Mathematics">Mathematics</SelectItem>
+                                        <SelectItem value="Physical Sciences">Physical Sciences</SelectItem>
+                                        <SelectItem value="Life Sciences">Life Sciences</SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <FormField name="file" control={form.control} render={({ field }) => (
+                        <FormField control={form.control} name="grade" render={({ field }) => (
                             <FormItem>
-                                <FormLabel>Attach an image or PDF (optional)</FormLabel>
-                                <div className="flex items-center gap-2">
-                                    <Button type="button" variant="outline" asChild>
-                                        <label htmlFor="file-upload" className="cursor-pointer">
-                                            <Paperclip className="mr-2 h-4 w-4"/>
-                                            Choose File
-                                        </label>
-                                    </Button>
-                                    {fileName && <span className="text-sm text-muted-foreground">{fileName}</span>}
-                                </div>
-                                <FormControl>
-                                    <Input 
-                                        id="file-upload"
-                                        type="file" 
-                                        className="hidden"
-                                        accept="image/*,.pdf"
-                                        {...fileRef}
-                                        onChange={e => {
-                                            field.onChange(e.target.files);
-                                            setFileName(e.target.files?.[0]?.name || null);
-                                        }}
-                                    />
-                                </FormControl>
+                                <FormLabel>Grade</FormLabel>
+                                <Select onValueChange={field.onChange} defaultValue={field.value}>
+                                    <FormControl><SelectTrigger><SelectValue placeholder="Select grade" /></SelectTrigger></FormControl>
+                                    <SelectContent>
+                                        <SelectItem value="10">Grade 10</SelectItem>
+                                        <SelectItem value="11">Grade 11</SelectItem>
+                                        <SelectItem value="12">Grade 12</SelectItem>
+                                    </SelectContent>
+                                </Select>
                                 <FormMessage />
                             </FormItem>
                         )} />
-                        <div className="flex justify-end pt-2">
-                            <Button type="submit" disabled={isSubmitting}>
-                                {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                {isSubmitting ? 'Posting...' : 'Post Question'}
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
-             )}
+                    </div>
+                    <FormField name="content" control={form.control} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Your Question</FormLabel>
+                            <FormControl><Textarea placeholder="Provide as much detail as possible..." rows={5} {...field} /></FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <FormField name="file" control={form.control} render={({ field }) => (
+                        <FormItem>
+                            <FormLabel>Attach an image or PDF (optional)</FormLabel>
+                            <div className="flex items-center gap-2">
+                                <Button type="button" variant="outline" asChild>
+                                    <label htmlFor="file-upload" className="cursor-pointer">
+                                        <Paperclip className="mr-2 h-4 w-4"/>
+                                        Choose File
+                                    </label>
+                                </Button>
+                                {fileName && <span className="text-sm text-muted-foreground">{fileName}</span>}
+                            </div>
+                            <FormControl>
+                                <Input 
+                                    id="file-upload"
+                                    type="file" 
+                                    className="hidden"
+                                    accept="image/*,.pdf"
+                                    {...fileRef}
+                                    onChange={e => {
+                                        field.onChange(e.target.files);
+                                        setFileName(e.target.files?.[0]?.name || null);
+                                    }}
+                                />
+                            </FormControl>
+                            <FormMessage />
+                        </FormItem>
+                    )} />
+                    <div className="flex justify-end pt-2">
+                        <Button type="submit" disabled={isSubmitting}>
+                            {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                            {isSubmitting ? 'Posting...' : 'Post Question'}
+                        </Button>
+                    </div>
+                </form>
+            </Form>
         </DialogContent>
     </Dialog>
   );
