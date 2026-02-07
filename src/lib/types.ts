@@ -18,6 +18,8 @@ export type Question = {
     commentCount: number;
     likeCount: number;
     likedBy: string[];
+    dislikeCount: number;
+    dislikedBy: string[];
     commentsDisabled?: boolean;
 }
 

@@ -137,6 +137,8 @@ export function QuestionForm() {
         commentCount: 0,
         likeCount: 0,
         likedBy: [],
+        dislikeCount: 0,
+        dislikedBy: [],
       });
 
       toast({ title: 'Question posted!', description: 'Your question is now live for the community.' });

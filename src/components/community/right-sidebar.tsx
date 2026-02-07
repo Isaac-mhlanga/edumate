@@ -1,8 +1,8 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { QuestionForm } from './question-form';
 import { type Question } from '@/lib/types';
 import React from 'react';
@@ -62,7 +62,7 @@ export function RightSidebar({ questions }: RightSidebarProps) {
   const memberCount = new Set(questions.map(q => q.studentId).filter(id => id !== 'anonymous')).size;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-2">
             <span className="relative flex h-2.5 w-2.5">
@@ -76,12 +76,9 @@ export function RightSidebar({ questions }: RightSidebarProps) {
       
       <QuestionForm />
 
-      <Card>
-        <CardHeader>
-          <CardTitle className="text-base font-bold">Top Members</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ul className="space-y-4">
+      <div>
+        <h3 className="text-base font-bold mb-4">Top Members</h3>
+        <ul className="space-y-4">
             {topMembers.map(member => (
               <li key={member.name} className="flex justify-between items-center text-sm">
                 <div className="flex items-center gap-3">
@@ -94,20 +91,15 @@ export function RightSidebar({ questions }: RightSidebarProps) {
                 <span className="font-semibold text-muted-foreground">{member.score}</span>
               </li>
             ))}
-          </ul>
-        </CardContent>
-      </Card>
+        </ul>
+      </div>
       
-      <Card>
-          <CardHeader>
-          <CardTitle className="text-base font-bold">Popular Tags</CardTitle>
-        </CardHeader>
-        <CardContent>
-            <div className="flex flex-wrap gap-2">
-                {popularTags.map(tag => <Button key={tag} variant="outline" size="sm">{tag}</Button>)}
-            </div>
-        </CardContent>
-      </Card>
+      <div>
+        <h3 className="text-base font-bold mb-4">Popular Tags</h3>
+        <div className="flex flex-wrap gap-2">
+            {popularTags.map(tag => <Button key={tag} variant="outline" size="sm" className="bg-muted/50">{tag}</Button>)}
+        </div>
+      </div>
     </div>
   );
 }
