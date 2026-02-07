@@ -38,7 +38,7 @@ export const PayoutReceipt = React.forwardRef<HTMLDivElement, PayoutReceiptProps
                         <div className="flex justify-between items-start">
                              <div>
                                 <Icons.logo className="h-10 w-auto" />
-                                <p className="text-xs text-muted-foreground mt-1">Payout Receipt</p>
+                                <p className="text-sm text-muted-foreground mt-1">Payout Receipt</p>
                             </div>
                             <div className="text-right">
                                 <p className="font-semibold">Receipt #{payout.id}</p>
@@ -89,7 +89,7 @@ export const PayoutReceipt = React.forwardRef<HTMLDivElement, PayoutReceiptProps
                             {getStatusIcon(payout.status)}
                             {payout.status}
                         </Badge>
-                        <p className="text-xs text-muted-foreground text-right">Edumate Pro &copy; {new Date().getFullYear()}</p>
+                        <p className="text-sm text-muted-foreground text-right">Edumate Pro &copy; {new Date().getFullYear()}</p>
                     </CardFooter>
                 </Card>
             </div>

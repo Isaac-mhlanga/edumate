@@ -134,7 +134,7 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
                             <TableRow key={assignment.id}>
                                 <TableCell>
                                     <div className="font-medium">{assignment.title}</div>
-                                    <div className="text-xs text-muted-foreground">{assignment.course}</div>
+                                    <div className="text-sm text-muted-foreground">{assignment.course}</div>
                                 </TableCell>
                                 <TableCell className="hidden sm:table-cell">{assignment.dueDate ? format(assignment.dueDate.toDate(), 'PPP') : 'N/A'}</TableCell>
                                 <TableCell>
@@ -162,7 +162,7 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
                 </TableBody>
             </Table>
             <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                     Showing{" "}
                     <strong>
                         {filteredAssignments.length > 0 ? (currentAssignmentPage - 1) * assignmentsPerPage + 1 : 0}-

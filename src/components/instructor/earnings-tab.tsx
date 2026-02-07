@@ -67,7 +67,7 @@ export function InstructorEarningsTab({ transactions, loading, onTransactionActi
                                         <TableRow key={transaction.id}>
                                             <TableCell>
                                                 <div className="font-medium">{transaction.itemTitle}</div>
-                                                <div className="text-xs text-muted-foreground">{transaction.itemType}</div>
+                                                <div className="text-sm text-muted-foreground">{transaction.itemType}</div>
                                             </TableCell>
                                             <TableCell className="hidden sm:table-cell">{transaction.date}</TableCell>
                                             <TableCell className={`font-semibold ${transaction.amount < 0 ? 'text-destructive' : ''}`}>
@@ -119,7 +119,7 @@ export function InstructorEarningsTab({ transactions, loading, onTransactionActi
                         </Button>
                     </CardContent>
                     <CardFooter>
-                         <p className="text-xs text-muted-foreground">Payouts are processed within 3-5 business days. A small processing fee may apply.</p>
+                         <p className="text-sm text-muted-foreground">Payouts are processed within 3-5 business days. A small processing fee may apply.</p>
                     </CardFooter>
                 </Card>
             </div>

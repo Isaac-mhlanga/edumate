@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -88,7 +89,7 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
             </Avatar>
             <div>
                 <p className="text-sm font-semibold">{question.studentName || 'Anonymous'}</p>
-                <p className="text-xs text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
+                <p className="text-sm text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
             </div>
         </div>
         <div className="space-y-2">
@@ -99,7 +100,7 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
         </div>
         <div className="flex justify-between items-center mt-3">
              <div className="flex flex-wrap gap-1">
-                {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary" className="text-xs">{tag}</Badge>)}
+                {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
             </div>
             <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1.5">

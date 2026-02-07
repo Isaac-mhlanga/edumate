@@ -474,7 +474,7 @@ function TutorPage() {
                                                     {!thread.isReadByTutor && <Badge>New</Badge>}
                                                 </div>
                                                 <p className="text-sm text-muted-foreground truncate">{thread.lastMessage}</p>
-                                                <p className="text-xs text-muted-foreground mt-1">
+                                                <p className="text-sm text-muted-foreground mt-1">
                                                      {thread.lastMessageTimestamp ? formatDistanceToNow(thread.lastMessageTimestamp.toDate(), { addSuffix: true }) : ''}
                                                 </p>
                                             </div>
@@ -578,11 +578,11 @@ function TutorPage() {
                                         {(profile.varsityModules || []).map((mod, index) => (
                                             <div key={index} className="flex items-end gap-2">
                                                 <div className="flex-1">
-                                                    <Label htmlFor={`mod-name-${index}`} className="text-xs">Module Name</Label>
+                                                    <Label htmlFor={`mod-name-${index}`}>Module Name</Label>
                                                     <Input id={`mod-name-${index}`} placeholder="e.g. MTH101" value={mod.name} onChange={e => handleVarsityModuleChange(index, 'name', e.target.value)} />
                                                 </div>
                                                 <div className="w-1/3">
-                                                    <Label htmlFor={`mod-year-${index}`} className="text-xs">Year</Label>
+                                                    <Label htmlFor={`mod-year-${index}`}>Year</Label>
                                                     <Input id={`mod-year-${index}`} placeholder="1st" value={mod.year} onChange={e => handleVarsityModuleChange(index, 'year', e.target.value)} />
                                                 </div>
                                                 <Button type="button" size="icon" variant="ghost" className="h-9 w-9 shrink-0" onClick={() => handleRemoveVarsityModule(index)}><XCircle className="h-4 w-4" /></Button>
@@ -640,7 +640,7 @@ function TutorPage() {
                                                                 variant={day.slots.includes(slot) ? 'secondary' : 'outline'}
                                                                 size="sm"
                                                                 onClick={() => handleSlotToggle(dayIndex, slot)}
-                                                                className="text-xs h-8"
+                                                                className="text-sm h-8"
                                                             >
                                                                 {slot}
                                                             </Button>
@@ -650,7 +650,7 @@ function TutorPage() {
                                                             )
                                                         )
                                                     ))}
-                                                     {!isEditingProfile && !day.slots.some(slot => slots.includes(slot)) && <p className="text-xs text-muted-foreground">Not available for this period.</p>}
+                                                     {!isEditingProfile && !day.slots.some(slot => slots.includes(slot)) && <p className="text-sm text-muted-foreground">Not available for this period.</p>}
                                                 </div>
                                             </div>
                                         ))}
@@ -719,7 +719,7 @@ function TutorPage() {
                                     <TableRow key={booking.id}>
                                         <TableCell>
                                             <div className="font-medium">{booking.studentName}</div>
-                                            <div className="text-xs text-muted-foreground sm:hidden">{booking.date} @ {booking.time}</div>
+                                            <div className="text-sm text-muted-foreground sm:hidden">{booking.date} @ {booking.time}</div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">{booking.date} @ {booking.time}</TableCell>
                                         <TableCell className="hidden md:table-cell"><Badge variant="secondary">{booking.subject}</Badge></TableCell>
@@ -738,7 +738,7 @@ function TutorPage() {
                                             ) : booking.status === 'Confirmed' ? (
                                                 <Button size="sm" variant="outline">Reschedule</Button>
                                             ) : (
-                                                <span className="text-xs text-muted-foreground">No actions</span>
+                                                <span className="text-sm text-muted-foreground">No actions</span>
                                             )}
                                         </TableCell>
                                     </TableRow>
@@ -747,7 +747,7 @@ function TutorPage() {
                         </Table>
                     </CardFooter>
                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                        <div className="text-xs text-muted-foreground">
+                        <div className="text-sm text-muted-foreground">
                             Showing <strong>{(currentBookingPage - 1) * bookingsPerPage + 1}-{Math.min(currentBookingPage * bookingsPerPage, filteredBookings.length)}</strong> of <strong>{filteredBookings.length}</strong> bookings.
                         </div>
                         <div className="flex items-center gap-2">
@@ -772,7 +772,7 @@ function TutorPage() {
                                         {!thread.isReadByTutor && <Badge className="h-2 w-2 p-0"></Badge>}
                                     </div>
                                     <p className="text-sm text-muted-foreground truncate">{thread.lastMessage}</p>
-                                    <p className="text-xs text-muted-foreground mt-1">
+                                    <p className="text-sm text-muted-foreground mt-1">
                                         {thread.lastMessageTimestamp ? formatDistanceToNow(thread.lastMessageTimestamp.toDate(), { addSuffix: true }) : ''}
                                     </p>
                                 </button>
@@ -830,5 +830,3 @@ function TutorPage() {
 
 
 export default withAuth(TutorPage, ['tutor']);
-
-    

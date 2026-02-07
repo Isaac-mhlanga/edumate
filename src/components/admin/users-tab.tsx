@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -91,8 +92,8 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
                                     <Avatar className="h-9 w-9 border"><AvatarFallback>{user.name.split(' ').map(n=>n[0]).join('')}</AvatarFallback></Avatar>
                                     <div>
                                         <p className="font-medium">{user.name}</p>
-                                        <p className="text-xs text-muted-foreground">{user.email}</p>
-                                        {user.phoneNumber && <p className="text-xs text-muted-foreground">{user.phoneNumber}</p>}
+                                        <p className="text-sm text-muted-foreground">{user.email}</p>
+                                        {user.phoneNumber && <p className="text-sm text-muted-foreground">{user.phoneNumber}</p>}
                                     </div>
                                 </div>
                             </TableCell>
@@ -108,7 +109,7 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
                                         {user.subscriptionPlan}
                                     </Badge>
                                 ) : (
-                                    <span className="text-xs text-muted-foreground">N/A</span>
+                                    <span className="text-sm text-muted-foreground">N/A</span>
                                 )}
                             </TableCell>
                             <TableCell className="hidden md:table-cell">{user.joined}</TableCell>
@@ -138,7 +139,7 @@ export function AdminUsersTab({ users, onUserAction }: AdminUsersTabProps) {
                 </TableBody>
             </Table>
             <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                <div className="text-xs text-muted-foreground">
+                <div className="text-sm text-muted-foreground">
                     Showing <strong>{(currentUserPage - 1) * usersPerPage + 1}-{Math.min(currentUserPage * usersPerPage, filteredUsers.length)}</strong> of <strong>{filteredUsers.length}</strong> users.
                 </div>
                 <div className="flex items-center gap-2">

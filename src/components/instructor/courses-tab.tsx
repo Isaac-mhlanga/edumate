@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -93,7 +94,7 @@ export function InstructorCoursesTab({
                                             <Image src={course.thumbnail} alt={course.title} width={112} height={63} className="rounded-md object-cover aspect-video bg-muted" data-ai-hint="online course abstract" />
                                             <div>
                                                 <div className="font-medium">{course.title}</div>
-                                                <div className="text-xs text-muted-foreground">{course.videos.length} lessons</div>
+                                                <div className="text-sm text-muted-foreground">{course.videos.length} lessons</div>
                                             </div>
                                         </div>
                                     </TableCell>
@@ -110,12 +111,12 @@ export function InstructorCoursesTab({
                                             </DropdownMenuTrigger>
                                             <DropdownMenuContent align="end">
                                                 <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                                                <DropdownMenuItem asChild><Link href={`/instructor/courses/${course.id}`} className="text-xs"><Eye className="mr-2 h-4 w-4"/>Preview</Link></DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => onEditCourse(course)} className="text-xs"><Edit className="mr-2 h-4 w-4"/>Edit</DropdownMenuItem>
-                                                {course.status === 'Draft' && <DropdownMenuItem onClick={() => onPublishCourse(course)} className="text-xs"><CheckCircle className="mr-2 h-4 w-4"/>Publish</DropdownMenuItem>}
-                                                {course.status === 'Published' && <DropdownMenuItem onClick={() => onUnpublishCourse(course)} className="text-xs"><Download className="mr-2 h-4 w-4"/>Unpublish</DropdownMenuItem>}
+                                                <DropdownMenuItem asChild><Link href={`/instructor/courses/${course.id}`}><Eye className="mr-2 h-4 w-4"/>Preview</Link></DropdownMenuItem>
+                                                <DropdownMenuItem onClick={() => onEditCourse(course)}><Edit className="mr-2 h-4 w-4"/>Edit</DropdownMenuItem>
+                                                {course.status === 'Draft' && <DropdownMenuItem onClick={() => onPublishCourse(course)}><CheckCircle className="mr-2 h-4 w-4"/>Publish</DropdownMenuItem>}
+                                                {course.status === 'Published' && <DropdownMenuItem onClick={() => onUnpublishCourse(course)}><Download className="mr-2 h-4 w-4"/>Unpublish</DropdownMenuItem>}
                                                 <DropdownMenuSeparator />
-                                                <DropdownMenuItem className="text-destructive focus:text-destructive text-xs" onClick={() => onDeleteCourse(course)}><Trash2 className="mr-2 h-4 w-4"/>Delete</DropdownMenuItem>
+                                                <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => onDeleteCourse(course)}><Trash2 className="mr-2 h-4 w-4"/>Delete</DropdownMenuItem>
                                             </DropdownMenuContent>
                                         </DropdownMenu>
                                     </TableCell>

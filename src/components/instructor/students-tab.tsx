@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -62,7 +63,7 @@ export function InstructorStudentsTab({ students, loading, onStudentAction }: In
                                             </Avatar>
                                             <div>
                                                 <div className="font-medium">{student.name}</div>
-                                                <div className="text-xs text-muted-foreground">{student.email}</div>
+                                                <div className="text-sm text-muted-foreground">{student.email}</div>
                                             </div>
                                         </div>
                                     </TableCell>
@@ -70,7 +71,7 @@ export function InstructorStudentsTab({ students, loading, onStudentAction }: In
                                     <TableCell className="hidden md:table-cell">
                                         <div className="flex items-center gap-2">
                                             <Progress value={student.progress} className="h-2 w-20" />
-                                            <span className="text-xs font-semibold">{student.progress}%</span>
+                                            <span className="text-sm font-semibold">{student.progress}%</span>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
@@ -99,7 +100,7 @@ export function InstructorStudentsTab({ students, loading, onStudentAction }: In
             </CardContent>
              {students.length > 0 && (
                 <CardFooter>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-sm text-muted-foreground">
                         Showing <strong>{students.length}</strong> students.
                     </div>
                 </CardFooter>

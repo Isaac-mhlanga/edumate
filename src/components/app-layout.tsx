@@ -281,7 +281,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Avatar>
                 <div className='flex flex-col overflow-hidden group-data-[collapsible=icon]:hidden'>
                     <span className='font-medium text-sm truncate'>{user.displayName ?? 'User'}</span>
-                    <span className='text-xs text-muted-foreground truncate'>{user.email}</span>
+                    <span className='text-sm text-muted-foreground truncate'>{user.email}</span>
                 </div>
             </div>
           ) : (

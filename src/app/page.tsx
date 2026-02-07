@@ -358,8 +358,8 @@ export default function Home() {
                         <CardContent className="flex-grow">
                             <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
                             {course.instructor && (
-                                <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                                    <User className="h-3 w-3" />
+                                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
+                                    <User className="h-4 w-4" />
                                     <span>By {course.instructor}</span>
                                 </div>
                             )}
