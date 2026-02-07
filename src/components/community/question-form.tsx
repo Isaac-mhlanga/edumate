@@ -110,8 +110,8 @@ export function QuestionForm() {
     try {
       const firestore = getFirestore(app);
       const storage = getStorage(app);
-      let fileUrl: string | undefined;
-      let fileType: 'image' | 'pdf' | undefined;
+      let fileUrl: string | null = null;
+      let fileType: 'image' | 'pdf' | null = null;
       
       const file = data.file?.[0];
       if (file) {
@@ -325,5 +325,3 @@ export function QuestionForm() {
     </Dialog>
   );
 }
-
-    

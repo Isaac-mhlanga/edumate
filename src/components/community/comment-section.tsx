@@ -1,3 +1,4 @@
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -280,7 +281,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
         const batch = writeBatch(firestore);
         const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
         
-        const commentData: Partial<Comment> = {
+        const commentData: any = {
             studentId: user?.uid,
             studentName: user?.displayName || 'Anonymous',
             studentAvatar: user?.photoURL ?? null,
@@ -288,6 +289,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
             likeCount: 0,
             likedBy: [],
             parentId: parentId,
+            fileUrl: null,
+            fileType: null,
         };
 
         if (file) {
