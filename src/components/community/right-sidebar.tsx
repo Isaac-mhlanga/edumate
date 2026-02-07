@@ -9,6 +9,7 @@ import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from '../ui/skeleton';
 import Link from 'next/link';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../ui/card';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -42,7 +43,7 @@ export function RightSidebar({ questions }: RightSidebarProps) {
     const memberStats: { [key: string]: { name: string; avatar?: string | null; postCount: number } } = {};
 
     questions.forEach(question => {
-      if (question.studentId === 'anonymous') return;
+      if (!question.studentId || question.studentId === 'anonymous') return;
 
       if (!memberStats[question.studentId]) {
         memberStats[question.studentId] = {
@@ -56,12 +57,7 @@ export function RightSidebar({ questions }: RightSidebarProps) {
 
     return Object.values(memberStats)
       .sort((a, b) => b.postCount - a.postCount)
-      .slice(0, 10)
-      .map(member => ({
-        name: member.name,
-        score: `${member.postCount} posts`,
-        avatar: member.avatar,
-      }));
+      .slice(0, 5);
   }, [questions]);
   
   const popularTags = React.useMemo(() => {
@@ -85,55 +81,41 @@ export function RightSidebar({ questions }: RightSidebarProps) {
       .map(([tag, _]) => tag);
   }, [questions]);
   
-  const memberCount = new Set(questions.map(q => q.studentId).filter(id => id !== 'anonymous')).size;
 
   return (
-    <div className="space-y-8">
-      <div className="flex justify-between items-center">
-        <div className="flex items-center gap-2">
-            <span className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-green-500"></span>
-            </span>
-            <span className="text-sm font-semibold">Online</span>
-        </div>
-        <span className="text-sm font-semibold">{memberCount} members</span>
-      </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle className="text-base">Top Authors</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <ul className="space-y-4">
+                {topMembers.map(member => (
+                <li key={member.name} className="flex justify-between items-center text-sm">
+                    <div className="flex items-center gap-3">
+                    <Avatar className="h-8 w-8">
+                        <AvatarImage src={member.avatar ?? undefined} />
+                        <AvatarFallback>{member.name[0]}</AvatarFallback>
+                    </Avatar>
+                    <span className="font-medium">{member.name}</span>
+                    </div>
+                    <span className="font-semibold text-muted-foreground">{member.postCount} posts</span>
+                </li>
+                ))}
+            </ul>
+        </CardContent>
+      </Card>
       
-      {loading ? (
-        <Skeleton className="h-10 w-full" />
-      ) : user ? (
-        <QuestionForm />
-      ) : (
-        <Button asChild className="w-full">
-            <Link href="/login">Login to ask a question</Link>
-        </Button>
-      )}
-
-      <div>
-        <h3 className="text-base font-bold mb-4">Top Members</h3>
-        <ul className="space-y-4">
-            {topMembers.map(member => (
-              <li key={member.name} className="flex justify-between items-center text-sm">
-                <div className="flex items-center gap-3">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={member.avatar ?? undefined} />
-                    <AvatarFallback>{member.name[0]}</AvatarFallback>
-                  </Avatar>
-                  <span className="font-medium">{member.name}</span>
-                </div>
-                <span className="font-semibold text-muted-foreground">{member.score}</span>
-              </li>
-            ))}
-        </ul>
-      </div>
-      
-      <div>
-        <h3 className="text-base font-bold mb-4">Popular Tags</h3>
-        <div className="flex flex-wrap gap-2">
-            {popularTags.map(tag => <Button key={tag} variant="outline" size="sm" className="bg-muted/50">{tag}</Button>)}
-        </div>
-      </div>
+      <Card>
+        <CardHeader>
+            <CardTitle className="text-base">Popular Tags</CardTitle>
+        </CardHeader>
+        <CardContent>
+            <div className="flex flex-wrap gap-2">
+                {popularTags.map(tag => <Button key={tag} variant="secondary" size="sm" className="bg-muted/50 text-muted-foreground hover:bg-muted">{tag}</Button>)}
+            </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }

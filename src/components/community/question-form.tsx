@@ -13,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Send, Paperclip, Plus } from 'lucide-react';
+import { Loader2, Send, Paperclip, Plus, HelpCircle } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
@@ -102,7 +102,7 @@ export function QuestionForm() {
         const fileRef = ref(storage, `questions/${currentUser.uid}/${Date.now()}-${file.name}`);
         await uploadBytes(fileRef, file);
         fileUrl = await getDownloadURL(fileRef);
-        fileType = file.type.startsWith('image/') ? 'image' : 'pdf';
+        fileType = file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : null;
       }
 
       await addDoc(collection(firestore, 'questions'), {
@@ -121,8 +121,6 @@ export function QuestionForm() {
         commentCount: 0,
         likeCount: 0,
         likedBy: [],
-        dislikeCount: 0,
-        dislikedBy: [],
       });
 
       toast({ title: 'Question posted!', description: 'Your question is now live for the community.' });
@@ -142,9 +140,9 @@ export function QuestionForm() {
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
-            <Button className="w-full">
-                <Plus className="mr-2 h-4 w-4"/>
-                Start a new topic
+            <Button size="lg">
+                <HelpCircle className="mr-2 h-5 w-5"/>
+                Ask a Question
             </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[625px]">

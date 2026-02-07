@@ -1,19 +1,19 @@
-
 'use client';
 
 import React from 'react';
 import { type Question } from '@/lib/types';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { ArrowUp, ArrowDown, MessageSquare, MoreHorizontal } from 'lucide-react';
+import { ThumbsUp, MessageSquare } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Skeleton } from '../ui/skeleton';
 import { Button } from '../ui/button';
 import { cn } from '@/lib/utils';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
-import { getFirestore, doc, updateDoc, increment, arrayUnion, arrayRemove, writeBatch } from 'firebase/firestore';
+import { getFirestore, doc, updateDoc, increment, arrayUnion, arrayRemove } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '../ui/badge';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -24,15 +24,13 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
-
 interface QuestionListProps {
   questions: Question[];
   loading: boolean;
   onQuestionSelect?: (question: Question) => void;
-  selectedQuestionId?: string;
 }
 
-function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Question, onQuestionSelect?: (question: Question) => void, isSelected?: boolean }) {
+function QuestionCard({ question, onQuestionSelect }: { question: Question, onQuestionSelect?: (question: Question) => void }) {
   const { toast } = useToast();
   const [user, setUser] = React.useState<User | null>(null);
 
@@ -43,131 +41,97 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
     return () => unsubscribe();
   }, []);
 
-  const handleVote = async (e: React.MouseEvent, voteType: 'up' | 'down') => {
+  const handleLike = async (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!user) {
-      toast({ title: 'Please log in', description: 'You need to be logged in to vote.' });
+      toast({ title: 'Please log in', description: 'You need to be logged in to like a post.' });
       return;
     }
 
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
     const docRef = doc(firestore, 'questions', question.id);
-
-    const isLiked = (question.likedBy || []).includes(user.uid);
-    const isDisliked = (question.dislikedBy || []).includes(user.uid);
     
-    const batch = writeBatch(firestore);
-
-    if (voteType === 'up') {
-        if (isLiked) { // undo upvote
-            batch.update(docRef, { likeCount: increment(-1), likedBy: arrayRemove(user.uid) });
-        } else { // new upvote
-            batch.update(docRef, { likeCount: increment(1), likedBy: arrayUnion(user.uid) });
-            if (isDisliked) { // remove downvote if it exists
-                batch.update(docRef, { dislikeCount: increment(-1), dislikedBy: arrayRemove(user.uid) });
-            }
-        }
-    } else { // voteType === 'down'
-        if (isDisliked) { // undo downvote
-            batch.update(docRef, { dislikeCount: increment(-1), dislikedBy: arrayRemove(user.uid) });
-        } else { // new downvote
-            batch.update(docRef, { dislikeCount: increment(1), dislikedBy: arrayUnion(user.uid) });
-            if (isLiked) { // remove upvote if it exists
-                batch.update(docRef, { likeCount: increment(-1), likedBy: arrayRemove(user.uid) });
-            }
-        }
-    }
+    const likedBy = question.likedBy || [];
+    const isLiked = likedBy.includes(user.uid);
 
     try {
-      await batch.commit();
+        await updateDoc(docRef, {
+            likeCount: increment(isLiked ? -1 : 1),
+            likedBy: isLiked ? arrayRemove(user.uid) : arrayUnion(user.uid),
+        });
     } catch (error) {
-      console.error("Error updating vote:", error);
-      toast({ variant: 'destructive', title: 'Error', description: 'Could not process your vote.' });
+      console.error("Error updating like:", error);
+      toast({ variant: 'destructive', title: 'Error', description: 'Could not process your like.' });
     }
   };
 
-
-  const contentSnippet = question.content.length > 150 
-    ? `${question.content.substring(0, 150)}...`
+  const contentSnippet = question.content.length > 180 
+    ? `${question.content.substring(0, 180)}...`
     : question.content;
+  
+  const tags = [question.audience, question.subject, question.grade ? `Grade ${question.grade}` : null, question.module].filter(Boolean);
 
   return (
      <Card 
       onClick={() => onQuestionSelect?.(question)}
-      className={cn("flex transition-all", onQuestionSelect && "cursor-pointer", isSelected ? "border-primary ring-1 ring-primary" : onQuestionSelect ? "hover:border-border" : "")}
+      className="bg-card text-card-foreground shadow-none rounded-lg border-b p-6 hover:bg-muted/50 cursor-pointer transition-colors duration-200"
     >
-        <div className="flex flex-col items-center bg-muted/50 p-2 border-r">
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleVote(e, 'up')}>
-                <ArrowUp className={cn("h-5 w-5", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary")} /> 
-            </Button>
-            <span className="font-bold text-sm my-1">{ (question.likeCount || 0) - (question.dislikeCount || 0) }</span>
-            <Button variant="ghost" size="icon" className="h-8 w-8" onClick={(e) => handleVote(e, 'down')}>
-                <ArrowDown className={cn("h-5 w-5", user && (question.dislikedBy || []).includes(user.uid) && "text-destructive fill-destructive")} />
-            </Button>
-        </div>
-
-        <div className="flex-1">
-            <CardHeader className="flex-row justify-between items-start pb-2">
-                <div className="flex items-center gap-3">
-                    <Avatar className="h-10 w-10">
-                        <AvatarImage src={question.studentAvatar ?? undefined} />
-                        <AvatarFallback>{question.studentName.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div>
-                        <p className="text-sm font-semibold text-foreground">Posted by {question.studentName}</p>
-                        <p className="text-xs text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
-                    </div>
+        <CardHeader className="p-0 mb-4 flex-row justify-between items-start">
+            <div className="flex items-center gap-3">
+                <Avatar className="h-10 w-10">
+                    <AvatarImage src={question.studentAvatar ?? undefined} />
+                    <AvatarFallback>{question.studentName?.charAt(0) || 'A'}</AvatarFallback>
+                </Avatar>
+                <div>
+                    <p className="text-sm font-semibold">{question.studentName || 'Anonymous'}</p>
+                    <p className="text-xs text-muted-foreground">{question.createdAt ? formatDistanceToNow(question.createdAt.toDate(), { addSuffix: true }) : '...'}</p>
                 </div>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreHorizontal className="h-4 w-4" />
+            </div>
+        </CardHeader>
+        <CardContent className="p-0 space-y-3">
+            <h3 className="font-bold text-lg leading-snug">{question.title}</h3>
+            <p className="text-muted-foreground text-sm leading-relaxed">
+              {contentSnippet}
+            </p>
+            <div className="flex flex-wrap gap-2">
+                {tags.map(tag => <Badge key={tag} variant="secondary">{tag}</Badge>)}
+            </div>
+        </CardContent>
+        <CardFooter className="p-0 pt-4">
+            <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                <Button variant="ghost" size="sm" className="flex items-center gap-1.5 px-2 -ml-2 h-8" onClick={handleLike}>
+                    <ThumbsUp className={cn("h-4 w-4", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} /> 
+                    <span>{question.likeCount || 0}</span>
                 </Button>
-            </CardHeader>
-            <CardContent className="space-y-2 py-2">
-                <h3 className="font-bold text-lg">{question.title}</h3>
-                <p className="text-muted-foreground text-sm">
-                {contentSnippet}
-                {question.content.length > 150 && <button className="text-primary font-semibold ml-1">see more</button>}
-                </p>
-            </CardContent>
-            <CardFooter className="py-2">
-                <Button variant="ghost" size="sm" className="flex items-center gap-1.5 px-2 text-muted-foreground">
+                <div className="flex items-center gap-1.5">
                     <MessageSquare className="h-4 w-4" /> 
-                    <span>{question.commentCount || 0} Comments</span>
-                </Button>
-            </CardFooter>
-        </div>
+                    <span>{question.commentCount || 0}</span>
+                </div>
+            </div>
+        </CardFooter>
     </Card>
   );
 }
 
 
-export function QuestionList({ questions, loading, onQuestionSelect, selectedQuestionId }: QuestionListProps) {
+export function QuestionList({ questions, loading, onQuestionSelect }: QuestionListProps) {
   if (loading) {
     return (
-      <div className="space-y-4">
-        <h2 className="text-lg font-semibold">Posts</h2>
-        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-48 w-full" />)}
+      <div className="bg-card rounded-lg border">
+        {Array.from({ length: 5 }).map((_, i) => <Skeleton key={i} className="h-48 w-full bg-muted/50" />)}
       </div>
     )
   }
 
   return (
-    <div className="space-y-4">
-        <h2 className="text-lg font-semibold">{questions.length > 0 ? `${questions.length} Posts` : ''}</h2>
+    <div className="bg-card rounded-lg border divide-y">
         {questions.length > 0 ? (
-            <div className="space-y-4">
-                {questions.map(q => <QuestionCard key={q.id} question={q} onQuestionSelect={onQuestionSelect} isSelected={q.id === selectedQuestionId} />)}
-            </div>
+            questions.map(q => <QuestionCard key={q.id} question={q} onQuestionSelect={onQuestionSelect} />)
         ) : (
-             <div className="text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
-                <h3 className="text-lg font-semibold">No Questions Found</h3>
-                <p>Try adjusting your search or be the first to ask!</p>
-            </div>
-        )}
-        {questions.length > 0 && (
-            <div className="text-center pt-4">
-                <Button variant="outline">See more</Button>
+             <div className="text-center py-24 text-muted-foreground">
+                <h3 className="text-lg font-semibold">No Questions Yet</h3>
+                <p>Be the first to start a conversation!</p>
             </div>
         )}
     </div>

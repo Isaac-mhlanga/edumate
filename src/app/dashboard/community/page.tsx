@@ -1,16 +1,17 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, deleteDoc, getDoc, getDocs, writeBatch, Timestamp } from 'firebase/firestore';
+import { getFirestore, collection, query, orderBy, onSnapshot, Unsubscribe, doc, getDoc, getDocs, writeBatch, Timestamp } from 'firebase/firestore';
 import { getStorage, ref, deleteObject } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { QuestionList } from '@/components/community/question-list';
 import { type Question, type Comment } from '@/lib/types';
 import withAuth from '@/components/with-auth';
 import { CommentSection } from '@/components/community/comment-section';
-import { Card } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/hooks/use-toast';
+import { RightSidebar } from '@/components/community/right-sidebar';
+import { QuestionForm } from '@/components/community/question-form';
+import { Sheet, SheetContent } from '@/components/ui/sheet';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -38,9 +39,8 @@ function CommunityDashboardPage() {
                 ...doc.data()
             } as Question));
             setQuestions(fetchedQuestions);
-            if (!selectedQuestion && fetchedQuestions.length > 0) {
-                setSelectedQuestion(fetchedQuestions[0]);
-            } else if (selectedQuestion) {
+            
+            if (selectedQuestion) {
                 // If a question was selected, make sure it's up-to-date
                 const updatedSelected = fetchedQuestions.find(q => q.id === selectedQuestion.id);
                 setSelectedQuestion(updatedSelected || null);
@@ -52,7 +52,7 @@ function CommunityDashboardPage() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [selectedQuestion]);
 
     const handleUpdateQuestion = (updatedQuestion: Question) => {
         setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
@@ -96,10 +96,7 @@ function CommunityDashboardPage() {
 
             toast({ title: "Question Deleted", description: "The question and all its content have been removed." });
             
-            if (selectedQuestion?.id === questionId) {
-                const remainingQuestions = questions.filter(q => q.id !== questionId);
-                setSelectedQuestion(remainingQuestions.length > 0 ? remainingQuestions[0] : null);
-            }
+            setSelectedQuestion(null);
         } catch (error) {
             console.error("Error deleting question:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
@@ -108,32 +105,33 @@ function CommunityDashboardPage() {
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[1fr_450px] gap-8 h-[calc(100vh-10rem)]">
-            <div className="min-w-0 h-full flex flex-col">
-                 <div className="mb-4 flex-shrink-0">
-                    <h1 className="text-3xl font-bold tracking-tight">Community Forum</h1>
-                    <p className="text-lg text-muted-foreground mt-1">Ask questions, share knowledge, and connect with fellow students.</p>
-                </div>
-                <ScrollArea className="flex-1 pr-4 -mr-4">
+        <>
+            <div className="grid grid-cols-1 xl:grid-cols-[1fr_350px] gap-8">
+                <div className="min-w-0">
+                    <div className="mb-6">
+                        <QuestionForm />
+                    </div>
                     <QuestionList 
                         questions={questions} 
                         loading={loading}
                         onQuestionSelect={setSelectedQuestion}
-                        selectedQuestionId={selectedQuestion?.id}
                     />
-                </ScrollArea>
+                </div>
+                <aside className="hidden xl:block">
+                    <RightSidebar questions={questions} />
+                </aside>
             </div>
-            <aside className="hidden lg:block h-full">
-                 <Card className="h-full flex flex-col">
+             <Sheet open={!!selectedQuestion} onOpenChange={(open) => !open && setSelectedQuestion(null)}>
+                <SheetContent className="w-full max-w-full sm:max-w-2xl p-0">
                     <CommentSection
                         question={selectedQuestion}
                         onUpdateQuestion={handleUpdateQuestion}
                         onDeleteQuestion={handleDeleteQuestion}
                         dashboardView={true}
                     />
-                </Card>
-            </aside>
-        </div>
+                </SheetContent>
+            </Sheet>
+        </>
     );
 }
 
