@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -14,7 +13,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Loader2, Send, Paperclip } from 'lucide-react';
+import { Loader2, Send, Paperclip, Plus } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '../ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../ui/select';
 import { RadioGroup, RadioGroupItem } from '../ui/radio-group';
@@ -157,8 +156,8 @@ export function QuestionForm() {
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogTrigger asChild>
             <Button className="w-full">
-                <Send className="mr-2 h-4 w-4"/>
-                Ask a Question
+                <Plus className="mr-2 h-4 w-4"/>
+                Start a new topic
             </Button>
         </DialogTrigger>
         <DialogContent className="sm:max-w-[625px]">
