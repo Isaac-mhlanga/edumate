@@ -103,7 +103,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     const replies = isReply ? [] : getReplies(comment.id);
     const isEditing = editingComment?.id === comment.id;
     const isCollapsed = collapsedComments.includes(comment.id);
-    const canModerate = userRole === 'admin' || user?.uid === comment.studentId;
+    const canEdit = userRole === 'admin' || user?.uid === comment.studentId;
+    const canDelete = userRole === 'admin' || user?.uid === comment.studentId;
 
     return (
         <div key={comment.id} className="flex items-start gap-3">
@@ -148,18 +149,16 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                             <CornerUpLeft className="mr-1 h-3 w-3" />
                             Reply
                         </Button>
-                        {canModerate && (
-                            <>
-                                {user && user.uid === comment.studentId && (
-                                    <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => setEditingComment({ id: comment.id, content: comment.content })}>
-                                        <Edit className="mr-1 h-3 w-3" />
-                                        Edit
-                                    </Button>
-                                )}
-                                <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive hover:text-destructive" onClick={() => handleDelete('comment', comment.id)}>
-                                    <Trash2 className="h-3 w-3" />
-                                </Button>
-                            </>
+                        {canEdit && (
+                            <Button variant="ghost" size="sm" className="text-xs h-auto px-2 py-1 text-muted-foreground" onClick={() => setEditingComment({ id: comment.id, content: comment.content })}>
+                                <Edit className="mr-1 h-3 w-3" />
+                                Edit
+                            </Button>
+                        )}
+                        {canDelete && (
+                            <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive hover:text-destructive" onClick={() => handleDelete('comment', comment.id)}>
+                                <Trash2 className="h-3 w-3" />
+                            </Button>
                         )}
                     </div>
                 )}
@@ -212,7 +211,13 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
   }
 
   const handleUpdateComment = async () => {
-    if (!editingComment || !question || user?.uid !== comments.find(c => c.id === editingComment.id)?.studentId) return;
+    const commentToEdit = comments.find(c => c.id === editingComment?.id);
+    if (!editingComment || !question || !commentToEdit) return;
+
+    if (user?.uid !== commentToEdit.studentId && userRole !== 'admin') {
+        toast({ variant: 'destructive', title: 'Permission Denied', description: 'You do not have permission to edit this comment.' });
+        return;
+    }
 
     setIsSubmitting(true);
     const firestore = getFirestore();
@@ -469,7 +474,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
   }
 
   const topLevelComments = comments.filter(comment => !comment.parentId);
-  const canModerate = userRole === 'admin' || user?.uid === question.studentId;
+  const canModerateQuestion = userRole === 'admin' || user?.uid === question.studentId;
 
 
   return (
@@ -480,7 +485,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                     <h2 className="text-xl font-bold">{question.title}</h2>
                     {dashboardView && userRole === 'admin' && (
                         <div className="flex items-center space-x-2">
-                            <Label htmlFor="disable-comments" className="text-xs text-muted-foreground">Disable Comments</Label>
+                            <Label htmlFor="disable-comments" className="text-sm text-muted-foreground">Disable Comments</Label>
                             <Switch
                                 id="disable-comments"
                                 checked={question.commentsDisabled}
@@ -489,7 +494,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                         </div>
                     )}
                 </div>
-                <div className="flex items-center gap-3 pt-2 text-xs text-muted-foreground">
+                <div className="flex items-center gap-3 pt-2 text-sm text-muted-foreground">
                     <Avatar className="h-6 w-6">
                     <AvatarImage src={question.studentAvatar} />
                     <AvatarFallback>{question.studentName.charAt(0)}</AvatarFallback>
@@ -505,8 +510,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                  {renderAttachment(question)}
                  
                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1" onClick={() => handleLike('question', question.id)} disabled={!user}>
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <Button variant="ghost" size="sm" className="text-sm h-auto p-1" onClick={() => handleLike('question', question.id)} disabled={!user}>
                             <ThumbsUp className={cn("h-4 w-4 mr-1", user && (question.likedBy || []).includes(user.uid) && "text-primary fill-primary/20")} />
                             {question.likeCount || 0}
                         </Button>
@@ -514,8 +519,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                             <MessageSquare className="h-4 w-4" /> {question.commentCount || 0}
                         </div>
                     </div>
-                     {canModerate && (
-                        <Button variant="ghost" size="sm" className="text-xs h-auto p-1 text-destructive hover:text-destructive" onClick={() => handleDelete('question', question.id)}>
+                     {canModerateQuestion && (
+                        <Button variant="ghost" size="sm" className="text-sm h-auto p-1 text-destructive hover:text-destructive" onClick={() => handleDelete('question', question.id)}>
                             <Trash2 className="h-4 w-4 mr-1" /> Delete Question
                         </Button>
                     )}
