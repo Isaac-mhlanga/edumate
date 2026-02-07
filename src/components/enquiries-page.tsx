@@ -14,6 +14,7 @@ import { formatDistanceToNow } from 'date-fns';
 import { Eye, CheckCircle, Clock, FileText, Phone, UserCheck, X } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
+import { Avatar, AvatarFallback } from './ui/avatar';
 
 type Enquiry = {
     id: string;
@@ -155,7 +156,15 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                             {loading ? (
                                 Array.from({ length: 5 }).map((_, i) => (
                                     <TableRow key={i}>
-                                        <TableCell><Skeleton className="h-5 w-32" /></TableCell>
+                                        <TableCell>
+                                            <div className="flex items-center gap-3">
+                                                <Skeleton className="h-9 w-9 rounded-full hidden sm:flex" />
+                                                <div className="space-y-1">
+                                                    <Skeleton className="h-4 w-24" />
+                                                    <Skeleton className="h-3 w-32" />
+                                                </div>
+                                            </div>
+                                        </TableCell>
                                         <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-24" /></TableCell>
                                         <TableCell><Skeleton className="h-6 w-20" /></TableCell>
                                         <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
@@ -166,8 +175,15 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                                 enquiries.map((enquiry) => (
                                     <TableRow key={enquiry.id}>
                                         <TableCell>
-                                            <div className="font-medium">{enquiry.name}</div>
-                                            <div className="text-xs text-muted-foreground">{enquiry.email}</div>
+                                             <div className="flex items-center gap-3">
+                                                <Avatar className="h-9 w-9 hidden sm:flex">
+                                                    <AvatarFallback>{enquiry.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                                </Avatar>
+                                                <div>
+                                                    <div className="font-medium">{enquiry.name}</div>
+                                                    <div className="text-xs text-muted-foreground">{enquiry.email}</div>
+                                                </div>
+                                            </div>
                                         </TableCell>
                                         <TableCell className="hidden sm:table-cell">{formatDistanceToNow(enquiry.createdAt.toDate(), { addSuffix: true })}</TableCell>
                                         <TableCell>{getStatusBadge(enquiry.status)}</TableCell>
