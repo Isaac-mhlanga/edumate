@@ -119,8 +119,8 @@ service cloud.firestore {
 
     // Rules for payouts
     match /payouts/{payoutId} {
-        // Instructors can create their own payout requests
-        allow create: if (isInstructor() && isOwner(request.resource.data.userId)) || isOwner(request.resource.data.userId);
+        // Any signed-in user can create their own payout request
+        allow create: if isSignedIn() && isOwner(request.resource.data.userId);
         // Instructors and users can read their own payout requests
         allow get, list: if (isInstructor() && isOwner(resource.data.userId)) || isOwner(resource.data.userId);
         // Admins can read and update any payout request (to approve/decline)
