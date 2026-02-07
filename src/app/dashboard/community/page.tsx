@@ -156,4 +156,4 @@ function CommunityDashboardPage() {
     );
 }
 
-export default withAuth(CommunityDashboardPage, ['student', 'instructor', 'admin', 'tutor']);
+export default withAuth(CommunityDashboardPage, ['student', 'varsity-student', 'instructor', 'admin', 'tutor']);

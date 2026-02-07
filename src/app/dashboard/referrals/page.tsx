@@ -281,4 +281,4 @@ function ReferralsPage() {
     );
 }
 
-export default withAuth(ReferralsPage, ['student']);
+export default withAuth(ReferralsPage, ['student', 'varsity-student']);
