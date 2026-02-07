@@ -7,8 +7,10 @@ import { QuestionList } from '@/components/community/question-list';
 import { type Question } from '@/lib/types';
 import { PublicHeader } from '@/components/public-header';
 import { Footer } from '@/components/footer';
-import { RightSidebar } from '@/components/community/right-sidebar';
-
+import { CommentSection } from '@/components/community/comment-section';
+import { Card } from '@/components/ui/card';
+import { QuestionForm } from '@/components/community/question-form';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -22,6 +24,7 @@ const firebaseConfig = {
 export default function CommunityPage() {
     const [questions, setQuestions] = useState<Question[]>([]);
     const [loading, setLoading] = useState(true);
+    const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null);
 
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -34,6 +37,14 @@ export default function CommunityPage() {
                 ...doc.data()
             } as Question));
             setQuestions(fetchedQuestions);
+            
+            if (!selectedQuestion && fetchedQuestions.length > 0) {
+                setSelectedQuestion(fetchedQuestions[0]);
+            } else if (selectedQuestion) {
+                 const updatedSelected = fetchedQuestions.find(q => q.id === selectedQuestion.id);
+                 setSelectedQuestion(updatedSelected || null);
+            }
+
             setLoading(false);
         }, (error) => {
             console.error("Error fetching questions:", error);
@@ -41,26 +52,52 @@ export default function CommunityPage() {
         });
 
         return () => unsubscribe();
-    }, []);
+    }, [selectedQuestion]);
+
+    const handleUpdateQuestion = (updatedQuestion: Question) => {
+        setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
+        if (selectedQuestion?.id === updatedQuestion.id) {
+            setSelectedQuestion(updatedQuestion);
+        }
+    };
+
+    const handleDeleteQuestion = async (questionId: string) => {
+        setSelectedQuestion(null);
+    };
 
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground">
             <PublicHeader />
             <main className="flex-1">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 pt-24">
-                     <div className="grid grid-cols-1 lg:grid-cols-[1fr_350px] gap-8">
-                        <div className="min-w-0">
-                           <QuestionList questions={questions} loading={loading} />
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 pt-24 h-full">
+                     <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 h-[calc(100vh-14rem)]">
+                        <Card className="flex flex-col h-full">
+                            <div className="p-4 border-b">
+                                <QuestionForm />
+                            </div>
+                            <ScrollArea className="flex-1">
+                                <QuestionList 
+                                    questions={questions} 
+                                    loading={loading}
+                                    onQuestionSelect={setSelectedQuestion}
+                                    selectedQuestionId={selectedQuestion?.id || null}
+                                />
+                            </ScrollArea>
+                        </Card>
+                        <div className="h-full">
+                            <CommentSection
+                                question={selectedQuestion}
+                                onUpdateQuestion={handleUpdateQuestion}
+                                onDeleteQuestion={handleDeleteQuestion}
+                                dashboardView={false}
+                            />
                         </div>
-                         <aside className="hidden lg:block">
-                           <RightSidebar questions={questions} />
-                        </aside>
                      </div>
                 </div>
-                 <div className="hidden md:block">
-                    <Footer />
-                </div>
             </main>
+            <div className="hidden md:block">
+                <Footer />
+            </div>
         </div>
     );
 }
