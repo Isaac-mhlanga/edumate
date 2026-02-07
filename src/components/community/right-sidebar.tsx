@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -107,3 +108,5 @@ export function RightSidebar({ questions }: RightSidebarProps) {
     </div>
   );
 }
+
+    

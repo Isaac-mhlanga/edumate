@@ -47,8 +47,11 @@ export type MessageThread = {
     studentId: string;
     studentName: string;
     tutorId: string;
+    tutorName: string;
     lastMessage: string;
     lastMessageTimestamp: Timestamp;
     isReadByTutor: boolean;
-    messages: ThreadMessage[];
+    isReadByStudent: boolean;
 };
+
+    
