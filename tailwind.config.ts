@@ -17,6 +17,9 @@ export default {
       },
     },
     extend: {
+      letterSpacing: {
+        subtle: '0.0125em',
+      },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
         headline: ['Lexend', 'sans-serif'],
