@@ -69,9 +69,9 @@ export default function CommunityPage() {
     return (
         <div className="flex flex-col min-h-screen bg-background text-foreground">
             <PublicHeader />
-            <main className="flex-1">
-                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 pt-24 h-full">
-                     <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 lg:h-[calc(100vh-14rem)]">
+            <main className="flex-1 flex flex-col">
+                <div className="max-w-screen-xl mx-auto px-4 sm:px-6 py-12 pt-24 w-full flex-1">
+                     <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 h-full">
                         <div className={cn("h-full flex-col", selectedQuestion ? "hidden lg:flex" : "flex")}>
                             <Card className="flex flex-col h-full">
                                 <div className="p-4 border-b">
