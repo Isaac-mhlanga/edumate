@@ -12,6 +12,7 @@ import { QuestionForm } from '@/components/community/question-form';
 import { Card } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { MessageSquare } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -40,7 +41,9 @@ function CommunityDashboardPage() {
             } as Question));
             setQuestions(fetchedQuestions);
             
-            if (selectedQuestion) {
+            if (window.innerWidth >= 1024 && !selectedQuestion && fetchedQuestions.length > 0) {
+                setSelectedQuestion(fetchedQuestions[0]);
+            } else if (selectedQuestion) {
                 const updatedSelected = fetchedQuestions.find(q => q.id === selectedQuestion.id);
                 setSelectedQuestion(updatedSelected || null);
             }
@@ -61,32 +64,34 @@ function CommunityDashboardPage() {
     };
 
     const handleDeleteQuestion = async (questionId: string) => {
-        // This logic is in CommentSection now. We just need to clear the selection.
         setSelectedQuestion(null);
     };
 
 
     return (
-        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 h-[calc(100vh-8rem)]">
-            <Card className="flex flex-col h-full">
-                <div className="p-4 border-b">
-                    <QuestionForm />
-                </div>
-                <ScrollArea className="flex-1">
-                    <QuestionList 
-                        questions={questions} 
-                        loading={loading}
-                        onQuestionSelect={setSelectedQuestion}
-                        selectedQuestionId={selectedQuestion?.id || null}
-                    />
-                </ScrollArea>
-            </Card>
-            <div className="h-full">
+        <div className="grid grid-cols-1 lg:grid-cols-[400px_1fr] gap-6 lg:h-[calc(100vh-8rem)]">
+            <div className={cn("h-full flex-col", selectedQuestion ? "hidden lg:flex" : "flex")}>
+                <Card className="flex flex-col h-full">
+                    <div className="p-4 border-b">
+                        <QuestionForm />
+                    </div>
+                    <ScrollArea className="flex-1">
+                        <QuestionList 
+                            questions={questions} 
+                            loading={loading}
+                            onQuestionSelect={setSelectedQuestion}
+                            selectedQuestionId={selectedQuestion?.id || null}
+                        />
+                    </ScrollArea>
+                </Card>
+            </div>
+            <div className={cn("h-full", !selectedQuestion ? "hidden lg:block" : "block")}>
                 <CommentSection
                     question={selectedQuestion}
                     onUpdateQuestion={handleUpdateQuestion}
                     onDeleteQuestion={handleDeleteQuestion}
                     dashboardView={true}
+                    onBack={() => setSelectedQuestion(null)}
                 />
             </div>
         </div>

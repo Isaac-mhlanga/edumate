@@ -8,7 +8,7 @@ import { Card, CardHeader, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X, User, Trash2, Edit, ChevronDown, ChevronUp } from 'lucide-react';
+import { ThumbsUp, MessageSquare, Send, FileText, Download, Loader2, CornerUpLeft, Paperclip, X, User, Trash2, Edit, ChevronDown, ChevronUp, ChevronLeft } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { ScrollArea } from '../ui/scroll-area';
 import { Separator } from '../ui/separator';
@@ -38,9 +38,10 @@ interface CommentSectionProps {
   onUpdateQuestion: (question: Question) => void;
   onDeleteQuestion: (questionId: string) => void;
   dashboardView?: boolean;
+  onBack?: () => void;
 }
 
-export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, dashboardView = false }: CommentSectionProps) {
+export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, dashboardView = false, onBack }: CommentSectionProps) {
   const { toast } = useToast();
   const [user, setUser] = useState<import('firebase/auth').User | null>(null);
   const [userRole, setUserRole] = useState<Role | null>(null);
@@ -457,7 +458,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
   }, [question, toast]);
 
   useEffect(() => {
-    // Scroll to top when question changes
     if (scrollAreaRef.current) {
       scrollAreaRef.current.scrollTo({ top: 0, behavior: 'auto' });
     }
@@ -481,15 +481,27 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     <Card className="flex flex-col h-full">
         <ScrollArea className="flex-1" ref={scrollAreaRef}>
             <CardHeader className="flex-shrink-0">
-                <div className="flex justify-between items-start">
-                    <h2 className="text-xl font-bold">{question.title}</h2>
+                 <div className="flex justify-between items-start gap-4">
+                    <div className="flex items-center gap-1 flex-1 min-w-0">
+                        {onBack && (
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className="lg:hidden -ml-2 shrink-0"
+                                onClick={onBack}
+                            >
+                                <ChevronLeft className="h-5 w-5" />
+                            </Button>
+                        )}
+                        <h2 className="text-xl font-bold truncate">{question.title}</h2>
+                    </div>
                     {dashboardView && userRole === 'admin' && (
-                        <div className="flex items-center space-x-2">
-                            <Label htmlFor="disable-comments" className="text-sm text-muted-foreground">Disable Comments</Label>
+                        <div className="flex items-center space-x-2 shrink-0">
+                            <Label htmlFor="disable-comments" className="text-sm text-muted-foreground">Comments</Label>
                             <Switch
                                 id="disable-comments"
-                                checked={question.commentsDisabled}
-                                onCheckedChange={handleToggleComments}
+                                checked={!question.commentsDisabled}
+                                onCheckedChange={(checked) => handleToggleComments(!checked)}
                             />
                         </div>
                     )}
@@ -580,5 +592,3 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     </Card>
   );
 }
-
-    
