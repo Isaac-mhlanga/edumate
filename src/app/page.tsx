@@ -1,19 +1,22 @@
 'use client';
 
+import { CommunityPreview } from "@/components/community-preview";
+import { EnquiryDialog } from "@/components/enquiry-dialog";
+import { EventDialog } from "@/components/event-dialog";
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
+import { PublicHeader } from "@/components/public-header";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Award, BookOpen, ChevronRight, Clapperboard, Star, UserCog, Video } from "lucide-react";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { faqData } from "@/lib/data";
+import { getApp, getApps, initializeApp } from "firebase/app";
+import { collection, getDocs, getFirestore, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, ShieldCheck, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { PublicHeader } from "@/components/public-header";
-import { getFirestore, collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
-import { getApp, getApps, initializeApp } from 'firebase/app';
-import { Skeleton } from "@/components/ui/skeleton";
-import { Rocket, GraduationCap } from "lucide-react";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -48,6 +51,7 @@ type Course = {
     videos: VideoData[];
     rating?: number;
     instructor?: string;
+    createdAt: Timestamp;
 };
 
 type UserDoc = {
@@ -56,11 +60,31 @@ type UserDoc = {
     role: 'student' | 'instructor' | 'admin' | 'tutor';
 };
 
+type CalendarEvent = {
+  id: string;
+  title: string;
+  start: string;
+  end?: string;
+  allDay: boolean;
+  color?: string;
+  description?: string;
+  instructor?: string;
+  grade?: string;
+  subject?: string;
+  scope?: string;
+  platforms?: ('tiktok' | 'youtube' | 'zoom')[];
+};
+
 
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  
+  const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
+
+  const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
@@ -72,7 +96,7 @@ export default function Home() {
             const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as UserDoc);
             const instructorMap = new Map(users.filter(u => u.role === 'instructor').map(i => [i.id, i.fullName]));
 
-            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'), orderBy('createdAt', 'desc'), limit(6));
+            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'), orderBy('createdAt', 'desc'), limit(3));
             const querySnapshot = await getDocs(coursesQuery);
             const fetchedCourses = querySnapshot.docs.map(doc => {
                 const courseData = { id: doc.id, ...doc.data() } as Course;
@@ -89,161 +113,157 @@ export default function Home() {
             setLoadingCourses(false);
         }
     };
+
+    const fetchUpcomingEvents = async () => {
+        try {
+            const eventsQuery = query(collection(firestore, "events"), where('start', '>=', new Date().toISOString()), orderBy('start', 'asc'), limit(3));
+            const querySnapshot = await getDocs(eventsQuery);
+            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+            setUpcomingEvents(fetchedEvents);
+        } catch (error) {
+            console.error("Error fetching upcoming events: ", error);
+        }
+    };
     
     fetchCoursesAndUsers();
+    fetchUpcomingEvents();
   }, []);
+  
+  const handleEventClick = (event: CalendarEvent) => {
+    setSelectedEvent(event);
+    setIsEventDialogOpen(true);
+  };
 
   const heroFeatures = [
-      { icon: Clapperboard, text: "Online Course"},
-      { icon: Video, text: "Live Webinar"},
-      { icon: UserCog, text: "Career Mentoring"},
-      { icon: Award, text: "Certification"},
+      { icon: Clapperboard, text: "Video Lessons"},
+      { icon: UserCog, text: "Expert Tutors"},
+      { icon: GraduationCap, text: "Career Guidance"},
+      { icon: ShieldCheck, text: "Bursary Applications"},
   ]
   
   const aboutFeatures = [
-      { icon: GraduationCap, title: "Online Courses", description: "Proin sodales feugiat odio curabitur curabitur." },
-      { icon: Rocket, title: "Upgrade Personal Skill", description: "Proin sodales feugiat odio curabitur curabitur." },
-      { icon: Award, title: "Certifications", description: "Proin sodales feugiat odio curabitur curabitur." },
+      { icon: BookOpen, title: "CAPS & IEB Aligned", description: "Our curriculum covers all key topics for Grade 10-12 Maths, Physical Sciences, and Life Sciences." },
+      { icon: Rocket, title: "University Support", description: "Specialized assistance for varsity students in IT, Computer Science, and Information Security modules." },
+      { icon: Award, title: "Proven Results", description: "Join thousands of students who have improved their grades and secured their academic future." },
   ]
+  
+  const services = [
+      {
+          icon: GraduationCap,
+          title: "University Career Guidance",
+          description: "Align your academic path with your career goals. We help you explore degree options and understand university requirements for a successful future."
+      },
+      {
+          icon: ShieldCheck,
+          title: "Bursary & NSFAS Applications",
+          description: "Get step-by-step guidance to ensure your application is accurate, complete, and submitted on time to maximize your chances of securing funding."
+      },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <PublicHeader />
-
       <main>
-        <section className="relative bg-[#0EAB83] text-white pt-24 overflow-hidden">
-            <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 items-center gap-8 py-20">
-                <div className="z-10 text-center lg:text-left">
-                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 mb-4">#FREE TRIAL 30 DAYS</Badge>
-                    <h1 className="text-4xl md:text-5xl font-bold mb-4">Upgrade your skills and knowledge with our online course</h1>
-                    <p className="text-lg opacity-80 mb-8">Unlock your potential with our 30-day free trial - sign up with your email today!</p>
+        <section className="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden">
+             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob -z-10"></div>
+             <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob animation-delay-4000 -z-10"></div>
+            <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 items-center gap-12">
+                <div className="z-10 text-center lg:text-left animate-fade-in-up">
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-semibold mb-6">A Smarter Way to Learn</h1>
+                    <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">Unlock your potential with expert-led video courses, personalized tutoring, and university application guidance.</p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                         <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-200">
+                         <Button size="lg" asChild>
                            <Link href="/register">Get Started Free <ChevronRight className="ml-2" /></Link>
+                        </Button>
+                        <Button size="lg" variant="outline" asChild>
+                           <Link href="/courses">Explore Courses</Link>
                         </Button>
                     </div>
                 </div>
                 <div className="relative h-full hidden lg:block">
-                     <Image src="https://picsum.photos/seed/h1/300/450" alt="Student with laptop" width={300} height={450} className="rounded-lg shadow-2xl absolute bottom-0 right-1/2 translate-x-1/4 z-10" data-ai-hint="student laptop"/>
-                     <Image src="https://picsum.photos/seed/h2/300/450" alt="Student with clipboard" width={300} height={450} className="rounded-lg shadow-2xl absolute bottom-0 right-0" data-ai-hint="student notebook"/>
+                    <div className="relative w-full aspect-[4/3]">
+                        <div className="absolute top-0 left-0 w-full h-full bg-grid-pattern -z-10"></div>
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 bg-primary/20 rounded-full blur-3xl"></div>
+
+                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
+                           {heroFeatures.map((feature, i) => (
+                                <div key={feature.text} className={`absolute animate-float-${i+1}`}>
+                                    <div className="bg-card/80 backdrop-blur-md p-3 rounded-lg shadow-lg flex items-center gap-3">
+                                        <div className="bg-primary/10 text-primary p-2 rounded-md"><feature.icon className="h-5 w-5"/></div>
+                                        <p className="font-semibold text-sm pr-2">{feature.text}</p>
+                                    </div>
+                                </div>
+                           ))}
+                        </div>
+                    </div>
                 </div>
-            </div>
-             <div className="absolute bottom-0 left-0 right-0 text-white">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 150">
-                    <path fill="currentColor" d="M0,64L80,80C160,96,320,128,480,128C640,128,800,96,960,85.3C1120,75,1280,85,1360,90.7L1440,96L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z" style={{transform: 'translateY(1px)', color: 'hsl(var(--background))'}}></path>
-                </svg>
             </div>
         </section>
         
-        <div className="max-w-7xl mx-auto px-6 -mt-16 relative z-20">
-             <div className="bg-white rounded-lg shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
-                {heroFeatures.map(feature => (
-                    <div key={feature.text} className="flex items-center gap-3">
-                        <div className="bg-primary/10 text-primary p-3 rounded-lg"><feature.icon /></div>
-                        <div>
-                            <h3 className="font-semibold text-sm">{feature.text}</h3>
-                            <p className="text-xs text-muted-foreground">pharetra dis.</p>
+         <section className="py-16 bg-muted">
+            <div className="max-w-7xl mx-auto px-6">
+                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 items-center">
+                    {services.map((service, index) => (
+                        <div key={index} className="flex items-start gap-4 p-6 rounded-lg transition-all duration-300">
+                            <div className="bg-primary/10 text-primary p-4 rounded-full">
+                                <service.icon className="w-8 h-8" />
+                            </div>
+                            <div>
+                                <h3 className="text-lg font-semibold font-headline">{service.title}</h3>
+                                <p className="text-muted-foreground mt-1">{service.description}</p>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-        </div>
-
-        <section className="py-24">
-            <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 items-center gap-16">
-                 <div className="relative">
-                    <Image src="https://picsum.photos/seed/a1/500/500" alt="Student smiling" width={500} height={500} className="rounded-lg shadow-lg w-full" data-ai-hint="student laptop crossed legs" />
-                    <div className="absolute -left-8 -top-8 bg-primary text-primary-foreground rounded-full h-28 w-28 flex flex-col items-center justify-center text-center p-4 shadow-xl">
-                        <p className="text-3xl font-bold">7M+</p>
-                        <p className="text-xs font-medium">Member Active</p>
-                    </div>
-                </div>
-                <div>
-                    <h3 className="text-sm font-bold text-primary uppercase mb-2">Who We Are</h3>
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Primary Instruction, Higher Department Of Education</h2>
-                    <p className="text-muted-foreground mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.</p>
-                    <div className="space-y-6">
-                        {aboutFeatures.map(feature => (
-                            <div key={feature.title} className="flex items-start gap-4">
-                                <div className="bg-primary/10 text-primary p-3 rounded-lg"><feature.icon/></div>
-                                <div>
-                                    <h4 className="font-bold">{feature.title}</h4>
-                                    <p className="text-sm text-muted-foreground">{feature.description}</p>
-                                </div>
-                            </div>
-                        ))}
-                    </div>
+                    ))}
                 </div>
             </div>
         </section>
 
-        <section className="bg-cover bg-center text-white" style={{backgroundImage: "url('https://picsum.photos/seed/cta/1440/400')"}}>
-            <div className="bg-[#1D2A5A]/80 py-24">
-                <div className="max-w-4xl mx-auto px-6 text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Start your learning journey today! Enroll now in our online course.</h2>
-                    <p className="text-lg opacity-80 mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.</p>
-                    <Button size="lg" variant="secondary" className="bg-primary text-primary-foreground hover:bg-primary/90">
-                        <Link href="/courses">Discover More</Link>
-                    </Button>
+        <section id="events" className="py-24">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-headline font-semibold mb-4">Upcoming Events</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live sessions, workshops, and Q&As, and career guidance sessions to boost your learning.</p>
                 </div>
-            </div>
-        </section>
-
-        <section id="courses" className="py-24 bg-background">
-          <div className="max-w-7xl mx-auto px-6">
-              <div className="flex justify-between items-center mb-12">
-                <h2 className="text-3xl md:text-4xl font-bold">Featured Courses</h2>
-                <Button variant="outline" asChild>
-                    <Link href="/courses">All Courses</Link>
-                </Button>
-              </div>
-              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-                {loadingCourses ? (
-                  Array.from({length: 4}).map((_, i) => (
-                    <Card key={i}><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
-                  ))
-                ) : (
-                    allCourses.map((course) => (
-                    <Card key={course.id} className="group overflow-hidden flex flex-col shadow-md hover:shadow-xl transition-all duration-300">
-                        <CardHeader className="p-0 relative">
-                            <Link href={`/courses/${course.id}`} className="block">
-                                <Image
-                                    src={course.thumbnail}
-                                    alt={course.title}
-                                    width={400}
-                                    height={250}
-                                    className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                    data-ai-hint="online course"
-                                />
-                            </Link>
-                             <Badge className="absolute top-3 left-3 text-base" variant="destructive">{course.pricing.type === 'purchase' ? `R${course.pricing.price}` : 'Free'}</Badge>
-                        </CardHeader>
-                        <CardContent className="p-4 flex-grow flex flex-col">
-                           <div className="flex-grow">
-                                <p className="text-primary text-sm font-semibold">{course.subject}</p>
-                                <h3 className="font-bold text-lg mt-1 line-clamp-2">{course.title}</h3>
-                                {course.rating && (
-                                    <div className="flex items-center gap-1 text-sm mt-2 text-muted-foreground">
-                                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-500" />
-                                        <span>({course.rating.toFixed(1)})</span>
+                <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    {upcomingEvents.map((event, index) => (
+                        <Card key={event.id} onClick={() => handleEventClick(event)} className="group overflow-hidden flex flex-col cursor-pointer hover:shadow-primary/20 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
+                            <CardHeader className="p-0">
+                                <div className="relative h-48 bg-muted flex items-center justify-center">
+                                    <Calendar className="w-16 h-16 text-muted-foreground/30" />
+                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col justify-end p-4">
+                                        <h3 className="font-semibold text-lg text-white line-clamp-2">{event.title}</h3>
                                     </div>
-                                )}
-                            </div>
-                            <div className="border-t mt-4 pt-4">
-                                <Button asChild className="w-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground">
-                                    <Link href={`/courses/${course.id}`}>Enroll Now</Link>
-                                </Button>
-                            </div>
-                        </CardContent>
-                    </Card>
-                    ))
-                )}
-              </div>
-          </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="p-4 flex-grow">
+                                <div className="flex justify-between items-center text-sm text-muted-foreground">
+                                    <div className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> <span>{new Date(event.start).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric'})}</span></div>
+                                    <Badge variant="secondary">{event.subject}</Badge>
+                                </div>
+                                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{event.scope}</p>
+                            </CardContent>
+                             <CardFooter className="p-4 border-t">
+                                <span className="text-primary font-semibold text-sm group-hover:underline">View Details <ArrowRight className="inline-block ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+                 <EventDialog 
+                    event={selectedEvent}
+                    allEvents={upcomingEvents}
+                    isOpen={isEventDialogOpen} 
+                    onClose={() => setIsEventDialogOpen(false)}
+                    onEventSelect={(event) => setSelectedEvent(event)}
+                />
+            </div>
         </section>
+        
+        <CommunityPreview />
+
       </main>
       
       <Footer />
+       <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
     </div>
   );
 }
