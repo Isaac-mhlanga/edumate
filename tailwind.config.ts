@@ -21,8 +21,8 @@ export default {
         subtle: '0.0125em',
       },
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Lexend', 'sans-serif'],
+        body: ['Montserrat', 'sans-serif'],
+        headline: ['Montserrat', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
