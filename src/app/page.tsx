@@ -131,7 +131,7 @@ export default function Home() {
                 orderBy('start', 'asc')
             );
             const querySnapshot = await getDocs(eventsQuery);
-            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as CalendarEvent);
+            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
             setUpcomingEvents(fetchedEvents);
         } catch (error) {
             console.error("Error fetching upcoming events: ", error);
@@ -176,11 +176,6 @@ export default function Home() {
       title: 'One-on-One Tutoring',
       description: 'Get personalized help when you need it. Connect with our professional tutors for one-on-one sessions tailored to your learning style.'
     },
-    {
-      icon: <BookOpen />,
-      title: 'Assignment & Project Help',
-      description: 'Stuck on an assignment? Get expert guidance for your school and university projects to understand the material and boost your grades.'
-    }
   ];
 
   return (
@@ -188,7 +183,7 @@ export default function Home() {
       <PublicHeader />
 
       <main className="flex-1">
-        <section id="home" className="relative py-24 md:py-32 lg:py-48 text-center overflow-hidden">
+        <section id="home" className="relative py-24 md:py-32 text-center overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10" />
 
           {/* Animated Background Icons Layer */}
@@ -254,7 +249,24 @@ export default function Home() {
                   <Link href="/courses">Explore Courses</Link>
                 </Button>
               </div>
-              <div className="mt-8 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+
+               <div className="mt-16 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
+                  <div className="relative w-full max-w-3xl mx-auto">
+                      <div className="relative animate-float-student">
+                           <Image
+                              src="https://picsum.photos/seed/student-hero/800/450"
+                              alt="A studious young person engaged in online learning on their laptop, with a slight smile of understanding."
+                              width={800}
+                              height={450}
+                              className="rounded-2xl shadow-2xl shadow-primary/10"
+                              data-ai-hint="student learning"
+                            />
+                      </div>
+                  </div>
+              </div>
+
+
+              <div className="mt-16 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
                 <div className="flex items-center justify-center gap-x-6 gap-y-2 flex-wrap">
                   <span className="flex items-center gap-2">
                     <Play className="h-4 w-4 text-primary" />
@@ -357,7 +369,7 @@ export default function Home() {
                       It’s a simple, easy-to-use space designed to help you succeed. Here’s how our key features help you learn better.
                     </p>
                 </div>
-                <div className="grid md:grid-cols-3 gap-8">
+                <div className="grid md:grid-cols-2 gap-8">
                   {features.map((feature, index) => (
                     <Card key={index} className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                       <CardContent className="p-8 text-center flex flex-col items-center">
@@ -428,7 +440,7 @@ export default function Home() {
             <div className="text-center mb-12 animate-fade-in-up">
               <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">Upcoming Events</h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Join our live sessions, workshops, Q&amp;As, and career guidance events to boost your learning.
+                Join our live sessions, workshops, Q&As, and career guidance events to boost your learning.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

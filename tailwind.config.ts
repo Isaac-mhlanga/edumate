@@ -136,6 +136,10 @@ export default {
             transform: 'translate(0px, 0px) scale(1)',
           },
         },
+        'float-student': {
+          '0%, 100%': { transform: 'translateY(0) scale(1)' },
+          '50%': { transform: 'translateY(-20px) scale(1.03)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -147,6 +151,7 @@ export default {
         'float-3': 'float-3 12s ease-in-out infinite',
         'spin-slow': 'spin 20s linear infinite',
         'blob': 'blob 20s cubic-bezier(0.76, 0, 0.24, 1) infinite',
+        'float-student': 'float-student 10s ease-in-out infinite',
       },
        boxShadow: {
         'card-glow': '0 0 20px -5px hsl(var(--primary) / 0.3)',
