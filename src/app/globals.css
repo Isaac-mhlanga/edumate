@@ -25,7 +25,7 @@
     --border: 220 13% 35%;
     --input: 220 13% 35%;
     --ring: 173 80% 40%;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 
   .dark {
@@ -50,7 +50,7 @@
     --border: 220 13% 35%;
     --input: 220 13% 35%;
     --ring: 173 80% 40%;
-    --radius: 0.75rem;
+    --radius: 0.5rem;
   }
 }
  
