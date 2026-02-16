@@ -218,6 +218,14 @@ export default function Home() {
                     <PenSquare className="h-4 w-4 text-primary" />
                     Assignment Help
                   </span>
+                   <span className="flex items-center gap-2">
+                    <Banknote className="h-4 w-4 text-primary" />
+                    Bursary & NSFAS Guidance
+                  </span>
+                  <span className="flex items-center gap-2">
+                    <GraduationCap className="h-4 w-4 text-primary" />
+                    Career Guidance
+                  </span>
                 </div>
               </div>
             </div>
@@ -503,3 +511,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
