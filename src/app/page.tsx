@@ -20,9 +20,11 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { faqData } from "@/lib/data";
+import { faqData, upcomingEvents, type UpcomingEvent } from "@/lib/data";
 import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
+import { format } from "date-fns";
+import { EventDialog } from "@/components/event-dialog";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -72,6 +74,8 @@ export default function Home() {
   const [currentPage, setCurrentPage] = useState(1);
   const coursesPerPage = 6;
   const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<UpcomingEvent | null>(null);
+  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -109,6 +113,11 @@ export default function Home() {
       (currentPage - 1) * coursesPerPage,
       currentPage * coursesPerPage
   );
+  
+  const handleEventClick = (event: UpcomingEvent) => {
+    setSelectedEvent(event);
+    setIsEventDialogOpen(true);
+  };
 
   const formatDuration = (videos: VideoData[] = []) => {
       const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
@@ -332,7 +341,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="guidance" className="py-24 bg-muted/70">
+        <section id="guidance" className="py-24 bg-background">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
@@ -376,6 +385,45 @@ export default function Home() {
                     </Button>
                 </div>
             </div>
+        </section>
+        
+         <section id="events" className="py-24 bg-muted/70">
+          <div className="container mx-auto px-6">
+            <div className="text-center mb-12 animate-fade-in-up">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
+              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                Join our live sessions, workshops, and Q&As to boost your learning.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {upcomingEvents.map((event, index) => (
+                <Card key={event.id} className="animate-fade-in-up bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1" style={{ animationDelay: `${0.1 * index}s` }}>
+                  <CardHeader>
+                    <div className="flex items-center gap-4">
+                      <div className="flex flex-col items-center justify-center p-2 rounded-md bg-background text-muted-foreground w-16 h-16 border">
+                        <span className="text-xs font-bold uppercase text-primary">
+                          {format(new Date(event.start), 'MMM')}
+                        </span>
+                        <span className="text-3xl font-bold">{format(new Date(event.start), 'd')}</span>
+                      </div>
+                      <div className="flex-1">
+                        <CardTitle className="text-base line-clamp-1">{event.title}</CardTitle>
+                        <CardDescription>{event.instructor}</CardDescription>
+                      </div>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <p className="text-sm text-muted-foreground line-clamp-2">{event.scope}</p>
+                  </CardContent>
+                  <CardFooter>
+                    <Button variant="secondary" className="w-full" onClick={() => handleEventClick(event)}>
+                      View Details <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </CardFooter>
+                </Card>
+              ))}
+            </div>
+          </div>
         </section>
 
         <section id="courses" className="py-24 relative overflow-hidden bg-background">
@@ -515,6 +563,13 @@ export default function Home() {
       
       <Footer />
       <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
+      <EventDialog 
+        event={selectedEvent} 
+        allEvents={upcomingEvents}
+        isOpen={isEventDialogOpen} 
+        onClose={() => setIsEventDialogOpen(false)}
+        onEventSelect={handleEventClick}
+      />
     </div>
   );
 }

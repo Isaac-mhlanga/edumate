@@ -11,7 +11,8 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Calendar, Info, Download, Clock, Share2, Twitter, Facebook, Linkedin, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { Calendar, Info, Download, Clock, Share2, Link as LinkIcon, Loader2 } from 'lucide-react';
+import { FaTwitter, FaFacebook, FaLinkedin } from "react-icons/fa";
 import { type UpcomingEvent } from '@/lib/data';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
@@ -194,9 +195,9 @@ export function EventDialog({ event, allEvents, isOpen, onClose, onEventSelect }
 
           <DialogFooter className="sm:justify-between flex-col-reverse sm:flex-row gap-4 pt-4 border-t">
             <div className="flex items-center gap-2">
-              <Button variant="outline" size="icon" onClick={() => shareOnSocial('twitter')}><Twitter className="h-4 w-4" /></Button>
-              <Button variant="outline" size="icon" onClick={() => shareOnSocial('facebook')}><Facebook className="h-4 w-4" /></Button>
-              <Button variant="outline" size="icon" onClick={() => shareOnSocial('linkedin')}><Linkedin className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => shareOnSocial('twitter')}><FaTwitter className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => shareOnSocial('facebook')}><FaFacebook className="h-4 w-4" /></Button>
+              <Button variant="outline" size="icon" onClick={() => shareOnSocial('linkedin')}><FaLinkedin className="h-4 w-4" /></Button>
               <Button variant="outline" size="icon" onClick={copyLink}><LinkIcon className="h-4 w-4" /></Button>
             </div>
             <div className="flex items-center gap-2">
