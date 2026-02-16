@@ -21,8 +21,8 @@ export default {
         subtle: '0.03em',
       },
       fontFamily: {
-        body: ['Poppins', 'sans-serif'],
-        headline: ['"EB Garamond"', 'serif'],
+        body: ['Inter', 'sans-serif'],
+        headline: ['"Cormorant Garamond"', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

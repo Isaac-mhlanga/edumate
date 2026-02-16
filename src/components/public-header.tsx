@@ -34,8 +34,7 @@ export const PublicHeader = () => {
 
   return (
      <header className={cn(
-        "sticky top-0 z-50 transition-all duration-300",
-        scrolled ? 'border-b border-border/20 bg-background/80 backdrop-blur-xl' : ''
+        "sticky top-0 z-50 transition-all duration-300 border-b border-border/10 bg-background/80 backdrop-blur-xl"
      )}>
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center py-4">

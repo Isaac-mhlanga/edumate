@@ -22,10 +22,10 @@
     --accent-foreground: 210 20% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 30%;
-    --input: 220 13% 30%;
+    --border: 220 13% 35%;
+    --input: 220 13% 35%;
     --ring: 173 80% 40%;
-    --radius: 0rem;
+    --radius: 0.75rem;
   }
 
   .dark {
@@ -47,10 +47,10 @@
     --accent-foreground: 210 20% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 30%;
-    --input: 220 13% 30%;
+    --border: 220 13% 35%;
+    --input: 220 13% 35%;
     --ring: 173 80% 40%;
-    --radius: 0rem;
+    --radius: 0.75rem;
   }
 }
  
@@ -63,7 +63,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-bold tracking-tight;
+    @apply font-headline font-semibold tracking-tight;
   }
    ::-webkit-scrollbar {
     @apply w-2;
