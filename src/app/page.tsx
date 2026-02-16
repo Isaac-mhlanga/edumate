@@ -13,7 +13,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { collection, getDocs, getFirestore, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, ShieldCheck, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket } from "lucide-react";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, ShieldCheck, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
