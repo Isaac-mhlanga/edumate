@@ -131,7 +131,7 @@ export default function Home() {
                 orderBy('start', 'asc')
             );
             const querySnapshot = await getDocs(eventsQuery);
-            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
+            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as CalendarEvent);
             setUpcomingEvents(fetchedEvents);
         } catch (error) {
             console.error("Error fetching upcoming events: ", error);
@@ -249,22 +249,6 @@ export default function Home() {
                   <Link href="/courses">Explore Courses</Link>
                 </Button>
               </div>
-
-               <div className="mt-16 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
-                  <div className="relative w-full max-w-3xl mx-auto">
-                      <div className="relative animate-float-student">
-                           <Image
-                              src="https://picsum.photos/seed/student-hero/800/450"
-                              alt="A studious young person engaged in online learning on their laptop, with a slight smile of understanding."
-                              width={800}
-                              height={450}
-                              className="rounded-2xl shadow-2xl shadow-primary/10"
-                              data-ai-hint="student learning"
-                            />
-                      </div>
-                  </div>
-              </div>
-
 
               <div className="mt-16 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
                 <div className="flex items-center justify-center gap-x-6 gap-y-2 flex-wrap">
@@ -627,3 +611,4 @@ export default function Home() {
     </div>
   );
 }
+    
