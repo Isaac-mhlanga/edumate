@@ -4,51 +4,51 @@
 
 @layer base {
   :root {
-    --background: 220 13% 11%;
+    --background: 220 13% 18%;
     --foreground: 210 20% 98%;
-    --card: 220 13% 17%;
+    --card: 220 13% 22%;
     --card-foreground: 210 20% 98%;
     --popover: 220 13% 17%;
     --popover-foreground: 210 20% 98%;
-    --sidebar: 220 13% 11%;
+    --sidebar: 220 13% 14%;
     --sidebar-foreground: 210 20% 98%;
     --primary: 173 80% 40%;
     --primary-foreground: 210 20% 98%;
     --secondary: 220 13% 24%;
     --secondary-foreground: 210 20% 98%;
-    --muted: 220 13% 17%;
-    --muted-foreground: 215 25% 65%;
+    --muted: 220 13% 28%;
+    --muted-foreground: 215 25% 75%;
     --accent: 220 13% 24%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 24%;
-    --input: 220 13% 24%;
+    --border: 220 13% 30%;
+    --input: 220 13% 30%;
     --ring: 173 80% 40%;
     --radius: 0.5rem;
   }
 
   .dark {
-    --background: 220 13% 11%;
+    --background: 220 13% 18%;
     --foreground: 210 20% 98%;
-    --card: 220 13% 17%;
+    --card: 220 13% 22%;
     --card-foreground: 210 20% 98%;
     --popover: 220 13% 17%;
     --popover-foreground: 210 20% 98%;
-    --sidebar: 220 13% 11%;
+    --sidebar: 220 13% 14%;
     --sidebar-foreground: 210 20% 98%;
     --primary: 173 80% 40%;
     --primary-foreground: 210 20% 98%;
     --secondary: 220 13% 24%;
     --secondary-foreground: 210 20% 98%;
-    --muted: 220 13% 17%;
-    --muted-foreground: 215 25% 65%;
+    --muted: 220 13% 28%;
+    --muted-foreground: 215 25% 75%;
     --accent: 220 13% 24%;
     --accent-foreground: 210 20% 98%;
     --destructive: 0 63% 31%;
     --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 24%;
-    --input: 220 13% 24%;
+    --border: 220 13% 30%;
+    --input: 220 13% 30%;
     --ring: 173 80% 40%;
     --radius: 0.5rem;
   }
@@ -63,7 +63,7 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-semibold tracking-tight;
+    @apply font-headline font-bold tracking-tight;
   }
    ::-webkit-scrollbar {
     @apply w-2;
