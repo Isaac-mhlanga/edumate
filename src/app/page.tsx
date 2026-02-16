@@ -311,7 +311,7 @@ export default function Home() {
             <div className="container mx-auto px-6 relative">
                 <div className="grid md:grid-cols-2 gap-8 items-center">
                     <div className="animate-fade-in-up">
-                        <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">
+                        <h2 className="text-3xl md:text-4xl font-headline font-semibold mb-4">
                             Refer &amp; Earn
                         </h2>
                         <p className="text-lg text-muted-foreground mb-6">
@@ -354,7 +354,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
           <div className="container mx-auto px-6 relative">
                  <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
+                    <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">
                       A Smarter Way to Learn
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -384,7 +384,7 @@ export default function Home() {
         <section id="guidance" className="py-24 bg-background">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
+                    <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">
                     Student Guidance Services
                     </h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
@@ -430,7 +430,7 @@ export default function Home() {
          <section id="events" className="py-24 bg-muted/70">
           <div className="container mx-auto px-6">
             <div className="text-center mb-12 animate-fade-in-up">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
+              <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">Upcoming Events</h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
                 Join our live sessions, workshops, Q&amp;As, and career guidance events to boost your learning.
               </p>
@@ -476,7 +476,7 @@ export default function Home() {
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="max-w-7xl mx-auto px-6 relative">
               <div className="text-center mb-12 animate-fade-in-up">
-                <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Featured Courses</h2>
+                <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">Featured Courses</h2>
                 <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Jump into our most popular courses. These are hand-picked to give you the best start. Learn from experts and hit your goals.</p>
               </div>
               <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -553,7 +553,7 @@ export default function Home() {
             <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
             <div className="max-w-7xl mx-auto px-6 relative">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">Frequently Asked Questions</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-semibold mb-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Got questions? We've got answers. Here are some common questions about our platform. If you can't find what you need, just ask!</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4">
@@ -586,7 +586,7 @@ export default function Home() {
           <div className="container mx-auto px-6 relative">
             <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 animate-fade-in-up">
                 <CardHeader className="p-0 mb-4">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">
+                    <h2 className="text-3xl md:text-4xl font-headline font-semibold">
                         Begin Your Journey to Excellence
                     </h2>
                 </CardHeader>

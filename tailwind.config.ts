@@ -18,7 +18,7 @@ export default {
     },
     extend: {
       letterSpacing: {
-        subtle: '0.0125em',
+        subtle: '0.02em',
       },
       fontFamily: {
         body: ['Montserrat', 'sans-serif'],
