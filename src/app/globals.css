@@ -25,7 +25,7 @@
     --border: 220 13% 30%;
     --input: 220 13% 30%;
     --ring: 173 80% 40%;
-    --radius: 0.5rem;
+    --radius: 0rem;
   }
 
   .dark {
@@ -50,7 +50,7 @@
     --border: 220 13% 30%;
     --input: 220 13% 30%;
     --ring: 173 80% 40%;
-    --radius: 0.5rem;
+    --radius: 0rem;
   }
 }
  
@@ -59,7 +59,7 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground min-h-screen font-body text-base leading-relaxed tracking-subtle;
+    @apply bg-background text-foreground min-h-screen font-body text-base leading-relaxed;
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   h1, h2, h3, h4, h5, h6 {

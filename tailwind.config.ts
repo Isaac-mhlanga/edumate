@@ -21,8 +21,8 @@ export default {
         subtle: '0.03em',
       },
       fontFamily: {
-        body: ['Montserrat', 'sans-serif'],
-        headline: ['Montserrat', 'sans-serif'],
+        body: ['Poppins', 'sans-serif'],
+        headline: ['"EB Garamond"', 'serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
