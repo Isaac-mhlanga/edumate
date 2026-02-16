@@ -4,24 +4,13 @@ import React from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
-import { LogIn, Menu, X } from 'lucide-react';
+import { Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 export const PublicHeader = () => {
   const pathname = usePathname();
-  const [scrolled, setScrolled] = React.useState(false);
-
-  React.useEffect(() => {
-    const handleScroll = () => {
-      setScrolled(window.scrollY > 10);
-    };
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-    };
-  }, []);
 
   const navItems = [
     { name: 'Home', href: '/' },
@@ -33,25 +22,23 @@ export const PublicHeader = () => {
   ];
 
   return (
-     <header className={cn(
-        "sticky top-0 z-50 transition-all duration-300 border-b border-border/10 bg-background/80 backdrop-blur-xl"
-     )}>
+     <header className="bg-background/95 sticky top-0 z-50 border-b backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-3">
               <Link href="/" className="flex items-center gap-2">
-                <Icons.logo className="w-auto h-8" />
+                <Icons.logo className="w-auto h-8 text-primary" />
               </Link>
             </div>
             
-             <nav className="hidden lg:flex absolute left-1/2 -translate-x-1/2 space-x-6">
+             <nav className="hidden lg:flex items-center space-x-6">
               {navItems.map((item) => (
                 <Link 
                     key={item.name} 
                     href={item.href} 
                     className={cn(
                         "text-sm font-medium transition-colors duration-300",
-                        pathname === item.href ? 'text-primary' : 'text-muted-foreground hover:text-primary'
+                        pathname === item.href ? 'text-primary' : 'text-foreground/80 hover:text-primary'
                     )}
                 >
                     {item.name}
@@ -60,14 +47,8 @@ export const PublicHeader = () => {
             </nav>
             
             <div className="hidden lg:flex items-center gap-2">
-                <Button variant="ghost" asChild>
-                    <Link href="/login">
-                      <LogIn className="mr-2 h-4 w-4" />
-                      Login
-                    </Link>
-                </Button>
                 <Button asChild>
-                    <Link href="/register">Register</Link>
+                    <Link href="/register">Get Started</Link>
                 </Button>
             </div>
 
@@ -102,14 +83,14 @@ export const PublicHeader = () => {
                       ))}
                     </div>
                      <div className="mt-auto border-t pt-6 flex flex-col gap-4">
-                      <SheetClose asChild>
+                       <SheetClose asChild>
                         <Button variant="outline" asChild size="lg">
                           <Link href="/login">Login</Link>
                         </Button>
                       </SheetClose>
                       <SheetClose asChild>
                         <Button asChild size="lg">
-                          <Link href="/register">Register</Link>
+                          <Link href="/register">Get Started</Link>
                         </Button>
                       </SheetClose>
                     </div>

@@ -21,8 +21,8 @@ export default {
         subtle: '0.03em',
       },
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        body: ['Poppins', 'sans-serif'],
+        headline: ['Poppins', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',

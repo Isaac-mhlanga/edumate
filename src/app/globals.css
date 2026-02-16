@@ -4,27 +4,25 @@
 
 @layer base {
   :root {
-    --background: 220 13% 18%;
-    --foreground: 210 20% 98%;
-    --card: 220 13% 22%;
-    --card-foreground: 210 20% 98%;
-    --popover: 220 13% 17%;
-    --popover-foreground: 210 20% 98%;
-    --sidebar: 220 13% 14%;
-    --sidebar-foreground: 210 20% 98%;
-    --primary: 173 80% 40%;
-    --primary-foreground: 210 20% 98%;
-    --secondary: 220 13% 24%;
-    --secondary-foreground: 210 20% 98%;
-    --muted: 220 13% 28%;
-    --muted-foreground: 215 25% 75%;
-    --accent: 220 13% 24%;
-    --accent-foreground: 210 20% 98%;
-    --destructive: 0 63% 31%;
-    --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 35%;
-    --input: 220 13% 35%;
-    --ring: 173 80% 40%;
+    --background: 0 0% 100%;
+    --foreground: 224 71% 4%;
+    --card: 0 0% 100%;
+    --card-foreground: 224 71% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 224 71% 4%;
+    --primary: 158 88% 41%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 220 13% 91%;
+    --secondary-foreground: 224 71% 4%;
+    --muted: 220 13% 96%;
+    --muted-foreground: 220 9% 46%;
+    --accent: 220 13% 91%;
+    --accent-foreground: 224 71% 4%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 158 88% 41%;
     --radius: 0.5rem;
   }
 
@@ -63,15 +61,20 @@
     font-feature-settings: "rlig" 1, "calt" 1;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-headline font-semibold tracking-tight;
+    @apply font-headline font-bold;
   }
    ::-webkit-scrollbar {
     @apply w-2;
   }
   
-  ::-webkit-scrollbar-thumb {
-    @apply bg-gray-700 rounded-full;
+  .light ::-webkit-scrollbar-thumb {
+    @apply bg-gray-300;
   }
+  
+  .dark ::-webkit-scrollbar-thumb {
+    @apply bg-gray-700;
+  }
+
   @media print {
     body {
         background-color: white;

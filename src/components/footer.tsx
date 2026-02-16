@@ -5,7 +5,7 @@ import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
 
 export function Footer() {
   return (
-    <footer className="border-t border-border/20 bg-background/50">
+    <footer className="bg-background border-t">
       <div className="max-w-7xl mx-auto px-6 py-12">
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             <div className="col-span-2 md:col-span-1 space-y-4">
@@ -48,7 +48,7 @@ export function Footer() {
                 </div>
             </div>
         </div>
-        <div className="mt-8 pt-8 border-t border-border/20 text-center text-sm text-muted-foreground">
+        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Edumate Pro. All rights reserved.</p>
         </div>
       </div>

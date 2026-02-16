@@ -6,60 +6,25 @@ export const Icons = {
     <svg
       width="150"
       height="40"
-      viewBox="0 0 150 40"
+      viewBox="0 0 110 30"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       {...props}
     >
-      <g clipPath="url(#clip0_1_2)">
-        {/* The blue circle with a brush effect (simplified) */}
-        <circle cx="20" cy="20" r="18" stroke="hsl(var(--primary))" strokeWidth="2" fill="none"/>
-        <path d="M5 20 A 15 15 0 0 1 35 20 A 15 15 0 0 1 5 20" fill="none" stroke="hsl(var(--primary))" strokeWidth="2.5" strokeLinecap="round" transform="rotate(-15 20 20)" />
-
-        {/* The 'E' inside the circle */}
+        <circle cx="15" cy="15" r="12" fill="hsl(var(--primary))"/>
+        <path d="M11 19L19 11" stroke="white" strokeWidth="2" strokeLinecap="round"/>
+        <path d="M19 19L11 11" stroke="white" strokeWidth="2" strokeLinecap="round"/>
         <text
-          x="13"
-          y="28"
-          fontFamily="serif"
-          fontSize="24"
-          fill="hsl(var(--primary))"
-          fontWeight="bold"
+            x="35"
+            y="21"
+            fontFamily="Poppins, sans-serif"
+            fontSize="16"
+            fill="hsl(var(--foreground))"
+            fontWeight="bold"
         >
-          E
+            ekursus
         </text>
-
-        {/* The text "EDUMATE" */}
-        <text
-          x="45"
-          y="22"
-          fontFamily="serif"
-          fontSize="16"
-          fill="hsl(var(--foreground))"
-          fontWeight="bold"
-          letterSpacing="1"
-        >
-          EDUMATE
-        </text>
-
-        {/* The text "LEARN SMARTER" */}
-        <text
-          x="45"
-          y="35"
-          fontFamily="sans-serif"
-          fontSize="7"
-          fill="hsl(var(--foreground))"
-          fontWeight="normal"
-          letterSpacing="1.5"
-        >
-          LEARN SMARTER
-        </text>
-      </g>
-      <defs>
-        <clipPath id="clip0_1_2">
-          <rect width="150" height="40" fill="white" />
-        </clipPath>
-      </defs>
     </svg>
   ),
   tiktok: ({ className, ...props }: SVGProps<SVGSVGElement>) => (

@@ -3,28 +3,17 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight, User, ChevronLeft, Banknote } from "lucide-react";
+import { Award, BookOpen, ChevronRight, Clapperboard, Star, UserCog, Video } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { PublicHeader } from "@/components/public-header";
 import { getFirestore, collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
-import { faqData } from "@/lib/data";
-import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
-import { EnquiryDialog } from "@/components/enquiry-dialog";
-import { format } from "date-fns";
-import { EventDialog } from "@/components/event-dialog";
+import { Rocket, GraduationCap } from "lucide-react";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -61,21 +50,6 @@ type Course = {
     instructor?: string;
 };
 
-type CalendarEvent = {
-    id: string;
-    title: string;
-    start: string;
-    end?: string;
-    allDay: boolean;
-    color?: string;
-    description?: string;
-    instructor?: string;
-    grade?: string;
-    subject?: string;
-    scope?: string;
-    platforms?: ('tiktok' | 'youtube' | 'zoom')[];
-};
-
 type UserDoc = {
     id: string;
     fullName: string;
@@ -86,14 +60,7 @@ type UserDoc = {
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
-  const [currentPage, setCurrentPage] = useState(1);
-  const coursesPerPage = 6;
-  const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
-  const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-
+  
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
@@ -105,13 +72,14 @@ export default function Home() {
             const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as UserDoc);
             const instructorMap = new Map(users.filter(u => u.role === 'instructor').map(i => [i.id, i.fullName]));
 
-            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'));
+            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'), orderBy('createdAt', 'desc'), limit(6));
             const querySnapshot = await getDocs(coursesQuery);
             const fetchedCourses = querySnapshot.docs.map(doc => {
                 const courseData = { id: doc.id, ...doc.data() } as Course;
                 return {
                     ...courseData,
-                    instructor: instructorMap.get(courseData.instructorId) || 'Edumate Team'
+                    instructor: instructorMap.get(courseData.instructorId) || 'Edumate Team',
+                    rating: 4.2 + (Math.random() * 0.7) // Add random rating
                 };
             });
             setAllCourses(fetchedCourses);
@@ -122,493 +90,160 @@ export default function Home() {
         }
     };
     
-    const fetchEvents = async () => {
-        setLoadingEvents(true);
-        try {
-            const eventsQuery = query(
-                collection(firestore, 'events'), 
-                where('start', '>=', new Date().toISOString()), 
-                orderBy('start', 'asc')
-            );
-            const querySnapshot = await getDocs(eventsQuery);
-            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as CalendarEvent);
-            setUpcomingEvents(fetchedEvents);
-        } catch (error) {
-            console.error("Error fetching upcoming events: ", error);
-        } finally {
-            setLoadingEvents(false);
-        }
-    };
-    
     fetchCoursesAndUsers();
-    fetchEvents();
   }, []);
 
-  const totalPages = Math.ceil(allCourses.length / coursesPerPage);
-  const paginatedCourses = allCourses.slice(
-      (currentPage - 1) * coursesPerPage,
-      currentPage * coursesPerPage
-  );
+  const heroFeatures = [
+      { icon: Clapperboard, text: "Online Course"},
+      { icon: Video, text: "Live Webinar"},
+      { icon: UserCog, text: "Career Mentoring"},
+      { icon: Award, text: "Certification"},
+  ]
   
-  const handleEventClick = (event: CalendarEvent) => {
-    setSelectedEvent(event);
-    setIsEventDialogOpen(true);
-  };
-
-  const formatDuration = (videos: VideoData[] = []) => {
-      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
-      if (totalSeconds === 0) return null;
-      const hours = Math.floor(totalSeconds / 3600);
-      const minutes = Math.floor((totalSeconds % 3600) / 60);
-      if (hours > 0) return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
-      if (minutes > 0) return `${minutes}m`;
-      return `${Math.round(totalSeconds)}s`;
-  };
-
-  const features = [
-    {
-      icon: <GraduationCap />,
-      title: 'Expert-Led Video Lessons',
-      description: 'Learn at your own pace with on-demand video lessons from subject-matter experts that make complex topics simple and clear.'
-    },
-    {
-      icon: <Users />,
-      title: 'One-on-One Tutoring',
-      description: 'Get personalized help when you need it. Connect with our professional tutors for one-on-one sessions tailored to your learning style.'
-    },
-  ];
+  const aboutFeatures = [
+      { icon: GraduationCap, title: "Online Courses", description: "Proin sodales feugiat odio curabitur curabitur." },
+      { icon: Rocket, title: "Upgrade Personal Skill", description: "Proin sodales feugiat odio curabitur curabitur." },
+      { icon: Award, title: "Certifications", description: "Proin sodales feugiat odio curabitur curabitur." },
+  ]
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <PublicHeader />
 
-      <main className="flex-1">
-        <section id="home" className="relative py-24 md:py-32 text-center overflow-hidden">
-          <div className="absolute inset-0 bg-gradient-to-b from-background via-transparent to-background z-10" />
-
-          {/* Animated Background Icons Layer */}
-          <div
-            aria-hidden="true"
-            className="absolute inset-0 -z-10 overflow-hidden"
-          >
-            {/* Glowing Blobs */}
-            <div className="absolute -top-1/4 -left-1/4 w-96 h-96 bg-primary/10 rounded-full animate-blob filter blur-3xl opacity-40" style={{animationDuration: '20s'}}></div>
-            <div className="absolute -bottom-1/4 -right-1/4 w-80 h-80 bg-accent/10 rounded-full animate-blob filter blur-3xl opacity-40" style={{animationDuration: '18s', animationDelay: '3s'}}></div>
-
-            {/* Atom Icon */}
-            <div className="absolute -top-10 -left-10 w-24 h-24 text-primary/10 animate-float-1">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="1"/><path d="M20.2 20.2c2.04-2.03.02-5.91-4.04-9.96-4.06-4.06-7.93-6.08-9.96-4.04-2.03 2.04-.02 5.91 4.04 9.96 4.06 4.06 7.93 6.08 9.96 4.04Z"/><path d="M3.8 3.8c-2.04 2.03-.02 5.91 4.04 9.96 4.06 4.06 7.93 6.08 9.96 4.04 2.03-2.04.02-5.91-4.04-9.96-4.06-4.06-7.93-6.08-9.96-4.04Z"/>
-                </svg>
-            </div>
-            {/* DNA Icon */}
-             <div className="absolute top-1/2 -right-12 w-28 h-28 text-primary/10 animate-float-2 opacity-50">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M4 14.5A8.5 8.5 0 0 1 15 4M9 20a8.5 8.5 0 0 1 11-10.5"/><path d="M15 4a8.5 8.5 0 0 0-11 10.5"/><path d="M9.5 20A8.5 8.5 0 0 0 20 9"/><path d="m7 11 1 1"/><path d="m16 8 1 1"/><path d="m12.5 15.5 1 1"/><path d="m8.5 4.5 1 1"/><path d="m15 13 1 1"/>
-                </svg>
-            </div>
-            {/* Sigma Icon */}
-            <div className="absolute -bottom-12 left-1/4 w-20 h-20 text-accent/20 animate-float-3 animate-spin-slow">
-                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 7V4H6v3"/><path d="M6 20v-3h12v3"/><path d="M18 7 6 20"/>
-                </svg>
-            </div>
-             {/* Flask Icon */}
-            <div className="absolute bottom-1/4 -left-10 w-20 h-20 text-accent/10 animate-float-1 opacity-75">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M8.5 2h7"/><path d="M8.5 2v1.71c0 .9.58 1.69 1.43 1.95.85.26 1.71.26 2.56 0 .85-.26 1.43-1.05 1.43-1.95V2"/><path d="M3.29 12.46c.44-.94.7-1.46.7-2.46 0-1-.26-1.52-.7-2.46l-.06-.11A.5.5 0 0 1 3.5 7h17a.5.5 0 0 1 .27.92l-.06.11c-.44.94-.7 1.46-.7 2.46 0 1 .26 1.52.7 2.46l.06.11a.5.5 0 0 1-.27.92H3.5a.5.5 0 0 1-.27-.92l.06-.11Z"/><path d="M12 13V9"/><path d="M8.5 22h7"/>
-                </svg>
-            </div>
-             {/* Plus Icon */}
-            <div className="absolute top-10 right-10 w-16 h-16 text-primary/5 animate-spin-slow">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-            </div>
-          </div>
-
-          <div className="container mx-auto px-6 relative z-20">
-            <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-headline font-semibold mb-6 animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-foreground to-primary animate-shimmer">
-                Accessible, Quality Education for All
-              </h1>
-              <p
-                className="text-lg md:text-xl text-muted-foreground mb-8 animate-fade-in-up"
-                style={{ animationDelay: '0.2s' }}
-              >
-                It’s simple. We give you the tools, you do the work. With easy-to-follow videos and expert help on demand, you can learn faster, smarter, and with less stress.
-              </p>
-              <div
-                className="flex flex-col sm:flex-row items-center justify-center gap-4 animate-fade-in-up"
-                style={{ animationDelay: '0.4s' }}
-              >
-                <Button asChild size="lg">
-                  <Link href="/register">
-                    Get Started Free <ArrowRight className="ml-2" />
-                  </Link>
-                </Button>
-                <Button asChild size="lg" variant="outline">
-                  <Link href="/courses">Explore Courses</Link>
-                </Button>
-              </div>
-
-              <div className="mt-16 text-sm text-muted-foreground animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
-                <div className="flex items-center justify-center gap-x-6 gap-y-2 flex-wrap">
-                  <span className="flex items-center gap-2">
-                    <Play className="h-4 w-4 text-primary" />
-                    On-demand Videos
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <Users className="h-4 w-4 text-primary" />
-                    Expert Tutors
-                  </span>
-                   <span className="flex items-center gap-2">
-                    <Banknote className="h-4 w-4 text-primary" />
-                    Bursary & NSFAS Guidance
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <GraduationCap className="h-4 w-4 text-primary" />
-                    Career Guidance
-                  </span>
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        <section className="py-12 bg-muted/40 animate-fade-in-up">
-          <div className="container mx-auto px-6">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-                <div>
-                    <h3 className="text-4xl font-bold text-primary font-headline">95%</h3>
-                    <p className="text-muted-foreground">Improved Scores</p>
-                </div>
-                <div>
-                    <h3 className="text-4xl font-bold text-primary font-headline">2.3x</h3>
-                    <p className="text-muted-foreground">Faster Learning</p>
-                </div>
-                <div>
-                    <h3 className="text-4xl font-bold text-primary font-headline">10k+</h3>
-                    <p className="text-muted-foreground">Happy Students</p>
-                </div>
-                <div>
-                    <h3 className="text-4xl font-bold text-primary font-headline">Top 1%</h3>
-                    <p className="text-muted-foreground">Expert Tutors</p>
-                </div>
-            </div>
-          </div>
-        </section>
-
-        <section id="refer" className="py-24 relative overflow-hidden">
-            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-            <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
-            <div className="container mx-auto px-6 relative">
-                <div className="grid md:grid-cols-2 gap-8 items-center">
-                    <div className="animate-fade-in-up">
-                        <h2 className="text-3xl md:text-4xl font-headline font-semibold mb-4">
-                            Refer &amp; Earn
-                        </h2>
-                        <p className="text-lg text-muted-foreground mb-6">
-                           Invite friends to Edumate Pro and earn R20 for each one who signs up. It's our way of saying thanks for helping our community grow.
-                        </p>
-                        <div className="flex items-center gap-4 mb-6">
-                            <p className="text-sm font-medium">Share on:</p>
-                            <div className="flex space-x-2">
-                                <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
-                                <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
-                                <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
-                            </div>
-                        </div>
-                        <Button asChild size="lg">
-                            <Link href="/register">
-                                Sign Up and Get Referral Code <ArrowRight className="ml-2" />
-                            </Link>
+      <main>
+        <section className="relative bg-[#0EAB83] text-white pt-24 overflow-hidden">
+            <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 items-center gap-8 py-20">
+                <div className="z-10 text-center lg:text-left">
+                    <Badge variant="outline" className="bg-white/10 text-white border-white/20 mb-4">#FREE TRIAL 30 DAYS</Badge>
+                    <h1 className="text-4xl md:text-5xl font-bold mb-4">Upgrade your skills and knowledge with our online course</h1>
+                    <p className="text-lg opacity-80 mb-8">Unlock your potential with our 30-day free trial - sign up with your email today!</p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                         <Button size="lg" variant="secondary" className="bg-white text-primary hover:bg-gray-200">
+                           <Link href="/register">Get Started Free <ChevronRight className="ml-2" /></Link>
                         </Button>
                     </div>
-                    <div className="animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
-                        <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 p-8 text-center">
-                            <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20">
-                                <Gift className="w-10 h-10 text-primary" />
+                </div>
+                <div className="relative h-full hidden lg:block">
+                     <Image src="https://picsum.photos/seed/h1/300/450" alt="Student with laptop" width={300} height={450} className="rounded-lg shadow-2xl absolute bottom-0 right-1/2 translate-x-1/4 z-10" data-ai-hint="student laptop"/>
+                     <Image src="https://picsum.photos/seed/h2/300/450" alt="Student with clipboard" width={300} height={450} className="rounded-lg shadow-2xl absolute bottom-0 right-0" data-ai-hint="student notebook"/>
+                </div>
+            </div>
+             <div className="absolute bottom-0 left-0 right-0 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 150">
+                    <path fill="currentColor" d="M0,64L80,80C160,96,320,128,480,128C640,128,800,96,960,85.3C1120,75,1280,85,1360,90.7L1440,96L1440,320L1360,320C1280,320,1120,320,960,320C800,320,640,320,480,320C320,320,160,320,80,320L0,320Z" style={{transform: 'translateY(1px)', color: 'hsl(var(--background))'}}></path>
+                </svg>
+            </div>
+        </section>
+        
+        <div className="max-w-7xl mx-auto px-6 -mt-16 relative z-20">
+             <div className="bg-white rounded-lg shadow-xl grid grid-cols-2 md:grid-cols-4 gap-4 p-6">
+                {heroFeatures.map(feature => (
+                    <div key={feature.text} className="flex items-center gap-3">
+                        <div className="bg-primary/10 text-primary p-3 rounded-lg"><feature.icon /></div>
+                        <div>
+                            <h3 className="font-semibold text-sm">{feature.text}</h3>
+                            <p className="text-xs text-muted-foreground">pharetra dis.</p>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+
+        <section className="py-24">
+            <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 items-center gap-16">
+                 <div className="relative">
+                    <Image src="https://picsum.photos/seed/a1/500/500" alt="Student smiling" width={500} height={500} className="rounded-lg shadow-lg w-full" data-ai-hint="student laptop crossed legs" />
+                    <div className="absolute -left-8 -top-8 bg-primary text-primary-foreground rounded-full h-28 w-28 flex flex-col items-center justify-center text-center p-4 shadow-xl">
+                        <p className="text-3xl font-bold">7M+</p>
+                        <p className="text-xs font-medium">Member Active</p>
+                    </div>
+                </div>
+                <div>
+                    <h3 className="text-sm font-bold text-primary uppercase mb-2">Who We Are</h3>
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Primary Instruction, Higher Department Of Education</h2>
+                    <p className="text-muted-foreground mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.</p>
+                    <div className="space-y-6">
+                        {aboutFeatures.map(feature => (
+                            <div key={feature.title} className="flex items-start gap-4">
+                                <div className="bg-primary/10 text-primary p-3 rounded-lg"><feature.icon/></div>
+                                <div>
+                                    <h4 className="font-bold">{feature.title}</h4>
+                                    <p className="text-sm text-muted-foreground">{feature.description}</p>
+                                </div>
                             </div>
-                            <CardTitle className="text-xl mb-2">
-                                Share the Knowledge, Get Rewarded
-                            </CardTitle>
-                            <p className="text-5xl font-bold text-primary my-4">R20</p>
-                            <p className="text-muted-foreground text-sm">
-                                For every successful referral.
-                            </p>
-                        </Card>
+                        ))}
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="features" className="py-24 bg-muted/40 relative overflow-hidden">
-          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-          <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent"></div>
-          <div className="container mx-auto px-6 relative">
-                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">
-                      A Smarter Way to Learn
-                    </h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                      It’s a simple, easy-to-use space designed to help you succeed. Here’s how our key features help you learn better.
-                    </p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-8">
-                  {features.map((feature, index) => (
-                    <Card key={index} className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up" style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
-                      <CardContent className="p-8 text-center flex flex-col items-center">
-                        <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
-                            {React.cloneElement(feature.icon, { className: "w-8 h-8 text-primary" })}
-                        </div>
-                        <CardTitle className="text-xl mb-2">
-                            {feature.title}
-                        </CardTitle>
-                        <p className="text-muted-foreground text-sm">
-                            {feature.description}
-                        </p>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-            </div>
-        </section>
-
-        <section id="guidance" className="py-24 bg-background">
-            <div className="container mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">
-                    Student Guidance Services
-                    </h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                    Navigate your future with confidence. We offer expert guidance on university applications, funding, and career choices to help you succeed beyond the classroom.
-                    </p>
-                </div>
-                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up" style={{ animationDelay: `0.2s` }}>
-                        <CardContent className="p-8 text-center flex flex-col items-center">
-                            <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
-                                <Banknote className="w-8 h-8 text-primary" />
-                            </div>
-                            <CardTitle className="text-xl mb-2">
-                                Bursary &amp; NSFAS Guidance
-                            </CardTitle>
-                            <p className="text-muted-foreground text-sm">
-                                Secure your funding with our expert help. We guide you through the entire application process for bursaries and NSFAS to maximize your chances.
-                            </p>
-                        </CardContent>
-                    </Card>
-                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up" style={{ animationDelay: `0.3s` }}>
-                        <CardContent className="p-8 text-center flex flex-col items-center">
-                        <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
-                            <GraduationCap className="w-8 h-8 text-primary" />
-                        </div>
-                        <CardTitle className="text-xl mb-2">
-                            University Career Guidance
-                        </CardTitle>
-                        <p className="text-muted-foreground text-sm">
-                            Align your passions with a fulfilling career. Get personalized advice on choosing the right degree and university to achieve your long-term goals.
-                        </p>
-                        </CardContent>
-                    </Card>
-                </div>
-                <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                    <Button size="lg" onClick={() => setIsEnquiryDialogOpen(true)}>
-                        Book a Guidance Session <ArrowRight className="ml-2" />
+        <section className="bg-cover bg-center text-white" style={{backgroundImage: "url('https://picsum.photos/seed/cta/1440/400')"}}>
+            <div className="bg-[#1D2A5A]/80 py-24">
+                <div className="max-w-4xl mx-auto px-6 text-center">
+                    <h2 className="text-3xl md:text-4xl font-bold mb-4">Start your learning journey today! Enroll now in our online course.</h2>
+                    <p className="text-lg opacity-80 mb-8">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Ut elit tellus, luctus nec ullamcorper mattis, pulvinar dapibus leo.</p>
+                    <Button size="lg" variant="secondary" className="bg-primary text-primary-foreground hover:bg-primary/90">
+                        <Link href="/courses">Discover More</Link>
                     </Button>
                 </div>
             </div>
         </section>
-        
-         <section id="events" className="py-24 bg-muted/40">
-          <div className="container mx-auto px-6">
-            <div className="text-center mb-12 animate-fade-in-up">
-              <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">Upcoming Events</h2>
-              <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Join our live sessions, workshops, Q&As, and career guidance events to boost your learning.
-              </p>
-            </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {loadingEvents ? (
-                  Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-48" />)
-              ) : upcomingEvents.length > 0 ? (
-                  upcomingEvents.slice(0, 3).map((event, index) => (
-                    <Card key={event.id} className="animate-fade-in-up bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1" style={{ animationDelay: `${0.1 * index}s` }}>
-                      <CardHeader>
-                        <div className="flex items-center gap-4">
-                          <div className="flex flex-col items-center justify-center p-2 rounded-md bg-background text-muted-foreground w-16 h-16 border">
-                            <span className="text-xs font-bold uppercase text-primary">
-                              {format(new Date(event.start), 'MMM')}
-                            </span>
-                            <span className="text-3xl font-bold">{format(new Date(event.start), 'd')}</span>
-                          </div>
-                          <div className="flex-1">
-                            <CardTitle className="text-base line-clamp-1">{event.title}</CardTitle>
-                            <CardDescription>{event.instructor}</CardDescription>
-                          </div>
-                        </div>
-                      </CardHeader>
-                      <CardContent>
-                        <p className="text-sm text-muted-foreground line-clamp-2">{event.scope}</p>
-                      </CardContent>
-                      <CardFooter>
-                        <Button variant="secondary" className="w-full" onClick={() => handleEventClick(event)}>
-                          View Details <ArrowRight className="ml-2 h-4 w-4" />
-                        </Button>
-                      </CardFooter>
-                    </Card>
-                  ))
-              ) : (
-                <p className="text-center text-muted-foreground md:col-span-3">No upcoming events scheduled. Check back soon!</p>
-              )}
-            </div>
-          </div>
-        </section>
 
-        <section id="courses" className="py-24 relative overflow-hidden bg-background">
-          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-          <div className="max-w-7xl mx-auto px-6 relative">
-              <div className="text-center mb-12 animate-fade-in-up">
-                <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">Featured Courses</h2>
-                <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Jump into our most popular courses. These are hand-picked to give you the best start. Learn from experts and hit your goals.</p>
+        <section id="courses" className="py-24 bg-background">
+          <div className="max-w-7xl mx-auto px-6">
+              <div className="flex justify-between items-center mb-12">
+                <h2 className="text-3xl md:text-4xl font-bold">Featured Courses</h2>
+                <Button variant="outline" asChild>
+                    <Link href="/courses">All Courses</Link>
+                </Button>
               </div>
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {loadingCourses ? (
-                  Array.from({length: 6}).map((_, i) => (
-                    <Card key={i} className="bg-card/50 backdrop-blur-lg border-border/20"><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
+                  Array.from({length: 4}).map((_, i) => (
+                    <Card key={i}><CardHeader><Skeleton className="h-48 w-full"/></CardHeader><CardContent className="pt-4"><Skeleton className="h-5 w-3/4 mb-2"/><Skeleton className="h-4 w-full"/></CardContent></Card>
                   ))
                 ) : (
-                    paginatedCourses.map((course, index) => (
-                    <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 animate-fade-in-up" style={{ animationDelay: `${0.2 + (index % 3) * 0.1}s` }}>
-                        <Link href={`/courses/${course.id}`} className="block">
-                            <div className="relative h-48 overflow-hidden">
+                    allCourses.map((course) => (
+                    <Card key={course.id} className="group overflow-hidden flex flex-col shadow-md hover:shadow-xl transition-all duration-300">
+                        <CardHeader className="p-0 relative">
+                            <Link href={`/courses/${course.id}`} className="block">
                                 <Image
                                     src={course.thumbnail}
                                     alt={course.title}
-                                    fill
+                                    width={400}
+                                    height={250}
                                     className="object-cover transition-transform duration-300 group-hover:scale-105"
                                     data-ai-hint="online course"
                                 />
-                            </div>
-                        </Link>
-                        <CardHeader>
-                            <div className="flex justify-between items-start">
-                                <Badge variant="secondary">{course.subject}</Badge>
-                            </div>
-                            <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
+                            </Link>
+                             <Badge className="absolute top-3 left-3 text-base" variant="destructive">{course.pricing.type === 'purchase' ? `R${course.pricing.price}` : 'Free'}</Badge>
                         </CardHeader>
-                        <CardContent className="flex-grow">
-                            <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
-                            {course.instructor && (
-                                <div className="flex items-center gap-2 text-sm text-muted-foreground mt-2">
-                                    <User className="h-4 w-4" />
-                                    <span>By {course.instructor}</span>
-                                </div>
-                            )}
-                        </CardContent>
-                        <CardFooter className="flex-col items-start gap-4">
-                            <div className="flex justify-between w-full text-sm text-muted-foreground">
-                                <div className="flex items-center gap-2">
-                                    <Clapperboard className="w-4 h-4" />
-                                    <span>{course.videos.length} lessons</span>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <Clock className="w-4 h-4" />
-                                    <span>{formatDuration(course.videos as VideoData[]) || 'N/A'}</span>
-                                </div>
+                        <CardContent className="p-4 flex-grow flex flex-col">
+                           <div className="flex-grow">
+                                <p className="text-primary text-sm font-semibold">{course.subject}</p>
+                                <h3 className="font-bold text-lg mt-1 line-clamp-2">{course.title}</h3>
+                                {course.rating && (
+                                    <div className="flex items-center gap-1 text-sm mt-2 text-muted-foreground">
+                                        <Star className="h-4 w-4 fill-yellow-400 text-yellow-500" />
+                                        <span>({course.rating.toFixed(1)})</span>
+                                    </div>
+                                )}
                             </div>
-                            <Separator />
-                            <div className="flex items-center justify-between w-full">
-                                <span className="text-2xl font-bold">
-                                    {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
-                                </span>
-                                <Button asChild size="sm">
-                                    <Link href={`/courses/${course.id}`}>View Course</Link>
+                            <div className="border-t mt-4 pt-4">
+                                <Button asChild className="w-full bg-primary/10 text-primary hover:bg-primary hover:text-primary-foreground">
+                                    <Link href={`/courses/${course.id}`}>Enroll Now</Link>
                                 </Button>
                             </div>
-                        </CardFooter>
+                        </CardContent>
                     </Card>
                     ))
                 )}
               </div>
-              {totalPages > 1 && (
-                <div className="flex items-center justify-center pt-12 animate-fade-in-up">
-                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                    <span className="text-sm text-muted-foreground mx-4">Page {currentPage} of {totalPages}</span>
-                    <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                </div>
-              )}
-          </div>
-        </section>
-
-        <section id="faq" className="py-24 bg-muted/40 relative overflow-hidden">
-            <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-            <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent"></div>
-            <div className="max-w-7xl mx-auto px-6 relative">
-                <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-semibold mb-4">Frequently Asked Questions</h2>
-                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">Got questions? We've got answers. Here are some common questions about our platform. If you can't find what you need, just ask!</p>
-                </div>
-                <Accordion type="single" collapsible className="w-full space-y-4">
-                    {faqData.map((faq, index) => (
-                        <AccordionItem
-                            value={`item-${index}`}
-                            key={index}
-                            className="border-none rounded-2xl bg-card/50 backdrop-blur-lg border border-border/20 shadow-lg overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 animate-fade-in-up"
-                            style={{ animationDelay: `${0.2 + index * 0.1}s` }}
-                        >
-                            <AccordionTrigger className="text-left p-6 text-base font-semibold hover:no-underline">
-                                {faq.question}
-                            </AccordionTrigger>
-                            <AccordionContent className="px-6 pb-6 pt-0">
-                                <p className="text-muted-foreground">{faq.answer}</p>
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
-            </div>
-        </section>
-        
-        <section id="contact" className="relative py-24 overflow-hidden">
-          <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
-          {/* More Animated Blobs */}
-          <div className="absolute -top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full animate-blob filter blur-3xl opacity-30" style={{animationDuration: '15s'}}></div>
-          <div className="absolute -bottom-1/4 right-1/4 w-80 h-80 bg-accent/10 rounded-full animate-blob filter blur-3xl opacity-30" style={{animationDuration: '10s'}}></div>
-          
-          <div className="container mx-auto px-6 relative">
-            <Card className="max-w-4xl mx-auto bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 p-8 md:p-12 text-center transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 animate-fade-in-up">
-                <CardHeader className="p-0 mb-4">
-                    <h2 className="text-3xl md:text-4xl font-headline font-semibold">
-                        Begin Your Journey to Excellence
-                    </h2>
-                </CardHeader>
-                <CardContent className="p-0 mb-8">
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                        Ready to get started? Join our community, unlock your potential, and start learning with our modern tools today.
-                    </p>
-                </CardContent>
-                <CardFooter className="p-0 flex justify-center">
-                    <Button size="lg" asChild>
-                        <Link href="/register">
-                            Get Started Now <ArrowRight className="ml-2" />
-                        </Link>
-                    </Button>
-                </CardFooter>
-            </Card>
           </div>
         </section>
       </main>
       
       <Footer />
-      <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
-      <EventDialog 
-        event={selectedEvent} 
-        allEvents={upcomingEvents}
-        isOpen={isEventDialogOpen} 
-        onClose={() => setIsEventDialogOpen(false)}
-        onEventSelect={handleEventClick}
-      />
     </div>
   );
 }
-    
