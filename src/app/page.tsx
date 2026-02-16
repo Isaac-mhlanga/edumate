@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { PublicHeader } from "@/components/public-header";
-import { getFirestore, collection, query, where, getDocs } from 'firebase/firestore';
+import { getFirestore, collection, query, where, getDocs, orderBy, Timestamp } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -20,7 +20,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/components/ui/accordion";
-import { faqData, upcomingEvents, type UpcomingEvent } from "@/lib/data";
+import { faqData } from "@/lib/data";
 import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
 import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { format } from "date-fns";
@@ -61,6 +61,21 @@ type Course = {
     instructor?: string;
 };
 
+type CalendarEvent = {
+    id: string;
+    title: string;
+    start: string;
+    end?: string;
+    allDay: boolean;
+    color?: string;
+    description?: string;
+    instructor?: string;
+    grade?: string;
+    subject?: string;
+    scope?: string;
+    platforms?: ('tiktok' | 'youtube' | 'zoom')[];
+};
+
 type UserDoc = {
     id: string;
     fullName: string;
@@ -71,10 +86,12 @@ type UserDoc = {
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
+  const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const coursesPerPage = 6;
   const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<UpcomingEvent | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
 
   useEffect(() => {
@@ -105,7 +122,26 @@ export default function Home() {
         }
     };
     
+    const fetchEvents = async () => {
+        setLoadingEvents(true);
+        try {
+            const eventsQuery = query(
+                collection(firestore, 'events'), 
+                where('start', '>=', new Date().toISOString()), 
+                orderBy('start', 'asc')
+            );
+            const querySnapshot = await getDocs(eventsQuery);
+            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as CalendarEvent);
+            setUpcomingEvents(fetchedEvents);
+        } catch (error) {
+            console.error("Error fetching upcoming events: ", error);
+        } finally {
+            setLoadingEvents(false);
+        }
+    };
+    
     fetchCoursesAndUsers();
+    fetchEvents();
   }, []);
 
   const totalPages = Math.ceil(allCourses.length / coursesPerPage);
@@ -114,7 +150,7 @@ export default function Home() {
       currentPage * coursesPerPage
   );
   
-  const handleEventClick = (event: UpcomingEvent) => {
+  const handleEventClick = (event: CalendarEvent) => {
     setSelectedEvent(event);
     setIsEventDialogOpen(true);
   };
@@ -392,36 +428,42 @@ export default function Home() {
             <div className="text-center mb-12 animate-fade-in-up">
               <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
               <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
-                Join our live sessions, workshops, and Q&As to boost your learning.
+                Join our live sessions, workshops, Q&amp;As, and career guidance events to boost your learning.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {upcomingEvents.map((event, index) => (
-                <Card key={event.id} className="animate-fade-in-up bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1" style={{ animationDelay: `${0.1 * index}s` }}>
-                  <CardHeader>
-                    <div className="flex items-center gap-4">
-                      <div className="flex flex-col items-center justify-center p-2 rounded-md bg-background text-muted-foreground w-16 h-16 border">
-                        <span className="text-xs font-bold uppercase text-primary">
-                          {format(new Date(event.start), 'MMM')}
-                        </span>
-                        <span className="text-3xl font-bold">{format(new Date(event.start), 'd')}</span>
-                      </div>
-                      <div className="flex-1">
-                        <CardTitle className="text-base line-clamp-1">{event.title}</CardTitle>
-                        <CardDescription>{event.instructor}</CardDescription>
-                      </div>
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <p className="text-sm text-muted-foreground line-clamp-2">{event.scope}</p>
-                  </CardContent>
-                  <CardFooter>
-                    <Button variant="secondary" className="w-full" onClick={() => handleEventClick(event)}>
-                      View Details <ArrowRight className="ml-2 h-4 w-4" />
-                    </Button>
-                  </CardFooter>
-                </Card>
-              ))}
+              {loadingEvents ? (
+                  Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-48" />)
+              ) : upcomingEvents.length > 0 ? (
+                  upcomingEvents.slice(0, 3).map((event, index) => (
+                    <Card key={event.id} className="animate-fade-in-up bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1" style={{ animationDelay: `${0.1 * index}s` }}>
+                      <CardHeader>
+                        <div className="flex items-center gap-4">
+                          <div className="flex flex-col items-center justify-center p-2 rounded-md bg-background text-muted-foreground w-16 h-16 border">
+                            <span className="text-xs font-bold uppercase text-primary">
+                              {format(new Date(event.start), 'MMM')}
+                            </span>
+                            <span className="text-3xl font-bold">{format(new Date(event.start), 'd')}</span>
+                          </div>
+                          <div className="flex-1">
+                            <CardTitle className="text-base line-clamp-1">{event.title}</CardTitle>
+                            <CardDescription>{event.instructor}</CardDescription>
+                          </div>
+                        </div>
+                      </CardHeader>
+                      <CardContent>
+                        <p className="text-sm text-muted-foreground line-clamp-2">{event.scope}</p>
+                      </CardContent>
+                      <CardFooter>
+                        <Button variant="secondary" className="w-full" onClick={() => handleEventClick(event)}>
+                          View Details <ArrowRight className="ml-2 h-4 w-4" />
+                        </Button>
+                      </CardFooter>
+                    </Card>
+                  ))
+              ) : (
+                <p className="text-center text-muted-foreground md:col-span-3">No upcoming events scheduled. Check back soon!</p>
+              )}
             </div>
           </div>
         </section>

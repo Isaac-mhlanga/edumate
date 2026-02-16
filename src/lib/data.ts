@@ -149,55 +149,6 @@ export const curriculumData = {
     }
 };
 
-
-export type UpcomingEvent = {
-    id: string;
-    title: string;
-    start: string;
-    end?: string;
-    instructor: string;
-    grade: string;
-    subject: string;
-    scope: string;
-    platforms?: ('tiktok' | 'youtube' | 'zoom')[];
-};
-
-export let upcomingEvents: UpcomingEvent[] = [
-    {
-        id: "EVT001",
-        title: "Live Class: Final Exam Revision",
-        start: "2024-11-15T18:00:00.000Z",
-        end: "2024-11-15T20:00:00.000Z",
-        instructor: "Dr. Evelyn Reed",
-        grade: "12",
-        subject: "Maths Paper 1",
-        scope: "Covering key concepts in Calculus and Functions & Graphs for the final exam.",
-        platforms: ['youtube', 'zoom'],
-    },
-    {
-        id: "EVT002",
-        title: "Organic Chemistry Q&A",
-        start: "2024-11-18T17:00:00.000Z",
-        end: "2024-11-18T18:00:00.000Z",
-        instructor: "Dr. Evelyn Reed",
-        grade: "12",
-        subject: "Physical Sciences",
-        scope: "An interactive Q&A session focused on common challenges in Organic Chemistry.",
-        platforms: ['tiktok', 'youtube'],
-    },
-    {
-        id: "EVT003",
-        title: "Study Session: Euclidean Geometry",
-        start: "2024-11-22T16:00:00.000Z",
-        end: "2024-11-22T18:00:00.000Z",
-        instructor: "John Smith",
-        grade: "11 & 12",
-        subject: "Maths Paper 2",
-        scope: "A collaborative study group to tackle complex Euclidean Geometry theorems and problems.",
-        platforms: ['zoom'],
-    },
-];
-
 export const subscriptionPlans = [
     {
         id: 'free',

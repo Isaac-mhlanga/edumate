@@ -13,19 +13,30 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Info, Download, Clock, Share2, Link as LinkIcon, Loader2 } from 'lucide-react';
 import { FaTwitter, FaFacebook, FaLinkedin } from "react-icons/fa";
-import { type UpcomingEvent } from '@/lib/data';
 import { Separator } from './ui/separator';
 import { useToast } from '@/hooks/use-toast';
 import { Icons } from './icons';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 
+type Event = {
+    id: string;
+    title: string;
+    start: string;
+    end?: string;
+    instructor?: string;
+    grade?: string;
+    subject?: string;
+    scope?: string;
+    platforms?: ('tiktok' | 'youtube' | 'zoom')[];
+};
+
 interface EventDialogProps {
-  event: UpcomingEvent | null;
-  allEvents: UpcomingEvent[];
+  event: Event | null;
+  allEvents: Event[];
   isOpen: boolean;
   onClose: () => void;
-  onEventSelect: (event: UpcomingEvent) => void;
+  onEventSelect: (event: Event) => void;
 }
 
 const platformLabels: {[key: string]: string} = {
@@ -34,7 +45,7 @@ const platformLabels: {[key: string]: string} = {
     zoom: 'Zoom',
 };
 
-const EventPoster = React.forwardRef<HTMLDivElement, { event: UpcomingEvent }>(({ event }, ref) => {
+const EventPoster = React.forwardRef<HTMLDivElement, { event: Event }>(({ event }, ref) => {
     const [isClient, setIsClient] = React.useState(false);
     React.useEffect(() => {
         setIsClient(true);
