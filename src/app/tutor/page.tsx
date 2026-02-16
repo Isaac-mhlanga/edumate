@@ -747,7 +747,7 @@ function TutorPage() {
                         </Table>
                     </CardFooter>
                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
-                        <div className="text-sm text-muted-foreground">
+                        <div className="text-xs text-muted-foreground">
                             Showing <strong>{(currentBookingPage - 1) * bookingsPerPage + 1}-{Math.min(currentBookingPage * bookingsPerPage, filteredBookings.length)}</strong> of <strong>{filteredBookings.length}</strong> bookings.
                         </div>
                         <div className="flex items-center gap-2">

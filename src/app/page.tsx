@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Footer } from "@/components/footer";
@@ -23,6 +22,7 @@ import {
 } from "@/components/ui/accordion";
 import { faqData } from "@/lib/data";
 import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
+import { EnquiryDialog } from "@/components/enquiry-dialog";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -71,6 +71,7 @@ export default function Home() {
   const [loadingCourses, setLoadingCourses] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const coursesPerPage = 6;
+  const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -331,7 +332,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="guidance" className="py-24 bg-background">
+        <section id="guidance" className="py-24 bg-muted/70">
             <div className="container mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
@@ -369,10 +370,15 @@ export default function Home() {
                         </CardContent>
                     </Card>
                 </div>
+                <div className="text-center mt-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                    <Button size="lg" onClick={() => setIsEnquiryDialogOpen(true)}>
+                        Book a Guidance Session <ArrowRight className="ml-2" />
+                    </Button>
+                </div>
             </div>
         </section>
 
-        <section id="courses" className="py-24 relative overflow-hidden">
+        <section id="courses" className="py-24 relative overflow-hidden bg-background">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
           <div className="max-w-7xl mx-auto px-6 relative">
               <div className="text-center mb-12 animate-fade-in-up">
@@ -508,8 +514,7 @@ export default function Home() {
       </main>
       
       <Footer />
+      <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
     </div>
   );
 }
-
-    
