@@ -18,7 +18,7 @@ export default {
     },
     extend: {
       letterSpacing: {
-        subtle: '0.02em',
+        subtle: '0.03em',
       },
       fontFamily: {
         body: ['Montserrat', 'sans-serif'],
@@ -107,16 +107,16 @@ export default {
           '50%': { backgroundPosition: '-200% center' },
         },
         'float-1': {
-          '0%, 100%': { transform: 'translateY(0px)' },
-          '50%': { transform: 'translateY(-25px)' },
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '50%': { transform: 'translateY(-25px) rotate(-10deg)' },
         },
         'float-2': {
-          '0%, 100%': { transform: 'translateY(20px)' },
-          '50%': { transform: 'translateY(20px)' },
+          '0%, 100%': { transform: 'translateY(0px) rotate(0deg)' },
+          '50%': { transform: 'translateY(-30px) rotate(15deg)' },
         },
         'float-3': {
-            '0%, 100%': { transform: 'translateX(0px)' },
-            '50%': { transform: 'translateX(-20px)' },
+            '0%, 100%': { transform: 'translateX(0px) rotate(0deg)' },
+            '50%': { transform: 'translateX(-20px) rotate(5deg)' },
         },
         'spin': {
             '0%': { transform: 'rotate(0deg)' },

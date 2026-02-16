@@ -3,7 +3,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight, User, ChevronLeft, Banknote } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight, User, ChevronLeft, Banknote } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -177,8 +177,8 @@ export default function Home() {
       description: 'Get personalized help when you need it. Connect with our professional tutors for one-on-one sessions tailored to your learning style.'
     },
     {
-      icon: <PenSquare />,
-      title: 'Assignment &amp; Project Help',
+      icon: <BookOpen />,
+      title: 'Assignment & Project Help',
       description: 'Stuck on an assignment? Get expert guidance for your school and university projects to understand the material and boost your grades.'
     }
   ];
@@ -232,7 +232,7 @@ export default function Home() {
 
           <div className="container mx-auto px-6 relative z-20">
             <div className="max-w-4xl mx-auto">
-              <h1 className="text-4xl md:text-5xl font-headline font-bold mb-6 animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-foreground to-primary animate-shimmer">
+              <h1 className="text-4xl md:text-5xl font-headline font-semibold mb-6 animate-fade-in-up bg-clip-text text-transparent bg-gradient-to-r from-primary via-foreground to-primary animate-shimmer">
                 Accessible, Quality Education for All
               </h1>
               <p
@@ -263,10 +263,6 @@ export default function Home() {
                   <span className="flex items-center gap-2">
                     <Users className="h-4 w-4 text-primary" />
                     Expert Tutors
-                  </span>
-                  <span className="flex items-center gap-2">
-                    <PenSquare className="h-4 w-4 text-primary" />
-                    Assignment Help
                   </span>
                    <span className="flex items-center gap-2">
                     <Banknote className="h-4 w-4 text-primary" />
@@ -349,9 +345,9 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="features" className="py-24 bg-muted/70 relative overflow-hidden">
+        <section id="features" className="py-24 bg-muted/40 relative overflow-hidden">
           <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-          <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+          <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent"></div>
           <div className="container mx-auto px-6 relative">
                  <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">
@@ -427,7 +423,7 @@ export default function Home() {
             </div>
         </section>
         
-         <section id="events" className="py-24 bg-muted/70">
+         <section id="events" className="py-24 bg-muted/40">
           <div className="container mx-auto px-6">
             <div className="text-center mb-12 animate-fade-in-up">
               <h2 className="text-3xl md:text-4xl font-headline font-semibold my-4">Upcoming Events</h2>
@@ -548,9 +544,9 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="faq" className="py-24 bg-muted/70 relative overflow-hidden">
+        <section id="faq" className="py-24 bg-muted/40 relative overflow-hidden">
             <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
-            <div className="absolute inset-0 bg-gradient-radial from-primary/10 via-transparent to-transparent"></div>
+            <div className="absolute inset-0 bg-gradient-radial from-primary/5 via-transparent to-transparent"></div>
             <div className="max-w-7xl mx-auto px-6 relative">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-semibold mb-4">Frequently Asked Questions</h2>
