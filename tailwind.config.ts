@@ -111,7 +111,7 @@ export default {
           '50%': { transform: 'translateY(-25px)' },
         },
         'float-2': {
-          '0%, 100%': { transform: 'translateY(0px)' },
+          '0%, 100%': { transform: 'translateY(20px)' },
           '50%': { transform: 'translateY(20px)' },
         },
         'float-3': {
@@ -121,6 +121,20 @@ export default {
         'spin': {
             '0%': { transform: 'rotate(0deg)' },
             '100%': { transform: 'rotate(360deg)' },
+        },
+        'blob': {
+          '0%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
+          '33%': {
+            transform: 'translate(30px, -50px) scale(1.1)',
+          },
+          '66%': {
+            transform: 'translate(-20px, 20px) scale(0.9)',
+          },
+          '100%': {
+            transform: 'translate(0px, 0px) scale(1)',
+          },
         },
       },
       animation: {
@@ -132,6 +146,7 @@ export default {
         'float-2': 'float-2 10s ease-in-out infinite',
         'float-3': 'float-3 12s ease-in-out infinite',
         'spin-slow': 'spin 20s linear infinite',
+        'blob': 'blob 20s cubic-bezier(0.76, 0, 0.24, 1) infinite',
       },
        boxShadow: {
         'card-glow': '0 0 20px -5px hsl(var(--primary) / 0.3)',
