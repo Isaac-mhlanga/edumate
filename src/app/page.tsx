@@ -4,7 +4,7 @@
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
 import { Button } from "@/components/ui/button";
-import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight, User, ChevronLeft } from "lucide-react";
+import { ArrowRight, BookOpen, GraduationCap, PenSquare, Play, Clapperboard, Clock, Users, Calendar, Gift, ChevronRight, User, ChevronLeft, Banknote } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -319,6 +319,47 @@ export default function Home() {
                       </CardContent>
                     </Card>
                   ))}
+                </div>
+            </div>
+        </section>
+
+        <section id="guidance" className="py-24 bg-background">
+            <div className="container mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">
+                    Student Guidance Services
+                    </h2>
+                    <p className="text-lg text-muted-foreground max-w-3xl mx-auto">
+                    Navigate your future with confidence. We offer expert guidance on university applications, funding, and career choices to help you succeed beyond the classroom.
+                    </p>
+                </div>
+                <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up" style={{ animationDelay: `0.2s` }}>
+                        <CardContent className="p-8 text-center flex flex-col items-center">
+                            <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
+                                <Banknote className="w-8 h-8 text-primary" />
+                            </div>
+                            <CardTitle className="text-xl mb-2">
+                                Bursary &amp; NSFAS Guidance
+                            </CardTitle>
+                            <p className="text-muted-foreground text-sm">
+                                Secure your funding with our expert help. We guide you through the entire application process for bursaries and NSFAS to maximize your chances.
+                            </p>
+                        </CardContent>
+                    </Card>
+                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 group animate-fade-in-up" style={{ animationDelay: `0.3s` }}>
+                        <CardContent className="p-8 text-center flex flex-col items-center">
+                        <div className="inline-block bg-primary/10 text-primary p-4 rounded-full mb-6 border-2 border-primary/20 group-hover:border-primary/50 transition-colors">
+                            <GraduationCap className="w-8 h-8 text-primary" />
+                        </div>
+                        <CardTitle className="text-xl mb-2">
+                            University Career Guidance
+                        </CardTitle>
+                        <p className="text-muted-foreground text-sm">
+                            Align your passions with a fulfilling career. Get personalized advice on choosing the right degree and university to achieve your long-term goals.
+                        </p>
+                        </CardContent>
+                    </Card>
                 </div>
             </div>
         </section>
