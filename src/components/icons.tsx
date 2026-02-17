@@ -5,26 +5,45 @@ export const Icons = {
   logo: ({ className, ...props }: SVGProps<SVGSVGElement>) => (
     <svg
       width="150"
-      height="40"
-      viewBox="0 0 110 30"
+      height="42"
+      viewBox="0 0 150 42"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
       {...props}
     >
-        <circle cx="15" cy="15" r="12" fill="hsl(var(--primary))"/>
-        <path d="M11 19L19 11" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-        <path d="M19 19L11 11" stroke="white" strokeWidth="2" strokeLinecap="round"/>
-        <text
-            x="35"
-            y="21"
-            fontFamily="Poppins, sans-serif"
-            fontSize="16"
-            fill="hsl(var(--foreground))"
-            fontWeight="bold"
-        >
-            ekursus
-        </text>
+      {/* Icon: Stylized book/E */}
+      <path
+        d="M20 8C20 6.89543 19.1046 6 18 6H6C4.89543 6 4 6.89543 4 8V34C4 35.1046 4.89543 36 6 36H18C19.1046 36 20 35.1046 20 34V8Z"
+        fill="hsl(var(--primary))"
+      />
+      <path d="M20 12H28" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" />
+      <path d="M20 22H28" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" />
+      <path d="M20 32H28" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" />
+
+      {/* Edumate text */}
+      <text
+        x="40"
+        y="23"
+        fontFamily="Lexend, sans-serif"
+        fontSize="20"
+        fontWeight="bold"
+        fill="hsl(var(--foreground))"
+      >
+        Edumate
+      </text>
+
+      {/* Slogan */}
+      <text
+        x="40"
+        y="37"
+        fontFamily="Inter, sans-serif"
+        fontSize="9"
+        fill="hsl(var(--muted-foreground))"
+        letterSpacing="0.05em"
+      >
+        LEARN SMARTER
+      </text>
     </svg>
   ),
   tiktok: ({ className, ...props }: SVGProps<SVGSVGElement>) => (
