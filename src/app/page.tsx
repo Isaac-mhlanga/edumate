@@ -139,24 +139,6 @@ export default function Home() {
       { icon: ShieldCheck, text: "Bursary Applications"},
   ]
   
-  const aboutFeatures = [
-      { icon: BookOpen, title: "CAPS & IEB Aligned", description: "Our curriculum covers all key topics for Grade 10-12 Maths, Physical Sciences, and Life Sciences." },
-      { icon: Rocket, title: "University Support", description: "Specialized assistance for varsity students in IT, Computer Science, and Information Security modules." },
-      { icon: Award, title: "Proven Results", description: "Join thousands of students who have improved their grades and secured their academic future." },
-  ]
-  
-  const services = [
-      {
-          icon: GraduationCap,
-          title: "University Career Guidance",
-          description: "Align your academic path with your career goals. We help you explore degree options and understand university requirements for a successful future."
-      },
-      {
-          icon: ShieldCheck,
-          title: "Bursary & NSFAS Applications",
-          description: "Get step-by-step guidance to ensure your application is accurate, complete, and submitted on time to maximize your chances of securing funding."
-      },
-  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -197,69 +179,7 @@ export default function Home() {
                 </div>
             </div>
         </section>
-        
-         <section className="py-16 bg-muted">
-            <div className="max-w-7xl mx-auto px-6">
-                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 items-center">
-                    {services.map((service, index) => (
-                        <div key={index} className="flex items-start gap-4 p-6 rounded-lg transition-all duration-300">
-                            <div className="bg-primary/10 text-primary p-4 rounded-full">
-                                <service.icon className="w-8 h-8" />
-                            </div>
-                            <div>
-                                <h3 className="text-lg font-semibold font-headline">{service.title}</h3>
-                                <p className="text-muted-foreground mt-1">{service.description}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            </div>
-        </section>
-
-        <section id="events" className="py-24">
-            <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-4xl font-headline font-bold tracking-tighter mb-4">Upcoming Events</h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live sessions, workshops, and Q&As, and career guidance sessions to boost your learning.</p>
-                </div>
-                <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {upcomingEvents.map((event, index) => (
-                        <Card key={event.id} onClick={() => handleEventClick(event)} className="group overflow-hidden flex flex-col cursor-pointer hover:shadow-primary/20 transition-all duration-300 animate-fade-in-up" style={{ animationDelay: `${index * 0.1}s` }}>
-                            <CardHeader className="p-0">
-                                <div className="relative h-48 bg-muted flex items-center justify-center">
-                                    <Calendar className="w-16 h-16 text-muted-foreground/30" />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent flex flex-col justify-end p-4">
-                                        <h3 className="font-semibold text-lg text-white line-clamp-2">{event.title}</h3>
-                                    </div>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="p-4 flex-grow">
-                                <div className="flex justify-between items-center text-sm text-muted-foreground">
-                                    <div className="flex items-center gap-1.5"><Calendar className="w-4 h-4" /> <span>{new Date(event.start).toLocaleDateString('en-ZA', { month: 'short', day: 'numeric'})}</span></div>
-                                    <Badge variant="secondary">{event.subject}</Badge>
-                                </div>
-                                <p className="text-sm text-muted-foreground mt-2 line-clamp-2">{event.scope}</p>
-                            </CardContent>
-                             <CardFooter className="p-4 border-t">
-                                <span className="text-primary font-semibold text-sm group-hover:underline">View Details <ArrowRight className="inline-block ml-1 h-4 w-4 transition-transform group-hover:translate-x-1" /></span>
-                            </CardFooter>
-                        </Card>
-                    ))}
-                </div>
-                 <EventDialog 
-                    event={selectedEvent}
-                    allEvents={upcomingEvents}
-                    isOpen={isEventDialogOpen} 
-                    onClose={() => setIsEventDialogOpen(false)}
-                    onEventSelect={(event) => setSelectedEvent(event)}
-                />
-            </div>
-        </section>
-        
-        <CommunityPreview />
-
       </main>
-      
       <Footer />
     </div>
   );

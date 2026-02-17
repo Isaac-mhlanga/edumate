@@ -13,34 +13,34 @@ export function Footer() {
                 <p className="text-sm text-muted-foreground">Empowering students to excel in high school subjects through comprehensive video courses and interactive learning.</p>
             </div>
             <div>
-                <h4 className="font-semibold text-foreground mb-4">Subjects</h4>
+                <h4 className="font-semibold text-base text-foreground mb-4">Subjects</h4>
                 <nav className="flex flex-col space-y-2">
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Mathematics</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Science</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">English</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">History</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Mathematics</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Science</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">English</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">History</Link>
                 </nav>
             </div>
              <div>
-                <h4 className="font-semibold text-foreground mb-4">Support</h4>
+                <h4 className="font-semibold text-base text-foreground mb-4">Support</h4>
                 <nav className="flex flex-col space-y-2">
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Help Center</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Contact Us</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">FAQ</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Tutorials</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Help Center</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Contact Us</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">FAQ</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Tutorials</Link>
                 </nav>
             </div>
              <div>
-                <h4 className="font-semibold text-foreground mb-4">Company</h4>
+                <h4 className="font-semibold text-base text-foreground mb-4">Company</h4>
                 <nav className="flex flex-col space-y-2">
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">About Us</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Careers</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Privacy Policy</Link>
-                    <Link href="#" className="text-sm text-muted-foreground hover:text-primary">Terms of Service</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">About Us</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Careers</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Privacy Policy</Link>
+                    <Link href="#" className="text-base font-medium text-muted-foreground hover:text-primary">Terms of Service</Link>
                 </nav>
             </div>
             <div>
-                <h4 className="font-semibold text-foreground mb-4">Follow Us</h4>
+                <h4 className="font-semibold text-base text-foreground mb-4">Follow Us</h4>
                 <div className="flex space-x-2">
                     <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
                     <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
