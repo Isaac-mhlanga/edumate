@@ -1,4 +1,3 @@
-
 import Link from "next/link";
 import { Icons } from "./icons";
 import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
@@ -10,7 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             <div className="col-span-2 md:col-span-1 space-y-4">
                 <Icons.logo className="h-8 w-auto" />
-                <p className="text-sm text-muted-foreground">Empowering students to excel in high school subjects through comprehensive video courses and interactive learning.</p>
+                <p className="text-base font-medium text-muted-foreground">Empowering students to excel in high school subjects through comprehensive video courses and interactive learning.</p>
             </div>
             <div>
                 <h4 className="font-semibold text-base text-foreground mb-4">Subjects</h4>
@@ -48,7 +47,7 @@ export function Footer() {
                 </div>
             </div>
         </div>
-        <div className="mt-8 pt-8 border-t text-center text-sm text-muted-foreground">
+        <div className="mt-8 pt-8 border-t text-center text-base text-muted-foreground">
             <p>&copy; {new Date().getFullYear()} Edumate Pro. All rights reserved.</p>
         </div>
       </div>
