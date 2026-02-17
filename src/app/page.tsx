@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { collection, getDocs, getFirestore, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, ShieldCheck, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight } from "lucide-react";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -136,7 +136,6 @@ export default function Home() {
       { icon: Clapperboard, text: "Video Lessons"},
       { icon: UserCog, text: "Expert Tutors"},
       { icon: GraduationCap, text: "Career Guidance"},
-      { icon: ShieldCheck, text: "Bursary Applications"},
   ]
   
 
@@ -147,34 +146,17 @@ export default function Home() {
         <section className="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden">
              <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob -z-10"></div>
              <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob animation-delay-4000 -z-10"></div>
-            <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 items-center gap-12">
-                <div className="z-10 text-center lg:text-left animate-fade-in-up">
+            <div className="max-w-7xl mx-auto px-6 text-center">
+                <div className="z-10 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6">A Smarter Way to Learn</h1>
-                    <p className="text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">Unlock your potential with expert-led video courses, personalized tutoring, and university application guidance.</p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
+                    <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">Unlock your potential with expert-led video courses, personalized tutoring, and university application guidance.</p>
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
                          <Button size="lg" asChild>
                            <Link href="/register">Get Started Free <ChevronRight className="ml-2" /></Link>
                         </Button>
                         <Button size="lg" variant="outline" asChild>
                            <Link href="/courses">Explore Courses</Link>
                         </Button>
-                    </div>
-                </div>
-                <div className="relative h-full hidden lg:block">
-                    <div className="relative w-full aspect-[4/3]">
-                        <div className="absolute top-0 left-0 w-full h-full bg-grid-pattern -z-10"></div>
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-4/5 h-4/5 bg-primary/20 rounded-full blur-3xl"></div>
-
-                        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full h-full">
-                           {heroFeatures.map((feature, i) => (
-                                <div key={feature.text} className={`absolute animate-float-${i+1}`}>
-                                    <div className="bg-card/80 backdrop-blur-md p-3 rounded-lg shadow-lg flex items-center gap-3">
-                                        <div className="bg-primary/10 text-primary p-2 rounded-md"><feature.icon className="h-5 w-5"/></div>
-                                        <p className="font-semibold text-sm pr-2">{feature.text}</p>
-                                    </div>
-                                </div>
-                           ))}
-                        </div>
                     </div>
                 </div>
             </div>
