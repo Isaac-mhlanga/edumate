@@ -49,7 +49,7 @@ export function CommunityPreview() {
         <section id="community-preview" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold mb-4">From the Community</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">From the Community</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">See what students are asking and get involved in the discussion.</p>
                 </div>
                 <div className="grid md:grid-cols-1 lg:grid-cols-3 gap-6">
