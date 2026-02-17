@@ -49,13 +49,13 @@ export const PublicHeader = () => {
             </div>
             
             <div className="hidden lg:flex items-center gap-2">
-                <Button variant="ghost" onClick={() => setIsEnquiryDialogOpen(true)}>
+                <Button variant="ghost" onClick={() => setIsEnquiryDialogOpen(true)} className="text-base font-medium">
                     Contact Us
                 </Button>
-                <Button variant="ghost" asChild>
+                <Button variant="ghost" asChild className="text-base font-medium">
                     <Link href="/login">Log In</Link>
                 </Button>
-                <Button asChild>
+                <Button asChild className="text-base font-medium">
                     <Link href="/register">Sign Up</Link>
                 </Button>
             </div>
@@ -92,15 +92,15 @@ export const PublicHeader = () => {
                     </div>
                      <div className="mt-auto border-t pt-6 flex flex-col gap-4">
                        <SheetClose asChild>
-                        <Button variant="ghost" onClick={() => setIsEnquiryDialogOpen(true)} size="lg">Contact Us</Button>
+                        <Button variant="ghost" onClick={() => setIsEnquiryDialogOpen(true)} size="lg" className="text-lg">Contact Us</Button>
                       </SheetClose>
                        <SheetClose asChild>
-                        <Button variant="outline" asChild size="lg">
+                        <Button variant="outline" asChild size="lg" className="text-lg">
                           <Link href="/login">Log In</Link>
                         </Button>
                       </SheetClose>
                       <SheetClose asChild>
-                        <Button asChild size="lg">
+                        <Button asChild size="lg" className="text-lg">
                           <Link href="/register">Sign Up</Link>
                         </Button>
                       </SheetClose>
