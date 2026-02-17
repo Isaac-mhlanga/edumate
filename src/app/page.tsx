@@ -150,7 +150,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6 text-center">
                 <div className="z-10 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6">A Smarter Way to Learn</h1>
-                    <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">Unlock your potential with expert-led video courses, personalized tutoring, university application guidance, career guidance, and bursary application assistance.</p>
+                    <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">Excel with expert-led video courses, personalized tutoring, and comprehensive university, career, and bursary guidance.</p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                          <Button size="lg" asChild>
                            <Link href="/register">Get Started Free <ChevronRight className="ml-2" /></Link>
