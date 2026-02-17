@@ -25,26 +25,25 @@ export const PublicHeader = () => {
      <header className="bg-background/95 sticky top-0 z-50 border-b backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center py-4">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-8">
               <Link href="/" className="flex items-center gap-2">
                 <Icons.logo className="w-auto h-8 text-primary" />
               </Link>
+              <nav className="hidden lg:flex items-center space-x-6">
+                {navItems.map((item) => (
+                  <Link 
+                      key={item.name} 
+                      href={item.href} 
+                      className={cn(
+                          "text-sm font-medium transition-colors duration-300",
+                          pathname === item.href ? 'text-primary' : 'text-foreground/80 hover:text-primary'
+                      )}
+                  >
+                      {item.name}
+                  </Link>
+                ))}
+              </nav>
             </div>
-            
-             <nav className="hidden lg:flex items-center space-x-6">
-              {navItems.map((item) => (
-                <Link 
-                    key={item.name} 
-                    href={item.href} 
-                    className={cn(
-                        "text-sm font-medium transition-colors duration-300",
-                        pathname === item.href ? 'text-primary' : 'text-foreground/80 hover:text-primary'
-                    )}
-                >
-                    {item.name}
-                </Link>
-              ))}
-            </nav>
             
             <div className="hidden lg:flex items-center gap-2">
                 <Button asChild>
