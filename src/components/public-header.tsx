@@ -17,9 +17,9 @@ export const PublicHeader = () => {
   const navItems = [
     { name: 'Home', href: '/' },
     { name: 'Courses', href: '/courses' },
-    { name: 'Learn', href: '/high-school' },
-    { name: 'University', href: '/varsity' },
-    { name: 'Tutors', href: '/tutors' },
+    { name: 'Lessons', href: '/high-school' },
+    { name: 'Projects', href: '/varsity' },
+    { name: 'Experts', href: '/tutors' },
     { name: 'Community', href: '/community' },
   ];
 
