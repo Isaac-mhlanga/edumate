@@ -38,7 +38,7 @@ export const PublicHeader = () => {
                       key={item.name} 
                       href={item.href} 
                       className={cn(
-                          "text-sm font-medium transition-colors duration-300",
+                          "text-base font-medium transition-colors duration-300",
                           pathname === item.href ? 'text-primary' : 'text-foreground/80 hover:text-primary'
                       )}
                   >

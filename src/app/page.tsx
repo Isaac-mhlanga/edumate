@@ -167,8 +167,8 @@ export default function Home() {
              <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob animation-delay-4000 -z-10"></div>
             <div className="max-w-7xl mx-auto px-6 grid lg:grid-cols-2 items-center gap-12">
                 <div className="z-10 text-center lg:text-left animate-fade-in-up">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tight mb-6">A Smarter Way to Learn</h1>
-                    <p className="text-lg text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">Unlock your potential with expert-led video courses, personalized tutoring, and university application guidance.</p>
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6">A Smarter Way to Learn</h1>
+                    <p className="text-xl text-muted-foreground mb-8 max-w-xl mx-auto lg:mx-0">Unlock your potential with expert-led video courses, personalized tutoring, and university application guidance.</p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                          <Button size="lg" asChild>
                            <Link href="/register">Get Started Free <ChevronRight className="ml-2" /></Link>
@@ -219,7 +219,7 @@ export default function Home() {
         <section id="events" className="py-24">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Upcoming Events</h2>
+                    <h2 className="text-4xl font-headline font-bold tracking-tighter mb-4">Upcoming Events</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Join our live sessions, workshops, and Q&As, and career guidance sessions to boost your learning.</p>
                 </div>
                 <div className="grid sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
