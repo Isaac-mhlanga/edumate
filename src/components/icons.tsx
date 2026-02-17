@@ -1,12 +1,11 @@
-
 import type { SVGProps } from "react";
 
 export const Icons = {
   logo: ({ className, ...props }: SVGProps<SVGSVGElement>) => (
     <svg
-      width="150"
+      width="160"
       height="42"
-      viewBox="0 0 150 42"
+      viewBox="0 0 160 42"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
       className={className}
@@ -16,7 +15,7 @@ export const Icons = {
       <g>
           <circle cx="21" cy="21" r="19.5" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
           <circle cx="21" cy="21" r="16" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
-          <text x="21" y="23" textAnchor="middle" dominantBaseline="central" fontFamily="Lexend, sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">E</text>
+          <text x="21" y="23" textAnchor="middle" dominantBaseline="central" fontFamily="Lexend, sans-serif" fontSize="22" fontWeight="bold" fill="hsl(var(--primary))">E</text>
       </g>
 
       {/* Edumate text */}
@@ -24,7 +23,7 @@ export const Icons = {
         x="50"
         y="23"
         fontFamily="Lexend, sans-serif"
-        fontSize="20"
+        fontSize="22"
         fontWeight="500"
         fill="hsl(var(--foreground))"
       >
