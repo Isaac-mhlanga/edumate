@@ -12,22 +12,20 @@ export const Icons = {
       className={className}
       {...props}
     >
-      {/* Icon: Stylized book/E */}
-      <path
-        d="M20 8C20 6.89543 19.1046 6 18 6H6C4.89543 6 4 6.89543 4 8V34C4 35.1046 4.89543 36 6 36H18C19.1046 36 20 35.1046 20 34V8Z"
-        fill="hsl(var(--primary))"
-      />
-      <path d="M20 12H28" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" />
-      <path d="M20 22H28" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" />
-      <path d="M20 32H28" stroke="hsl(var(--primary))" strokeWidth="3" strokeLinecap="round" />
+      {/* Icon: Circle with 'E' */}
+      <g>
+          <circle cx="21" cy="21" r="19.5" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
+          <circle cx="21" cy="21" r="16" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
+          <text x="21" y="23" textAnchor="middle" dominantBaseline="central" fontFamily="Lexend, sans-serif" fontSize="20" fontWeight="bold" fill="hsl(var(--primary))">E</text>
+      </g>
 
       {/* Edumate text */}
       <text
-        x="40"
+        x="50"
         y="23"
         fontFamily="Lexend, sans-serif"
         fontSize="20"
-        fontWeight="bold"
+        fontWeight="500"
         fill="hsl(var(--foreground))"
       >
         Edumate
@@ -35,7 +33,7 @@ export const Icons = {
 
       {/* Slogan */}
       <text
-        x="40"
+        x="50"
         y="37"
         fontFamily="Inter, sans-serif"
         fontSize="9"
