@@ -151,6 +151,7 @@ export default {
         'float-3': 'float-3 12s ease-in-out infinite',
         'spin-slow': 'spin 20s linear infinite',
         'blob': 'blob 20s cubic-bezier(0.76, 0, 0.24, 1) infinite',
+        'blob-2': 'blob 20s cubic-bezier(0.76, 0, 0.24, 1) 4s infinite',
         'float-student': 'float-student 10s ease-in-out infinite',
       },
        boxShadow: {

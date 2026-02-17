@@ -131,13 +131,6 @@ export default function Home() {
     setSelectedEvent(event);
     setIsEventDialogOpen(true);
   };
-
-  const heroFeatures = [
-      { icon: Clapperboard, text: "Video Lessons"},
-      { icon: UserCog, text: "Expert Tutors"},
-      { icon: GraduationCap, text: "Career Guidance"},
-      { icon: Award, text: "Bursary Applications"},
-  ]
   
 
   return (
@@ -146,7 +139,7 @@ export default function Home() {
       <main>
         <section className="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden">
              <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob -z-10"></div>
-             <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob animation-delay-4000 -z-10"></div>
+             <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2 -z-10"></div>
             <div className="max-w-7xl mx-auto px-6 text-center">
                 <div className="z-10 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6">A Smarter Way to Learn</h1>
