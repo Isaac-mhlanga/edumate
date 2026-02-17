@@ -1,7 +1,6 @@
 'use client';
 
 import { CommunityPreview } from "@/components/community-preview";
-import { EnquiryDialog } from "@/components/enquiry-dialog";
 import { EventDialog } from "@/components/event-dialog";
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
@@ -79,7 +78,6 @@ type CalendarEvent = {
 export default function Home() {
   const [allCourses, setAllCourses] = useState<Course[]>([]);
   const [loadingCourses, setLoadingCourses] = useState(true);
-  const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
 
   const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
@@ -118,7 +116,7 @@ export default function Home() {
         try {
             const eventsQuery = query(collection(firestore, "events"), where('start', '>=', new Date().toISOString()), orderBy('start', 'asc'), limit(3));
             const querySnapshot = await getDocs(eventsQuery);
-            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as CalendarEvent);
+            const fetchedEvents = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
             setUpcomingEvents(fetchedEvents);
         } catch (error) {
             console.error("Error fetching upcoming events: ", error);
@@ -263,7 +261,6 @@ export default function Home() {
       </main>
       
       <Footer />
-       <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
     </div>
   );
 }

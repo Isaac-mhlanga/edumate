@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
@@ -8,9 +8,11 @@ import { Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { EnquiryDialog } from '@/components/enquiry-dialog';
 
 export const PublicHeader = () => {
   const pathname = usePathname();
+  const [isEnquiryDialogOpen, setIsEnquiryDialogOpen] = useState(false);
 
   const navItems = [
     { name: 'Home', href: '/' },
@@ -22,7 +24,8 @@ export const PublicHeader = () => {
   ];
 
   return (
-     <header className="bg-background/95 sticky top-0 z-50 border-b backdrop-blur-xl">
+    <>
+      <header className="bg-background/95 sticky top-0 z-50 border-b backdrop-blur-xl">
         <div className="max-w-7xl mx-auto px-6">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-8">
@@ -46,8 +49,14 @@ export const PublicHeader = () => {
             </div>
             
             <div className="hidden lg:flex items-center gap-2">
+                <Button variant="ghost" onClick={() => setIsEnquiryDialogOpen(true)}>
+                    Contact Us
+                </Button>
+                <Button variant="ghost" asChild>
+                    <Link href="/login">Log In</Link>
+                </Button>
                 <Button asChild>
-                    <Link href="/register">Get Started</Link>
+                    <Link href="/register">Sign Up</Link>
                 </Button>
             </div>
 
@@ -83,13 +92,16 @@ export const PublicHeader = () => {
                     </div>
                      <div className="mt-auto border-t pt-6 flex flex-col gap-4">
                        <SheetClose asChild>
+                        <Button variant="ghost" onClick={() => setIsEnquiryDialogOpen(true)} size="lg">Contact Us</Button>
+                      </SheetClose>
+                       <SheetClose asChild>
                         <Button variant="outline" asChild size="lg">
-                          <Link href="/login">Login</Link>
+                          <Link href="/login">Log In</Link>
                         </Button>
                       </SheetClose>
                       <SheetClose asChild>
                         <Button asChild size="lg">
-                          <Link href="/register">Get Started</Link>
+                          <Link href="/register">Sign Up</Link>
                         </Button>
                       </SheetClose>
                     </div>
@@ -100,5 +112,7 @@ export const PublicHeader = () => {
           </div>
         </div>
       </header>
+      <EnquiryDialog isOpen={isEnquiryDialogOpen} setIsOpen={setIsEnquiryDialogOpen} />
+    </>
   );
 };
