@@ -272,7 +272,9 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="events" className="py-24 bg-muted">
+        <section id="events" className="py-24 bg-muted relative overflow-hidden">
+            <div className="absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-[30rem] h-[30rem] bg-primary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
+            <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob -z-10"></div>
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
@@ -283,21 +285,26 @@ export default function Home() {
                 {upcomingEvents.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {upcomingEvents.map((event, index) => (
-                            <Card key={event.id} className="group cursor-pointer" onClick={() => handleEventClick(event)}>
+                             <Card key={event.id} className="group cursor-pointer bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 flex flex-col" onClick={() => handleEventClick(event)}>
                                 <CardHeader>
-                                    <div className="flex items-center gap-4 text-primary mb-2">
-                                        <Calendar className="h-6 w-6"/>
-                                        <p className="font-bold text-lg">{format(new Date(event.start), 'MMMM d, yyyy')}</p>
+                                    <div className="flex items-start gap-4">
+                                        <div className="flex flex-col items-center justify-center p-2 rounded-md bg-muted text-muted-foreground w-16">
+                                            <span className="text-xs font-bold uppercase">{format(new Date(event.start), 'MMM')}</span>
+                                            <span className="text-2xl font-bold text-foreground">{format(new Date(event.start), 'd')}</span>
+                                        </div>
+                                        <div className="flex-1">
+                                            <Badge variant="secondary" className="mb-2">{event.subject} - Grade {event.grade}</Badge>
+                                            <CardTitle className="text-base line-clamp-2">{event.title}</CardTitle>
+                                        </div>
                                     </div>
-                                    <CardTitle className="text-xl group-hover:text-primary transition-colors">{event.title}</CardTitle>
                                 </CardHeader>
-                                <CardContent>
-                                    <p className="text-muted-foreground line-clamp-3">{event.scope || event.description}</p>
+                                <CardContent className="flex-grow">
+                                    <p className="text-muted-foreground line-clamp-2 text-sm">{event.scope || event.description}</p>
                                 </CardContent>
                                 <CardFooter>
-                                    <div className="flex justify-between w-full items-center text-sm">
+                                    <div className="flex justify-between w-full items-center text-sm text-muted-foreground">
                                         <span className="font-semibold">{event.instructor}</span>
-                                        <Badge variant="secondary">{event.subject} - Grade {event.grade}</Badge>
+                                        <span className="group-hover:text-primary transition-colors flex items-center">View Details <ArrowRight className="ml-1 h-3 w-3"/></span>
                                     </div>
                                 </CardFooter>
                             </Card>
