@@ -1,3 +1,4 @@
+
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -268,6 +269,11 @@ export default function Home() {
                             </Card>
                         ))
                     )}
+                </div>
+                <div className="text-center mt-12">
+                    <Button size="lg" asChild>
+                        <Link href="/courses">View All Courses <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    </Button>
                 </div>
             </div>
         </section>
