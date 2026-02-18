@@ -13,9 +13,10 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ListFilter, Clapperboard, Clock, User, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ListFilter, Clapperboard, Clock, UserCog, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { cn } from '@/lib/utils';
 
 type VideoData = {
     id: string;
@@ -58,6 +59,73 @@ const firebaseConfig = {
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
 };
 
+function Pagination({
+  currentPage,
+  totalPages,
+  onPageChange,
+}: {
+  currentPage: number;
+  totalPages: number;
+  onPageChange: (page: number) => void;
+}) {
+  const getPageNumbers = () => {
+    const pageNumbers = [];
+    if (totalPages <= 7) {
+      for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+      }
+    } else {
+      if (currentPage <= 4) {
+        pageNumbers.push(1, 2, 3, 4, 5, '...', totalPages);
+      } else if (currentPage >= totalPages - 3) {
+        pageNumbers.push(1, '...', totalPages - 4, totalPages - 3, totalPages - 2, totalPages - 1, totalPages);
+      } else {
+        pageNumbers.push(1, '...', currentPage - 1, currentPage, currentPage + 1, '...', totalPages);
+      }
+    }
+    return pageNumbers;
+  };
+
+  return (
+    <div className="flex items-center justify-center space-x-1 pt-8">
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage - 1)}
+        disabled={currentPage === 1}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
+      {getPageNumbers().map((page, index) =>
+        typeof page === 'number' ? (
+          <Button
+            key={index}
+            variant={currentPage === page ? 'default' : 'outline'}
+            size="sm"
+            className="h-9 w-9 p-0"
+            onClick={() => onPageChange(page)}
+          >
+            {page}
+          </Button>
+        ) : (
+          <span key={index} className="px-2 py-1 text-muted-foreground">
+            ...
+          </span>
+        )
+      )}
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => onPageChange(currentPage + 1)}
+        disabled={currentPage === totalPages}
+      >
+        <ChevronRight className="h-4 w-4" />
+      </Button>
+    </div>
+  );
+}
+
+
 export default function CoursesPage() {
     const [allCourses, setAllCourses] = useState<Course[]>([]);
     const [loadingCourses, setLoadingCourses] = useState(true);
@@ -84,7 +152,8 @@ export default function CoursesPage() {
                     const courseData = { id: doc.id, ...doc.data() } as Course;
                     return {
                         ...courseData,
-                        instructor: instructorMap.get(courseData.instructorId) || 'Edumate Team'
+                        instructor: instructorMap.get(courseData.instructorId) || 'Edumate Team',
+                        rating: 4.2 + (Math.random() * 0.7) // Add random rating
                     };
                 });
                 setAllCourses(fetchedCourses);
@@ -100,6 +169,7 @@ export default function CoursesPage() {
 
     const handleFilterChange = (key: 'search' | 'subject' | 'grade', value: string) => {
         setFilters(prev => ({ ...prev, [key]: value }));
+        setCurrentPage(1);
     };
 
     const filteredCourses = React.useMemo(() => {
@@ -181,11 +251,11 @@ export default function CoursesPage() {
                             </div>
                         ) : paginatedCourses.length > 0 ? (
                              <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {paginatedCourses.map((course) => (
-                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card border transition-shadow duration-300 hover:shadow-xl">
+                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1">
                                             <Link href={`/courses/${course.id}`} className="block">
-                                                <div className="relative h-48 overflow-hidden">
+                                                <div className="relative h-56 overflow-hidden">
                                                     <Image
                                                         src={course.thumbnail}
                                                         alt={course.title}
@@ -198,17 +268,15 @@ export default function CoursesPage() {
                                             <CardHeader>
                                                 <div className="flex justify-between items-start">
                                                     <Badge variant="secondary">{course.subject}</Badge>
+                                                    <div className="flex items-center gap-1 text-sm text-amber-500">
+                                                        <Star className="w-4 h-4 fill-amber-400" />
+                                                        <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
+                                                    </div>
                                                 </div>
                                                 <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
                                             </CardHeader>
                                             <CardContent className="flex-grow">
                                                 <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
-                                                {course.instructor && (
-                                                    <div className="flex items-center gap-2 text-xs text-muted-foreground mt-2">
-                                                        <User className="h-3 w-3" />
-                                                        <span>By {course.instructor}</span>
-                                                    </div>
-                                                )}
                                             </CardContent>
                                             <CardFooter className="flex-col items-start gap-4">
                                                 <div className="flex justify-between w-full text-sm text-muted-foreground">
@@ -234,12 +302,8 @@ export default function CoursesPage() {
                                         </Card>
                                     ))}
                                 </div>
-                                 {totalPages > 1 && (
-                                    <div className="flex items-center justify-center pt-8">
-                                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.max(1, p - 1))} disabled={currentPage === 1}><ChevronLeft className="h-4 w-4 mr-1" />Prev</Button>
-                                        <span className="text-sm text-muted-foreground mx-4">Page {currentPage} of {totalPages}</span>
-                                        <Button variant="outline" size="sm" onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))} disabled={currentPage >= totalPages}>Next<ChevronRight className="h-4 w-4 ml-1" /></Button>
-                                    </div>
+                                {totalPages > 1 && (
+                                  <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
                                 )}
                             </>
                         ) : (
