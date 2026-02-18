@@ -249,7 +249,7 @@ export default function Home() {
                             {allCourses.map((course, index) => (
                                 <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                                     <div className="p-1 h-full">
-                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
+                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 [--tw-shadow-color:hsl(var(--primary)/0.2)] shadow-xl -translate-y-1 transition-all duration-300 hover:[--tw-shadow-color:hsl(var(--primary)/0.3)] hover:scale-105 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
                                             <Link href={`/courses/${course.id}`} className="block">
                                                 <div className="relative h-56 overflow-hidden">
                                                     <Image
