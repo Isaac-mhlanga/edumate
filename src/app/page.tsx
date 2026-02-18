@@ -329,7 +329,7 @@ export default function Home() {
                             value={`item-${index}`} 
                             className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 rounded-lg"
                         >
-                            <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground">
+                            <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground tracking-subtle">
                                 {item.question}
                             </AccordionTrigger>
                             <AccordionContent className="text-base text-muted-foreground px-6">
