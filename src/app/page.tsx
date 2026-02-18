@@ -98,7 +98,7 @@ export default function Home() {
             const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as UserDoc);
             const instructorMap = new Map(users.filter(u => u.role === 'instructor').map(i => [i.id, i.fullName]));
 
-            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'), orderBy('createdAt', 'desc'));
+            const coursesQuery = query(collection(firestore, 'courses'), orderBy('createdAt', 'desc'));
             const querySnapshot = await getDocs(coursesQuery);
             const fetchedCourses = querySnapshot.docs.map(doc => {
                 const courseData = { id: doc.id, ...doc.data() } as Course;
@@ -110,7 +110,7 @@ export default function Home() {
             });
             setAllCourses(fetchedCourses);
         } catch (error) {
-            console.error("Error fetching published courses: ", error);
+            console.error("Error fetching courses: ", error);
         } finally {
             setLoadingCourses(false);
         }
