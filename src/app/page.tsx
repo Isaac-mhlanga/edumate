@@ -188,7 +188,9 @@ export default function Home() {
             </div>
         </section>
 
-        <section className="py-24 bg-muted">
+        <section className="py-24 bg-muted relative overflow-hidden">
+           <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-primary/10 rounded-full blur-3xl animate-blob -z-10"></div>
+           <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2 -z-10"></div>
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
@@ -198,7 +200,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service, index) => (
-                <Card key={index} className="text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                <Card key={index} className="text-center transition-all duration-300 bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1">
                   <CardHeader className="items-center">
                     <div className="bg-primary/10 text-primary rounded-full p-4">
                       <service.icon className="h-8 w-8" />
