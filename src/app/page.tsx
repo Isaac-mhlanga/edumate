@@ -12,7 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { collection, getDocs, getFirestore, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight } from "lucide-react";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -132,6 +132,38 @@ export default function Home() {
     setIsEventDialogOpen(true);
   };
   
+  const services = [
+    {
+      icon: Users,
+      title: "Tutorial Sessions",
+      description: "One-on-one and group tutoring sessions designed to improve understanding and academic performance.",
+    },
+    {
+      icon: FilePenLine,
+      title: "Assignment & Project Assistance",
+      description: "Guidance and support with school and university assignments and research projects.",
+    },
+    {
+      icon: GraduationCap,
+      title: "Career Guidance",
+      description: "Personalized career advice, subject selection guidance, and future planning support.",
+    },
+    {
+      icon: Award,
+      title: "Bursary Applications",
+      description: "Assistance with identifying and applying for bursaries and scholarships.",
+    },
+    {
+      icon: Banknote,
+      title: "NSFAS Bursary Applications",
+      description: "Step-by-step support with NSFAS applications and documentation.",
+    },
+     {
+      icon: School,
+      title: "University Applications",
+      description: "Guidance through the university application process, from choosing a course to final submission.",
+    },
+  ];
 
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
@@ -154,6 +186,32 @@ export default function Home() {
                     </div>
                 </div>
             </div>
+        </section>
+
+        <section className="py-24 bg-muted">
+          <div className="max-w-7xl mx-auto px-6">
+            <div className="text-center mb-12">
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
+              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                Empowering students through academic support, career guidance, and funding assistance.
+              </p>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {services.map((service, index) => (
+                <Card key={index} className="text-center transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
+                  <CardHeader className="items-center">
+                    <div className="bg-primary/10 text-primary rounded-full p-4">
+                      <service.icon className="h-8 w-8" />
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    <CardTitle className="text-xl mb-2">{service.title}</CardTitle>
+                    <CardDescription>{service.description}</CardDescription>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
         </section>
       </main>
       <Footer />
