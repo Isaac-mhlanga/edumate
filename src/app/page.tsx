@@ -12,12 +12,13 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { collection, getDocs, getFirestore, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, UserCog, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School } from "lucide-react";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { format } from 'date-fns';
+import { Separator } from "@/components/ui/separator";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -167,6 +168,16 @@ export default function Home() {
     },
   ];
 
+  const formatDuration = (videos: VideoData[] = []) => {
+      const totalSeconds = videos.reduce((acc, video) => acc + (video.duration || 0), 0);
+      if (totalSeconds === 0) return null;
+      const hours = Math.floor(totalSeconds / 3600);
+      const minutes = Math.floor((totalSeconds % 3600) / 60);
+      if (hours > 0) return `${hours}h ${minutes > 0 ? `${minutes}m` : ''}`.trim();
+      if (minutes > 0) return `${minutes}m`;
+      return `${Math.round(totalSeconds)}s`;
+    };
+
   return (
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <PublicHeader />
@@ -229,7 +240,7 @@ export default function Home() {
                         Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)
                     ) : (
                         allCourses.map((course, index) => (
-                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
+                             <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
                                 <Link href={`/courses/${course.id}`} className="block">
                                     <div className="relative h-56 overflow-hidden">
                                         <Image
@@ -261,9 +272,18 @@ export default function Home() {
                                             <span>{course.videos.length} lessons</span>
                                         </div>
                                         <div className="flex items-center gap-2">
-                                            <UserCog className="w-4 h-4" />
-                                            <span>By {course.instructor}</span>
+                                            <Clock className="w-4 h-4" />
+                                            <span>{formatDuration(course.videos) || 'N/A'}</span>
                                         </div>
+                                    </div>
+                                    <Separator />
+                                    <div className="flex items-center justify-between w-full">
+                                        <span className="text-2xl font-bold">
+                                            {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
+                                        </span>
+                                        <Button asChild size="sm">
+                                            <Link href={`/courses/${course.id}`}>View Course</Link>
+                                        </Button>
                                     </div>
                                 </CardFooter>
                             </Card>
