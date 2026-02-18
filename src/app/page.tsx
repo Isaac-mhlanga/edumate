@@ -238,7 +238,7 @@ export default function Home() {
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                     {loadingCourses ? (
                         Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)
-                    ) : (
+                    ) : allCourses.length > 0 ? (
                         allCourses.map((course, index) => (
                              <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
                                 <Link href={`/courses/${course.id}`} className="block">
@@ -288,7 +288,19 @@ export default function Home() {
                                 </CardFooter>
                             </Card>
                         ))
+                    ) : (
+                        <div className="col-span-full text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                            <h3 className="text-lg font-semibold">No Featured Courses Available</h3>
+                            <p>Check back later for new courses, or make sure you have courses set to "Published" in your instructor dashboard.</p>
+                        </div>
                     )}
+                </div>
+                 <div className="text-center mt-12">
+                    <Button size="lg" asChild>
+                        <Link href="/courses">
+                            View All Courses
+                        </Link>
+                    </Button>
                 </div>
             </div>
         </section>
@@ -380,3 +392,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
