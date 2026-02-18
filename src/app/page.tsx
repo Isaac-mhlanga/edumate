@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { collection, getDocs, getFirestore, limit, orderBy, query, Timestamp, where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where } from "firebase/firestore";
 import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -19,6 +19,7 @@ import React, { useState, useEffect } from "react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { format } from 'date-fns';
 import { Separator } from "@/components/ui/separator";
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -97,7 +98,7 @@ export default function Home() {
             const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as UserDoc);
             const instructorMap = new Map(users.filter(u => u.role === 'instructor').map(i => [i.id, i.fullName]));
 
-            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'), orderBy('createdAt', 'desc'), limit(3));
+            const coursesQuery = query(collection(firestore, 'courses'), where('status', '==', 'Published'), orderBy('createdAt', 'desc'));
             const querySnapshot = await getDocs(coursesQuery);
             const fetchedCourses = querySnapshot.docs.map(doc => {
                 const courseData = { id: doc.id, ...doc.data() } as Course;
@@ -235,73 +236,79 @@ export default function Home() {
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Explore our most popular courses and start learning today.</p>
                 </div>
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-                    {loadingCourses ? (
-                        Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)
-                    ) : allCourses.length > 0 ? (
-                        allCourses.map((course, index) => (
-                             <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
-                                <Link href={`/courses/${course.id}`} className="block">
-                                    <div className="relative h-56 overflow-hidden">
-                                        <Image
-                                            src={course.thumbnail}
-                                            alt={course.title}
-                                            fill
-                                            className="object-cover transition-transform duration-300 group-hover:scale-105"
-                                            data-ai-hint="online course"
-                                        />
+                {loadingCourses ? (
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)}
+                    </div>
+                ) : allCourses.length > 0 ? (
+                    <Carousel
+                        opts={{ align: "start", loop: true }}
+                        className="w-full"
+                    >
+                        <CarouselContent>
+                            {allCourses.map((course, index) => (
+                                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                                    <div className="p-1 h-full">
+                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
+                                            <Link href={`/courses/${course.id}`} className="block">
+                                                <div className="relative h-56 overflow-hidden">
+                                                    <Image
+                                                        src={course.thumbnail}
+                                                        alt={course.title}
+                                                        fill
+                                                        className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                                        data-ai-hint="online course"
+                                                    />
+                                                </div>
+                                            </Link>
+                                            <CardHeader>
+                                                <div className="flex justify-between items-start">
+                                                    <Badge variant="secondary">{course.subject}</Badge>
+                                                    <div className="flex items-center gap-1 text-sm text-amber-500">
+                                                        <Star className="w-4 h-4 fill-amber-400" />
+                                                        <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
+                                                    </div>
+                                                </div>
+                                                <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
+                                            </CardHeader>
+                                            <CardContent className="flex-grow">
+                                                <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                                            </CardContent>
+                                            <CardFooter className="flex-col items-start gap-4">
+                                                <div className="flex justify-between w-full text-sm text-muted-foreground">
+                                                    <div className="flex items-center gap-2">
+                                                        <Clapperboard className="w-4 h-4" />
+                                                        <span>{course.videos.length} lessons</span>
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <Clock className="w-4 h-4" />
+                                                        <span>{formatDuration(course.videos) || 'N/A'}</span>
+                                                    </div>
+                                                </div>
+                                                <Separator />
+                                                <div className="flex items-center justify-between w-full">
+                                                    <span className="text-2xl font-bold">
+                                                        {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
+                                                    </span>
+                                                    <Button asChild size="sm">
+                                                        <Link href={`/courses/${course.id}`}>View Course</Link>
+                                                    </Button>
+                                                </div>
+                                            </CardFooter>
+                                        </Card>
                                     </div>
-                                </Link>
-                                <CardHeader>
-                                    <div className="flex justify-between items-start">
-                                        <Badge variant="secondary">{course.subject}</Badge>
-                                        <div className="flex items-center gap-1 text-sm text-amber-500">
-                                            <Star className="w-4 h-4 fill-amber-400" />
-                                            <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
-                                        </div>
-                                    </div>
-                                    <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
-                                </CardContent>
-                                <CardFooter className="flex-col items-start gap-4">
-                                    <div className="flex justify-between w-full text-sm text-muted-foreground">
-                                        <div className="flex items-center gap-2">
-                                            <Clapperboard className="w-4 h-4" />
-                                            <span>{course.videos.length} lessons</span>
-                                        </div>
-                                        <div className="flex items-center gap-2">
-                                            <Clock className="w-4 h-4" />
-                                            <span>{formatDuration(course.videos) || 'N/A'}</span>
-                                        </div>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex items-center justify-between w-full">
-                                        <span className="text-2xl font-bold">
-                                            {course.pricing.type === 'purchase' ? `R ${course.pricing.price}` : 'Free'}
-                                        </span>
-                                        <Button asChild size="sm">
-                                            <Link href={`/courses/${course.id}`}>View Course</Link>
-                                        </Button>
-                                    </div>
-                                </CardFooter>
-                            </Card>
-                        ))
-                    ) : (
-                        <div className="col-span-full text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
-                            <h3 className="text-lg font-semibold">No Featured Courses Available</h3>
-                            <p>Check back later for new courses, or make sure you have courses set to "Published" in your instructor dashboard.</p>
-                        </div>
-                    )}
-                </div>
-                 <div className="text-center mt-12">
-                    <Button size="lg" asChild>
-                        <Link href="/courses">
-                            View All Courses
-                        </Link>
-                    </Button>
-                </div>
+                                </CarouselItem>
+                            ))}
+                        </CarouselContent>
+                        <CarouselPrevious className="ml-10" />
+                        <CarouselNext className="mr-10"/>
+                    </Carousel>
+                ) : (
+                    <div className="col-span-full text-center py-16 text-muted-foreground border-2 border-dashed rounded-lg">
+                        <h3 className="text-lg font-semibold">No Featured Courses Available</h3>
+                        <p>Check back later for new courses, or make sure you have courses set to "Published" in your instructor dashboard.</p>
+                    </div>
+                )}
             </div>
         </section>
 
@@ -392,5 +399,3 @@ export default function Home() {
     </div>
   );
 }
-
-    
