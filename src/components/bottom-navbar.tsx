@@ -31,7 +31,7 @@ export function BottomNavbar({ menuItems }: BottomNavbarProps) {
     };
 
     // Take the first 5 items for the bottom nav
-    const navItems = menuItems.slice(0, 5);
+    const navItems = menuItems.filter(item => item.label !== 'Community').slice(0, 5);
 
     return (
         <div className="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-card border-t z-50">

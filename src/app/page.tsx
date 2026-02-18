@@ -1,6 +1,5 @@
 'use client';
 
-import { CommunityPreview } from "@/components/community-preview";
 import { EventDialog } from "@/components/event-dialog";
 import { Footer } from "@/components/footer";
 import { Icons } from "@/components/icons";
@@ -317,8 +316,6 @@ export default function Home() {
             </div>
         </section>
         
-        <CommunityPreview />
-
         <section id="faq" className="py-24">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">

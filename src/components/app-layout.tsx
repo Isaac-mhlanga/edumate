@@ -100,7 +100,6 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/dashboard/tutors', label: 'Tutors', icon: Users, basePath: '/dashboard/tutors' },
-  { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
@@ -111,7 +110,6 @@ const varsityStudentMenuItems: MenuItem[] = [
   { href: '/varsity-dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/varsity-dashboard', tab: 'overview' },
   { href: '/varsity-dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/varsity-dashboard', tab: 'assignments' },
   { href: '/varsity-dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/varsity-dashboard', tab: 'transactions'},
-  { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/varsity-dashboard?tab=subscriptions', label: 'My Plan', icon: CreditCard, basePath: '/varsity-dashboard', tab: 'subscriptions' },
   { href: '/calendar', label: 'Calendar', icon: Calendar, basePath: '/calendar' },
@@ -125,7 +123,6 @@ const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/instructor', tab: 'earnings' },
   { href: '/instructor?tab=quizzes', label: 'Quizzes', icon: FileQuestion, basePath: '/instructor', tab: 'quizzes' },
   { href: '/instructor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/instructor', tab: 'enquiries' },
-  { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/instructor?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/instructor', tab: 'calendar' },
 ];
 
@@ -136,7 +133,6 @@ const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=payouts', label: 'Payouts', icon: Banknote, basePath: '/admin', tab: 'payouts' },
   { href: '/admin?tab=tutors', label: 'Tutors', icon: UserCog, basePath: '/admin', tab: 'tutors' },
   { href: '/admin?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/admin', tab: 'enquiries' },
-  { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/admin?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/admin', tab: 'assignments' },
   { href: '/admin?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/admin', tab: 'calendar' },
   { href: '/admin?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/admin', tab: 'subscriptions' },
@@ -148,7 +144,6 @@ const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
   { href: '/tutor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/tutor', tab: 'enquiries' },
-  { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
 ];
 
 
