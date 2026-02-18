@@ -15,14 +15,14 @@ export const Icons = {
       <g>
           <circle cx="21" cy="21" r="19.5" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
           <circle cx="21" cy="21" r="16" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
-          <text x="21" y="23" textAnchor="middle" dominantBaseline="central" fontFamily="Lexend, sans-serif" fontSize="22" fontWeight="bold" fill="hsl(var(--primary))">E</text>
+          <text x="21" y="23" textAnchor="middle" dominantBaseline="central" fontFamily="Inter, sans-serif" fontSize="22" fontWeight="bold" fill="hsl(var(--primary))">E</text>
       </g>
 
       {/* Edumate text */}
       <text
         x="50"
         y="23"
-        fontFamily="Lexend, sans-serif"
+        fontFamily="Inter, sans-serif"
         fontSize="22"
         fontWeight="500"
         fill="hsl(var(--foreground))"

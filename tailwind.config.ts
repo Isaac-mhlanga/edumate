@@ -22,7 +22,7 @@ export default {
       },
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Lexend', 'sans-serif'],
+        headline: ['Inter', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
