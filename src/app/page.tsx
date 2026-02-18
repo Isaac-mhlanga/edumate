@@ -322,11 +322,17 @@ export default function Home() {
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Have questions? We've got answers. If you can't find what you're looking for, feel free to contact us.</p>
                 </div>
-                <Accordion type="single" collapsible className="w-full">
+                <Accordion type="single" collapsible className="w-full space-y-4">
                     {faqData.map((item, index) => (
-                        <AccordionItem key={index} value={`item-${index}`}>
-                            <AccordionTrigger className="text-lg font-semibold text-left hover:no-underline">{item.question}</AccordionTrigger>
-                            <AccordionContent className="text-base text-muted-foreground">
+                        <AccordionItem 
+                            key={index} 
+                            value={`item-${index}`} 
+                            className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 rounded-lg"
+                        >
+                            <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground">
+                                {item.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-base text-muted-foreground px-6">
                                 {item.answer}
                             </AccordionContent>
                         </AccordionItem>
