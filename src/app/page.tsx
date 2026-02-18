@@ -16,6 +16,8 @@ import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star,
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { format } from 'date-fns';
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -215,8 +217,135 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        <section id="featured-courses" className="py-24">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Explore our most popular courses and start learning today.</p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    {loadingCourses ? (
+                        Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-xl" />)
+                    ) : (
+                        allCourses.map((course, index) => (
+                            <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
+                                <Link href={`/courses/${course.id}`} className="block">
+                                    <div className="relative h-56 overflow-hidden">
+                                        <Image
+                                            src={course.thumbnail}
+                                            alt={course.title}
+                                            fill
+                                            className="object-cover transition-transform duration-300 group-hover:scale-105"
+                                            data-ai-hint="online course"
+                                        />
+                                    </div>
+                                </Link>
+                                <CardHeader>
+                                    <div className="flex justify-between items-start">
+                                        <Badge variant="secondary">{course.subject}</Badge>
+                                        <div className="flex items-center gap-1 text-sm text-amber-500">
+                                            <Star className="w-4 h-4 fill-amber-400" />
+                                            <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
+                                        </div>
+                                    </div>
+                                    <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent className="flex-grow">
+                                    <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
+                                </CardContent>
+                                <CardFooter className="flex-col items-start gap-4">
+                                    <div className="flex justify-between w-full text-sm text-muted-foreground">
+                                        <div className="flex items-center gap-2">
+                                            <Clapperboard className="w-4 h-4" />
+                                            <span>{course.videos.length} lessons</span>
+                                        </div>
+                                        <div className="flex items-center gap-2">
+                                            <UserCog className="w-4 h-4" />
+                                            <span>By {course.instructor}</span>
+                                        </div>
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        ))
+                    )}
+                </div>
+            </div>
+        </section>
+
+        <section id="events" className="py-24 bg-muted">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                        Join our live sessions, workshops, and Q&A's.
+                    </p>
+                </div>
+                {upcomingEvents.length > 0 ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {upcomingEvents.map((event, index) => (
+                            <Card key={event.id} className="group cursor-pointer" onClick={() => handleEventClick(event)}>
+                                <CardHeader>
+                                    <div className="flex items-center gap-4 text-primary mb-2">
+                                        <Calendar className="h-6 w-6"/>
+                                        <p className="font-bold text-lg">{format(new Date(event.start), 'MMMM d, yyyy')}</p>
+                                    </div>
+                                    <CardTitle className="text-xl group-hover:text-primary transition-colors">{event.title}</CardTitle>
+                                </CardHeader>
+                                <CardContent>
+                                    <p className="text-muted-foreground line-clamp-3">{event.scope || event.description}</p>
+                                </CardContent>
+                                <CardFooter>
+                                    <div className="flex justify-between w-full items-center text-sm">
+                                        <span className="font-semibold">{event.instructor}</span>
+                                        <Badge variant="secondary">{event.subject} - Grade {event.grade}</Badge>
+                                    </div>
+                                </CardFooter>
+                            </Card>
+                        ))}
+                    </div>
+                ) : (
+                    <div className="text-center text-muted-foreground">
+                        <p>No upcoming events scheduled at the moment. Check back soon!</p>
+                    </div>
+                )}
+                <div className="text-center mt-12">
+                    <Button size="lg" asChild>
+                        <Link href="/calendar">View Full Calendar <ArrowRight className="ml-2 h-4 w-4" /></Link>
+                    </Button>
+                </div>
+            </div>
+        </section>
+        
+        <CommunityPreview />
+
+        <section id="faq" className="py-24">
+            <div className="max-w-4xl mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Have questions? We've got answers. If you can't find what you're looking for, feel free to contact us.</p>
+                </div>
+                <Accordion type="single" collapsible className="w-full">
+                    {faqData.map((item, index) => (
+                        <AccordionItem key={index} value={`item-${index}`}>
+                            <AccordionTrigger className="text-lg font-semibold text-left hover:no-underline">{item.question}</AccordionTrigger>
+                            <AccordionContent className="text-base text-muted-foreground">
+                                {item.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </div>
+        </section>
       </main>
       <Footer />
+       <EventDialog
+        event={selectedEvent}
+        allEvents={upcomingEvents}
+        isOpen={isEventDialogOpen}
+        onClose={() => setIsEventDialogOpen(false)}
+        onEventSelect={handleEventClick}
+      />
     </div>
   );
 }
