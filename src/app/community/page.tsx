@@ -63,6 +63,7 @@ export default function CommunityPage() {
     };
 
     const handleDeleteQuestion = async (questionId: string) => {
+        setQuestions(prev => prev.filter(q => q.id !== questionId));
         setSelectedQuestion(null);
     };
 

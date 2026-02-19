@@ -222,12 +222,15 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const menuItems = getMenuItems();
   const currentTab = searchParams.get('tab');
+  
   const isCurrentPage = (item: MenuItem) => {
     if (item.tab) {
-        return pathname === item.basePath && (currentTab === item.tab || (!currentTab && item.tab === 'overview'));
+        const isOverviewAndNoTab = item.tab === 'overview' && !currentTab;
+        return pathname === item.basePath && (currentTab === item.tab || isOverviewAndNoTab);
     }
     return pathname.startsWith(item.basePath);
   }
+  
   const isSettingsPage = pathname === '/settings';
 
   return (

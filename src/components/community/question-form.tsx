@@ -1,10 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
+import Link from 'next/link';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { getAuth } from 'firebase/auth';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { getFirestore, collection, addDoc, serverTimestamp } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from 'firebase/app';
@@ -62,6 +63,8 @@ export function QuestionForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
+  const [user, setUser] = React.useState<import('firebase/auth').User | null>(null);
+  const [loading, setLoading] = React.useState(true);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -72,6 +75,16 @@ export function QuestionForm() {
       module: '',
     },
   });
+  
+  React.useEffect(() => {
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
+        setUser(currentUser);
+        setLoading(false);
+    });
+    return () => unsubscribe();
+  }, []);
 
   const audience = form.watch('audience');
 
@@ -136,6 +149,14 @@ export function QuestionForm() {
   };
   
   const fileRef = form.register("file");
+
+  if (loading) {
+    return <Button size="lg" disabled><Loader2 className="mr-2 h-5 w-5 animate-spin"/>Loading...</Button>
+  }
+
+  if (!user) {
+    return <Button size="lg" asChild><Link href="/login">Log in to Ask a Question</Link></Button>
+  }
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

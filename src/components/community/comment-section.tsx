@@ -341,24 +341,48 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     const storage = getStorage();
     if (!question) return;
 
-    const isOwner = type === 'comment' 
-        ? user?.uid === comments.find(c => c.id === id)?.studentId 
-        : user?.uid === question.studentId;
-
+    const itemToDelete = type === 'question' ? question : comments.find(c => c.id === id);
+    if (!itemToDelete) return;
+    const isOwner = user?.uid === itemToDelete.studentId;
     if (userRole !== 'admin' && !isOwner) {
-        toast({ variant: 'destructive', title: 'Permission Denied' });
+        toast({ variant: 'destructive', title: 'Permission Denied', description: 'You cannot delete this item.' });
         return;
     }
 
     if (type === 'question') {
-        onDeleteQuestion(id);
+        if (!window.confirm("Are you sure you want to delete this question? This will delete all its comments and cannot be undone.")) return;
+        try {
+            const commentsQuery = query(collection(firestore, 'questions', id, 'comments'));
+            const commentsSnapshot = await getDocs(commentsQuery);
+            const batch = writeBatch(firestore);
+
+            for (const commentDoc of commentsSnapshot.docs) {
+                const commentData = commentDoc.data();
+                if (commentData.fileUrl) {
+                    try { await deleteObject(ref(storage, commentData.fileUrl)); } catch (e) { console.warn(`Failed to delete comment file: ${e}`); }
+                }
+                batch.delete(commentDoc.ref);
+            }
+            
+            if (question.fileUrl) {
+                try { await deleteObject(ref(storage, question.fileUrl)); } catch (e) { console.warn(`Failed to delete question file: ${e}`); }
+            }
+
+            const questionRef = doc(firestore, 'questions', id);
+            batch.delete(questionRef);
+
+            await batch.commit();
+            toast({ title: 'Question Deleted' });
+            onDeleteQuestion(id);
+        } catch (error) {
+            console.error('Error deleting question:', error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Failed to delete the question.' });
+        }
     } else {
         if (!window.confirm("Are you sure you want to delete this comment? This will also delete all replies to it.")) return;
-        const commentToDelete = comments.find(c => c.id === id);
-        if (!commentToDelete) return;
-
         try {
-            const allCommentsToDelete = [commentToDelete];
+            const batch = writeBatch(firestore);
+            const allCommentsToDelete: Comment[] = [];
             const findRepliesRecursive = (parentId: string) => {
                 const replies = comments.filter(c => c.parentId === parentId);
                 for (const reply of replies) {
@@ -366,18 +390,21 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                     findRepliesRecursive(reply.id);
                 }
             };
-            findRepliesRecursive(commentToDelete.id);
-
-            const batch = writeBatch(firestore);
             
+            const rootComment = comments.find(c => c.id === id);
+            if (rootComment) {
+                allCommentsToDelete.push(rootComment);
+                findRepliesRecursive(id);
+            }
+
             for (const commentDoc of allCommentsToDelete) {
                 if (commentDoc.fileUrl) {
-                    try { await deleteObject(ref(storage, commentDoc.fileUrl)); } catch (e) { console.error(e); }
+                     try { await deleteObject(ref(storage, commentDoc.fileUrl)); } catch (e) { console.warn(`Failed to delete comment file: ${e}`); }
                 }
                 batch.delete(doc(firestore, 'questions', question.id, 'comments', commentDoc.id));
             }
             
-            if (!commentToDelete.parentId) {
+            if (rootComment && !rootComment.parentId) {
                 const questionRef = doc(firestore, 'questions', question.id);
                 batch.update(questionRef, { commentCount: increment(-1) });
             }
@@ -390,7 +417,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
         }
     }
   };
-
 
   const handleToggleComments = async (disabled: boolean) => {
     if (!dashboardView || userRole !== 'admin' || !question) return;
