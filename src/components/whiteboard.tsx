@@ -62,11 +62,6 @@ function InnerWhiteboard({
 
 	useEffect(() => {
 		if (!user || !editor) return;
-
-		// Set user preferences, including making tools "sticky"
-		editor.user.updateUserPreferences({
-			isToolLocked: true,
-		});
         
         // Set user's name
         editor.user.updateUser({
