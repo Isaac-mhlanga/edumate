@@ -21,7 +21,7 @@ import { format } from 'date-fns';
 import { Separator } from "@/components/ui/separator";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -83,7 +83,7 @@ type CalendarEvent = {
 const testimonials = [
   {
     quote: "Isaac Mhlanga, a final-year student at the University of Johannesburg, is renowned for his talent and motivation. He passionately assists fellow students across diverse fields such as Information Technology, mathematics, and theory-based studies, showcasing his dedication to learning and academic excellence.",
-    name: "Mukhetwa Isaac Mhlanga",
+    name: "Mukhetwa Mhlanga",
     role: "Student | University of Johannesburg",
     avatarFallback: "MM",
   },
