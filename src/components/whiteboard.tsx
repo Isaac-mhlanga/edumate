@@ -48,7 +48,6 @@ function InnerWhiteboard({
 	user: User | null;
 }) {
 	const editor = useEditor();
-	const { theme } = useTheme();
 
 	const [saveSnapshotToFirestore] = useDebounce((snapshot: TLSnapshot) => {
 		const docRef = doc(firestore, 'whiteboards', whiteboardId);
@@ -64,7 +63,6 @@ function InnerWhiteboard({
 		editor.user.updateUserPreferences({
 			id: user.uid,
 			name: user.displayName ?? 'Anonymous',
-			isDarkMode: theme === 'dark',
 		});
 
 		let stillAlive = true;
@@ -117,7 +115,7 @@ function InnerWhiteboard({
 			unsubscribe();
 			cleanupStoreListener();
 		};
-	}, [editor, user, whiteboardId, theme, saveSnapshotToFirestore]);
+	}, [editor, user, whiteboardId, saveSnapshotToFirestore]);
 
 	return null;
 }
@@ -130,6 +128,7 @@ export function Whiteboard({
 	userRole: 'instructor' | 'student' | 'admin' | 'varsity-student';
 }) {
 	const [user, setUser] = useState<User | null>(null);
+	const { theme } = useTheme();
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -139,7 +138,7 @@ export function Whiteboard({
 
 	return (
 		<div style={{ position: 'fixed', inset: 0 }}>
-			<Tldraw key={whiteboardId}>
+			<Tldraw persistenceKey={whiteboardId} forceDarkMode={theme === 'dark'}>
 				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
 			</Tldraw>
 		</div>
