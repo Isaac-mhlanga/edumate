@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -201,7 +202,10 @@ export default function CoursesPage() {
         <div className="flex flex-col min-h-screen bg-background">
             <PublicHeader />
             <main className="flex-1">
-                <section className="py-24 bg-muted/50 animate-fade-in-up">
+                <section className="relative pt-24 pb-12 bg-background animate-fade-in-up">
+                    <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-5" />
+                    <div className="absolute top-0 right-0 -translate-y-1/2 translate-x-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob" />
+                    <div className="absolute bottom-0 left-0 translate-y-1/2 -translate-x-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2" />
                     <div className="max-w-7xl mx-auto px-6">
                         <div className="text-center mb-12">
                             <h1 className="text-4xl md:text-5xl font-headline font-bold">Course Catalog</h1>
@@ -270,8 +274,8 @@ export default function CoursesPage() {
                                             <CardHeader>
                                                 <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
                                                     <span className="font-semibold">By {course.instructor}</span>
-                                                     <div className="flex items-center gap-1 text-sm text-amber-500">
-                                                        <Star className="w-4 h-4 fill-amber-400" />
+                                                     <div className="flex items-center gap-1 text-sm text-primary">
+                                                        <Star className="w-4 h-4 fill-primary" />
                                                         <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
                                                     </div>
                                                 </div>

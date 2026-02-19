@@ -1,4 +1,5 @@
 
+
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -349,14 +350,14 @@ export default function Home() {
                                                 </div>
                                             </Link>
                                             <CardHeader>
-                                                <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
                                                 <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
-                                                    <div className="flex items-center gap-1">
-                                                        <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
-                                                        <span className="font-bold text-sm">{(course.rating || 0).toFixed(1)}</span>
+                                                    <span className="font-semibold">By {course.instructor}</span>
+                                                    <div className="flex items-center gap-1 text-sm text-primary">
+                                                        <Star className="w-4 h-4 fill-primary" />
+                                                        <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
                                                     </div>
-                                                     <span>By {course.instructor}</span>
                                                 </div>
+                                                <CardTitle className="text-lg pt-2 line-clamp-2">{course.title}</CardTitle>
                                             </CardHeader>
                                             <CardContent className="flex-grow">
                                                 <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
