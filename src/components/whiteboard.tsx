@@ -6,7 +6,7 @@ import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import { getFirestore, doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useDebounce } from 'use-debounce';
+import { useDebouncedCallback } from 'use-debounce';
 import { useRouter } from 'next/navigation';
 import { X, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from './ui/button';
@@ -41,7 +41,7 @@ function InnerWhiteboard({
 }) {
 	const editor = useEditor();
 
-	const [saveSnapshotToFirestore] = useDebounce((snapshot: TLSnapshot) => {
+	const saveSnapshotToFirestore = useDebouncedCallback((snapshot: TLSnapshot) => {
 		const docRef = doc(firestore, 'whiteboards', whiteboardId);
 		setDoc(docRef, {
 			snapshot,
