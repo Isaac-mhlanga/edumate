@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@excalidraw/excalidraw": "^0.17.6",
     "@fullcalendar/daygrid": "^6.1.15",
     "@fullcalendar/interaction": "^6.1.15",
     "@fullcalendar/list": "^6.1.15",
@@ -66,11 +67,11 @@
     "react-katex": "^3.0.1",
     "react-paystack": "^5.0.0",
     "react-resizable-panels": "^2.0.19",
+    "react-sketch-canvas": "^6.2.0",
     "react-to-print": "^2.15.1",
     "recharts": "^2.15.1",
     "tailwind-merge": "^3.0.1",
     "tailwindcss-animate": "^1.0.7",
-    "tldraw": "^2.1.4",
     "vaul": "^0.9.1",
     "zod": "^3.24.2"
   },
