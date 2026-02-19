@@ -84,7 +84,7 @@ type CalendarEvent = {
 const testimonials = [
   {
     quote: "Mukhetwa is a talented and motivated final-year student at the University of Johannesburg. He is passionate about helping other students in IT, maths, and theory subjects, showing his love for learning and helping others succeed.",
-    name: "Mukhetwa",
+    name: "Mukhetwa Mhlanga",
     role: "Student | University of Johannesburg",
     avatarFallback: "M",
   },
@@ -208,9 +208,9 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6 text-center">
                 <div className="z-10 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                        Your Key to Unlocking Academic Success
+                        Your Path to Academic Success
                     </h1>
-                    <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+                    <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
                         Get the marks you deserve with video lessons, one-on-one tutoring, and help with varsity and bursary applications.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -252,7 +252,7 @@ export default function Home() {
            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">How We Help You Succeed</h2>
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
                 Everything you need to ace your exams, get into varsity, and secure funding.
               </p>
@@ -283,7 +283,7 @@ export default function Home() {
                         <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
                             <Gift className="h-8 w-8" />
                         </div>
-                        <CardTitle className="text-3xl font-headline">Refer a Friend & Get R20</CardTitle>
+                        <CardTitle className="text-3xl font-headline">Refer & Earn</CardTitle>
                         <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto">
                            Tell your friends about Edumate Pro. When they sign up using your link, you get R20. It's that simple!
                         </CardDescription>
@@ -313,7 +313,7 @@ export default function Home() {
         <section id="featured-courses" className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Popular Courses</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Check out the courses our students are loving right now.</p>
                 </div>
                 {loadingCourses ? (
@@ -397,7 +397,7 @@ export default function Home() {
         <section id="events" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Live Sessions</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
                         Don't miss our live classes, workshops, and Q&A sessions.
                     </p>
@@ -447,7 +447,7 @@ export default function Home() {
         <section id="faq" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Got Questions?</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">We've got answers to your most common questions. If you don't see your question here, just ask!</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4">
