@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -18,6 +19,7 @@ export const PublicHeader = () => {
     { name: 'High School', href: '/high-school' },
     { name: 'Varsity', href: '/varsity' },
     { name: 'Tutors', href: '/tutors' },
+    { name: 'Community', href: '/community' },
   ];
 
   return (
