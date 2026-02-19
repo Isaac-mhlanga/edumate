@@ -1,23 +1,16 @@
 'use client';
 import dynamic from 'next/dynamic';
-import {
-	useEditor,
-	type TLStore,
-	type TLSnapshot,
-} from '@tldraw/tldraw';
+import { useEditor, type TLSnapshot } from '@tldraw/tldraw';
 import '@tldraw/tldraw/tldraw.css';
 import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
-import {
-	getFirestore,
-	doc,
-	onSnapshot,
-	setDoc,
-	getDoc,
-	type DocumentReference,
-} from 'firebase/firestore';
+import { getFirestore, doc, onSnapshot, setDoc, getDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDebounce } from 'use-debounce';
+import { useRouter } from 'next/navigation';
+import { X, Minimize2, Maximize2 } from 'lucide-react';
+import { Button } from './ui/button';
+import { cn } from '@/lib/utils';
 
 const Tldraw = dynamic(
 	async () => (await import('@tldraw/tldraw')).Tldraw,
@@ -125,6 +118,8 @@ export function Whiteboard({
 	userRole: 'instructor' | 'student' | 'admin' | 'varsity-student';
 }) {
 	const [user, setUser] = useState<User | null>(null);
+    const router = useRouter();
+    const [isMinimized, setIsMinimized] = useState(false);
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -132,9 +127,37 @@ export function Whiteboard({
 		return () => unsubscribe();
 	}, []);
 
+    if (isMinimized) {
+        return (
+            <div className="fixed bottom-4 right-4 z-[100]">
+                <Button size="lg" onClick={() => setIsMinimized(false)} className="shadow-2xl">
+                    <Maximize2 className="mr-2 h-5 w-5" />
+                    Whiteboard Session
+                </Button>
+            </div>
+        )
+    }
 
 	return (
-		<div className="relative w-full h-[calc(100vh-12rem)] rounded-lg border overflow-hidden">
+		<div className="fixed inset-2 z-50 bg-background rounded-xl overflow-hidden shadow-2xl border">
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
+                 <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={() => setIsMinimized(true)}
+                >
+                    <Minimize2 className="h-5 w-5" />
+                    <span className="sr-only">Minimize Whiteboard</span>
+                </Button>
+                <Button
+                    variant="destructive"
+                    size="icon"
+                    onClick={() => router.back()}
+                >
+                    <X className="h-5 w-5" />
+                    <span className="sr-only">Exit Whiteboard</span>
+                </Button>
+            </div>
 			<Tldraw persistenceKey={whiteboardId}>
 				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
 			</Tldraw>
