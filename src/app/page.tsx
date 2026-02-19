@@ -1,3 +1,4 @@
+
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -82,7 +83,7 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate was a lifesaver. The tutors didn't just give me answers they walked me through the problems and helped me actually understand the material.",
+    quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate was a lifesaver. The tutors didn't just give me answers; they walked me through the problems and helped me actually understand the material.",
     name: "Mukhetwa",
     role: "MSc Data Science Student | University of Johannesburg",
   },
@@ -222,7 +223,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="stats" className="py-16 bg-muted">
+        <section id="stats" className="py-16 bg-muted animate-fade-in-up">
             <div className="max-w-5xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                     <div className="space-y-2">
@@ -248,7 +249,7 @@ export default function Home() {
            <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-3xl animate-blob -z-10"></div>
            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
           <div className="max-w-7xl mx-auto px-6">
-            <div className="text-center mb-12">
+            <div className="text-center mb-12 animate-fade-in-up">
               <Badge>What We Offer</Badge>
               <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Our Services</h2>
               <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -275,7 +276,7 @@ export default function Home() {
 
         <section id="refer-earn" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12">
+                <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Get Rewarded</Badge>
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Refer & Earn</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
@@ -400,7 +401,7 @@ export default function Home() {
 
         <section id="events" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
-                <div className="text-center mb-12">
+                <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Live Sessions</Badge>
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
                     <p className="text-lg text-muted-foreground">
@@ -410,7 +411,7 @@ export default function Home() {
                 {upcomingEvents.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {upcomingEvents.map((event, index) => (
-                             <Card key={event.id} className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 bg-card/50" onClick={() => handleEventClick(event)}>
+                             <Card key={event.id} className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1 bg-card/50" onClick={() => handleEventClick(event)}>
                                 <div className="flex">
                                     <div className="flex flex-col items-center justify-center w-24 bg-gradient-to-br from-primary/10 to-primary/20 p-4 text-primary-foreground border-r border-primary/20">
                                         <span className="text-3xl font-bold text-primary">{format(new Date(event.start), 'd')}</span>
@@ -494,7 +495,7 @@ export default function Home() {
                         {testimonials.map((testimonial, index) => (
                             <CarouselItem key={index}>
                                 <div className="p-1 h-full">
-                                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg h-full flex flex-col justify-between">
+                                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg h-full flex flex-col justify-between transition-all duration-300 hover:shadow-xl hover:-translate-y-1">
                                         <CardContent className="p-8 text-center flex-grow flex items-center justify-center">
                                             <p className="text-lg font-medium text-foreground italic">
                                                 "{testimonial.quote}"
@@ -530,3 +531,5 @@ export default function Home() {
     </div>
   );
 }
+
+    
