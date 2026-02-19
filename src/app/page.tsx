@@ -403,7 +403,7 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="faq" className="py-24 bg-muted">
+        <section id="faq" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
@@ -428,7 +428,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="testimonials" className="py-24 bg-background relative overflow-hidden">
+        <section id="testimonials" className="py-24 bg-muted relative overflow-hidden">
             <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-5"></div>
             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
             <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2"></div>
