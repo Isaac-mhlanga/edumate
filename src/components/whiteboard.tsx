@@ -52,9 +52,13 @@ function InnerWhiteboard({
 	useEffect(() => {
 		if (!user || !editor) return;
 
+		// Set the user's name that appears on the whiteboard
 		editor.user.updateUserPreferences({
 			name: user.displayName ?? 'Anonymous',
 		});
+
+        // This makes the currently selected tool "sticky"
+        editor.updateInstanceState({ isToolLocked: true });
 
 		let stillAlive = true;
 
@@ -75,6 +79,7 @@ function InnerWhiteboard({
 
 		loadInitialData();
 
+		// Subscribe to changes from other users
 		const unsubscribe = onSnapshot(
 			doc(firestore, 'whiteboards', whiteboardId),
 			(snapshot) => {
@@ -91,6 +96,7 @@ function InnerWhiteboard({
 			}
 		);
 
+		// Save changes to firestore
 		const cleanupStoreListener = editor.store.listen(
 			(event) => {
 				if (event.source === 'user') {
@@ -141,31 +147,34 @@ export function Whiteboard({
     }
 
 	return (
-		<div className="fixed inset-2 z-50 bg-background rounded-xl overflow-hidden shadow-2xl border">
-            <div className="absolute top-4 right-4 z-10 flex items-center gap-2">
-                 <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={() => setIsMinimized(true)}
+		<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm p-4 flex items-center justify-center">
+            <div className='relative w-full h-full rounded-xl overflow-hidden shadow-2xl border'>
+                <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => setIsMinimized(true)}
+                        className="bg-background/80 hover:bg-background"
+                    >
+                        <Minimize2 className="h-5 w-5" />
+                        <span className="sr-only">Minimize Whiteboard</span>
+                    </Button>
+                    <Button
+                        variant="destructive"
+                        size="icon"
+                        onClick={() => router.back()}
+                    >
+                        <X className="h-5 w-5" />
+                        <span className="sr-only">Exit Whiteboard</span>
+                    </Button>
+                </div>
+                <Tldraw 
+                    persistenceKey={whiteboardId}
+                    forceDarkMode={resolvedTheme === 'dark'}
                 >
-                    <Minimize2 className="h-5 w-5" />
-                    <span className="sr-only">Minimize Whiteboard</span>
-                </Button>
-                <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={() => router.back()}
-                >
-                    <X className="h-5 w-5" />
-                    <span className="sr-only">Exit Whiteboard</span>
-                </Button>
+                    <InnerWhiteboard user={user} whiteboardId={whiteboardId} />
+                </Tldraw>
             </div>
-			<Tldraw 
-                persistenceKey={whiteboardId}
-                forceDarkMode={resolvedTheme === 'dark'}
-            >
-				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
-			</Tldraw>
 		</div>
 	);
 }
