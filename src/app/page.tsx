@@ -83,16 +83,14 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "Edumate Pro was a game-changer for my IT and maths courses. The video lessons are clear, and the one-on-one tutoring helped me finally understand difficult concepts. I feel more confident in my studies than ever before.",
+    quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate Pro was a lifesaver. The tutors didn't just give me answers—they walked me through the problems and helped me actually understand the material. I'm so much more confident now.",
     name: "Mukhetwa",
-    role: "Student | University of Johannesburg",
-    avatarFallback: "M",
+    role: "MSc Data Science Student | University of Johannesburg",
   },
   {
     quote: "Edumate gave me amazing help with my assignments. Their expert support made a huge difference in my understanding. I highly recommend them as mentors who go the extra mile for students. Thank you for the incredible support!",
     name: "Bontle Mahlango",
     role: "Student | University of Johannesburg",
-    avatarFallback: "BM",
   }
 ];
 
@@ -494,9 +492,6 @@ export default function Home() {
                                             </p>
                                         </CardContent>
                                         <CardFooter className="flex flex-col items-center gap-4 pt-6 border-t">
-                                            <Avatar className="h-16 w-16 border-2 border-primary">
-                                                <AvatarFallback className="text-2xl">{testimonial.avatarFallback}</AvatarFallback>
-                                            </Avatar>
                                             <div className="text-center">
                                                 <p className="font-bold text-lg">{testimonial.name}</p>
                                                 <p className="text-muted-foreground text-sm">{testimonial.role}</p>
