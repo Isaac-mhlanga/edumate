@@ -65,10 +65,14 @@ function InnerWhiteboard({
 
 		// Set user preferences, including making tools "sticky"
 		editor.user.updateUserPreferences({
-			id: user.uid,
-			name: user.displayName ?? 'Anonymous',
-			isToolLocked: true, // This makes the selected tool stay active
+			isToolLocked: true,
 		});
+        
+        // Set user's name
+        editor.user.updateUser({
+            name: user.displayName ?? 'Anonymous',
+        });
+
 
 		let stillAlive = true;
 
@@ -151,8 +155,8 @@ export function Whiteboard({
                 router.push('/admin/whiteboard');
                 break;
             case 'varsity-student':
-                router.push('/varsity-dashboard');
-                break;
+                 router.push('/varsity-dashboard/whiteboard');
+                 break;
             case 'student':
                  router.push('/dashboard');
                  break;
