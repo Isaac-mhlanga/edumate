@@ -1,4 +1,3 @@
-
 'use client';
 import dynamic from 'next/dynamic';
 import {
@@ -18,7 +17,6 @@ import {
 } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
-import { useTheme } from 'next-themes';
 import { useDebounce } from 'use-debounce';
 import { useRouter } from 'next/navigation';
 import { Button } from './ui/button';
@@ -63,8 +61,7 @@ function InnerWhiteboard({
 	useEffect(() => {
 		if (!user || !editor) return;
         
-        // Set user's name
-        editor.user.updateUser({
+        editor.updateUser({
             name: user.displayName ?? 'Anonymous',
         });
 
@@ -132,7 +129,6 @@ export function Whiteboard({
 	userRole: 'instructor' | 'student' | 'admin' | 'varsity-student';
 }) {
 	const [user, setUser] = useState<User | null>(null);
-	const { theme } = useTheme();
     const router = useRouter();
 
 	useEffect(() => {
@@ -171,7 +167,7 @@ export function Whiteboard({
             >
                 <X className="h-5 w-5" />
             </Button>
-			<Tldraw persistenceKey={whiteboardId} forceDarkMode={theme === 'dark'}>
+			<Tldraw persistenceKey={whiteboardId}>
 				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
 			</Tldraw>
 		</div>
