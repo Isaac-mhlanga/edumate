@@ -41,12 +41,17 @@ function CommunityDashboardPage() {
             } as Question));
             setQuestions(fetchedQuestions);
             
-            if (window.innerWidth >= 1024 && !selectedQuestion && fetchedQuestions.length > 0) {
-                setSelectedQuestion(fetchedQuestions[0]);
-            } else if (selectedQuestion) {
-                const updatedSelected = fetchedQuestions.find(q => q.id === selectedQuestion.id);
-                setSelectedQuestion(updatedSelected || null);
-            }
+            setSelectedQuestion(prevSelectedQuestion => {
+                if (prevSelectedQuestion) {
+                    const updatedSelected = fetchedQuestions.find(q => q.id === prevSelectedQuestion.id);
+                    return updatedSelected || null;
+                }
+                if (window.innerWidth >= 1024 && fetchedQuestions.length > 0) {
+                    return fetchedQuestions[0];
+                }
+                return null;
+            });
+
             setLoading(false);
         }, (error) => {
             console.error("Error fetching questions:", error);
@@ -54,7 +59,7 @@ function CommunityDashboardPage() {
         });
 
         return () => unsubscribe();
-    }, [selectedQuestion]);
+    }, []);
 
     const handleUpdateQuestion = (updatedQuestion: Question) => {
         setQuestions(prev => prev.map(q => q.id === updatedQuestion.id ? updatedQuestion : q));
