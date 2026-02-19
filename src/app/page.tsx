@@ -435,7 +435,7 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="faq" className="py-24 bg-background relative overflow-hidden bg-grid-pattern">
+        <section id="faq" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
