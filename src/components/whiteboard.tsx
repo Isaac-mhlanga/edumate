@@ -129,8 +129,7 @@ export function Whiteboard({
     // New state for audio and recording
     const [isMuted, setIsMuted] = useState(true);
     const [isRecording, setIsRecording] = useState(false);
-    const [isUiVisible, setIsUiVisible] = useState(true);
-    const { theme } = useTheme();
+    const [isStylePanelHidden, setIsStylePanelHidden] = useState(false);
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -154,13 +153,15 @@ export function Whiteboard({
             <div className='relative w-full h-full rounded-xl overflow-hidden shadow-2xl border'>
                 <Tldraw 
                     persistenceKey={whiteboardId}
-                    hideUi={!isUiVisible}
+                    components={{
+                        StylePanel: isStylePanelHidden ? () => null : undefined,
+                    }}
                     forceMobile={false}
                 >
                     <InnerWhiteboard user={user} whiteboardId={whiteboardId} />
                 </Tldraw>
                 
-                <div className="absolute bottom-20 left-4 z-[1000] flex flex-col items-center gap-2">
+                <div className="absolute bottom-4 left-4 z-[1000] flex flex-col items-center gap-2">
                     {userRole === 'instructor' && (
                         <>
                              <Button
@@ -187,11 +188,14 @@ export function Whiteboard({
                     <Button
                         variant="outline"
                         size="icon"
-                        onClick={() => setIsUiVisible(prev => !prev)}
-                        className="bg-background/80 hover:bg-background rounded-full h-10 w-10"
+                        onClick={() => setIsStylePanelHidden(prev => !prev)}
+                        className={cn(
+                            "bg-background/80 hover:bg-background rounded-full h-10 w-10",
+                            isStylePanelHidden && "bg-green-500/20 text-green-700 border-green-500/30 dark:text-green-400"
+                        )}
                     >
                         <Brush className="h-5 w-5" />
-                        <span className="sr-only">Toggle Tools</span>
+                        <span className="sr-only">Toggle Style Panel</span>
                     </Button>
                     <Button
                         variant="outline"
