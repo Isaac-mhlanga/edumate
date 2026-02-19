@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { X, Minimize2, Maximize2 } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
+import { useTheme } from 'next-themes';
 
 const Tldraw = dynamic(
 	async () => (await import('@tldraw/tldraw')).Tldraw,
@@ -120,6 +121,7 @@ export function Whiteboard({
 	const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
     const [isMinimized, setIsMinimized] = useState(false);
+    const { resolvedTheme } = useTheme();
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -158,7 +160,10 @@ export function Whiteboard({
                     <span className="sr-only">Exit Whiteboard</span>
                 </Button>
             </div>
-			<Tldraw persistenceKey={whiteboardId}>
+			<Tldraw 
+                persistenceKey={whiteboardId}
+                forceDarkMode={resolvedTheme === 'dark'}
+            >
 				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
 			</Tldraw>
 		</div>
