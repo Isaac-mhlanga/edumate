@@ -1,4 +1,3 @@
-
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -12,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where, limit } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock } from "lucide-react";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock, User } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -330,28 +329,29 @@ export default function Home() {
                     </p>
                 </div>
                 {upcomingEvents.length > 0 ? (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {upcomingEvents.map((event, index) => (
-                             <Card key={event.id} className="group cursor-pointer bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 flex flex-col" onClick={() => handleEventClick(event)}>
-                                <CardHeader>
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex flex-col items-center justify-center p-2 rounded-md bg-muted text-muted-foreground w-16 h-16 border">
-                                            <span className="text-xs font-bold uppercase">{format(new Date(event.start), 'MMM')}</span>
-                                            <span className="text-2xl font-bold text-foreground">{format(new Date(event.start), 'd')}</span>
+                             <Card key={event.id} className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1" onClick={() => handleEventClick(event)}>
+                                <div className="flex">
+                                    <div className="flex flex-col items-center justify-center w-24 bg-gradient-to-br from-primary/10 to-primary/20 p-4 text-primary-foreground border-r border-primary/20">
+                                        <span className="text-3xl font-bold text-primary">{format(new Date(event.start), 'd')}</span>
+                                        <span className="text-sm font-semibold tracking-wider uppercase text-primary/80">{format(new Date(event.start), 'MMM')}</span>
+                                    </div>
+                                    <div className="p-4 flex-1">
+                                        <Badge variant="outline">{event.subject}</Badge>
+                                        <h3 className="font-semibold mt-2 line-clamp-2">{event.title}</h3>
+                                        <div className="text-sm text-muted-foreground mt-2 space-y-1">
+                                            <div className="flex items-center gap-2">
+                                                <Clock className="h-4 w-4" />
+                                                <span>{format(new Date(event.start), 'p')}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                                <User className="h-4 w-4" />
+                                                <span>By {event.instructor}</span>
+                                            </div>
                                         </div>
-                                         <Badge variant="secondary">{event.subject}</Badge>
                                     </div>
-                                    <CardTitle className="text-lg pt-4 line-clamp-2">{event.title}</CardTitle>
-                                </CardHeader>
-                                <CardContent className="flex-grow">
-                                    <p className="text-muted-foreground line-clamp-2 text-sm">{event.scope || event.description}</p>
-                                </CardContent>
-                                <CardFooter>
-                                    <div className="flex justify-between w-full items-center text-sm text-muted-foreground">
-                                        <span className="font-semibold">By {event.instructor}</span>
-                                        <span className="text-primary group-hover:underline flex items-center">View Details <ArrowRight className="ml-1 h-3 w-3"/></span>
-                                    </div>
-                                </CardFooter>
+                                </div>
                             </Card>
                         ))}
                     </div>
