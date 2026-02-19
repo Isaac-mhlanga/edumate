@@ -19,6 +19,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { format } from 'date-fns';
 import { Separator } from "@/components/ui/separator";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import Autoplay from "embla-carousel-autoplay";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -76,6 +77,21 @@ type CalendarEvent = {
   scope?: string;
   platforms?: ('tiktok' | 'youtube' | 'zoom')[];
 };
+
+const testimonials = [
+  {
+    quote: "Isaac Mhlanga, a final-year student at the University of Johannesburg, is renowned for his talent and motivation. He passionately assists fellow students across diverse fields such as Information Technology, mathematics, and theory-based studies, showcasing his dedication to learning and academic excellence.",
+    name: "Mukhetwa Isaac Mhlanga",
+    role: "Student | University of Johannesburg",
+    avatarFallback: "MM",
+  },
+  {
+    quote: "Edumate provided exceptional assistance with my assignments. Their expertise, dedication, and genuine support made a significant impact on my understanding of my assignments. I highly recommend Isaac Mhlanga as a mentor who goes above and beyond to ensure student success. Thank you for your invaluable support in my learning journey.",
+    name: "Bontle Mahlango",
+    role: "Student | University of Johannesburg",
+    avatarFallback: "BM",
+  }
+];
 
 
 export default function Home() {
@@ -385,7 +401,61 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="faq" className="py-24 bg-muted">
+        <section id="testimonials" className="py-24 bg-muted">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">What Our Students Say</h2>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                        Real stories from students who've transformed their learning with Edumate Pro.
+                    </p>
+                </div>
+                <Carousel
+                    plugins={[
+                        Autoplay({
+                            delay: 7000,
+                            stopOnInteraction: true,
+                        }),
+                    ]}
+                    opts={{
+                        align: "start",
+                        loop: true,
+                    }}
+                    className="w-full max-w-4xl mx-auto"
+                >
+                    <CarouselContent>
+                        {testimonials.map((testimonial, index) => (
+                            <CarouselItem key={index}>
+                                <div className="p-1 h-full">
+                                    <Card className="bg-background/50 backdrop-blur-lg border-border/20 shadow-lg h-full flex flex-col justify-between">
+                                        <CardContent className="p-8 text-center flex-grow flex items-center justify-center">
+                                            <p className="text-lg font-medium text-foreground italic">
+                                                "{testimonial.quote}"
+                                            </p>
+                                        </CardContent>
+                                        <CardFooter className="flex flex-col items-center gap-4 pt-6 border-t">
+                                            <Avatar className="h-16 w-16 border-2 border-primary">
+                                                <AvatarFallback className="text-2xl">{testimonial.avatarFallback}</AvatarFallback>
+                                            </Avatar>
+                                            <div className="text-center">
+                                                <p className="font-bold text-lg">{testimonial.name}</p>
+                                                <p className="text-muted-foreground text-sm">{testimonial.role}</p>
+                                            </div>
+                                            <div className="flex items-center gap-2 pt-2 text-muted-foreground">
+                                                <Icons.logo className="h-6 w-auto opacity-70" />
+                                            </div>
+                                        </CardFooter>
+                                    </Card>
+                                </div>
+                            </CarouselItem>
+                        ))}
+                    </CarouselContent>
+                    <CarouselPrevious className="left-[-50px] hidden sm:flex" />
+                    <CarouselNext className="right-[-50px] hidden sm:flex" />
+                </Carousel>
+            </div>
+        </section>
+
+        <section id="faq" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
