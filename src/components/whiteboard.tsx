@@ -8,7 +8,7 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { useRouter } from 'next/navigation';
-import { X, Minimize2, Maximize2 } from 'lucide-react';
+import { X, Minimize2, Maximize2, Mic, MicOff, Circle as RecordIcon, Square as StopIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
@@ -129,6 +129,10 @@ export function Whiteboard({
     const [isMinimized, setIsMinimized] = useState(false);
     const { resolvedTheme } = useTheme();
 
+    // New state for audio and recording
+    const [isMuted, setIsMuted] = useState(true);
+    const [isRecording, setIsRecording] = useState(false);
+
 	useEffect(() => {
 		const auth = getAuth(app);
 		const unsubscribe = onAuthStateChanged(auth, setUser);
@@ -150,6 +154,30 @@ export function Whiteboard({
 		<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm p-4 flex items-center justify-center">
             <div className='relative w-full h-full rounded-xl overflow-hidden shadow-2xl border'>
                 <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
+                    {/* Add new buttons for audio and recording */}
+                    {userRole === 'instructor' && (
+                        <>
+                             <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setIsMuted(prev => !prev)}
+                                className="bg-background/80 hover:bg-background"
+                            >
+                                {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5 text-primary" />}
+                                <span className="sr-only">{isMuted ? 'Unmute' : 'Mute'}</span>
+                            </Button>
+                             <Button
+                                variant="outline"
+                                size="icon"
+                                onClick={() => setIsRecording(prev => !prev)}
+                                className={cn("bg-background/80 hover:bg-background", isRecording && "text-destructive border-destructive/50 ring-2 ring-destructive/50")}
+                            >
+                                {isRecording ? <StopIcon className="h-5 w-5" /> : <RecordIcon className="h-5 w-5" />}
+                                <span className="sr-only">{isRecording ? 'Stop Recording' : 'Start Recording'}</span>
+                            </Button>
+                        </>
+                    )}
+
                     <Button
                         variant="outline"
                         size="icon"
