@@ -1,3 +1,4 @@
+
 'use client';
 import dynamic from 'next/dynamic';
 import {
@@ -19,6 +20,9 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTheme } from 'next-themes';
 import { useDebounce } from 'use-debounce';
+import { useRouter } from 'next/navigation';
+import { Button } from './ui/button';
+import { X } from 'lucide-react';
 
 const Tldraw = dynamic(
 	async () => (await import('@tldraw/tldraw')).Tldraw,
@@ -59,9 +63,11 @@ function InnerWhiteboard({
 	useEffect(() => {
 		if (!user || !editor) return;
 
+		// Set user preferences, including making tools "sticky"
 		editor.user.updateUserPreferences({
 			id: user.uid,
 			name: user.displayName ?? 'Anonymous',
+			isToolLocked: true, // This makes the selected tool stay active
 		});
 
 		let stillAlive = true;
@@ -128,6 +134,7 @@ export function Whiteboard({
 }) {
 	const [user, setUser] = useState<User | null>(null);
 	const { theme } = useTheme();
+    const router = useRouter();
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -135,8 +142,36 @@ export function Whiteboard({
 		return () => unsubscribe();
 	}, []);
 
+    const handleExit = () => {
+        switch (userRole) {
+            case 'instructor':
+                router.push('/instructor/whiteboard');
+                break;
+            case 'admin':
+                router.push('/admin/whiteboard');
+                break;
+            case 'varsity-student':
+                router.push('/varsity-dashboard');
+                break;
+            case 'student':
+                 router.push('/dashboard');
+                 break;
+            default:
+                router.push('/');
+                break;
+        }
+    };
+
 	return (
-		<div className="fixed inset-0 z-50 bg-background">
+		<div className="fixed inset-0 z-[1000]">
+            <Button
+                onClick={handleExit}
+                className="absolute top-4 left-4 z-50 h-10 w-10 p-0 rounded-full"
+                variant="secondary"
+                aria-label="Exit Whiteboard"
+            >
+                <X className="h-5 w-5" />
+            </Button>
 			<Tldraw persistenceKey={whiteboardId} forceDarkMode={theme === 'dark'}>
 				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
 			</Tldraw>
