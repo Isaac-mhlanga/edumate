@@ -1,5 +1,4 @@
 
-
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -12,16 +11,15 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { Book, GraduationCap, BookOpen, Calendar, ChevronLeft, ChevronRight, Computer, Loader2, MapPin, MessageSquare, Search, Star, LogIn } from "lucide-react";
+import { BookOpen, Calendar, ChevronLeft, ChevronRight, Loader2, MapPin, MessageSquare, Search, Star } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
-import { Icons } from "@/components/icons";
-import Link from "next/link";
 import { getFirestore, collection, query, where, getDocs, addDoc, serverTimestamp, doc, setDoc } from 'firebase/firestore';
 import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import withAuth from "@/components/with-auth";
+import { Skeleton } from "@/components/ui/skeleton";
 
 type Mode = "Online" | "In-person";
 
@@ -232,13 +230,11 @@ function TutorsDashboardPage() {
             <Card>
                 <CardHeader>
                     <div className="flex flex-col md:flex-row items-start md:items-end gap-4">
-                        <div className="grid grid-cols-2 gap-4 flex-grow">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 flex-grow">
                             <div className="space-y-2">
                                 <Label>Subject</Label>
                                 <Select value={subject} onValueChange={setSubject}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select subject" />
-                                    </SelectTrigger>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All">All Subjects</SelectItem>
                                         <SelectItem value="Maths">Maths</SelectItem>
@@ -250,9 +246,7 @@ function TutorsDashboardPage() {
                             <div className="space-y-2">
                                 <Label>Grade</Label>
                                 <Select value={grade} onValueChange={setGrade}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select grade" />
-                                    </SelectTrigger>
+                                    <SelectTrigger><SelectValue /></SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="All">All Grades</SelectItem>
                                         <SelectItem value="10">Grade 10</SelectItem>
@@ -274,43 +268,48 @@ function TutorsDashboardPage() {
                         <span>{locationStatus}</span>
                     </div>
                     {loading ? (
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {Array.from({ length: 3 }).map((_, i) => <Card key={i}><CardHeader><div className="h-48 w-full bg-muted rounded-md animate-pulse"></div></CardHeader></Card>)}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {Array.from({ length: 3 }).map((_, i) => <Skeleton key={i} className="h-96 rounded-lg" />)}
                         </div>
                     ) : paginatedTutors.length > 0 ? (
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {paginatedTutors.map(tutor => (
-                            <Card key={tutor.id} className="flex flex-col transition-shadow duration-300 hover:shadow-xl">
-                                <CardHeader className="flex-row gap-4 items-center">
-                                    <Avatar className="w-16 h-16 border">
+                             <Card key={tutor.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1">
+                                <CardHeader className="flex-row gap-4 items-center p-4">
+                                    <Avatar className="w-20 h-20 border-2 border-primary">
                                         <AvatarImage src={tutor.avatar} alt={tutor.name} data-ai-hint="person profile" />
                                         <AvatarFallback>{tutor.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                                     </Avatar>
                                     <div>
                                         <CardTitle className="text-xl">{tutor.name}</CardTitle>
                                         <div className="flex items-center gap-1 text-sm text-muted-foreground mt-1">
-                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-500" />
+                                            <Star className="w-4 h-4 fill-primary text-primary" />
                                             <span>4.9 (82 reviews)</span>
                                         </div>
                                     </div>
                                 </CardHeader>
-                                <CardContent className="flex-grow space-y-4">
+                                <CardContent className="flex-grow p-4 space-y-4">
                                     <p className="text-sm text-muted-foreground line-clamp-3">{tutor.bio}</p>
-                                    <div className="space-y-2">
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <BookOpen className="h-4 w-4 text-primary" />
-                                            <span>{tutor.subjects.join(', ')} (Grades {tutor.grades.join(', ')})</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <MapPin className="h-4 w-4 text-primary" />
-                                            <span>{tutor.location}</span>
+                                    <div className="flex flex-wrap gap-2">
+                                        {tutor.subjects.map(s => <Badge key={s} variant="secondary">{s}</Badge>)}
+                                        {tutor.grades.map(g => <Badge key={g} variant="outline">Grade {g}</Badge>)}
+                                    </div>
+                                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                        <MapPin className="h-4 w-4 text-primary" />
+                                        <span>{tutor.location}</span>
+                                    </div>
+                                </CardContent>
+                                <CardFooter className="p-4 flex-col gap-2">
+                                    <div className="flex justify-between items-center w-full">
+                                        <span className="text-2xl font-bold">R{tutor.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hour</span></span>
+                                        <div className="flex gap-2">
+                                            {tutor.modes.map(mode => <Badge key={mode} variant="outline">{mode}</Badge>)}
                                         </div>
                                     </div>
-                                    <div className="text-2xl font-bold">R{tutor.hourlyRate}<span className="text-sm font-normal text-muted-foreground">/hour</span></div>
-                                </CardContent>
-                                <CardFooter className="flex gap-2">
-                                    <Button className="w-full" onClick={() => handleBookTutor(tutor as Tutor)}><Calendar className="mr-2" /> Book Session</Button>
-                                    <Button variant="outline" className="w-full" onClick={() => handleMessageTutor(tutor as Tutor)}><MessageSquare className="mr-2" /> Message</Button>
+                                    <div className="flex gap-2 w-full mt-2">
+                                        <Button className="w-full" onClick={() => handleBookTutor(tutor as Tutor)}><Calendar className="mr-2" /> Book</Button>
+                                        <Button variant="outline" className="w-full" onClick={() => handleMessageTutor(tutor as Tutor)}><MessageSquare className="mr-2" /> Message</Button>
+                                    </div>
                                 </CardFooter>
                             </Card>
                         ))}
