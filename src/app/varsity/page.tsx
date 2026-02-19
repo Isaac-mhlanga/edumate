@@ -1,4 +1,3 @@
-
 'use client';
 
 import React, { useState } from 'react';
@@ -66,9 +65,9 @@ export default function VarsityPage() {
                                 <CardContent className="space-y-3">
                                     <p className="text-muted-foreground">Specialized support for advanced topics, research projects, and in-depth analysis.</p>
                                     {[
-                                        "Advanced Information Security & Cryptography",
-                                        "Information Security Risk Analysis & Management",
-                                        "Forensic Computing & Digital Investigations",
+                                        "Advanced Information Security",
+                                        "Information Security Risk Analysis",
+                                        "Forensic Computing",
                                     ].map((item, index) => (
                                         <div key={index} className="flex items-center gap-3">
                                             <CheckCircle className="w-5 h-5 text-primary" />
