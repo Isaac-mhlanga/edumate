@@ -83,7 +83,7 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "He is passionate about helping other students in IT, maths, and theory subjects, showing his love for learning and helping others succeed.",
+    quote: "Edumate Pro was a game-changer for me. The video lessons are clear and easy to follow, and the one-on-one tutoring sessions helped me finally understand difficult concepts in my IT and maths courses. I feel more confident in my studies than ever before.",
     name: "Mukhetwa",
     role: "Student | University of Johannesburg",
     avatarFallback: "M",
@@ -158,32 +158,32 @@ export default function Home() {
     {
       icon: Users,
       title: "Private & Group Tutoring",
-      description: "Whether you need one-on-one attention or prefer learning with friends, our expert tutors are here to help you master difficult subjects and improve your grades.",
+      description: "Get the focused attention you need to ace your exams. Our expert tutors offer personalized one-on-one and group sessions to help you master tough subjects and boost your confidence.",
     },
     {
       icon: FilePenLine,
       title: "Assignment Help",
-      description: "Don't get stuck on challenging assignments. Our specialists provide detailed guidance and explanations to help you understand the work and submit with confidence.",
+      description: "Don't let difficult assignments hold you back. Our specialists provide clear, detailed guidance to help you understand complex topics, structure your work, and submit high-quality assignments with confidence.",
     },
     {
       icon: GraduationCap,
       title: "Career Guidance",
-      description: "Choosing a career is a big step. We offer personalized guidance to help you identify your strengths, choose the right subjects, and map out a clear path to your dream job.",
+      description: "Not sure which career path is right for you? We offer personalized guidance sessions to help you identify your strengths, choose the right subjects, and map out a clear path to your dream job.",
     },
     {
       icon: Award,
       title: "Bursary Applications",
-      description: "Securing funding can be tough. We'll help you find and apply for bursaries and scholarships, ensuring your application stands out so you can focus on your studies.",
+      description: "Securing funding for your studies can be challenging. We guide you through the process, helping you find the right bursaries and prepare a standout application so you can focus on what matters: your education.",
     },
     {
       icon: Banknote,
       title: "NSFAS Applications",
-      description: "The NSFAS process can be confusing. Our team will guide you through every step, helping you prepare your documents and submit your application correctly and on time.",
+      description: "The NSFAS application process can be confusing. Our team provides step-by-step support, ensuring your documents are in order and your application is submitted correctly and on time.",
     },
      {
       icon: School,
       title: "Varsity Applications",
-      description: "Get into the university of your choice. We provide hands-on support with your applications, helping you choose the right courses and write compelling motivation letters.",
+      description: "Get into the university of your choice with our expert support. We provide hands-on assistance with your applications, helping you choose the right courses and write compelling motivation letters that get you noticed.",
     },
   ];
 
@@ -208,10 +208,10 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6 text-center">
                 <div className="z-10 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                        Your Path to Academic Success
+                        Your Key to Unlocking Academic Success
                     </h1>
                     <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
-                        Edumate Pro is your partner in academic excellence. We provide high-quality video lessons for Grade 10-12 Maths and Sciences, expert one-on-one tutoring, and dedicated support for university and bursary applications. Our mission is to make top-tier education accessible and affordable for every South African student.
+                       Edumate Pro is your all-in-one partner for academic excellence. We provide high-quality video lessons for Grade 10-12 Maths and Sciences, expert one-on-one tutoring, and dedicated support for university and bursary applications. Our mission is to make top-tier education accessible and affordable for every South African student, helping you achieve your dreams.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                          <Button size="lg" asChild className="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-primary via-primary/80 to-primary">
@@ -283,9 +283,9 @@ export default function Home() {
                         <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
                             <Gift className="h-8 w-8" />
                         </div>
-                        <CardTitle className="text-3xl font-headline">Refer & Earn</CardTitle>
+                        <CardTitle className="text-3xl font-headline">Refer a Friend, Earn R20</CardTitle>
                         <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                           Tell your friends about Edumate Pro. When they sign up using your link, you get R20. It's that simple!
+                           Love using Edumate Pro? Share the love! For every friend who signs up with your unique referral link, we'll give you R20 as a thank you. It's that simple!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="relative z-10">
@@ -301,9 +301,9 @@ export default function Home() {
                          <Separator className="my-2"/>
                          <h4 className="font-semibold text-base text-muted-foreground">Share on Social Media</h4>
                         <div className="flex justify-center space-x-4">
-                            <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
-                            <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
-                            <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
+                            <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
                         </div>
                     </CardFooter>
                 </Card>
