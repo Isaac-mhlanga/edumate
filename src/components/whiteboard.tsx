@@ -56,6 +56,7 @@ function InnerWhiteboard({
 		editor.user.updateUserPreferences({
 			name: user.displayName ?? 'Anonymous',
 		});
+		editor.updateInstanceState({ isReadonly: false, isToolLocked: true });
 
 		let stillAlive = true;
 
@@ -129,6 +130,7 @@ export function Whiteboard({
     const [isMuted, setIsMuted] = useState(true);
     const [isRecording, setIsRecording] = useState(false);
     const [isUiVisible, setIsUiVisible] = useState(true);
+    const { theme } = useTheme();
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -153,18 +155,19 @@ export function Whiteboard({
                 <Tldraw 
                     persistenceKey={whiteboardId}
                     hideUi={!isUiVisible}
+                    forceMobile={false}
                 >
                     <InnerWhiteboard user={user} whiteboardId={whiteboardId} />
                 </Tldraw>
                 
-                <div className="absolute bottom-20 right-4 z-[1000] flex flex-col items-center gap-2">
+                <div className="absolute bottom-20 left-4 z-[1000] flex flex-col items-center gap-2">
                     {userRole === 'instructor' && (
                         <>
                              <Button
                                 variant="outline"
                                 size="icon"
                                 onClick={() => setIsMuted(prev => !prev)}
-                                className="bg-background/80 hover:bg-background rounded-full h-12 w-12"
+                                className="bg-background/80 hover:bg-background rounded-full h-10 w-10"
                             >
                                 {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5 text-primary" />}
                                 <span className="sr-only">{isMuted ? 'Unmute' : 'Mute'}</span>
@@ -173,7 +176,7 @@ export function Whiteboard({
                                 variant="outline"
                                 size="icon"
                                 onClick={() => setIsRecording(prev => !prev)}
-                                className={cn("bg-background/80 hover:bg-background rounded-full h-12 w-12", isRecording && "text-destructive border-destructive/50 ring-2 ring-destructive/50")}
+                                className={cn("bg-background/80 hover:bg-background rounded-full h-10 w-10", isRecording && "text-destructive border-destructive/50 ring-2 ring-destructive/50")}
                             >
                                 {isRecording ? <StopIcon className="h-5 w-5" /> : <RecordIcon className="h-5 w-5" />}
                                 <span className="sr-only">{isRecording ? 'Stop Recording' : 'Start Recording'}</span>
@@ -185,7 +188,7 @@ export function Whiteboard({
                         variant="outline"
                         size="icon"
                         onClick={() => setIsUiVisible(prev => !prev)}
-                        className="bg-background/80 hover:bg-background rounded-full h-12 w-12"
+                        className="bg-background/80 hover:bg-background rounded-full h-10 w-10"
                     >
                         <Brush className="h-5 w-5" />
                         <span className="sr-only">Toggle Tools</span>
@@ -194,7 +197,7 @@ export function Whiteboard({
                         variant="outline"
                         size="icon"
                         onClick={() => setIsMinimized(true)}
-                        className="bg-background/80 hover:bg-background rounded-full h-12 w-12"
+                        className="bg-background/80 hover:bg-background rounded-full h-10 w-10"
                     >
                         <Minimize2 className="h-5 w-5" />
                         <span className="sr-only">Minimize Whiteboard</span>
@@ -203,7 +206,7 @@ export function Whiteboard({
                         variant="destructive"
                         size="icon"
                         onClick={() => router.back()}
-                        className="rounded-full h-12 w-12"
+                        className="rounded-full h-10 w-10"
                     >
                         <X className="h-5 w-5" />
                         <span className="sr-only">Exit Whiteboard</span>
