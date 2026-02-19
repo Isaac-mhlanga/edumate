@@ -1,5 +1,4 @@
 'use client';
-
 import dynamic from 'next/dynamic';
 import {
 	useEditor,
@@ -22,7 +21,7 @@ import { useTheme } from 'next-themes';
 import { useDebounce } from 'use-debounce';
 
 const Tldraw = dynamic(
-	() => import('@tldraw/tldraw').then((mod) => mod.Tldraw),
+	async () => (await import('@tldraw/tldraw')).Tldraw,
 	{
 		ssr: false,
 	}
@@ -137,7 +136,7 @@ export function Whiteboard({
 	}, []);
 
 	return (
-		<div style={{ position: 'fixed', inset: 0 }}>
+		<div className="w-full h-[calc(100vh-10rem)]">
 			<Tldraw persistenceKey={whiteboardId} forceDarkMode={theme === 'dark'}>
 				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
 			</Tldraw>
