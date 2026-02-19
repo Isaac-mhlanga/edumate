@@ -148,7 +148,7 @@ export function Whiteboard({
 
 	return (
 		<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm p-4 flex items-center justify-center">
-            <div className='relative w-full h-full rounded-xl overflow-hidden shadow-2xl border'>
+            <div className='relative w-full h-full rounded-xl shadow-2xl border'>
                 <Tldraw 
                     persistenceKey={whiteboardId}
                     forceMobile={false}
