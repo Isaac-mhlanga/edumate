@@ -83,7 +83,7 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate Pro was a lifesaver. The tutors didn't just give me answers—they walked me through the problems and helped me actually understand the material. I'm so much more confident now.",
+    quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate was a lifesaver. The tutors didn't just give me answers. They walked me through the problems and helped me actually understand the material.",
     name: "Mukhetwa",
     role: "MSc Data Science Student | University of Johannesburg",
   },
@@ -209,7 +209,7 @@ export default function Home() {
                         Unlock Your Academic Success
                     </h1>
                     <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
-                       Edumate Pro is your all-in-one partner for academic excellence. We provide high-quality video lessons for Grade 10-12 Maths and Sciences, expert one-on-one tutoring, and dedicated support for university and bursary applications. Our mission is to make top-tier education accessible and affordable for every South African student, helping you achieve your dreams.
+                       Edumate is your all-in-one partner for academic excellence. We provide high-quality video lessons for Grade 10-12 Maths and Sciences, expert one-on-one tutoring, and dedicated support for university and bursary applications. Our mission is to make top-tier education accessible and affordable for every South African student, helping you achieve your dreams.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                          <Button size="lg" asChild className="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-primary via-primary/80 to-primary">
@@ -283,7 +283,7 @@ export default function Home() {
                         </div>
                         <CardTitle className="text-3xl font-headline">Refer a Friend, Earn R20</CardTitle>
                         <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                           Love using Edumate Pro? Share the love! For every friend who signs up using your unique referral link, we'll give you R20 as a thank you. It's that simple!
+                           Love using Edumate? Share the love! For every friend who signs up using your unique referral link, we'll give you R20 as a thank you. It's that simple!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="relative z-10">
@@ -463,7 +463,7 @@ export default function Home() {
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">What Our Students Are Saying</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                        Hear from students who are acing their studies with Edumate Pro.
+                        Hear from students who are acing their studies with Edumate.
                     </p>
                 </div>
                 <Carousel
@@ -494,6 +494,7 @@ export default function Home() {
                                                 <p className="font-bold text-lg">{testimonial.name}</p>
                                                 <p className="text-muted-foreground text-sm">{testimonial.role}</p>
                                             </div>
+                                            <Icons.logo className="h-6 w-auto opacity-50" />
                                         </CardFooter>
                                     </Card>
                                 </div>

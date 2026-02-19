@@ -89,7 +89,7 @@ export const PayoutReceipt = React.forwardRef<HTMLDivElement, PayoutReceiptProps
                             {getStatusIcon(payout.status)}
                             {payout.status}
                         </Badge>
-                        <p className="text-sm text-muted-foreground text-right">Edumate Pro &copy; {new Date().getFullYear()}</p>
+                        <p className="text-sm text-muted-foreground text-right">Edumate &copy; {new Date().getFullYear()}</p>
                     </CardFooter>
                 </Card>
             </div>

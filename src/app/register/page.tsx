@@ -206,7 +206,7 @@ export default function RegisterPage() {
                             </Link>
                         </div>
                         <CardTitle className="text-2xl">Create an Account</CardTitle>
-                        <CardDescription>Join Edumate Pro to start your learning journey.</CardDescription>
+                        <CardDescription>Join Edumate to start your learning journey.</CardDescription>
                     </CardHeader>
                     <Form {...form}>
                         <form onSubmit={form.handleSubmit(handleRegister)}>

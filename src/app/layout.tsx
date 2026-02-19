@@ -1,3 +1,4 @@
+
 'use client'
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
@@ -42,7 +43,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <title>Edumate Pro</title>
+        <title>Edumate</title>
         <meta name="description" content="A futuristic, professional, and student-focused multi-tenant educational web app offering video lessons, tutoring services, and paid assignments." />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
