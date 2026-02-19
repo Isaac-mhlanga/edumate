@@ -161,7 +161,7 @@ export function Whiteboard({
                     <InnerWhiteboard user={user} whiteboardId={whiteboardId} />
                 </Tldraw>
                 
-                <div className="absolute bottom-4 left-4 z-[1000] flex flex-col items-center gap-2">
+                <div className="absolute top-1/2 left-4 -translate-y-1/2 z-[1000] flex flex-col items-center gap-2">
                     {userRole === 'instructor' && (
                         <>
                              <Button
