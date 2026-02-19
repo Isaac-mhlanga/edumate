@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -126,6 +127,7 @@ export type CalendarEvent = {
   instructor?: string;
   grade?: string;
   subject?: string;
+  module?: string;
   scope?: string;
   platforms?: string[];
 };
@@ -731,6 +733,7 @@ function InstructorPage() {
           instructor: extendedProps.instructor,
           grade: extendedProps.grade,
           subject: extendedProps.subject,
+          module: extendedProps.module,
           scope: extendedProps.scope,
           platforms: extendedProps.platforms,
           color: event.backgroundColor,

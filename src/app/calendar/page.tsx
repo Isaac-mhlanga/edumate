@@ -42,6 +42,7 @@ type CalendarEvent = {
   instructor?: string;
   grade?: string;
   subject?: string;
+  module?: string;
   scope?: string;
   platforms?: string[];
 };
@@ -90,6 +91,7 @@ export default function CalendarPage() {
             instructor: extendedProps.instructor,
             grade: extendedProps.grade,
             subject: extendedProps.subject,
+            module: extendedProps.module,
             scope: extendedProps.scope,
             platforms: extendedProps.platforms,
         });
@@ -210,18 +212,35 @@ export default function CalendarPage() {
                                             <p>Hosted by <span className="font-semibold">{selectedEvent.instructor}</span></p>
                                         </div>
                                     </div>
-                                    <div className="flex items-center gap-4">
-                                        <BookOpen className="h-5 w-5 text-muted-foreground" />
-                                        <div>
-                                            <p>{selectedEvent.subject}</p>
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-4">
-                                        <GraduationCap className="h-5 w-5 text-muted-foreground" />
-                                        <div>
-                                            <p>Grade {selectedEvent.grade}</p>
-                                        </div>
-                                    </div>
+                                    {selectedEvent.grade === 'Varsity' ? (
+                                        selectedEvent.module && (
+                                            <div className="flex items-center gap-4">
+                                                <BookOpen className="h-5 w-5 text-muted-foreground" />
+                                                <div>
+                                                    <p>{selectedEvent.module}</p>
+                                                </div>
+                                            </div>
+                                        )
+                                    ) : (
+                                        <>
+                                            {selectedEvent.subject && (
+                                                <div className="flex items-center gap-4">
+                                                    <BookOpen className="h-5 w-5 text-muted-foreground" />
+                                                    <div>
+                                                        <p>{selectedEvent.subject}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                            {selectedEvent.grade && (
+                                                <div className="flex items-center gap-4">
+                                                    <GraduationCap className="h-5 w-5 text-muted-foreground" />
+                                                    <div>
+                                                        <p>Grade {selectedEvent.grade}</p>
+                                                    </div>
+                                                </div>
+                                            )}
+                                        </>
+                                    )}
 
                                     {selectedEvent.description && (
                                         <div className="flex items-start gap-4">

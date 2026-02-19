@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -68,21 +69,37 @@ export function CalendarDialogs({
                             </div>
                              <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-2">
-                                    <Label htmlFor="manual-subject">Subject</Label>
-                                    <Input id="manual-subject" value={manualEvent.subject || ''} onChange={(e) => setManualEvent(prev => ({...prev, subject: e.target.value}))}/>
-                                </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="manual-grade">Grade</Label>
-                                     <Select value={manualEvent.grade} onValueChange={(value) => setManualEvent(prev => ({...prev, grade: value}))}>
-                                        <SelectTrigger><SelectValue placeholder="Select Grade" /></SelectTrigger>
+                                    <Label htmlFor="manual-grade">Audience</Label>
+                                    <Select value={manualEvent.grade} onValueChange={(value) => {
+                                        const isVarsity = value === 'Varsity';
+                                        setManualEvent(prev => ({
+                                            ...prev, 
+                                            grade: value,
+                                            subject: isVarsity ? undefined : prev.subject,
+                                            module: isVarsity ? prev.module : undefined
+                                        }))
+                                    }}>
+                                        <SelectTrigger><SelectValue placeholder="Select Audience" /></SelectTrigger>
                                         <SelectContent>
                                             <SelectItem value="10">Grade 10</SelectItem>
                                             <SelectItem value="11">Grade 11</SelectItem>
                                             <SelectItem value="12">Grade 12</SelectItem>
                                             <SelectItem value="10-12">All Grades</SelectItem>
+                                            <SelectItem value="Varsity">Varsity/College</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
+                                {manualEvent.grade === 'Varsity' ? (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="manual-module">Module</Label>
+                                        <Input id="manual-module" value={manualEvent.module || ''} onChange={(e) => setManualEvent(prev => ({...prev, module: e.target.value}))}/>
+                                    </div>
+                                ) : (
+                                    <div className="space-y-2">
+                                        <Label htmlFor="manual-subject">Subject</Label>
+                                        <Input id="manual-subject" value={manualEvent.subject || ''} onChange={(e) => setManualEvent(prev => ({...prev, subject: e.target.value}))}/>
+                                    </div>
+                                )}
                              </div>
                              <div className="space-y-2">
                                 <Label>Platforms</Label>
@@ -183,18 +200,35 @@ export function CalendarDialogs({
                                         <p>Hosted by <span className="font-semibold">{selectedEvent.instructor}</span></p>
                                     </div>
                                 </div>
-                                <div className="flex items-center gap-4">
-                                    <BookOpen className="h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p>{selectedEvent.subject}</p>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-4">
-                                    <GraduationCap className="h-5 w-5 text-muted-foreground" />
-                                    <div>
-                                        <p>Grade {selectedEvent.grade}</p>
-                                    </div>
-                                </div>
+                                {selectedEvent.grade === 'Varsity' ? (
+                                    selectedEvent.module && (
+                                        <div className="flex items-center gap-4">
+                                            <BookOpen className="h-5 w-5 text-muted-foreground" />
+                                            <div>
+                                                <p>{selectedEvent.module}</p>
+                                            </div>
+                                        </div>
+                                    )
+                                ) : (
+                                    <>
+                                        {selectedEvent.subject && (
+                                            <div className="flex items-center gap-4">
+                                                <BookOpen className="h-5 w-5 text-muted-foreground" />
+                                                <div>
+                                                    <p>{selectedEvent.subject}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                        {selectedEvent.grade && (
+                                            <div className="flex items-center gap-4">
+                                                <GraduationCap className="h-5 w-5 text-muted-foreground" />
+                                                <div>
+                                                    <p>Grade {selectedEvent.grade}</p>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </>
+                                )}
 
                                 {selectedEvent.description && (
                                     <div className="flex items-start gap-4">
