@@ -101,7 +101,6 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/dashboard/tutors', label: 'Tutors', icon: Users, basePath: '/dashboard/tutors' },
-  { href: '/dashboard/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/dashboard/whiteboard' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
@@ -145,7 +144,6 @@ const adminMenuItems: MenuItem[] = [
 
 const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/tutor', tab: 'overview' },
-  { href: '/tutor/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/tutor/whiteboard' },
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
@@ -228,7 +226,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     if (item.tab) {
         return pathname.startsWith(item.basePath) && (currentTab === item.tab || (!currentTab && item.tab === 'overview'))
     }
-    return pathname === item.basePath;
+    return pathname === item.basePath || pathname.startsWith(item.basePath + '/');
   }
   const isSettingsPage = pathname === '/settings';
 

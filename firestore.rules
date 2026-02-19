@@ -184,5 +184,11 @@ service cloud.firestore {
       // Only instructors and admins can create, update, delete events
       allow write: if isInstructor() || isAdmin();
     }
+    
+    // Rules for whiteboards
+    match /whiteboards/{whiteboardId} {
+      // Any signed-in user can read or write to a whiteboard session
+      allow read, write: if isSignedIn();
+    }
   }
 }
