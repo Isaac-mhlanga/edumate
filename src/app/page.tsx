@@ -283,17 +283,15 @@ export default function Home() {
                         </div>
                         <CardTitle className="text-3xl font-headline">Refer a Friend, Earn R20</CardTitle>
                         <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                           Love using Edumate Pro? Share the love! For every friend who signs up with your unique referral link, we'll give you R20 as a thank you. It's that simple!
+                           Love using Edumate Pro? Share the love! For every friend who signs up using your unique referral link, we'll give you R20 as a thank you. It's that simple!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="relative z-10">
-                         <div className="mt-8">
-                             <Button size="lg" asChild>
-                                <Link href="/dashboard/referrals">
-                                    Get Your Referral Link <ArrowRight className="ml-2" />
-                                </Link>
-                            </Button>
-                        </div>
+                        <Button size="lg" asChild>
+                            <Link href="/dashboard/referrals">
+                                Get Your Referral Link <ArrowRight className="ml-2" />
+                            </Link>
+                        </Button>
                     </CardContent>
                      <CardFooter className="relative z-10 flex flex-col gap-4 p-6">
                          <Separator className="my-2"/>
@@ -495,9 +493,6 @@ export default function Home() {
                                             <div className="text-center">
                                                 <p className="font-bold text-lg">{testimonial.name}</p>
                                                 <p className="text-muted-foreground text-sm">{testimonial.role}</p>
-                                            </div>
-                                            <div className="flex items-center gap-2 pt-2 text-muted-foreground">
-                                                <Icons.logo className="h-6 w-auto opacity-70" />
                                             </div>
                                         </CardFooter>
                                     </Card>
