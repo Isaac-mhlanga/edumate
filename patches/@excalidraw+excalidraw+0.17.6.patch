@@ -1,11 +1,16 @@
+diff --git a/node_modules/@excalidraw/excalidraw/package.json b/node_modules/@excalidraw/excalidraw/package.json
+index 52b5b31..f131a4c 100644
 --- a/node_modules/@excalidraw/excalidraw/package.json
 +++ b/node_modules/@excalidraw/excalidraw/package.json
-@@ -93,8 +93,6 @@
-     "nanoid": "3.3.4",
-     "open-color": "^1.9.1",
-     "pako": "^2.1.0",
--    "react": "18.2.0",
--    "react-dom": "18.2.0",
-     "react-scripts": "5.0.1",
-     "roughjs": "4.6.6",
-     "sass": "^1.69.5",
+@@ -61,8 +61,8 @@
+     "react-dom": ">=16.8.0"
+   },
+   "peerDependenciesMeta": {
+-    "react-dom": {
+-      "optional": true
+-    }
++    "react": { "optional": true },
++    "react-dom": { "optional": true }
+   },
+   "main": "dist/excalidraw.js",
+   "module": "dist/excalidraw.mjs",

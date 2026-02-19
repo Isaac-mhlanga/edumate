@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where } from "firebase/firestore";
+import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where, limit } from "firebase/firestore";
 import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -98,7 +98,7 @@ export default function Home() {
             const users = usersSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }) as UserDoc);
             const instructorMap = new Map(users.filter(u => u.role === 'instructor').map(i => [i.id, i.fullName]));
 
-            const coursesQuery = query(collection(firestore, 'courses'), orderBy('createdAt', 'desc'));
+            const coursesQuery = query(collection(firestore, 'courses'));
             const querySnapshot = await getDocs(coursesQuery);
             const fetchedCourses = querySnapshot.docs.map(doc => {
                 const courseData = { id: doc.id, ...doc.data() } as Course;
@@ -249,7 +249,7 @@ export default function Home() {
                             {allCourses.map((course, index) => (
                                 <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
                                     <div className="p-1 h-full">
-                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 [--tw-shadow-color:hsl(var(--primary)/0.2)] shadow-xl -translate-y-1 transition-all duration-300 hover:[--tw-shadow-color:hsl(var(--primary)/0.3)] hover:scale-105 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
+                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 [--tw-shadow-color:hsl(var(--primary)/0.2)] shadow-xl -translate-y-1 transition-all duration-300 hover:scale-105 hover:[--tw-shadow-color:hsl(var(--primary)/0.3)] animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
                                             <Link href={`/courses/${course.id}`} className="block">
                                                 <div className="relative h-56 overflow-hidden">
                                                     <Image
