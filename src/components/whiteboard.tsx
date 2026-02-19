@@ -136,12 +136,10 @@ export function Whiteboard({
 	}, []);
 
 	return (
-		<div className="relative w-full h-[calc(100vh-10rem)]">
-			<div className="absolute inset-0">
-				<Tldraw persistenceKey={whiteboardId} forceDarkMode={theme === 'dark'}>
-					<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
-				</Tldraw>
-			</div>
+		<div className="fixed inset-0 z-50 bg-background">
+			<Tldraw persistenceKey={whiteboardId} forceDarkMode={theme === 'dark'}>
+				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
+			</Tldraw>
 		</div>
 	);
 }
