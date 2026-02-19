@@ -21,8 +21,8 @@ export default {
         subtle: '0.03em',
       },
       fontFamily: {
-        body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        body: ['General Sans', 'sans-serif'],
+        headline: ['General Sans', 'sans-serif'],
       },
       colors: {
         border: 'hsl(var(--border))',
