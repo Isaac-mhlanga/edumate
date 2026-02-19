@@ -360,11 +360,6 @@ export default function Home() {
                         <p>No upcoming events scheduled at the moment. Check back soon!</p>
                     </div>
                 )}
-                <div className="text-center mt-12">
-                    <Button size="lg" asChild variant="outline">
-                        <Link href="/calendar">View Full Calendar <ArrowRight className="ml-2 h-4 w-4" /></Link>
-                    </Button>
-                </div>
             </div>
         </section>
         
