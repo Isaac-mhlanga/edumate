@@ -206,6 +206,28 @@ export default function Home() {
             </div>
         </section>
 
+        <section id="stats" className="py-16 bg-background">
+            <div className="max-w-5xl mx-auto px-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
+                    <div className="space-y-2">
+                        <Users className="h-10 w-10 text-primary mx-auto" />
+                        <p className="text-4xl font-bold">150+</p>
+                        <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Students Helped</p>
+                    </div>
+                    <div className="space-y-2">
+                        <Rocket className="h-10 w-10 text-primary mx-auto" />
+                        <p className="text-4xl font-bold">95%</p>
+                        <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Success Rate</p>
+                    </div>
+                    <div className="space-y-2">
+                        <Star className="h-10 w-10 text-primary mx-auto" />
+                        <p className="text-4xl font-bold">4.8/5</p>
+                        <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Average Rating</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
         <section className="py-24 bg-muted relative overflow-hidden">
            <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-3xl animate-blob -z-10"></div>
            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
