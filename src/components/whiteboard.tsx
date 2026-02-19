@@ -61,10 +61,9 @@ function InnerWhiteboard({
 	useEffect(() => {
 		if (!user || !editor) return;
         
-        editor.updateUser({
+        editor.user.updateUserPreferences({
             name: user.displayName ?? 'Anonymous',
         });
-
 
 		let stillAlive = true;
 
