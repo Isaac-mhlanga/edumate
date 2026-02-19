@@ -83,7 +83,7 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "Edumate Pro was a game-changer for me. The video lessons are clear and easy to follow, and the one-on-one tutoring sessions helped me finally understand difficult concepts in my IT and maths courses. I feel more confident in my studies than ever before.",
+    quote: "Edumate Pro was a game-changer for my IT and maths courses. The video lessons are clear, and the one-on-one tutoring helped me finally understand difficult concepts. I feel more confident in my studies than ever before.",
     name: "Mukhetwa",
     role: "Student | University of Johannesburg",
     avatarFallback: "M",
@@ -208,7 +208,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6 text-center">
                 <div className="z-10 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                        Your Key to Unlocking Academic Success
+                        Unlock Your Academic Success
                     </h1>
                     <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
                        Edumate Pro is your all-in-one partner for academic excellence. We provide high-quality video lessons for Grade 10-12 Maths and Sciences, expert one-on-one tutoring, and dedicated support for university and bursary applications. Our mission is to make top-tier education accessible and affordable for every South African student, helping you achieve your dreams.
