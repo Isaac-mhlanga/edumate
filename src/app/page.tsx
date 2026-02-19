@@ -83,8 +83,8 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "Mukhetwa is a talented and motivated final-year student at the University of Johannesburg. He is passionate about helping other students in IT, maths, and theory subjects, showing his love for learning and helping others succeed.",
-    name: "Mukhetwa Mhlanga",
+    quote: "He is passionate about helping other students in IT, maths, and theory subjects, showing his love for learning and helping others succeed.",
+    name: "Mukhetwa",
     role: "Student | University of Johannesburg",
     avatarFallback: "M",
   },
@@ -158,32 +158,32 @@ export default function Home() {
     {
       icon: Users,
       title: "Private & Group Tutoring",
-      description: "Get personal help to understand tricky subjects and boost your marks.",
+      description: "Whether you need one-on-one attention or prefer learning with friends, our expert tutors are here to help you master difficult subjects and improve your grades.",
     },
     {
       icon: FilePenLine,
       title: "Assignment Help",
-      description: "Get expert help to understand and complete your school and varsity assignments.",
+      description: "Don't get stuck on challenging assignments. Our specialists provide detailed guidance and explanations to help you understand the work and submit with confidence.",
     },
     {
       icon: GraduationCap,
       title: "Career Guidance",
-      description: "We help you choose the right subjects and plan your future career path.",
+      description: "Choosing a career is a big step. We offer personalized guidance to help you identify your strengths, choose the right subjects, and map out a clear path to your dream job.",
     },
     {
       icon: Award,
       title: "Bursary Applications",
-      description: "Find and apply for bursaries and scholarships so you can focus on your studies.",
+      description: "Securing funding can be tough. We'll help you find and apply for bursaries and scholarships, ensuring your application stands out so you can focus on your studies.",
     },
     {
       icon: Banknote,
       title: "NSFAS Applications",
-      description: "We guide you step-by-step through your NSFAS application.",
+      description: "The NSFAS process can be confusing. Our team will guide you through every step, helping you prepare your documents and submit your application correctly and on time.",
     },
      {
       icon: School,
       title: "Varsity Applications",
-      description: "Get help applying to different universities and choosing the right course for you.",
+      description: "Get into the university of your choice. We provide hands-on support with your applications, helping you choose the right courses and write compelling motivation letters.",
     },
   ];
 
@@ -211,7 +211,7 @@ export default function Home() {
                         Your Path to Academic Success
                     </h1>
                     <p className="text-lg text-muted-foreground mb-8 max-w-3xl mx-auto">
-                        Get the marks you deserve with video lessons, one-on-one tutoring, and help with varsity and bursary applications.
+                        Edumate Pro is your partner in academic excellence. We provide high-quality video lessons for Grade 10-12 Maths and Sciences, expert one-on-one tutoring, and dedicated support for university and bursary applications. Our mission is to make top-tier education accessible and affordable for every South African student.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                          <Button size="lg" asChild className="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-primary via-primary/80 to-primary">
@@ -254,7 +254,7 @@ export default function Home() {
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                Everything you need to ace your exams, get into varsity, and secure funding.
+                We offer a complete support system for your academic journey. From mastering tough subjects with expert tutors to navigating the complexities of university applications, our services are designed to give you the confidence and tools you need to succeed.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -314,7 +314,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Check out the courses our students are loving right now.</p>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Check out the expert-led video courses our students are loving right now.</p>
                 </div>
                 {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -399,7 +399,7 @@ export default function Home() {
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                        Don't miss our live classes, workshops, and Q&A sessions.
+                        Join our free live classes, workshops, and Q&A sessions to boost your knowledge and engage with our learning community.
                     </p>
                 </div>
                 {upcomingEvents.length > 0 ? (
