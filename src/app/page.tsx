@@ -206,7 +206,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="stats" className="py-16 bg-background">
+        <section id="stats" className="py-16 bg-muted">
             <div className="max-w-5xl mx-auto px-6">
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
                     <div className="space-y-2">
@@ -228,7 +228,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section className="py-24 bg-muted relative overflow-hidden">
+        <section className="py-24 bg-background relative overflow-hidden">
            <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-3xl animate-blob -z-10"></div>
            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
           <div className="max-w-7xl mx-auto px-6">
@@ -256,7 +256,7 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="featured-courses" className="py-24">
+        <section id="featured-courses" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
@@ -340,7 +340,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="events" className="py-24 bg-muted relative overflow-hidden">
+        <section id="events" className="py-24 bg-background relative overflow-hidden">
             <div className="absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-[30rem] h-[30rem] bg-primary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
             <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob -z-10"></div>
             <div className="max-w-7xl mx-auto px-6">
@@ -385,7 +385,7 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="faq" className="py-24">
+        <section id="faq" className="py-24 bg-muted">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
