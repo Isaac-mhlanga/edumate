@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -124,6 +123,11 @@ export type CalendarEvent = {
   allDay: boolean;
   color?: string;
   description?: string;
+  instructor?: string;
+  grade?: string;
+  subject?: string;
+  scope?: string;
+  platforms?: string[];
 };
 
 type BankDetails = {
@@ -192,7 +196,8 @@ function InstructorPage() {
       setLoadingStudents(true);
 
       try {
-        const eventsSnapshot = await getDocs(collection(firestore, "events"));
+        const eventsQuery = query(collection(firestore, "events"), where('instructorId', '==', currentUser.uid));
+        const eventsSnapshot = await getDocs(eventsQuery);
         const fetchedEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
         setEvents(fetchedEvents);
 
@@ -279,6 +284,7 @@ function InstructorPage() {
         setSubmittedAssignments([]);
         setEnrolledStudents([]);
         setTransactions([]);
+        setEvents([]);
         setLoadingCourses(false);
         setLoadingQuizzes(false);
         setLoadingAssignments(false);
@@ -550,12 +556,6 @@ function InstructorPage() {
                 videoUrl = video.youtubeUrl.replace("watch?v=", "embed/");
             }
 
-            if (video.notesFile instanceof File) {
-                const notesRef = ref(storage, `courses/${user.uid}/notes/${Date.now()}-${video.notesFile.name}`);
-                await uploadBytes(notesRef, video.notesFile);
-                notesUrl = await getDownloadURL(notesRef);
-            }
-
             if (videoUrl) {
                  newVideos.push({
                     id: `vid_${Date.now()}_${Math.random()}`,
@@ -714,12 +714,13 @@ function InstructorPage() {
   };
 
   const handleDateClick = (arg: any) => {
-      setManualEvent({ start: arg.dateStr, allDay: arg.allDay });
+      setManualEvent({ start: arg.dateStr, allDay: arg.allDay, instructor: user?.displayName || 'Instructor' });
       setIsManualDialogOpen(true);
   };
   
   const handleEventClick = (clickInfo: any) => {
       const event = clickInfo.event;
+      const extendedProps = event.extendedProps;
       setSelectedEvent({
           id: event.id,
           title: event.title,
@@ -727,22 +728,49 @@ function InstructorPage() {
           end: event.endStr,
           allDay: event.allDay,
           description: event.extendedProps.description,
+          instructor: extendedProps.instructor,
+          grade: extendedProps.grade,
+          subject: extendedProps.subject,
+          scope: extendedProps.scope,
+          platforms: extendedProps.platforms,
           color: event.backgroundColor,
       });
       setIsDetailDialogOpen(true);
   };
   
-  const handleAddManualEvent = () => {
-      if (!manualEvent.title || !manualEvent.start) {
-          toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
-          return;
-      }
-      const newEvent = { ...manualEvent, id: String(Date.now()) } as CalendarEvent
-      setEvents([...events, newEvent]);
-      toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
-      setIsManualDialogOpen(false);
-      setManualEvent({});
-  };
+  const handleAddOrUpdateEvent = async () => {
+        if (!manualEvent.title || !manualEvent.start || !user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
+            return;
+        }
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        
+        const eventData = { ...manualEvent, instructorId: user.uid, instructor: user.displayName };
+
+        try {
+            if (manualEvent.id) {
+                // Update existing event
+                const eventRef = doc(firestore, 'events', manualEvent.id);
+                await updateDoc(eventRef, eventData);
+                setEvents(prev => prev.map(e => e.id === manualEvent.id ? eventData as CalendarEvent : e));
+                toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
+            } else {
+                // Create new event
+                const docRef = await addDoc(collection(firestore, 'events'), eventData);
+                const newEvent = { ...eventData, id: docRef.id } as CalendarEvent;
+                setEvents([...events, newEvent]);
+                toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
+            }
+            
+            setIsManualDialogOpen(false);
+            setManualEvent({});
+        } catch(error) {
+            console.error("Error saving event:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
+        }
+    };
 
   return (
     <div className="space-y-8">
@@ -838,9 +866,6 @@ function InstructorPage() {
           events={events}
           onDateClick={handleDateClick}
           onEventClick={handleEventClick}
-          onAddEventClick={() => {
-             toast({ title: "Action not available", description: "Please go to the admin dashboard to create new events." });
-          }}
         />
       )}
 
@@ -913,8 +938,8 @@ function InstructorPage() {
         setIsDetailsOpen={setIsTransactionDetailsOpen}
         isRefundOpen={isRefundDialogOpen}
         setIsRefundOpen={setIsRefundDialogOpen}
-        isPayoutOpen={isPayoutDialogOpen}
-        setIsPayoutOpen={setIsPayoutDialogOpen}
+        isPayoutOpen={isPayoutOpen}
+        setIsPayoutOpen={setIsPayoutOpen}
         selectedTransaction={selectedTransaction}
         onConfirmRefund={confirmRefundTransaction}
         onPayoutRequest={handlePayoutRequest}
@@ -929,7 +954,7 @@ function InstructorPage() {
         selectedEvent={selectedEvent}
         manualEvent={manualEvent}
         setManualEvent={setManualEvent}
-        onManualCreate={handleAddManualEvent}
+        onManualCreate={handleAddOrUpdateEvent}
       />
     </div>
   );

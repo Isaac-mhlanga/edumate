@@ -177,5 +177,12 @@ service cloud.firestore {
       // Only the assigned user or an admin can update the enquiry
       allow update: if (isSignedIn() && resource.data.assigneeId == request.auth.uid) || isAdmin();
     }
+     // Rules for events
+    match /events/{eventId} {
+      // Anyone can read events
+      allow get, list: if true;
+      // Only instructors and admins can create, update, delete events
+      allow write: if isInstructor() || isAdmin();
+    }
   }
 }

@@ -73,7 +73,7 @@ export default function CalendarPage() {
     }, []);
 
     const handleDateClick = (arg: any) => {
-        toast({ title: "Action not available", description: "Please go to the admin dashboard to create new events." });
+        toast({ title: "Action not available", description: "Please go to the admin or instructor dashboard to create new events." });
     };
     
     const handleEventClick = (clickInfo: any) => {
@@ -152,7 +152,7 @@ export default function CalendarPage() {
                     <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div>
                             <CardTitle className="text-2xl">Calendar</CardTitle>
-                            <CardDescription>Manage your schedule, events, and appointments.</CardDescription>
+                            <CardDescription>Browse upcoming live sessions, workshops, and deadlines.</CardDescription>
                         </div>
                     </CardHeader>
                     <CardContent>

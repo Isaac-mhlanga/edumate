@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -16,21 +15,15 @@ interface InstructorCalendarTabProps {
     events: CalendarEvent[];
     onDateClick: (arg: any) => void;
     onEventClick: (clickInfo: any) => void;
-    onAddEventClick: () => void;
 }
 
-export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAddEventClick }: InstructorCalendarTabProps) {
+export function InstructorCalendarTab({ events, onDateClick, onEventClick }: InstructorCalendarTabProps) {
     return (
         <Card className="shadow-lg">
             <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div>
                     <CardTitle className="text-xl">My Calendar</CardTitle>
                     <CardDescription>Manage your schedule, teaching sessions, and deadlines.</CardDescription>
-                </div>
-                <div className="flex gap-2">
-                    <Button variant="outline" onClick={onAddEventClick}>
-                        <PlusCircle className="mr-2 h-4 w-4" /> Add Event
-                    </Button>
                 </div>
             </CardHeader>
             <CardContent>
@@ -48,6 +41,7 @@ export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAdd
                         eventClick={onEventClick}
                         editable={false}
                         selectable={true}
+                        select={onDateClick}
                         height="auto"
                         contentHeight="auto"
                         aspectRatio={2}
@@ -58,5 +52,3 @@ export function InstructorCalendarTab({ events, onDateClick, onEventClick, onAdd
         </Card>
     );
 }
-
-    
