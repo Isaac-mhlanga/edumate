@@ -249,8 +249,9 @@ export default function Home() {
            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
-              <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+              <Badge>What We Offer</Badge>
+              <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Our Services</h2>
+              <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                 We offer a complete support system for your academic journey. From mastering tough subjects with expert tutors to navigating the complexities of university applications, our services are designed to give you the confidence and tools you need to succeed.
               </p>
             </div>
@@ -275,8 +276,9 @@ export default function Home() {
         <section id="refer-earn" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Refer & Earn</h2>
-                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                    <Badge>Get Rewarded</Badge>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Refer & Earn</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                         Love using Edumate? Share the love! For every friend who signs up using your unique referral link, we'll give you R20 as a thank you.
                     </p>
                 </div>
@@ -314,7 +316,8 @@ export default function Home() {
         <section id="featured-courses" className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
+                    <Badge>Top Picks</Badge>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight my-4">Featured Courses</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Check out the expert-led video courses our students are loving right now.</p>
                 </div>
                 {loadingCourses ? (
@@ -398,8 +401,9 @@ export default function Home() {
         <section id="events" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
-                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                    <Badge>Live Sessions</Badge>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
+                    <p className="text-lg text-muted-foreground">
                         Join our free live classes, workshops, and Q&A sessions to boost your knowledge and engage with our learning community.
                     </p>
                 </div>
@@ -441,7 +445,8 @@ export default function Home() {
         <section id="faq" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
+                    <Badge>Need Help?</Badge>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight my-4">Frequently Asked Questions</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">We've got answers to your most common questions. If you don't see your question here, just ask!</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4">
@@ -466,8 +471,9 @@ export default function Home() {
         <section id="testimonials" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">What Our Students Are Saying</h2>
-                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                    <Badge>Success Stories</Badge>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">What Our Students Are Saying</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                         Hear from students who are acing their studies with Edumate.
                     </p>
                 </div>
