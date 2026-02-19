@@ -8,10 +8,9 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { useRouter } from 'next/navigation';
-import { X, Minimize2, Maximize2, Mic, MicOff, Circle as RecordIcon, Square as StopIcon, Brush } from 'lucide-react';
+import { X, Minimize2, Maximize2, Mic, MicOff, Circle as RecordIcon, Square as StopIcon } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
-import { useTheme } from 'next-themes';
 
 const Tldraw = dynamic(
 	async () => (await import('@tldraw/tldraw')).Tldraw,
@@ -129,7 +128,6 @@ export function Whiteboard({
     // New state for audio and recording
     const [isMuted, setIsMuted] = useState(true);
     const [isRecording, setIsRecording] = useState(false);
-    const [isStylePanelHidden, setIsStylePanelHidden] = useState(false);
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -153,9 +151,6 @@ export function Whiteboard({
             <div className='relative w-full h-full rounded-xl overflow-hidden shadow-2xl border'>
                 <Tldraw 
                     persistenceKey={whiteboardId}
-                    components={{
-                        StylePanel: isStylePanelHidden ? () => null : undefined,
-                    }}
                     forceMobile={false}
                 >
                     <InnerWhiteboard user={user} whiteboardId={whiteboardId} />
@@ -185,18 +180,6 @@ export function Whiteboard({
                         </>
                     )}
 
-                    <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => setIsStylePanelHidden(prev => !prev)}
-                        className={cn(
-                            "bg-background/80 hover:bg-background rounded-full h-10 w-10",
-                            isStylePanelHidden && "bg-green-500/20 text-green-700 border-green-500/30 dark:text-green-400"
-                        )}
-                    >
-                        <Brush className="h-5 w-5" />
-                        <span className="sr-only">Toggle Style Panel</span>
-                    </Button>
                     <Button
                         variant="outline"
                         size="icon"
