@@ -9,7 +9,7 @@ export function Footer() {
         <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
             <div className="col-span-2 md:col-span-1 space-y-4">
                 <Icons.logo className="h-8 w-auto" />
-                <p className="text-base font-medium text-muted-foreground">Empowering students to excel in high school subjects through comprehensive video courses and interactive learning.</p>
+                <p className="text-base font-medium text-muted-foreground">Helping students pass their high school subjects with great video lessons and support.</p>
             </div>
             <div>
                 <h4 className="font-semibold text-base text-foreground mb-4">Subjects</h4>

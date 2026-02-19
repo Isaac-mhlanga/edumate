@@ -1,3 +1,4 @@
+
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -82,13 +83,13 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "Mukhetwa, a final-year student at the University of Johannesburg, is renowned for his talent and motivation. He passionately assists fellow students across diverse fields such as Information Technology, mathematics, and theory-based studies, showcasing his dedication to learning and academic excellence.",
+    quote: "Mukhetwa is a talented and motivated final-year student at the University of Johannesburg. He is passionate about helping other students in IT, maths, and theory subjects, showing his love for learning and helping others succeed.",
     name: "Mukhetwa",
     role: "Student | University of Johannesburg",
     avatarFallback: "M",
   },
   {
-    quote: "Edumate provided exceptional assistance with my assignments. Their expertise, dedication, and genuine support made a significant impact on my understanding of my assignments. I highly recommend Edumate Pro as a mentorship platform that goes above and beyond to ensure student success. Thank you for your invaluable support in my learning journey.",
+    quote: "Edumate gave me amazing help with my assignments. Their expert support made a huge difference in my understanding. I highly recommend them as mentors who go the extra mile for students. Thank you for the incredible support!",
     name: "Bontle Mahlango",
     role: "Student | University of Johannesburg",
     avatarFallback: "BM",
@@ -156,33 +157,33 @@ export default function Home() {
   const services = [
     {
       icon: Users,
-      title: "Tutorial Sessions",
-      description: "One-on-one and group tutoring sessions designed to improve understanding and academic performance.",
+      title: "Private & Group Tutoring",
+      description: "Get personal help to understand tricky subjects and boost your marks.",
     },
     {
       icon: FilePenLine,
-      title: "Assignment & Project Assistance",
-      description: "Guidance and support with school and university assignments and research projects.",
+      title: "Assignment Help",
+      description: "Get expert help to understand and complete your school and varsity assignments.",
     },
     {
       icon: GraduationCap,
       title: "Career Guidance",
-      description: "Personalized career advice, subject selection guidance, and future planning support.",
+      description: "We help you choose the right subjects and plan your future career path.",
     },
     {
       icon: Award,
       title: "Bursary Applications",
-      description: "Assistance with identifying and applying for bursaries and scholarships.",
+      description: "Find and apply for bursaries and scholarships so you can focus on your studies.",
     },
     {
       icon: Banknote,
-      title: "NSFAS Bursary Applications",
-      description: "Step-by-step support with NSFAS applications and documentation.",
+      title: "NSFAS Applications",
+      description: "We guide you step-by-step through your NSFAS application.",
     },
      {
       icon: School,
-      title: "University Applications",
-      description: "Guidance through the university application process, from choosing a course to final submission.",
+      title: "Varsity Applications",
+      description: "Get help applying to different universities and choosing the right course for you.",
     },
   ];
 
@@ -200,17 +201,17 @@ export default function Home() {
     <div className="flex flex-col min-h-screen bg-background text-foreground">
       <PublicHeader />
       <main>
-        <section className="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden">
+        <section className="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden bg-background">
              <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-5"></div>
              <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
              <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2"></div>
             <div className="max-w-7xl mx-auto px-6 text-center">
                 <div className="z-10 animate-fade-in-up">
                     <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
-                        A Smarter Way to Learn
+                        Your Key to Unlocking Academic Success
                     </h1>
                     <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
-                        Excel with expert-led video courses, personalized tutoring, and comprehensive university, career, and bursary guidance.
+                        Get the marks you deserve with video lessons, one-on-one tutoring, and help with varsity and bursary applications.
                     </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
                          <Button size="lg" asChild className="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-primary via-primary/80 to-primary">
@@ -230,12 +231,12 @@ export default function Home() {
                     <div className="space-y-2">
                         <Users className="h-10 w-10 text-primary mx-auto" />
                         <p className="text-4xl font-bold">150+</p>
-                        <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Students Helped</p>
+                        <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Students Supported</p>
                     </div>
                     <div className="space-y-2">
                         <Rocket className="h-10 w-10 text-primary mx-auto" />
                         <p className="text-4xl font-bold">95%</p>
-                        <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Success Rate</p>
+                        <p className="text-muted-foreground text-sm font-medium uppercase tracking-wider">Pass Rate</p>
                     </div>
                     <div className="space-y-2">
                         <Star className="h-10 w-10 text-primary mx-auto" />
@@ -251,9 +252,9 @@ export default function Home() {
            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-12">
-              <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
+              <h2 className="text-3xl md:text-4xl font-headline font-bold">How We Help You Succeed</h2>
               <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                Empowering students through academic support, career guidance, and funding assistance.
+                Everything you need to ace your exams, get into varsity, and secure funding.
               </p>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -282,9 +283,9 @@ export default function Home() {
                         <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
                             <Gift className="h-8 w-8" />
                         </div>
-                        <CardTitle className="text-3xl font-headline">Refer a Friend, Earn Rewards</CardTitle>
+                        <CardTitle className="text-3xl font-headline">Refer a Friend & Get R20</CardTitle>
                         <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                           Love Edumate Pro? Share your unique referral link and earn <span className="font-bold text-primary">R20</span> for every new user who signs up.
+                           Tell your friends about Edumate Pro. When they sign up using your link, you get R20. It's that simple!
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="relative z-10">
@@ -312,8 +313,8 @@ export default function Home() {
         <section id="featured-courses" className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Explore our most popular courses and start learning today.</p>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Popular Courses</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Check out the courses our students are loving right now.</p>
                 </div>
                 {loadingCourses ? (
                     <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -396,9 +397,9 @@ export default function Home() {
         <section id="events" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Live Sessions</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                        Join our live sessions, workshops, and Q&amp;A's.
+                        Don't miss our live classes, workshops, and Q&A sessions.
                     </p>
                 </div>
                 {upcomingEvents.length > 0 ? (
@@ -446,8 +447,8 @@ export default function Home() {
         <section id="faq" className="py-24 bg-background">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Have questions? We've got answers. If you can't find what you're looking for, feel free to contact us.</p>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Got Questions?</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">We've got answers to your most common questions. If you don't see your question here, just ask!</p>
                 </div>
                 <Accordion type="single" collapsible className="w-full space-y-4">
                     {faqData.map((item, index) => (
@@ -471,9 +472,9 @@ export default function Home() {
         <section id="testimonials" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold">What Our Students Say</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">What Our Students Are Saying</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                        Real stories from students who've transformed their learning with Edumate Pro.
+                        Hear from students who are acing their studies with Edumate Pro.
                     </p>
                 </div>
                 <Carousel

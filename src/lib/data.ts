@@ -5,32 +5,32 @@ import { type PayoutRequest as AdminPayoutRequest } from "@/app/admin/page";
 
 export const faqData = [
     {
-        question: "What subjects and grades do you cover for high school?",
-        answer: "We primarily focus on Grade 10, 11, and 12 curricula for Mathematics, Physical Sciences, and Life Sciences. Our course catalog is always expanding, so be sure to check back for new subjects!"
+        question: "What subjects and grades do you cover?",
+        answer: "We cover Grade 10, 11, and 12 Maths, Physical Sciences, and Life Sciences. We're always adding more subjects, so keep an eye out!"
     },
     {
         question: "How does the assignment assistance work?",
-        answer: "You can submit your assignment brief through our community forum or student dashboard. An expert will review it and provide you with a quote. Once you approve, they will provide a detailed, original solution to guide you."
+        answer: "Easy! Just upload your assignment on your dashboard. An expert will check it and give you a price. Once you're happy, they'll create a step-by-step guide to help you understand it."
     },
     {
-        question: "Do you help with university-level assignments?",
-        answer: "Yes! We offer specialized assistance for university and college students with assignments, projects, and research in Computer Science, Information Security, and related IT modules. You can post a question in our community forum to get a quote and connect with an expert."
+        question: "Do you help with varsity assignments?",
+        answer: "Yes! We help varsity and college students with assignments and projects, especially in IT subjects like Computer Science and Information Security. Ask in our community forum to get a quote."
     },
     {
         question: "Can I get help from a real person for tutoring?",
-        answer: "Absolutely! Alongside our video lessons, you can browse our approved tutors and book one-on-one sessions. They provide personalized guidance and support tailored to your specific learning needs."
+        answer: "Definitely! You can book one-on-one sessions with our expert tutors for personal help with any topic you're struggling with."
     },
     {
         question: "How does the Bursary and NSFAS application guidance work?",
-        answer: "We provide step-by-step assistance to ensure your application is accurate, complete, and submitted on time. Our experts help you gather the necessary documents, write compelling motivation letters, and navigate the entire application process to maximize your chances of success."
+        answer: "We help you with your bursary and NSFAS applications from start to finish. We'll make sure all your documents are correct and help you write a great motivation letter to improve your chances."
     },
     {
-        question: "What is included in University Career Guidance?",
-        answer: "Our career guidance service helps you align your academic path with your career aspirations. We offer personalized sessions to explore degree options, understand university requirements, and create a strategic plan for your future."
+        question: "What is University Career Guidance?",
+        answer: "Not sure what to study or what career to choose? We offer one-on-one sessions to help you figure it out, choose the right subjects, and plan for your future."
     },
     {
-        question: "What is the difference between a subscription and a one-time purchase?",
-        answer: "A one-time purchase gives you lifetime access to a single course. A subscription gives you access to all courses within a subject (or all subjects, depending on the plan) for the duration of your subscription."
+        question: "What's the difference between buying a course and a subscription?",
+        answer: "With a one-time purchase, you get a single course forever. A subscription gives you access to many more courses for as long as you are subscribed."
     }
 ];
 
