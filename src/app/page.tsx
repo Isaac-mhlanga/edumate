@@ -274,7 +274,41 @@ export default function Home() {
           </div>
         </section>
 
-        <section id="featured-courses" className="py-24 bg-muted">
+        <section id="refer-earn" className="py-24 bg-muted">
+            <div className="max-w-4xl mx-auto px-6">
+                <Card className="text-center bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 overflow-hidden">
+                     <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
+                     <CardHeader className="relative z-10">
+                        <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
+                            <Gift className="h-8 w-8" />
+                        </div>
+                        <CardTitle className="text-3xl font-headline">Refer &amp; Earn</CardTitle>
+                    </CardHeader>
+                    <CardContent className="relative z-10">
+                        <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
+                            Love Edumate Pro? Share it with your friends and earn <span className="font-bold text-primary">R20</span> for every successful referral! It's a win-win.
+                        </p>
+                         <div className="mt-8">
+                             <Button size="lg" asChild>
+                                <Link href="/register">
+                                    Start Earning Now <ArrowRight className="ml-2" />
+                                </Link>
+                            </Button>
+                        </div>
+                    </CardContent>
+                     <CardFooter className="relative z-10 flex flex-col gap-4">
+                         <h4 className="font-semibold text-base text-foreground">Share on Social Media</h4>
+                        <div className="flex justify-center space-x-4">
+                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
+                            <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                        </div>
+                    </CardFooter>
+                </Card>
+            </div>
+        </section>
+
+        <section id="featured-courses" className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Featured Courses</h2>
@@ -358,20 +392,18 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="events" className="py-24 bg-background relative overflow-hidden">
-            <div className="absolute bottom-0 left-0 -translate-x-1/2 translate-y-1/2 w-[30rem] h-[30rem] bg-primary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
-            <div className="absolute top-0 right-0 translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob -z-10"></div>
+        <section id="events" className="py-24 bg-muted relative overflow-hidden">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
                     <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
-                        Join our live sessions, workshops, and Q&A's.
+                        Join our live sessions, workshops, and Q&amp;A's.
                     </p>
                 </div>
                 {upcomingEvents.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                         {upcomingEvents.map((event, index) => (
-                             <Card key={event.id} className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1" onClick={() => handleEventClick(event)}>
+                             <Card key={event.id} className="group cursor-pointer overflow-hidden transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-1 bg-card/50" onClick={() => handleEventClick(event)}>
                                 <div className="flex">
                                     <div className="flex flex-col items-center justify-center w-24 bg-gradient-to-br from-primary/10 to-primary/20 p-4 text-primary-foreground border-r border-primary/20">
                                         <span className="text-3xl font-bold text-primary">{format(new Date(event.start), 'd')}</span>
@@ -403,7 +435,7 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="faq" className="py-24 bg-card relative overflow-hidden bg-grid-pattern">
+        <section id="faq" className="py-24 bg-background relative overflow-hidden bg-grid-pattern">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
@@ -414,7 +446,7 @@ export default function Home() {
                         <AccordionItem 
                             key={index} 
                             value={`item-${index}`} 
-                            className="border-none bg-background/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-px rounded-lg"
+                            className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-px rounded-lg"
                         >
                             <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground tracking-subtle">
                                 {item.question}
@@ -428,8 +460,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="testimonials" className="py-24 bg-background relative overflow-hidden">
-            <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-10"></div>
+        <section id="testimonials" className="py-24 bg-muted relative overflow-hidden">
             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
             <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2"></div>
             <div className="max-w-7xl mx-auto px-6">
@@ -483,34 +514,6 @@ export default function Home() {
                     <CarouselNext className="right-[-50px] hidden sm:flex" />
                 </Carousel>
             </div>
-        </section>
-
-         <section id="refer-earn" className="py-24 bg-card relative overflow-hidden">
-             <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-10"></div>
-             <div className="max-w-4xl mx-auto px-6 text-center">
-                <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
-                    <Gift className="h-8 w-8" />
-                </div>
-                <h2 className="text-3xl md:text-4xl font-headline font-bold">Refer & Earn</h2>
-                <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
-                    Love Edumate Pro? Share it with your friends and earn <span className="font-bold text-primary">R20</span> for every successful referral! It's a win-win.
-                </p>
-                 <div className="mt-8">
-                     <Button size="lg" asChild>
-                        <Link href="/register">
-                            Start Earning Now <ArrowRight className="ml-2" />
-                        </Link>
-                    </Button>
-                </div>
-                <div className="mt-10">
-                     <h4 className="font-semibold text-base text-foreground mb-4">Share on Social Media</h4>
-                    <div className="flex justify-center space-x-4">
-                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
-                        <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
-                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
-                    </div>
-                </div>
-             </div>
         </section>
 
       </main>
