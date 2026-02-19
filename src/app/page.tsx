@@ -184,14 +184,19 @@ export default function Home() {
       <PublicHeader />
       <main>
         <section className="relative pt-24 pb-12 md:pt-32 md:pb-24 overflow-hidden">
-             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob -z-10"></div>
-             <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2 -z-10"></div>
+             <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-5"></div>
+             <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
+             <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2"></div>
             <div className="max-w-7xl mx-auto px-6 text-center">
                 <div className="z-10 animate-fade-in-up">
-                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6">A Smarter Way to Learn</h1>
-                    <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">Excel with expert-led video courses, personalized tutoring, and comprehensive university, career, and bursary guidance.</p>
+                    <h1 className="text-4xl md:text-5xl lg:text-6xl font-headline font-bold tracking-tighter mb-6 bg-gradient-to-br from-foreground to-muted-foreground bg-clip-text text-transparent">
+                        A Smarter Way to Learn
+                    </h1>
+                    <p className="text-xl text-muted-foreground mb-8 max-w-3xl mx-auto">
+                        Excel with expert-led video courses, personalized tutoring, and comprehensive university, career, and bursary guidance.
+                    </p>
                     <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                         <Button size="lg" asChild>
+                         <Button size="lg" asChild className="animate-shimmer bg-[length:200%_100%] bg-gradient-to-r from-primary via-primary/80 to-primary">
                            <Link href="/register">Get Started Free <ChevronRight className="ml-2" /></Link>
                         </Button>
                         <Button size="lg" variant="outline" asChild>
@@ -203,8 +208,8 @@ export default function Home() {
         </section>
 
         <section className="py-24 bg-muted relative overflow-hidden">
-           <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-primary/10 rounded-full blur-3xl animate-blob -z-10"></div>
-           <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2 -z-10"></div>
+           <div className="absolute top-1/2 left-1/4 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[40rem] bg-primary/5 rounded-full blur-3xl animate-blob -z-10"></div>
+           <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/5 rounded-full blur-3xl animate-blob-2 -z-10"></div>
           <div className="max-w-7xl mx-auto px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl md:text-4xl font-headline font-bold">Our Services</h2>
@@ -214,9 +219,9 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service, index) => (
-                <Card key={index} className="text-center transition-all duration-300 bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-1">
+                <Card key={index} className="text-center transition-all duration-300 bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 hover:-translate-y-2">
                   <CardHeader className="items-center">
-                    <div className="bg-primary/10 text-primary rounded-full p-4">
+                    <div className="bg-gradient-to-br from-primary/10 to-primary/20 text-primary rounded-xl p-4 border border-primary/20">
                       <service.icon className="h-8 w-8" />
                     </div>
                   </CardHeader>
@@ -245,11 +250,11 @@ export default function Home() {
                         opts={{ align: "start", loop: true }}
                         className="w-full"
                     >
-                        <CarouselContent>
+                        <CarouselContent className="-ml-2">
                             {allCourses.map((course, index) => (
-                                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
+                                <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3 pl-2">
                                     <div className="p-1 h-full">
-                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 [--tw-shadow-color:hsl(var(--primary)/0.2)] shadow-xl -translate-y-1 transition-all duration-300 hover:scale-105 hover:[--tw-shadow-color:hsl(var(--primary)/0.3)] animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
+                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1 animate-fade-in-up" style={{ animationDelay: `${0.1 * index}s` }}>
                                             <Link href={`/courses/${course.id}`} className="block">
                                                 <div className="relative h-56 overflow-hidden">
                                                     <Image
@@ -259,17 +264,19 @@ export default function Home() {
                                                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                                                         data-ai-hint="online course"
                                                     />
+                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                                     <Badge variant="secondary" className="absolute top-3 left-3">{course.subject}</Badge>
                                                 </div>
                                             </Link>
                                             <CardHeader>
-                                                <div className="flex justify-between items-start">
-                                                    <Badge variant="secondary">{course.subject}</Badge>
-                                                    <div className="flex items-center gap-1 text-sm text-amber-500">
-                                                        <Star className="w-4 h-4 fill-amber-400" />
-                                                        <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
+                                                <CardTitle className="text-lg pt-2">{course.title}</CardTitle>
+                                                <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
+                                                    <div className="flex items-center gap-1">
+                                                        <Star className="w-4 h-4 fill-amber-400 text-amber-500" />
+                                                        <span className="font-bold text-sm">{(course.rating || 0).toFixed(1)}</span>
                                                     </div>
+                                                     <span>By {course.instructor}</span>
                                                 </div>
-                                                <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
                                             </CardHeader>
                                             <CardContent className="flex-grow">
                                                 <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
@@ -325,38 +332,36 @@ export default function Home() {
                 {upcomingEvents.length > 0 ? (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         {upcomingEvents.map((event, index) => (
-                             <Card key={event.id} className="group cursor-pointer bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 flex flex-col" onClick={() => handleEventClick(event)}>
+                             <Card key={event.id} className="group cursor-pointer bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-2 flex flex-col" onClick={() => handleEventClick(event)}>
                                 <CardHeader>
-                                    <div className="flex items-start gap-4">
-                                        <div className="flex flex-col items-center justify-center p-2 rounded-md bg-muted text-muted-foreground w-16">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex flex-col items-center justify-center p-2 rounded-md bg-muted text-muted-foreground w-16 h-16 border">
                                             <span className="text-xs font-bold uppercase">{format(new Date(event.start), 'MMM')}</span>
                                             <span className="text-2xl font-bold text-foreground">{format(new Date(event.start), 'd')}</span>
                                         </div>
-                                        <div className="flex-1">
-                                            <Badge variant="secondary" className="mb-2">{event.subject} - Grade {event.grade}</Badge>
-                                            <CardTitle className="text-base line-clamp-2">{event.title}</CardTitle>
-                                        </div>
+                                         <Badge variant="secondary">{event.subject}</Badge>
                                     </div>
+                                    <CardTitle className="text-lg pt-4 line-clamp-2">{event.title}</CardTitle>
                                 </CardHeader>
                                 <CardContent className="flex-grow">
                                     <p className="text-muted-foreground line-clamp-2 text-sm">{event.scope || event.description}</p>
                                 </CardContent>
                                 <CardFooter>
                                     <div className="flex justify-between w-full items-center text-sm text-muted-foreground">
-                                        <span className="font-semibold">{event.instructor}</span>
-                                        <span className="group-hover:text-primary transition-colors flex items-center">View Details <ArrowRight className="ml-1 h-3 w-3"/></span>
+                                        <span className="font-semibold">By {event.instructor}</span>
+                                        <span className="text-primary group-hover:underline flex items-center">View Details <ArrowRight className="ml-1 h-3 w-3"/></span>
                                     </div>
                                 </CardFooter>
                             </Card>
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center text-muted-foreground">
+                    <div className="text-center text-muted-foreground py-12">
                         <p>No upcoming events scheduled at the moment. Check back soon!</p>
                     </div>
                 )}
                 <div className="text-center mt-12">
-                    <Button size="lg" asChild>
+                    <Button size="lg" asChild variant="outline">
                         <Link href="/calendar">View Full Calendar <ArrowRight className="ml-2 h-4 w-4" /></Link>
                     </Button>
                 </div>
@@ -374,7 +379,7 @@ export default function Home() {
                         <AccordionItem 
                             key={index} 
                             value={`item-${index}`} 
-                            className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1 rounded-lg"
+                            className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-px rounded-lg"
                         >
                             <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground tracking-subtle">
                                 {item.question}
