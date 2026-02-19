@@ -1,3 +1,4 @@
+
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -20,6 +21,7 @@ import { format } from 'date-fns';
 import { Separator } from "@/components/ui/separator";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
