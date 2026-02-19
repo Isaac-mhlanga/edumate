@@ -1,4 +1,3 @@
-
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -12,7 +11,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where, limit } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock, User } from "lucide-react";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock, User, Gift } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -22,6 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -82,13 +82,13 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "Isaac Mhlanga, a final-year student at the University of Johannesburg, is renowned for his talent and motivation. He passionately assists fellow students across diverse fields such as Information Technology, mathematics, and theory-based studies, showcasing his dedication to learning and academic excellence.",
+    quote: "Mukhetwa, a final-year student at the University of Johannesburg, is renowned for his talent and motivation. He passionately assists fellow students across diverse fields such as Information Technology, mathematics, and theory-based studies, showcasing his dedication to learning and academic excellence.",
     name: "Mukhetwa",
     role: "Student | University of Johannesburg",
     avatarFallback: "M",
   },
   {
-    quote: "Edumate provided exceptional assistance with my assignments. Their expertise, dedication, and genuine support made a significant impact on my understanding of my assignments. I highly recommend Isaac Mhlanga as a mentor who goes above and beyond to ensure student success. Thank you for your invaluable support in my learning journey.",
+    quote: "Edumate provided exceptional assistance with my assignments. Their expertise, dedication, and genuine support made a significant impact on my understanding of my assignments. I highly recommend Edumate Pro as a mentorship platform that goes above and beyond to ensure student success. Thank you for your invaluable support in my learning journey.",
     name: "Bontle Mahlango",
     role: "Student | University of Johannesburg",
     avatarFallback: "BM",
@@ -403,7 +403,7 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="faq" className="py-24 bg-muted relative overflow-hidden">
+        <section id="faq" className="py-24 bg-card relative overflow-hidden bg-grid-pattern">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
@@ -414,7 +414,7 @@ export default function Home() {
                         <AccordionItem 
                             key={index} 
                             value={`item-${index}`} 
-                            className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-px rounded-lg"
+                            className="border-none bg-background/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-px rounded-lg"
                         >
                             <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground tracking-subtle">
                                 {item.question}
@@ -456,7 +456,7 @@ export default function Home() {
                         {testimonials.map((testimonial, index) => (
                             <CarouselItem key={index}>
                                 <div className="p-1 h-full">
-                                    <Card className="bg-background/50 backdrop-blur-lg border-border/20 shadow-lg h-full flex flex-col justify-between">
+                                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-lg h-full flex flex-col justify-between">
                                         <CardContent className="p-8 text-center flex-grow flex items-center justify-center">
                                             <p className="text-lg font-medium text-foreground italic">
                                                 "{testimonial.quote}"
@@ -484,6 +484,35 @@ export default function Home() {
                 </Carousel>
             </div>
         </section>
+
+         <section id="refer-earn" className="py-24 bg-card relative overflow-hidden">
+             <div className="absolute inset-0 -z-10 bg-grid-pattern opacity-10"></div>
+             <div className="max-w-4xl mx-auto px-6 text-center">
+                <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
+                    <Gift className="h-8 w-8" />
+                </div>
+                <h2 className="text-3xl md:text-4xl font-headline font-bold">Refer & Earn</h2>
+                <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
+                    Love Edumate Pro? Share it with your friends and earn <span className="font-bold text-primary">R20</span> for every successful referral! It's a win-win.
+                </p>
+                 <div className="mt-8">
+                     <Button size="lg" asChild>
+                        <Link href="/register">
+                            Start Earning Now <ArrowRight className="ml-2" />
+                        </Link>
+                    </Button>
+                </div>
+                <div className="mt-10">
+                     <h4 className="font-semibold text-base text-foreground mb-4">Share on Social Media</h4>
+                    <div className="flex justify-center space-x-4">
+                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
+                        <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                        <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                    </div>
+                </div>
+             </div>
+        </section>
+
       </main>
       <Footer />
        <EventDialog
