@@ -941,8 +941,8 @@ function InstructorPage() {
         setIsDetailsOpen={setIsTransactionDetailsOpen}
         isRefundOpen={isRefundDialogOpen}
         setIsRefundOpen={setIsRefundDialogOpen}
-        isPayoutOpen={isPayoutOpen}
-        setIsPayoutOpen={setIsPayoutOpen}
+        isPayoutOpen={isPayoutDialogOpen}
+        setIsPayoutOpen={setIsPayoutDialogOpen}
         selectedTransaction={selectedTransaction}
         onConfirmRefund={confirmRefundTransaction}
         onPayoutRequest={handlePayoutRequest}
@@ -964,3 +964,5 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
