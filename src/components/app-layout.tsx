@@ -43,6 +43,7 @@ import {
   UserCog,
   HelpCircle,
   Gift,
+  Brush,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
@@ -100,6 +101,7 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/dashboard/tutors', label: 'Tutors', icon: Users, basePath: '/dashboard/tutors' },
+  { href: '/dashboard/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/dashboard/whiteboard' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
@@ -108,6 +110,7 @@ const studentMenuItems: MenuItem[] = [
 
 const varsityStudentMenuItems: MenuItem[] = [
   { href: '/varsity-dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/varsity-dashboard', tab: 'overview' },
+  { href: '/varsity-dashboard/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/varsity-dashboard/whiteboard' },
   { href: '/varsity-dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/varsity-dashboard', tab: 'assignments' },
   { href: '/varsity-dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/varsity-dashboard', tab: 'transactions'},
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
@@ -117,6 +120,7 @@ const varsityStudentMenuItems: MenuItem[] = [
 
 const instructorMenuItems: MenuItem[] = [
   { href: '/instructor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/instructor', tab: 'overview' },
+  { href: '/instructor/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/instructor/whiteboard' },
   { href: '/instructor?tab=courses', label: 'Courses', icon: GraduationCap, basePath: '/instructor', tab: 'courses' },
   { href: '/instructor?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/instructor', tab: 'assignments' },
   { href: '/instructor?tab=students', label: 'Students', icon: Users, basePath: '/instructor', tab: 'students' },
@@ -128,6 +132,7 @@ const instructorMenuItems: MenuItem[] = [
 
 const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/admin', tab: 'overview' },
+  { href: '/admin/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/admin/whiteboard' },
   { href: '/admin?tab=users', label: 'Users', icon: Users, basePath: '/admin', tab: 'users' },
   { href: '/admin?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/admin', tab: 'courses' },
   { href: '/admin?tab=payouts', label: 'Payouts', icon: Banknote, basePath: '/admin', tab: 'payouts' },
@@ -140,6 +145,7 @@ const adminMenuItems: MenuItem[] = [
 
 const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/tutor', tab: 'overview' },
+  { href: '/tutor/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/tutor/whiteboard' },
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
