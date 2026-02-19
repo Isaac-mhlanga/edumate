@@ -1,13 +1,13 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import {
-	Tldraw,
 	useEditor,
 	type TLStore,
 	type TLSnapshot,
-} from '@tldraw/tldraw'
-import '@tldraw/tldraw/tldraw.css'
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth'
+} from '@tldraw/tldraw';
+import '@tldraw/tldraw/tldraw.css';
+import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
 import {
 	getFirestore,
 	doc,
@@ -15,11 +15,18 @@ import {
 	setDoc,
 	getDoc,
 	type DocumentReference,
-} from 'firebase/firestore'
-import { getApp, getApps, initializeApp } from 'firebase/app'
-import React, { useCallback, useEffect, useState } from 'react'
-import { useTheme } from 'next-themes'
-import { useDebounce } from 'use-debounce'
+} from 'firebase/firestore';
+import { getApp, getApps, initializeApp } from 'firebase/app';
+import React, { useCallback, useEffect, useState } from 'react';
+import { useTheme } from 'next-themes';
+import { useDebounce } from 'use-debounce';
+
+const Tldraw = dynamic(
+	() => import('@tldraw/tldraw').then((mod) => mod.Tldraw),
+	{
+		ssr: false,
+	}
+);
 
 const firebaseConfig = {
 	apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -28,106 +35,107 @@ const firebaseConfig = {
 	storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
 	messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
 	appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-}
+};
 
-const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig)
-const firestore = getFirestore(app)
+const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+const firestore = getFirestore(app);
 
 function InnerWhiteboard({
 	whiteboardId,
 	user,
 }: {
-	whiteboardId: string
-	user: User | null
+	whiteboardId: string;
+	user: User | null;
 }) {
-	const editor = useEditor()
-	const { theme } = useTheme()
+	const editor = useEditor();
+	const { theme } = useTheme();
 
 	const [saveSnapshotToFirestore] = useDebounce((snapshot: TLSnapshot) => {
-		const docRef = doc(firestore, 'whiteboards', whiteboardId)
+		const docRef = doc(firestore, 'whiteboards', whiteboardId);
 		setDoc(docRef, {
 			snapshot,
-			sourceId: editor.user.getId(), 
-		})
-	}, 500)
+			sourceId: editor.user.getId(),
+		});
+	}, 500);
 
 	useEffect(() => {
-		if (!user || !editor) return
+		if (!user || !editor) return;
 
 		editor.user.updateUserPreferences({
 			id: user.uid,
 			name: user.displayName ?? 'Anonymous',
 			isDarkMode: theme === 'dark',
-		})
+		});
 
-		let stillAlive = true
+		let stillAlive = true;
 
 		async function loadInitialData() {
-			const docRef = doc(firestore, 'whiteboards', whiteboardId)
-			const docSnap = await getDoc(docRef)
+			const docRef = doc(firestore, 'whiteboards', whiteboardId);
+			const docSnap = await getDoc(docRef);
 			if (stillAlive && docSnap.exists()) {
-				const data = docSnap.data()
+				const data = docSnap.data();
 				if (data?.snapshot) {
 					try {
-						editor.store.loadSnapshot(data.snapshot)
+						editor.store.loadSnapshot(data.snapshot);
 					} catch (e) {
-						console.error('Error loading snapshot:', e)
+						console.error('Error loading snapshot:', e);
 					}
 				}
 			}
 		}
 
-		loadInitialData()
+		loadInitialData();
 
 		const unsubscribe = onSnapshot(
 			doc(firestore, 'whiteboards', whiteboardId),
 			(snapshot) => {
-				if (!stillAlive) return
-				const data = snapshot.data()
+				if (!stillAlive) return;
+				const data = snapshot.data();
 
 				if (data?.snapshot && data.sourceId !== editor.user.getId()) {
 					try {
-						editor.store.loadSnapshot(data.snapshot)
+						editor.store.loadSnapshot(data.snapshot);
 					} catch (e) {
-						console.error('Error loading remote snapshot:', e)
+						console.error('Error loading remote snapshot:', e);
 					}
 				}
 			}
-		)
+		);
 
 		const cleanupStoreListener = editor.store.listen(
 			(event) => {
 				if (event.source === 'user') {
-					const snapshot = editor.store.getSnapshot()
-					saveSnapshotToFirestore(snapshot)
+					const snapshot = editor.store.getSnapshot();
+					saveSnapshotToFirestore(snapshot);
 				}
 			},
 			{ source: 'user', scope: 'document' }
-		)
+		);
 
 		return () => {
-			stillAlive = false
-			unsubscribe()
-			cleanupStoreListener()
-		}
-	}, [editor, user, whiteboardId, theme, saveSnapshotToFirestore])
+			stillAlive = false;
+			unsubscribe();
+			cleanupStoreListener();
+		};
+	}, [editor, user, whiteboardId, theme, saveSnapshotToFirestore]);
 
-	return null
+	return null;
 }
 
 export function Whiteboard({
 	whiteboardId,
+	userRole,
 }: {
-	whiteboardId: string
-	userRole: 'instructor' | 'student' | 'admin' | 'varsity-student'
+	whiteboardId: string;
+	userRole: 'instructor' | 'student' | 'admin' | 'varsity-student';
 }) {
-	const [user, setUser] = useState<User | null>(null)
+	const [user, setUser] = useState<User | null>(null);
 
 	useEffect(() => {
-		const auth = getAuth(app)
-		const unsubscribe = onAuthStateChanged(auth, setUser)
-		return () => unsubscribe()
-	}, [])
+		const auth = getAuth(app);
+		const unsubscribe = onAuthStateChanged(auth, setUser);
+		return () => unsubscribe();
+	}, []);
 
 	return (
 		<div style={{ position: 'fixed', inset: 0 }}>
@@ -135,5 +143,5 @@ export function Whiteboard({
 				<InnerWhiteboard user={user} whiteboardId={whiteboardId} />
 			</Tldraw>
 		</div>
-	)
+	);
 }
