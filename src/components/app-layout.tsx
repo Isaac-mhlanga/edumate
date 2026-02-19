@@ -224,9 +224,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const currentTab = searchParams.get('tab');
   const isCurrentPage = (item: MenuItem) => {
     if (item.tab) {
-        return pathname.startsWith(item.basePath) && (currentTab === item.tab || (!currentTab && item.tab === 'overview'))
+        return pathname === item.basePath && (currentTab === item.tab || (!currentTab && item.tab === 'overview'));
     }
-    return pathname === item.basePath || pathname.startsWith(item.basePath + '/');
+    return pathname.startsWith(item.basePath);
   }
   const isSettingsPage = pathname === '/settings';
 
