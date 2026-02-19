@@ -116,7 +116,10 @@ function TutorsDashboardPage() {
                         setLocationStatus("Could not determine city. Showing all tutors.");
                     }
                 },
-                () => setLocationStatus("Location access denied. Showing all tutors.")
+                (error) => {
+                    console.error("Error getting location:", error.message);
+                    setLocationStatus("Location access denied. Showing all tutors.");
+                }
             );
         } else {
              setLocationStatus("Geolocation is not supported by your browser.");

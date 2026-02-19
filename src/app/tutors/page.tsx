@@ -106,7 +106,7 @@ export default function TutorsPage() {
                     }
                 },
                 (error) => {
-                    console.error("Error getting location:", error);
+                    console.error("Error getting location:", error.message);
                     setLocationStatus("Location access denied. Showing all tutors.");
                 }
             );
