@@ -8,7 +8,7 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { useRouter } from 'next/navigation';
-import { X, Minimize2, Maximize2, Mic, MicOff, Circle as RecordIcon, Square as StopIcon } from 'lucide-react';
+import { X, Minimize2, Maximize2, Mic, MicOff, Circle as RecordIcon, Square as StopIcon, Brush } from 'lucide-react';
 import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
@@ -56,9 +56,6 @@ function InnerWhiteboard({
 		editor.user.updateUserPreferences({
 			name: user.displayName ?? 'Anonymous',
 		});
-
-        // This makes the currently selected tool "sticky"
-        editor.updateInstanceState({ isToolLocked: true });
 
 		let stillAlive = true;
 
@@ -127,11 +124,11 @@ export function Whiteboard({
 	const [user, setUser] = useState<User | null>(null);
     const router = useRouter();
     const [isMinimized, setIsMinimized] = useState(false);
-    const { resolvedTheme } = useTheme();
-
+    
     // New state for audio and recording
     const [isMuted, setIsMuted] = useState(true);
     const [isRecording, setIsRecording] = useState(false);
+    const [isUiVisible, setIsUiVisible] = useState(true);
 
 	useEffect(() => {
 		const auth = getAuth(app);
@@ -153,15 +150,21 @@ export function Whiteboard({
 	return (
 		<div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm p-4 flex items-center justify-center">
             <div className='relative w-full h-full rounded-xl overflow-hidden shadow-2xl border'>
-                <div className="absolute top-4 right-4 z-[1000] flex items-center gap-2">
-                    {/* Add new buttons for audio and recording */}
+                <Tldraw 
+                    persistenceKey={whiteboardId}
+                    hideUi={!isUiVisible}
+                >
+                    <InnerWhiteboard user={user} whiteboardId={whiteboardId} />
+                </Tldraw>
+                
+                <div className="absolute bottom-20 right-4 z-[1000] flex flex-col items-center gap-2">
                     {userRole === 'instructor' && (
                         <>
                              <Button
                                 variant="outline"
                                 size="icon"
                                 onClick={() => setIsMuted(prev => !prev)}
-                                className="bg-background/80 hover:bg-background"
+                                className="bg-background/80 hover:bg-background rounded-full h-12 w-12"
                             >
                                 {isMuted ? <MicOff className="h-5 w-5" /> : <Mic className="h-5 w-5 text-primary" />}
                                 <span className="sr-only">{isMuted ? 'Unmute' : 'Mute'}</span>
@@ -170,7 +173,7 @@ export function Whiteboard({
                                 variant="outline"
                                 size="icon"
                                 onClick={() => setIsRecording(prev => !prev)}
-                                className={cn("bg-background/80 hover:bg-background", isRecording && "text-destructive border-destructive/50 ring-2 ring-destructive/50")}
+                                className={cn("bg-background/80 hover:bg-background rounded-full h-12 w-12", isRecording && "text-destructive border-destructive/50 ring-2 ring-destructive/50")}
                             >
                                 {isRecording ? <StopIcon className="h-5 w-5" /> : <RecordIcon className="h-5 w-5" />}
                                 <span className="sr-only">{isRecording ? 'Stop Recording' : 'Start Recording'}</span>
@@ -181,8 +184,17 @@ export function Whiteboard({
                     <Button
                         variant="outline"
                         size="icon"
+                        onClick={() => setIsUiVisible(prev => !prev)}
+                        className="bg-background/80 hover:bg-background rounded-full h-12 w-12"
+                    >
+                        <Brush className="h-5 w-5" />
+                        <span className="sr-only">Toggle Tools</span>
+                    </Button>
+                    <Button
+                        variant="outline"
+                        size="icon"
                         onClick={() => setIsMinimized(true)}
-                        className="bg-background/80 hover:bg-background"
+                        className="bg-background/80 hover:bg-background rounded-full h-12 w-12"
                     >
                         <Minimize2 className="h-5 w-5" />
                         <span className="sr-only">Minimize Whiteboard</span>
@@ -191,17 +203,12 @@ export function Whiteboard({
                         variant="destructive"
                         size="icon"
                         onClick={() => router.back()}
+                        className="rounded-full h-12 w-12"
                     >
                         <X className="h-5 w-5" />
                         <span className="sr-only">Exit Whiteboard</span>
                     </Button>
                 </div>
-                <Tldraw 
-                    persistenceKey={whiteboardId}
-                    forceDarkMode={resolvedTheme === 'dark'}
-                >
-                    <InnerWhiteboard user={user} whiteboardId={whiteboardId} />
-                </Tldraw>
             </div>
 		</div>
 	);
