@@ -13,7 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ListFilter, Clapperboard, Clock, UserCog, ChevronLeft, ChevronRight, Star } from 'lucide-react';
+import { Search, ListFilter, Clapperboard, Clock, ChevronLeft, ChevronRight, Star } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { cn } from '@/lib/utils';
@@ -201,27 +201,27 @@ export default function CoursesPage() {
         <div className="flex flex-col min-h-screen bg-background">
             <PublicHeader />
             <main className="flex-1">
-                <section className="py-24 bg-muted animate-fade-in-up">
+                <section className="py-24 bg-muted/50 animate-fade-in-up">
                     <div className="max-w-7xl mx-auto px-6">
-                        <div className="text-center mb-8">
-                            <h1 className="text-4xl md:text-5xl font-bold">Course Catalog</h1>
-                            <p className="text-lg text-muted-foreground mt-2">Find the perfect course to excel in your studies.</p>
+                        <div className="text-center mb-12">
+                            <h1 className="text-4xl md:text-5xl font-headline font-bold">Course Catalog</h1>
+                            <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">Find the perfect course to excel in your studies, from Grade 10 to 12.</p>
                         </div>
-                        <Card className="mb-8">
-                            <CardHeader>
+                        <Card className="mb-12 shadow-lg bg-card/70 backdrop-blur-lg">
+                            <CardContent className="p-4">
                                 <div className="flex flex-col md:flex-row items-center justify-between gap-4">
                                     <div className="relative flex-1 w-full">
                                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                                         <Input
-                                            placeholder="Search courses..."
-                                            className="pl-10"
+                                            placeholder="Search for courses like 'Calculus' or 'Physics'..."
+                                            className="pl-10 h-11"
                                             value={filters.search}
                                             onChange={(e) => handleFilterChange('search', e.target.value)}
                                         />
                                     </div>
                                     <div className="flex items-center gap-2 w-full md:w-auto">
                                         <Select value={filters.subject} onValueChange={(value) => handleFilterChange('subject', value)}>
-                                            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                                            <SelectTrigger className="w-full h-11"><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="All">All Subjects</SelectItem>
                                                 <SelectItem value="Mathematics">Mathematics</SelectItem>
@@ -230,7 +230,7 @@ export default function CoursesPage() {
                                             </SelectContent>
                                         </Select>
                                         <Select value={filters.grade} onValueChange={(value) => handleFilterChange('grade', value)}>
-                                            <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
+                                            <SelectTrigger className="w-full h-11"><SelectValue /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="All">All Grades</SelectItem>
                                                 <SelectItem value="10">Grade 10</SelectItem>
@@ -240,20 +240,20 @@ export default function CoursesPage() {
                                         </Select>
                                     </div>
                                 </div>
-                            </CardHeader>
+                            </CardContent>
                         </Card>
 
                         {loadingCourses ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {Array.from({ length: 6 }).map((_, i) => (
-                                    <Card key={i}><CardHeader><Skeleton className="h-40 w-full" /></CardHeader><CardContent className="space-y-2 pt-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /></CardContent><CardFooter><Skeleton className="h-10 w-full" /></CardFooter></Card>
+                                    <Card key={i}><CardHeader><Skeleton className="h-56 w-full" /></CardHeader><CardContent className="space-y-2 pt-4"><Skeleton className="h-5 w-3/4" /><Skeleton className="h-4 w-1/2" /></CardContent><CardFooter><Skeleton className="h-10 w-full" /></CardFooter></Card>
                                 ))}
                             </div>
                         ) : paginatedCourses.length > 0 ? (
                              <>
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                     {paginatedCourses.map((course) => (
-                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/20 transition-all duration-300 hover:-translate-y-1">
+                                        <Card key={course.id} className="group overflow-hidden flex flex-col h-full bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-1">
                                             <Link href={`/courses/${course.id}`} className="block">
                                                 <div className="relative h-56 overflow-hidden">
                                                     <Image
@@ -263,17 +263,19 @@ export default function CoursesPage() {
                                                         className="object-cover transition-transform duration-300 group-hover:scale-105"
                                                         data-ai-hint="online course"
                                                     />
+                                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                                                    <Badge variant="secondary" className="absolute top-3 left-3">{course.subject}</Badge>
                                                 </div>
                                             </Link>
                                             <CardHeader>
-                                                <div className="flex justify-between items-start">
-                                                    <Badge variant="secondary">{course.subject}</Badge>
-                                                    <div className="flex items-center gap-1 text-sm text-amber-500">
+                                                <div className="flex justify-between items-center text-xs text-muted-foreground pt-1">
+                                                    <span className="font-semibold">By {course.instructor}</span>
+                                                     <div className="flex items-center gap-1 text-sm text-amber-500">
                                                         <Star className="w-4 h-4 fill-amber-400" />
                                                         <span className="font-bold">{(course.rating || 0).toFixed(1)}</span>
                                                     </div>
                                                 </div>
-                                                <CardTitle className="text-xl pt-2">{course.title}</CardTitle>
+                                                <CardTitle className="text-xl pt-1 line-clamp-2">{course.title}</CardTitle>
                                             </CardHeader>
                                             <CardContent className="flex-grow">
                                                 <p className="text-sm text-muted-foreground line-clamp-2">{course.description}</p>
