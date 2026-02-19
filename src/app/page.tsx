@@ -282,26 +282,27 @@ export default function Home() {
                         <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
                             <Gift className="h-8 w-8" />
                         </div>
-                        <CardTitle className="text-3xl font-headline">Refer &amp; Earn</CardTitle>
+                        <CardTitle className="text-3xl font-headline">Refer a Friend, Earn Rewards</CardTitle>
+                        <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                           Love Edumate Pro? Share your unique referral link and earn <span className="font-bold text-primary">R20</span> for every new user who signs up.
+                        </CardDescription>
                     </CardHeader>
                     <CardContent className="relative z-10">
-                        <p className="text-lg text-muted-foreground mt-4 max-w-2xl mx-auto">
-                            Love Edumate Pro? Share it with your friends and earn <span className="font-bold text-primary">R20</span> for every successful referral! It's a win-win.
-                        </p>
                          <div className="mt-8">
                              <Button size="lg" asChild>
-                                <Link href="/register">
-                                    Start Earning Now <ArrowRight className="ml-2" />
+                                <Link href="/dashboard/referrals">
+                                    Get Your Referral Link <ArrowRight className="ml-2" />
                                 </Link>
                             </Button>
                         </div>
                     </CardContent>
-                     <CardFooter className="relative z-10 flex flex-col gap-4">
-                         <h4 className="font-semibold text-base text-foreground">Share on Social Media</h4>
+                     <CardFooter className="relative z-10 flex flex-col gap-4 p-6">
+                         <Separator className="my-2"/>
+                         <h4 className="font-semibold text-base text-muted-foreground">Share on Social Media</h4>
                         <div className="flex justify-center space-x-4">
-                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
-                            <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
-                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-full border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                            <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
+                            <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                            <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
                         </div>
                     </CardFooter>
                 </Card>
@@ -392,7 +393,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="events" className="py-24 bg-muted relative overflow-hidden">
+        <section id="events" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">Upcoming Events</h2>
@@ -432,6 +433,13 @@ export default function Home() {
                         <p>No upcoming events scheduled at the moment. Check back soon!</p>
                     </div>
                 )}
+                 <div className="text-center mt-12">
+                    <Button size="lg" asChild>
+                        <Link href="/calendar">
+                            View Full Calendar
+                        </Link>
+                    </Button>
+                </div>
             </div>
         </section>
         
@@ -460,9 +468,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="testimonials" className="py-24 bg-muted relative overflow-hidden">
-            <div className="absolute top-0 left-0 -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-primary/10 rounded-full blur-3xl animate-blob"></div>
-            <div className="absolute bottom-0 right-0 translate-x-1/2 translate-y-1/2 w-96 h-96 bg-secondary/10 rounded-full blur-3xl animate-blob-2"></div>
+        <section id="testimonials" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <h2 className="text-3xl md:text-4xl font-headline font-bold">What Our Students Say</h2>
