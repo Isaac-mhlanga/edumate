@@ -83,9 +83,9 @@ type CalendarEvent = {
 const testimonials = [
   {
     quote: "Isaac Mhlanga, a final-year student at the University of Johannesburg, is renowned for his talent and motivation. He passionately assists fellow students across diverse fields such as Information Technology, mathematics, and theory-based studies, showcasing his dedication to learning and academic excellence.",
-    name: "Mukhetwa Mhlanga",
+    name: "Mukhetwa",
     role: "Student | University of Johannesburg",
-    avatarFallback: "MM",
+    avatarFallback: "M",
   },
   {
     quote: "Edumate provided exceptional assistance with my assignments. Their expertise, dedication, and genuine support made a significant impact on my understanding of my assignments. I highly recommend Isaac Mhlanga as a mentor who goes above and beyond to ensure student success. Thank you for your invaluable support in my learning journey.",
@@ -403,6 +403,31 @@ export default function Home() {
             </div>
         </section>
         
+        <section id="faq" className="py-24 bg-background">
+            <div className="max-w-4xl mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Have questions? We've got answers. If you can't find what you're looking for, feel free to contact us.</p>
+                </div>
+                <Accordion type="single" collapsible className="w-full space-y-4">
+                    {faqData.map((item, index) => (
+                        <AccordionItem 
+                            key={index} 
+                            value={`item-${index}`} 
+                            className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-px rounded-lg"
+                        >
+                            <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground tracking-subtle">
+                                {item.question}
+                            </AccordionTrigger>
+                            <AccordionContent className="text-base text-muted-foreground px-6">
+                                {item.answer}
+                            </AccordionContent>
+                        </AccordionItem>
+                    ))}
+                </Accordion>
+            </div>
+        </section>
+
         <section id="testimonials" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
@@ -454,31 +479,6 @@ export default function Home() {
                     <CarouselPrevious className="left-[-50px] hidden sm:flex" />
                     <CarouselNext className="right-[-50px] hidden sm:flex" />
                 </Carousel>
-            </div>
-        </section>
-
-        <section id="faq" className="py-24 bg-background">
-            <div className="max-w-4xl mx-auto px-6">
-                <div className="text-center mb-12 animate-fade-in-up">
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold tracking-tight mb-4">Frequently Asked Questions</h2>
-                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">Have questions? We've got answers. If you can't find what you're looking for, feel free to contact us.</p>
-                </div>
-                <Accordion type="single" collapsible className="w-full space-y-4">
-                    {faqData.map((item, index) => (
-                        <AccordionItem 
-                            key={index} 
-                            value={`item-${index}`} 
-                            className="border-none bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-xl hover:shadow-primary/10 transition-all duration-300 hover:-translate-y-px rounded-lg"
-                        >
-                            <AccordionTrigger className="text-base font-semibold text-left hover:no-underline p-6 text-foreground tracking-subtle">
-                                {item.question}
-                            </AccordionTrigger>
-                            <AccordionContent className="text-base text-muted-foreground px-6">
-                                {item.answer}
-                            </AccordionContent>
-                        </AccordionItem>
-                    ))}
-                </Accordion>
             </div>
         </section>
       </main>
