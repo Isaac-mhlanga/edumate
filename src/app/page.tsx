@@ -1,4 +1,3 @@
-
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -83,7 +82,7 @@ type CalendarEvent = {
 
 const testimonials = [
   {
-    quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate was a lifesaver. The tutors didn't just give me answers. They walked me through the problems and helped me actually understand the material.",
+    quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate was a lifesaver. The tutors didn't just give me answers they walked me through the problems and helped me actually understand the material.",
     name: "Mukhetwa",
     role: "MSc Data Science Student | University of Johannesburg",
   },
@@ -274,35 +273,41 @@ export default function Home() {
         </section>
 
         <section id="refer-earn" className="py-24 bg-muted">
-            <div className="max-w-4xl mx-auto px-6">
-                <Card className="text-center bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 overflow-hidden">
-                     <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-                     <CardHeader className="relative z-10">
-                        <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
-                            <Gift className="h-8 w-8" />
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-12">
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold">Refer & Earn</h2>
+                    <p className="text-lg text-muted-foreground mt-2 max-w-2xl mx-auto">
+                        Love using Edumate? Share the love! For every friend who signs up using your unique referral link, we'll give you R20 as a thank you.
+                    </p>
+                </div>
+                <div className="max-w-4xl mx-auto">
+                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 overflow-hidden">
+                        <div className="md:grid md:grid-cols-2 items-center">
+                            <div className="p-8">
+                                <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
+                                    <Gift className="h-8 w-8" />
+                                </div>
+                                <h3 className="text-2xl font-headline font-bold">Get R20 for Every Friend</h3>
+                                <p className="text-muted-foreground mt-2">
+                                   It's that simple! Share your unique link and start earning rewards today.
+                                </p>
+                                 <Button size="lg" asChild className="mt-6">
+                                    <Link href="/dashboard/referrals">
+                                        Get Your Referral Link <ArrowRight className="ml-2" />
+                                    </Link>
+                                </Button>
+                            </div>
+                            <div className="bg-muted/50 p-8 text-center">
+                                <h4 className="font-semibold text-base text-foreground mb-4">Share on Social Media</h4>
+                                <div className="flex justify-center space-x-4">
+                                    <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
+                                    <a href="https://www.youtube.com/@Edumate" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                                    <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                                </div>
+                            </div>
                         </div>
-                        <CardTitle className="text-3xl font-headline">Refer a Friend, Earn R20</CardTitle>
-                        <CardDescription className="text-lg text-muted-foreground max-w-2xl mx-auto">
-                           Love using Edumate? Share the love! For every friend who signs up using your unique referral link, we'll give you R20 as a thank you. It's that simple!
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent className="relative z-10">
-                        <Button size="lg" asChild>
-                            <Link href="/dashboard/referrals">
-                                Get Your Referral Link <ArrowRight className="ml-2" />
-                            </Link>
-                        </Button>
-                    </CardContent>
-                     <CardFooter className="relative z-10 flex flex-col gap-4 p-6">
-                         <Separator className="my-2"/>
-                         <h4 className="font-semibold text-base text-muted-foreground">Share on Social Media</h4>
-                        <div className="flex justify-center space-x-4">
-                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
-                            <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
-                            <a href="#" className="flex h-10 w-10 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
-                        </div>
-                    </CardFooter>
-                </Card>
+                    </Card>
+                </div>
             </div>
         </section>
 
