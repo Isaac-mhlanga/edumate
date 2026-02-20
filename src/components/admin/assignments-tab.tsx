@@ -96,7 +96,7 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">{assignment.studentName}</TableCell>
                             <TableCell className="hidden md:table-cell">{assignment.instructor}</TableCell>
-                            <TableCell className="font-semibold">{assignment.price ? `R ${assignment.price.toFixed(2)}` : 'N/A'}</TableCell>
+                            <TableCell className="font-semibold">{assignment.price !== null ? (assignment.price > 0 ? `R ${assignment.price.toFixed(2)}` : 'Free') : 'N/A'}</TableCell>
                             <TableCell className="hidden lg:table-cell">
                                 <Badge
                                     variant={"outline"}
@@ -157,3 +157,4 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
     
 
     
+
