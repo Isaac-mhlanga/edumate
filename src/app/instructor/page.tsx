@@ -811,52 +811,6 @@ function InstructorPage() {
 
   return (
     <div className="space-y-8">
-      <style jsx global>{`
-        .fc {
-          font-family: var(--font-body), sans-serif;
-          color: hsl(var(--foreground));
-        }
-        .fc .fc-toolbar-title {
-          font-size: 1.25rem;
-          font-weight: 600;
-          color: hsl(var(--foreground));
-        }
-        .fc .fc-button {
-          background-color: hsl(var(--card)) !important;
-          border-color: hsl(var(--border)) !important;
-          color: hsl(var(--card-foreground)) !important;
-          box-shadow: none !important;
-          text-transform: capitalize;
-        }
-          .fc .fc-button:hover {
-          background-color: hsl(var(--muted)) !important;
-          }
-        .fc .fc-button-primary:not(:disabled).fc-button-active, 
-        .fc .fc-button-primary:not(:disabled):active {
-          background-color: hsl(var(--primary)) !important;
-          border-color: hsl(var(--primary)) !important;
-          color: hsl(var(--primary-foreground)) !important;
-        }
-        .fc-daygrid-day.fc-day-today {
-          background-color: hsla(var(--primary), 0.05) !important;
-        }
-        .fc-event {
-          border-radius: 0rem;
-          border: 0;
-          padding: 4px 6px;
-          cursor: pointer;
-        }
-        .fc-theme-standard .fc-list-day-cushion, .fc-theme-standard th {
-          background-color: hsl(var(--card));
-        }
-        .fc .fc-list-event:hover td {
-          background-color: hsl(var(--muted)) !important;
-        }
-        .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
-            color: hsl(var(--foreground)) !important;
-        }
-      `}</style>
-
       {currentTab === 'overview' && (
         <InstructorOverviewTab 
           user={user}

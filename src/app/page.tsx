@@ -299,7 +299,7 @@ export default function Home() {
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
               {services.map((service, index) => (
-                <Card key={index} className="text-center transition-all duration-300 bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 hover:-translate-y-2">
+                <Card key={index} className="text-center animate-fade-in-up transition-all duration-300 bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/20 hover:-translate-y-2">
                   <CardHeader className="items-center">
                     <div className="bg-gradient-to-br from-primary/10 to-primary/20 text-primary rounded-xl p-4 border border-primary/20">
                       <service.icon className="h-8 w-8" />
@@ -326,7 +326,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                     {subscriptionPlans.map((plan, index) => (
-                        <Card key={plan.id} className={cn("flex flex-col animate-fade-in-up transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-2", plan.name === 'Pro' ? 'border-2 border-primary shadow-card-glow' : 'bg-card/50 backdrop-blur-lg border-border/20 shadow-lg')} style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={plan.id} className={cn("flex flex-col animate-fade-in-up transition-all duration-300 hover:shadow-primary/20 hover:-translate-y-2", plan.name === 'Pro' ? 'border-2 border-primary shadow-card-glow' : 'bg-card/50 backdrop-blur-lg border-border/20 shadow-lg')} style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex justify-between items-center">
                                     <CardTitle className="text-2xl">{plan.name}</CardTitle>

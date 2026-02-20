@@ -326,7 +326,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <header className="sticky top-0 z-40 flex h-16 items-center justify-between border-b bg-card px-6">
             <SidebarTrigger />
         </header>
-        <main className={cn("flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto", isMobile && "pb-20")}>
+        <main className={cn("dashboard-layout flex-1 p-4 md:p-6 lg:p-8 overflow-y-auto", isMobile && "pb-20")}>
             {children}
         </main>
         {isMobile && menuItems.length > 0 && <BottomNavbar menuItems={menuItems} />}

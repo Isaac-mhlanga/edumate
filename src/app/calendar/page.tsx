@@ -103,55 +103,6 @@ export default function CalendarPage() {
 
     return (
         <>
-            <style jsx global>{`
-                .fc {
-                    font-family: var(--font-body), sans-serif;
-                    color: hsl(var(--foreground));
-                }
-                .fc .fc-toolbar-title {
-                    font-size: 1.5rem;
-                    font-weight: 500;
-                    color: hsl(var(--foreground));
-                }
-                .fc .fc-button {
-                    background-color: hsl(var(--card)) !important;
-                    border-color: hsl(var(--border)) !important;
-                    color: hsl(var(--card-foreground)) !important;
-                    box-shadow: none !important;
-                    text-transform: capitalize;
-                }
-                 .fc .fc-button:hover {
-                    background-color: hsl(var(--muted)) !important;
-                 }
-                .fc .fc-button-primary:not(:disabled).fc-button-active, 
-                .fc .fc-button-primary:not(:disabled):active {
-                    background-color: hsl(var(--primary)) !important;
-                    border-color: hsl(var(--primary)) !important;
-                    color: hsl(var(--primary-foreground)) !important;
-                }
-                .fc-daygrid-day.fc-day-today {
-                    background-color: hsla(var(--primary), 0.05) !important;
-                }
-                .fc-event {
-                    border-radius: 4px;
-                    border: 0;
-                    padding: 4px 6px;
-                    cursor: pointer;
-                }
-                .fc-theme-standard .fc-list-day-cushion {
-                    background-color: hsl(var(--card));
-                }
-                .fc .fc-list-event:hover td {
-                    background-color: hsl(var(--muted)) !important;
-                }
-                 .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
-                    color: hsl(var(--foreground)) !important;
-                }
-                .fc-theme-standard th {
-                    background: hsl(var(--card));
-                }
-            `}</style>
-
             <div className="space-y-6">
                 <Card className="shadow-lg">
                     <CardHeader className="flex flex-col sm:flex-row items-center justify-between gap-4">
