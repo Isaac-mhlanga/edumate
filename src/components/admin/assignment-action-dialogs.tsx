@@ -8,88 +8,103 @@ import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
-import { Download, FileUp, MessageSquare } from "lucide-react";
+import { Download, Save } from "lucide-react";
 import { type Assignment } from "@/app/admin/page";
+import { useToast } from "@/hooks/use-toast";
 
 interface AssignmentReviewDialogProps {
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
     selectedAssignment: Assignment | null;
-    onFeedbackSubmit: () => void;
+    onSave: (assignmentId: string, newPrice: number | null) => void;
 }
 
-export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, onFeedbackSubmit }: AssignmentReviewDialogProps) {
+export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, onSave }: AssignmentReviewDialogProps) {
+    const { toast } = useToast();
+    const [price, setPrice] = React.useState<number | string>('');
+
+    React.useEffect(() => {
+        if (selectedAssignment) {
+            setPrice(selectedAssignment.price ?? '');
+        } else {
+            setPrice('');
+        }
+    }, [selectedAssignment]);
+
+    const handleSaveChanges = () => {
+        if (!selectedAssignment) return;
+        if (price === '' || isNaN(Number(price)) || Number(price) < 0) {
+            toast({
+                variant: 'destructive',
+                title: 'Invalid Price',
+                description: 'Please enter a valid non-negative number for the price, or 0 for free.'
+            });
+            return;
+        }
+        const newPrice = Number(price);
+        onSave(selectedAssignment.id, newPrice);
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={setIsOpen}>
-            <DialogContent className="sm:max-w-2xl">
+            <DialogContent className="sm:max-w-xl">
                 <DialogHeader>
                     <DialogTitle className="text-xl">Review Assignment</DialogTitle>
                     <DialogDescription>
-                        Review submission for quality, fairness, and provide feedback.
+                        Review submission details and adjust the price if necessary.
                     </DialogDescription>
                 </DialogHeader>
                 {selectedAssignment && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 py-4">
-                        <div className="space-y-4">
-                            <Card>
-                                <CardHeader className="pb-2">
-                                    <CardTitle className="text-lg">Submission Details</CardTitle>
-                                </CardHeader>
-                                <CardContent className="text-sm space-y-2">
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Student:</span>
-                                        <span className="font-medium">{selectedAssignment.studentName}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Instructor:</span>
-                                        <span className="font-medium">{selectedAssignment.instructor}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Course:</span>
-                                        <span className="font-medium">{selectedAssignment.course}</span>
-                                    </div>
-                                    <Separator />
-                                    <div className="flex justify-between text-base">
-                                        <span className="text-muted-foreground">Price:</span>
-                                        <span className="font-semibold">R {selectedAssignment.price?.toFixed(2) ?? 'N/A'}</span>
-                                    </div>
-                                </CardContent>
-                                <CardFooter className="flex gap-2">
-                                    <Button variant="outline" className="w-full" asChild>
-                                        <a href={selectedAssignment.fileUrl} download><Download className="mr-2" /> Original</a>
-                                    </Button>
-                                     <Button variant="secondary" className="w-full" asChild>
-                                        <a href={selectedAssignment.fileUrl} download><Download className="mr-2" /> Solution</a>
-                                    </Button>
-                                </CardFooter>
-                            </Card>
-                        </div>
-                         <div className="space-y-4">
-                            <div className="space-y-2">
-                                <Label>Leave a Comment for Instructor</Label>
-                                <Textarea placeholder="Type your feedback here..." rows={4} />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Upload New Solution (Optional)</Label>
-                                <div className="flex items-center justify-center w-full">
-                                    <label htmlFor="dropzone-file-solution-admin" className="flex flex-col items-center justify-center w-full h-24 border-2 border-dashed rounded-lg cursor-pointer bg-muted/50 hover:bg-muted">
-                                        <div className="flex flex-col items-center justify-center">
-                                            <FileUp className="w-6 h-6 mb-1 text-muted-foreground" />
-                                            <p className="text-xs text-muted-foreground"><span className="font-medium">Click to upload</span></p>
-                                        </div>
-                                        <Input id="dropzone-file-solution-admin" type="file" className="hidden" />
-                                    </label>
+                    <div className="grid grid-cols-1 gap-6 py-4">
+                        <Card>
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base">Submission Details</CardTitle>
+                            </CardHeader>
+                            <CardContent className="text-sm space-y-2">
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Student:</span>
+                                    <span className="font-medium">{selectedAssignment.studentName}</span>
                                 </div>
-                            </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Instructor:</span>
+                                    <span className="font-medium">{selectedAssignment.instructor}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                    <span className="text-muted-foreground">Course:</span>
+                                    <span className="font-medium">{selectedAssignment.course}</span>
+                                </div>
+                                <Separator />
+                                <div className="flex justify-between text-base">
+                                    <span className="text-muted-foreground">Current Price:</span>
+                                    <span className="font-semibold">R {selectedAssignment.price?.toFixed(2) ?? 'N/A'}</span>
+                                </div>
+                            </CardContent>
+                            <CardFooter>
+                                <Button variant="outline" className="w-full" asChild>
+                                    <a href={selectedAssignment.fileUrl} download><Download className="mr-2" /> Download Submission</a>
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                        <div className="space-y-2">
+                            <Label htmlFor="assignment-price">Set/Adjust Price (R)</Label>
+                            <Input
+                                id="assignment-price"
+                                type="number"
+                                placeholder="e.g., 150 or 0 for free"
+                                value={price}
+                                onChange={(e) => setPrice(e.target.value)}
+                            />
+                            <p className="text-xs text-muted-foreground">
+                                Setting the price to 0 will make the solution freely available to the student upon instructor completion.
+                            </p>
                         </div>
                     </div>
                 )}
                 <DialogFooter>
                     <Button variant="outline" onClick={() => setIsOpen(false)}>Close</Button>
-                    <Button onClick={onFeedbackSubmit}>
-                        <MessageSquare className="mr-2"/> Submit Feedback
+                    <Button onClick={handleSaveChanges}>
+                        <Save className="mr-2"/> Save Changes
                     </Button>
                 </DialogFooter>
             </DialogContent>
@@ -124,5 +139,3 @@ export function DeleteAssignmentDialog({ isOpen, setIsOpen, selectedAssignment, 
         </AlertDialog>
     );
 }
-
-    

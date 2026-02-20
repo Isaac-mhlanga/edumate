@@ -379,6 +379,21 @@ function AdminPage() {
             setSelectedAssignment(null);
         }
     };
+
+    const handleUpdateAssignmentPrice = async (assignmentId: string, newPrice: number | null) => {
+        const assignmentRef = doc(firestore, 'assignments', assignmentId);
+        try {
+            await updateDoc(assignmentRef, { price: newPrice });
+            setAssignments(prev => 
+                prev.map(a => a.id === assignmentId ? { ...a, price: newPrice } : a)
+            );
+            toast({ title: "Assignment Price Updated", description: "The price has been successfully updated." });
+            setIsAssignmentReviewDialogOpen(false);
+        } catch (error) {
+            console.error("Error updating assignment price:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update the assignment price.' });
+        }
+    };
     
     const confirmCancelSubscription = () => {
         if (!selectedSubscription) return;
@@ -557,10 +572,7 @@ function AdminPage() {
                 isOpen={isAssignmentReviewDialogOpen}
                 setIsOpen={setIsAssignmentReviewDialogOpen}
                 selectedAssignment={selectedAssignment}
-                onFeedbackSubmit={() => {
-                    toast({ title: "Feedback Sent", description: "Your comments and actions have been logged." });
-                    setIsAssignmentReviewDialogOpen(false);
-                }}
+                onSave={handleUpdateAssignmentPrice}
             />
             <DeleteAssignmentDialog
                 isOpen={isDeleteAssignmentDialogOpen}

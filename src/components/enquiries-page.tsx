@@ -15,6 +15,7 @@ import { Eye, CheckCircle, Clock, FileText, Phone, UserCheck, X } from 'lucide-r
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Avatar, AvatarFallback } from './ui/avatar';
+import { Separator } from './ui/separator';
 
 type Enquiry = {
     id: string;
@@ -78,7 +79,6 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
     const handleAssign = async (enquiry: Enquiry) => {
         if (!user) return;
 
-        // Re-fetch the document to get the latest status before updating
         const firestore = getFirestore();
         const enquiryRef = doc(firestore, 'enquiries', enquiry.id);
         const currentEnquirySnap = await getDoc(enquiryRef);
@@ -89,8 +89,6 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
                 title: 'Already Assigned',
                 description: 'This enquiry has already been taken by another team member.',
             });
-            // No need to close the dialog, just inform the user
-            // Refresh the selected enquiry to show the latest status
             setSelectedEnquiry({ id: currentEnquirySnap.id, ...currentEnquirySnap.data() } as Enquiry);
             return;
         }
@@ -206,46 +204,75 @@ export function EnquiriesPage({ userRole }: EnquiriesPageProps) {
             </Card>
 
             <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                <DialogContent className="sm:max-w-lg">
+                <DialogContent className="sm:max-w-xl">
                     <DialogHeader>
-                        <DialogTitle>Enquiry from {selectedEnquiry?.name}</DialogTitle>
+                        <DialogTitle>Enquiry Details</DialogTitle>
                         <DialogDescription>
-                            Received {selectedEnquiry ? formatDistanceToNow(selectedEnquiry.createdAt.toDate(), { addSuffix: true }) : ''}
+                            Reviewing enquiry from {selectedEnquiry?.name}.
                         </DialogDescription>
                     </DialogHeader>
                     {selectedEnquiry && (
-                        <div className="py-4 space-y-4 text-sm max-h-[60vh] overflow-y-auto pr-2">
-                             <p className="whitespace-pre-wrap bg-muted p-4 rounded-md">{selectedEnquiry.enquiry}</p>
-                             <div className="space-y-1">
-                                <p><span className="font-semibold">Email:</span> <a href={`mailto:${selectedEnquiry.email}`} className="text-primary hover:underline">{selectedEnquiry.email}</a></p>
-                                {selectedEnquiry.phone && <p className="flex items-center"><Phone className="h-4 w-4 mr-2 text-muted-foreground"/> <span className="font-semibold">Phone:</span> {selectedEnquiry.phone}</p>}
+                        <div className="py-4 space-y-6 text-sm max-h-[60vh] overflow-y-auto pr-2">
+                            <div className="flex items-center gap-4">
+                                <Avatar className="h-12 w-12">
+                                    <AvatarFallback>{selectedEnquiry.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                </Avatar>
+                                <div>
+                                    <p className="font-semibold text-base">{selectedEnquiry.name}</p>
+                                    <p className="text-muted-foreground">{selectedEnquiry.email}</p>
+                                    {selectedEnquiry.phone && <p className="text-muted-foreground">{selectedEnquiry.phone}</p>}
+                                </div>
+                                <div className="text-right flex-1">
+                                    <p className="text-xs text-muted-foreground">{formatDistanceToNow(selectedEnquiry.createdAt.toDate(), { addSuffix: true })}</p>
+                                </div>
                             </div>
+
+                            <Separator />
+                            
+                            <div>
+                                <h4 className="font-semibold mb-2">Enquiry Message</h4>
+                                <p className="whitespace-pre-wrap bg-muted p-4 rounded-md text-muted-foreground">{selectedEnquiry.enquiry}</p>
+                            </div>
+
                             {selectedEnquiry.fileUrl && (
-                                <Button asChild variant="outline">
-                                    <a href={selectedEnquiry.fileUrl} target="_blank" rel="noopener noreferrer">
-                                        <FileText className="mr-2 h-4 w-4" /> View Attachment
-                                    </a>
-                                </Button>
+                                <div>
+                                    <h4 className="font-semibold mb-2">Attachment</h4>
+                                    <Button asChild variant="outline" className="w-full justify-start">
+                                        <a href={selectedEnquiry.fileUrl} target="_blank" rel="noopener noreferrer">
+                                            <FileText className="mr-2 h-4 w-4" /> View Attached File
+                                        </a>
+                                    </Button>
+                                </div>
+                            )}
+                             {selectedEnquiry.assigneeName && (
+                                <div>
+                                    <h4 className="font-semibold mb-2">Assigned To</h4>
+                                     <div className="flex items-center gap-2">
+                                        <UserCheck className="h-4 w-4 text-primary"/>
+                                        <p className="text-muted-foreground">This enquiry is being handled by <span className="font-semibold text-foreground">{selectedEnquiry.assigneeName}</span>.</p>
+                                    </div>
+                                </div>
                             )}
                         </div>
                     )}
-                    <DialogFooter className="gap-2">
+                    <DialogFooter className="gap-2 sm:justify-between w-full">
                         <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
-                            <X className="mr-2 h-4 w-4"/>
                             Close
                         </Button>
-                        {selectedEnquiry?.status === 'New' && (
-                            <Button onClick={() => handleAssign(selectedEnquiry!)}>
-                                <UserCheck className="mr-2 h-4 w-4" />
-                                Assign to Me
-                            </Button>
-                        )}
-                        {selectedEnquiry?.status === 'In Progress' && selectedEnquiry.assigneeId === user?.uid && (
-                             <Button onClick={() => handleComplete(selectedEnquiry!)}>
-                                <CheckCircle className="mr-2 h-4 w-4" />
-                                Mark as Complete
-                            </Button>
-                        )}
+                        <div className="flex gap-2">
+                            {selectedEnquiry?.status === 'New' && (
+                                <Button onClick={() => handleAssign(selectedEnquiry!)}>
+                                    <UserCheck className="mr-2 h-4 w-4" />
+                                    Assign to Me
+                                </Button>
+                            )}
+                            {selectedEnquiry?.status === 'In Progress' && selectedEnquiry.assigneeId === user?.uid && (
+                                 <Button onClick={() => handleComplete(selectedEnquiry!)}>
+                                    <CheckCircle className="mr-2 h-4 w-4" />
+                                    Mark as Complete
+                                </Button>
+                            )}
+                        </div>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
