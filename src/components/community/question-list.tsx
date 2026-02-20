@@ -73,7 +73,7 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
   const tags = [question.audience, question.subject, question.grade ? `Grade ${question.grade}` : null, question.module].filter(Boolean) as string[];
 
   return (
-     <button 
+     <div 
       onClick={() => onQuestionSelect?.(question)}
       className={cn(
         "w-full text-left p-4 border-b hover:bg-muted/50 cursor-pointer transition-colors duration-200 space-y-3",
@@ -101,7 +101,7 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
                 {tags.slice(0, 2).map(tag => <Badge key={tag} variant="secondary" className="rounded-full text-xs">{tag}</Badge>)}
             </div>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
-                <button onClick={handleLike} className="flex items-center gap-1.5 hover:text-primary transition-colors">
+                <button onClick={handleLike} className="flex items-center gap-1.5 hover:text-primary transition-colors" disabled={!user}>
                     <ThumbsUp className={cn("h-4 w-4", user && question.likedBy?.includes(user.uid) ? "text-primary" : "")} /> 
                     <span>{question.likeCount || 0}</span>
                 </button>
@@ -111,7 +111,7 @@ function QuestionCard({ question, onQuestionSelect, isSelected }: { question: Qu
                 </div>
             </div>
         </div>
-    </button>
+    </div>
   );
 }
 

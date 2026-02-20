@@ -63,8 +63,6 @@ export function QuestionForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [user, setUser] = React.useState<import('firebase/auth').User | null>(null);
-  const [loading, setLoading] = React.useState(true);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -76,31 +74,12 @@ export function QuestionForm() {
     },
   });
   
-  React.useEffect(() => {
-    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-    const auth = getAuth(app);
-    const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-        setUser(currentUser);
-        setLoading(false);
-    });
-    return () => unsubscribe();
-  }, []);
-
   const audience = form.watch('audience');
 
   const onSubmit = async (data: FormValues) => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const auth = getAuth(app);
     const currentUser = auth.currentUser;
-
-    if (!currentUser) {
-        toast({
-            variant: 'destructive',
-            title: 'Not logged in',
-            description: 'You must be logged in to ask a question.'
-        });
-        return;
-    }
     
     setIsSubmitting(true);
 
@@ -112,16 +91,20 @@ export function QuestionForm() {
       
       const file = data.file?.[0];
       if (file) {
-        const fileRef = ref(storage, `questions/${currentUser.uid}/${Date.now()}-${file.name}`);
+        const fileRef = ref(storage, `questions/${currentUser?.uid || 'anonymous'}/${Date.now()}-${file.name}`);
         await uploadBytes(fileRef, file);
         fileUrl = await getDownloadURL(fileRef);
         fileType = file.type.startsWith('image/') ? 'image' : file.type === 'application/pdf' ? 'pdf' : null;
       }
 
+      const studentId = currentUser ? currentUser.uid : 'anonymous';
+      const studentName = currentUser ? currentUser.displayName : 'Anonymous';
+      const studentAvatar = currentUser ? currentUser.photoURL : null;
+
       await addDoc(collection(firestore, 'questions'), {
-        studentId: currentUser.uid,
-        studentName: currentUser.displayName,
-        studentAvatar: currentUser.photoURL,
+        studentId: studentId,
+        studentName: studentName,
+        studentAvatar: studentAvatar,
         title: data.title,
         content: data.content,
         audience: data.audience,
@@ -149,14 +132,6 @@ export function QuestionForm() {
   };
   
   const fileRef = form.register("file");
-
-  if (loading) {
-    return <Button size="lg" disabled><Loader2 className="mr-2 h-5 w-5 animate-spin"/>Loading...</Button>
-  }
-
-  if (!user) {
-    return <Button size="lg" asChild><Link href="/login">Log in to Ask a Question</Link></Button>
-  }
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>

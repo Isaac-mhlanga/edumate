@@ -274,10 +274,6 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
   };
 
   const handlePostComment = async (content: string, parentId: string | null, file: File | null) => {
-    if (!user) {
-        toast({ variant: 'destructive', title: 'Not Logged In', description: 'You must be logged in to post a comment.' });
-        return;
-    }
     if (!question || (!content.trim() && !file)) return;
     
     setIsSubmitting(true);
@@ -290,7 +286,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
         const commentRef = doc(collection(firestore, 'questions', question.id, 'comments'));
         
         const commentData: any = {
-            studentId: user?.uid,
+            studentId: user?.uid ?? 'anonymous',
             studentName: user?.displayName || 'Anonymous',
             studentAvatar: user?.photoURL ?? null,
             content: content,
@@ -594,18 +590,18 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
                             placeholder="Add your answer..."
                             value={newComment}
                             onChange={(e) => setNewComment(e.target.value)}
-                            disabled={isSubmitting || !user}
+                            disabled={isSubmitting}
                             className="text-sm bg-background"
                         />
                         {newCommentFile && <div className="text-xs text-muted-foreground flex items-center justify-between">{newCommentFile.name} <Button size="icon" variant="ghost" className="h-6 w-6" onClick={() => setNewCommentFile(null)}><X className="h-4 w-4"/></Button></div>}
                         <div className="flex justify-between items-center">
                             <Button type="button" variant="ghost" size="icon" asChild>
-                            <label htmlFor="comment-file" className={cn("cursor-pointer", !user && 'cursor-not-allowed opacity-50')}>
+                            <label htmlFor="comment-file" className="cursor-pointer">
                                 <Paperclip className="h-4 w-4"/>
                             </label>
                             </Button>
-                            <Input id="comment-file" type="file" className="hidden" onChange={e => setNewCommentFile(e.target.files?.[0] || null)} disabled={!user} />
-                            <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile) || !user}>
+                            <Input id="comment-file" type="file" className="hidden" onChange={e => setNewCommentFile(e.target.files?.[0] || null)} />
+                            <Button size="sm" onClick={() => handlePostComment(newComment, null, newCommentFile)} disabled={isSubmitting || (!newComment.trim() && !newCommentFile)}>
                                 {isSubmitting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                                 <Send className="mr-2 h-4 w-4" />
                                 Post Answer

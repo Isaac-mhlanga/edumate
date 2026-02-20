@@ -123,17 +123,73 @@
       background-position: -200% 0;
     }
   }
-  .fc-col-header-cell-cushion, .fc-list-day-text, .fc-list-day-side-text {
-      color: hsl(var(--foreground)) !important;
-  }
-  .fc-theme-standard .fc-list-day-cushion, .fc-col-header-cell {
-      background-color: hsl(var(--card)) !important;
-  }
-  .fc .fc-list-event:hover td {
-      background-color: hsl(var(--muted)) !important;
-  }
   .bg-grid-pattern {
     background-image: linear-gradient(hsl(var(--border)) 1px, transparent 1px), linear-gradient(to right, hsl(var(--border)) 1px, hsl(var(--background)) 1px);
     background-size: 2rem 2rem;
+  }
+
+  /* Custom Calendar Styles */
+  .fc {
+    font-family: var(--font-body), sans-serif;
+    color: hsl(var(--foreground));
+  }
+  .fc .fc-toolbar-title {
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  .fc .fc-button {
+    background-color: hsl(var(--card)) !important;
+    border-color: hsl(var(--border)) !important;
+    color: hsl(var(--card-foreground)) !important;
+    box-shadow: none !important;
+    text-transform: capitalize;
+    transition: all 0.2s ease-in-out;
+  }
+  .fc .fc-button:hover {
+    background-color: hsl(var(--muted)) !important;
+    transform: translateY(-1px);
+  }
+  .fc .fc-button-primary:not(:disabled).fc-button-active,
+  .fc .fc-button-primary:not(:disabled):active {
+    background-color: hsl(var(--primary)) !important;
+    border-color: hsl(var(--primary)) !important;
+    color: hsl(var(--primary-foreground)) !important;
+    transform: translateY(0);
+    box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+  .fc-daygrid-day.fc-day-today {
+    background-color: hsl(var(--primary) / 0.05) !important;
+    border: 1px solid hsl(var(--primary) / 0.2);
+  }
+  .fc .fc-daygrid-day-number {
+    padding: 0.5em;
+  }
+  .fc-event {
+    border-radius: var(--radius);
+    border: 1px solid hsl(var(--border));
+    padding: 4px 6px;
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.2s ease-in-out;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+  .fc-event:hover {
+    transform: scale(1.03);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  .fc-theme-standard .fc-list-day-cushion,
+  .fc-col-header-cell {
+    background-color: hsl(var(--card)) !important;
+  }
+  .fc .fc-list-event:hover td {
+    background-color: hsl(var(--muted)) !important;
+  }
+  .fc-col-header-cell-cushion,
+  .fc-list-day-text,
+  .fc-list-day-side-text {
+    color: hsl(var(--foreground)) !important;
+    font-weight: 500;
+    text-transform: uppercase;
+    font-size: 0.75rem;
   }
 }

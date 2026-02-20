@@ -130,10 +130,10 @@ service cloud.firestore {
     
     // Rules for community questions
     match /questions/{questionId} {
-      // Any signed-in user can read questions
+      // Anyone can read questions
       allow get, list: if true;
-      // Only signed-in users can create questions
-      allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+      // Logged-in users can create for themselves; guests can create 'anonymous' posts.
+      allow create: if (isSignedIn() && isOwner(request.resource.data.studentId)) || (request.auth == null && request.resource.data.studentId == 'anonymous');
       // Users can only update their own question, or update likes, or if they are an admin
       allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy', 'commentCount', 'commentsDisabled']) || isAdmin());
        // Users can only delete their own questions, or if they are an admin
@@ -143,8 +143,8 @@ service cloud.firestore {
       match /comments/{commentId} {
          // Any signed-in user can read comments
         allow get, list: if true;
-        // Users can create comments
-        allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+        // Logged-in users can create for themselves; guests can create 'anonymous' posts.
+        allow create: if (isSignedIn() && isOwner(request.resource.data.studentId)) || (request.auth == null && request.resource.data.studentId == 'anonymous');
         // Only owner or admin can edit content. Any signed-in user can like.
         allow update: if isSignedIn() && (
             (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy'])) ||

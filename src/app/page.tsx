@@ -295,7 +295,7 @@ export default function Home() {
                 </div>
                 <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
                     {subscriptionPlans.map((plan, index) => (
-                        <Card key={plan.id} className={cn("flex flex-col animate-fade-in-up", plan.name === 'Pro' ? 'border-2 border-primary shadow-card-glow' : 'bg-card/50 backdrop-blur-lg border-border/20 shadow-lg')} style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                        <Card key={plan.id} className={cn("flex flex-col animate-fade-in-up transition-all duration-300 hover:shadow-xl hover:shadow-primary/20 hover:-translate-y-2", plan.name === 'Pro' ? 'border-2 border-primary shadow-card-glow' : 'bg-card/50 backdrop-blur-lg border-border/20 shadow-lg')} style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
                             <CardHeader>
                                 <div className="flex justify-between items-center">
                                     <CardTitle className="text-2xl">{plan.name}</CardTitle>
