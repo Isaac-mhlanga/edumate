@@ -76,13 +76,13 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
                 // Update existing event
                 const eventRef = doc(firestore, 'events', manualEvent.id);
                 await updateDoc(eventRef, manualEvent);
-                setEvents(prev => prev.map(e => e.id === manualEvent.id ? manualEvent as CalendarEvent : e));
+                setEvents(prev => prev.map(e => e.id === manualEvent.id ? { ...e, ...manualEvent } : e));
                 toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
             } else {
                 // Create new event
                 const docRef = await addDoc(collection(firestore, 'events'), manualEvent);
                 const newEvent = { ...manualEvent, id: docRef.id } as CalendarEvent;
-                setEvents([...events, newEvent]);
+                setEvents(prev => [...prev, newEvent]);
                 toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
             }
             

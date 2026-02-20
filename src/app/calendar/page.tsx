@@ -40,6 +40,7 @@ type CalendarEvent = {
   color?: string;
   description?: string;
   instructor?: string;
+  instructorId?: string;
   grade?: string;
   subject?: string;
   module?: string;

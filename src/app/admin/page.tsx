@@ -57,7 +57,7 @@ export type PayoutRequest = {
 };
 export type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; deletedByStudent?: boolean; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
-export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
+export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
 export type Transaction = { id: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
 export type RecentActivity = {
     id: string;
