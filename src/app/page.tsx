@@ -1,5 +1,3 @@
-
-
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -12,8 +10,8 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Skeleton } from "@/components/ui/skeleton";
 import { faqData } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
-import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where, limit } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock, User, Gift } from "lucide-react";
+import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where, limit, getDoc, doc } from "firebase/firestore";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock, User, Gift, Sparkles as SparklesIcon } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -23,7 +21,7 @@ import { Separator } from "@/components/ui/separator";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
+import { FaTiktok, FaYoutube, FaFacebook, FaTwitter } from "react-icons/fa";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -82,6 +80,15 @@ type CalendarEvent = {
   platforms?: ('tiktok' | 'youtube' | 'zoom')[];
 };
 
+type Promotion = {
+    title: string;
+    description: string;
+    buttonText: string;
+    buttonLink: string;
+    icon?: string;
+};
+
+
 const testimonials = [
   {
     quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate was a lifesaver. The tutors didn't just give me answers; they walked me through the problems and helped me actually understand the material.",
@@ -103,6 +110,7 @@ export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
+  const [promotion, setPromotion] = useState<Promotion | null>(null);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -143,9 +151,22 @@ export default function Home() {
             console.error("Error fetching upcoming events: ", error);
         }
     };
+
+    const fetchPromotion = async () => {
+        try {
+            const promoRef = doc(firestore, 'promotions', 'homepage-banner');
+            const docSnap = await getDoc(promoRef);
+            if (docSnap.exists()) {
+                setPromotion(docSnap.data() as Promotion);
+            }
+        } catch (error) {
+            console.error("Error fetching promotion:", error);
+        }
+    };
     
     fetchCoursesAndUsers();
     fetchUpcomingEvents();
+    fetchPromotion();
   }, []);
   
   const handleEventClick = (event: CalendarEvent) => {
@@ -279,7 +300,7 @@ export default function Home() {
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Get Rewarded</Badge>
-                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Refer & Earn</h2>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Refer &amp; Earn</h2>
                     <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
                         Love using Edumate? Share the love! For every friend who signs up using your unique referral link, we'll give you R20 as a thank you.
                     </p>
@@ -307,6 +328,7 @@ export default function Home() {
                                     <a href="https://www.tiktok.com/@edumate.pro" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
                                     <a href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
                                     <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                                    <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Twitter"><FaTwitter /></a>
                                 </div>
                             </div>
                         </div>
@@ -315,7 +337,35 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="featured-courses" className="py-24 bg-background">
+        {promotion && (
+            <section id="promotion" className="py-24 bg-background">
+                <div className="max-w-4xl mx-auto px-6">
+                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 overflow-hidden">
+                        <div className="md:grid md:grid-cols-2 items-center">
+                            <div className="p-8">
+                                <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
+                                    {promotion.icon === 'tiktok' ? <FaTiktok className="h-8 w-8" /> : <SparklesIcon className="h-8 w-8" />}
+                                </div>
+                                <h3 className="text-2xl font-headline font-bold">{promotion.title}</h3>
+                                <p className="text-muted-foreground mt-2">
+                                    {promotion.description}
+                                </p>
+                                <Button size="lg" asChild className="mt-6">
+                                    <a href={promotion.buttonLink} target="_blank" rel="noopener noreferrer">
+                                        {promotion.buttonText} <ArrowRight className="ml-2" />
+                                    </a>
+                                </Button>
+                            </div>
+                            <div className="bg-muted/50 p-8 h-full flex items-center justify-center">
+                                <SparklesIcon className="h-24 w-24 text-primary/30" />
+                            </div>
+                        </div>
+                    </Card>
+                </div>
+            </section>
+        )}
+
+        <section id="featured-courses" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Top Picks</Badge>
@@ -400,13 +450,13 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="events" className="py-24 bg-muted">
+        <section id="events" className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Live Sessions</Badge>
                     <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Upcoming Events</h2>
                     <p className="text-lg text-muted-foreground">
-                        Join our free live classes, workshops, and Q&A sessions to boost your knowledge and engage with our learning community.
+                        Join our free live classes, workshops, and Q&amp;A sessions to boost your knowledge and engage with our learning community.
                     </p>
                 </div>
                 {upcomingEvents.length > 0 ? (
@@ -444,7 +494,7 @@ export default function Home() {
             </div>
         </section>
         
-        <section id="faq" className="py-24 bg-background">
+        <section id="faq" className="py-24 bg-muted">
             <div className="max-w-4xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Need Help?</Badge>
@@ -470,7 +520,7 @@ export default function Home() {
             </div>
         </section>
 
-        <section id="testimonials" className="py-24 bg-muted">
+        <section id="testimonials" className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Success Stories</Badge>
@@ -532,5 +582,3 @@ export default function Home() {
     </div>
   );
 }
-
-    

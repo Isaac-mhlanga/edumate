@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -25,6 +24,7 @@ import { SubscriptionActionDialog } from "@/components/admin/subscription-action
 import { format, formatDistanceToNow } from "date-fns";
 import { EnquiriesPage } from "@/components/enquiries-page";
 import { ChangeRoleDialog } from "@/components/admin/change-role-dialog";
+import { AdminPromotionsTab } from "@/components/admin/promotions-tab";
 
 
 const firebaseConfig = {
@@ -82,6 +82,13 @@ export type TutorProfile = {
     qualificationUrl: string;
     approvalStatus: 'Pending' | 'Approved' | 'Rejected';
 };
+export type Promotion = {
+    title: string;
+    description: string;
+    buttonText: string;
+    buttonLink: string;
+    icon: string;
+};
 
 
 function AdminPage() {
@@ -100,6 +107,7 @@ function AdminPage() {
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [events, setEvents] = React.useState<CalendarEvent[]>([]);
     const [tutors, setTutors] = React.useState<TutorProfile[]>([]);
+    const [promotion, setPromotion] = React.useState<Promotion | null>(null);
     
     const [loading, setLoading] = React.useState(true);
     
@@ -193,6 +201,13 @@ function AdminPage() {
                 });
                 setPayoutRequests(fetchedPayouts);
                 
+                // Fetch Promotion
+                const promoRef = doc(firestore, 'promotions', 'homepage-banner');
+                const promoSnap = await getDoc(promoRef);
+                if (promoSnap.exists()) {
+                    setPromotion(promoSnap.data() as Promotion);
+                }
+
             } catch (error) {
                 console.error("Error fetching admin data:", error);
                 toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch platform data.' });
@@ -390,6 +405,18 @@ function AdminPage() {
         setSelectedTutorProfile(tutor);
         setIsTutorProfileDialogOpen(true);
     };
+    
+    const handleSavePromotion = async (data: Promotion) => {
+        const promoRef = doc(firestore, 'promotions', 'homepage-banner');
+        try {
+            await setDoc(promoRef, data, { merge: true });
+            setPromotion(data);
+            toast({ title: 'Promotion Updated', description: 'The homepage banner has been saved.' });
+        } catch (error) {
+            console.error("Error saving promotion:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not save the promotion.' });
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -417,6 +444,12 @@ function AdminPage() {
                     transactions={transactions}
                     subscriptions={subscriptions}
                     recentActivity={recentActivity}
+                />
+            )}
+            {currentTab === 'promotions' && (
+                <AdminPromotionsTab 
+                    promotion={promotion}
+                    onSave={handleSavePromotion}
                 />
             )}
             {currentTab === 'enquiries' && <EnquiriesPage userRole="admin" />}
