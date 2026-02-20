@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -11,6 +10,7 @@ import { getAuth, signInWithEmailAndPassword, sendEmailVerification, signOut, ty
 import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
 import { getFirestore, doc, getDoc } from "firebase/firestore";
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import React from "react";
 import { Mail, KeyRound } from "lucide-react";
@@ -139,54 +139,76 @@ export default function LoginPage() {
     }
     
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <div className="w-full max-w-md">
-                <form onSubmit={handleLogin}>
-                    <Card>
-                        <CardHeader className="text-center">
-                            <div className="mb-4 flex justify-center">
-                                <Link href="/">
-                                    <Icons.logo className="w-auto h-12 text-primary" />
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden">
+            <Image
+                src="https://picsum.photos/seed/loginbg/1920/1080"
+                alt="Background"
+                fill
+                className="object-cover z-0"
+                data-ai-hint="modern campus building"
+            />
+            <div className="absolute inset-0 bg-black/60 z-0" />
+
+            <div className="relative z-10 grid w-full max-w-6xl grid-cols-1 md:grid-cols-2 gap-16 p-8">
+                <div className="text-white flex-col justify-center hidden md:flex animate-fade-in-up">
+                    <Link href="/" className="mb-8">
+                        <Icons.logoWhite className="w-auto h-12" />
+                    </Link>
+                    <h1 className="text-4xl font-bold tracking-tight mb-4">
+                        Welcome to Edumate
+                    </h1>
+                    <p className="text-lg text-white/80">
+                        Your gateway to academic excellence. Log in to access your courses, assignments, and connect with tutors.
+                    </p>
+                </div>
+                
+                <div className="w-full animate-fade-in-up" style={{animationDelay: '0.2s'}}>
+                    <form onSubmit={handleLogin}>
+                        <Card className="bg-card/80 backdrop-blur-lg border-white/20">
+                            <CardHeader className="text-center">
+                                <Link href="/" className="mb-4 flex justify-center md:hidden">
+                                     <Icons.logo className="w-auto h-12" />
                                 </Link>
-                            </div>
-                            <CardTitle className="text-2xl">Welcome Back!</CardTitle>
-                            <CardDescription>Enter your credentials to access your account.</CardDescription>
-                        </CardHeader>
-                        <CardContent className="space-y-4">
-                            <div className="space-y-2">
-                                <Label htmlFor="email">Email</Label>
-                                <div className="relative">
-                                    <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="email" type="email" placeholder="name@example.com" required className="pl-10" />
+                                <CardTitle className="text-2xl">Login</CardTitle>
+                                <CardDescription>Enter your credentials to access your account.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="space-y-4">
+                                <div className="space-y-2">
+                                    <Label htmlFor="email">Email Address</Label>
+                                    <div className="relative">
+                                        <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input id="email" type="email" placeholder="name@example.com" required className="pl-10 bg-background/70" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label htmlFor="password">Password</Label>
-                                <div className="relative">
-                                    <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                    <Input id="password" type="password" required className="pl-10" />
+                                <div className="space-y-2">
+                                    <Label htmlFor="password">Password</Label>
+                                    <div className="relative">
+                                        <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input id="password" type="password" required className="pl-10 bg-background/70" />
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="flex items-center justify-between">
-                                <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
-                                    Forgot password?
-                                </Link>
-                            </div>
-                        </CardContent>
-                        <CardFooter className="flex flex-col gap-4">
-                            <Button type="submit" className="w-full" disabled={isLoading}>
-                                {isLoading ? 'Signing in...' : 'Sign In'}
-                            </Button>
-                            <div className="text-center text-sm text-muted-foreground">
-                                Don't have an account?{' '}
-                                <Link href="/register" className="font-medium text-primary hover:underline">
-                                    Sign Up
-                                </Link>
-                            </div>
-                        </CardFooter>
-                    </Card>
-                </form>
+                                <div className="text-right">
+                                    <Link href="/forgot-password" className="text-sm text-muted-foreground hover:text-primary">
+                                        Forgotten your username or password?
+                                    </Link>
+                                </div>
+                            </CardContent>
+                            <CardFooter className="flex flex-col gap-4">
+                                <Button type="submit" className="w-full" disabled={isLoading}>
+                                    {isLoading ? 'Signing in...' : 'Log in'}
+                                </Button>
+                                <div className="text-center text-sm text-muted-foreground">
+                                    Don't have an account?{' '}
+                                    <Link href="/register" className="font-medium text-primary hover:underline">
+                                        Sign Up
+                                    </Link>
+                                </div>
+                            </CardFooter>
+                        </Card>
+                    </form>
+                </div>
             </div>
         </div>
     );
 }
+    

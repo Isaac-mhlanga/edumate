@@ -16,6 +16,21 @@ export const Icons = {
         <text x="48" y="37" fontFamily="Montserrat, sans-serif" fontSize="9" fill="hsl(var(--primary))" letterSpacing="0.05em" fontWeight="700">LEARN SMARTER</text>
     </svg>
   ),
+  logoWhite: ({ className, ...props }: SVGProps<SVGSVGElement>) => (
+    <svg
+      width="160"
+      height="42"
+      viewBox="0 0 160 42"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+      className={className}
+      {...props}
+    >
+        <path d="M29.6 5.25H12.4C8.3 5.25 5.25 8.3 5.25 12.4V29.6C5.25 33.7 8.3 36.75 12.4 36.75H29.6C33.7 36.75 36.75 33.7 36.75 29.6V25.5H17.25V21.75H36.75V16.5H17.25V12.75H36.75V12.4C36.75 8.3 33.7 5.25 29.6 5.25Z" fill="hsl(var(--primary))"/>
+        <text x="48" y="23" fontFamily="Montserrat, sans-serif" fontSize="20" fontWeight="600" fill="white">Edumate</text>
+        <text x="48" y="37" fontFamily="Montserrat, sans-serif" fontSize="9" fill="hsl(var(--primary))" letterSpacing="0.05em" fontWeight="700">LEARN SMARTER</text>
+    </svg>
+  ),
   tiktok: ({ className, ...props }: SVGProps<SVGSVGElement>) => (
     <svg 
       xmlns="http://www.w3.org/2000/svg" 
@@ -28,3 +43,5 @@ export const Icons = {
     </svg>
   ),
 };
+
+    
