@@ -96,7 +96,7 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
                                 onChange={(e) => setPrice(e.target.value)}
                             />
                             <p className="text-xs text-muted-foreground">
-                                Setting the price to 0 will make the solution freely available to the student upon instructor completion.
+                                Setting a price will move the assignment to 'Awaiting Payment'. Setting it to 0 will mark it as 'Paid'.
                             </p>
                         </div>
                     </div>
@@ -133,6 +133,34 @@ export function DeleteAssignmentDialog({ isOpen, setIsOpen, selectedAssignment, 
                     <AlertDialogCancel>Cancel</AlertDialogCancel>
                     <AlertDialogAction onClick={onConfirm} className={buttonVariants({ variant: "destructive" })}>
                         Delete Assignment
+                    </AlertDialogAction>
+                </AlertDialogFooter>
+            </AlertDialogContent>
+        </AlertDialog>
+    );
+}
+
+interface MarkAsPaidDialogProps {
+    isOpen: boolean;
+    setIsOpen: (open: boolean) => void;
+    selectedAssignment: Assignment | null;
+    onConfirm: () => void;
+}
+
+export function MarkAsPaidDialog({ isOpen, setIsOpen, selectedAssignment, onConfirm }: MarkAsPaidDialogProps) {
+    return (
+        <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
+            <AlertDialogContent>
+                <AlertDialogHeader>
+                    <AlertDialogTitle>Mark Assignment as Paid?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                        This will mark the assignment <strong>"{selectedAssignment?.assignmentTitle}"</strong> as paid and create a transaction record for R{selectedAssignment?.price?.toFixed(2)}. This is for payments made outside the platform (e.g., direct bank transfer). This cannot be undone.
+                    </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                    <AlertDialogAction onClick={onConfirm}>
+                        Confirm Payment
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

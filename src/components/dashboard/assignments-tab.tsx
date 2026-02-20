@@ -144,14 +144,14 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
                                         {assignment.status}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? `R ${assignment.price.toFixed(2)}` : 'N/A'}</TableCell>
+                                <TableCell className="hidden md:table-cell font-semibold">{assignment.price !== null ? (assignment.price > 0 ? `R ${assignment.price.toFixed(2)}` : 'Free') : 'N/A'}</TableCell>
                                 <TableCell className="text-right">
                                     <DropdownMenu>
                                         <DropdownMenuTrigger asChild>
                                             <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
                                         </DropdownMenuTrigger>
                                         <DropdownMenuContent align="end">
-                                            {assignment.status === 'Awaiting Payment' && (
+                                            {assignment.status === 'Awaiting Payment' && assignment.price && assignment.price > 0 && (
                                                 <DropdownMenuItem asChild>
                                                     <Link href={`/payment?type=assignment&id=${assignment.id}&title=${encodeURIComponent(assignment.title)}&price=${assignment.price}`}>
                                                         <CreditCard className="mr-2 h-4 w-4" /> Pay Now
@@ -161,16 +161,16 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
                                             {assignment.status === 'Paid' && assignment.solutionUrl && (
                                                 <DropdownMenuItem asChild>
                                                     <a href={assignment.solutionUrl!} download>
-                                                        <Download className="mr-2 h-4 w-4" /> Download
+                                                        <Download className="mr-2 h-4 w-4" /> Download Solution
                                                     </a>
                                                 </DropdownMenuItem>
                                             )}
                                              <DropdownMenuItem onClick={() => onOpenAssignmentDialog(assignment)}>
-                                                <Edit className="mr-2 h-4 w-4" /> Edit
+                                                <Edit className="mr-2 h-4 w-4" /> Edit Submission
                                             </DropdownMenuItem>
                                             <DropdownMenuSeparator />
                                             <DropdownMenuItem onClick={() => onSoftDelete(assignment.id)} className="text-destructive focus:text-destructive">
-                                                <Trash2 className="mr-2 h-4 w-4" /> Hide
+                                                <Trash2 className="mr-2 h-4 w-4" /> Hide From View
                                             </DropdownMenuItem>
                                         </DropdownMenuContent>
                                     </DropdownMenu>

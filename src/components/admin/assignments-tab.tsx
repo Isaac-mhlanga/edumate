@@ -15,9 +15,10 @@ interface AdminAssignmentsTabProps {
     assignments: Assignment[];
     onOpenAssignmentReview: (assignment: Assignment) => void;
     onDeleteAssignment: (assignment: Assignment) => void;
+    onMarkAsPaid: (assignment: Assignment) => void;
 }
 
-export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDeleteAssignment }: AdminAssignmentsTabProps) {
+export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDeleteAssignment, onMarkAsPaid }: AdminAssignmentsTabProps) {
     const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', instructor: 'All' });
     const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
     const assignmentsPerPage = 7;
@@ -120,11 +121,16 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
                                     </DropdownMenuTrigger>
                                     <DropdownMenuContent align="end">
                                         <DropdownMenuItem onClick={() => onOpenAssignmentReview(assignment)}>
-                                            <Eye className="mr-2 h-4 w-4" /> View Details
+                                            <Eye className="mr-2 h-4 w-4" /> View & Edit Price
                                         </DropdownMenuItem>
+                                        {assignment.status === 'Awaiting Payment' && (
+                                            <DropdownMenuItem onClick={() => onMarkAsPaid(assignment)}>
+                                                <CheckCircle className="mr-2 h-4 w-4" /> Mark as Paid
+                                            </DropdownMenuItem>
+                                        )}
                                         <DropdownMenuSeparator />
                                         <DropdownMenuItem onClick={() => onDeleteAssignment(assignment)} className="text-destructive focus:text-destructive">
-                                            <Trash2 className="mr-2 h-4 w-4" /> Delete
+                                            <Trash2 className="mr-2 h-4 w-4" /> Delete Permanently
                                         </DropdownMenuItem>
                                     </DropdownMenuContent>
                                 </DropdownMenu>

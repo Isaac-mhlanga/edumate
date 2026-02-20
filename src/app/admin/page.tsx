@@ -20,7 +20,7 @@ import { AdminTutorsTab, TutorProfileDialog } from "@/components/admin/tutors-ta
 import { UserActionDialogs, UserDetailsDialog } from "@/components/admin/user-action-dialogs";
 import { CourseActionDialog } from "@/components/admin/course-action-dialog";
 import { PayoutActionDialog, PayoutReceiptDialog, ClearAllPayoutsDialog } from "@/components/admin/payout-dialogs";
-import { AssignmentReviewDialog, DeleteAssignmentDialog } from "@/components/admin/assignment-action-dialogs";
+import { AssignmentReviewDialog, DeleteAssignmentDialog, MarkAsPaidDialog } from "@/components/admin/assignment-action-dialogs";
 import { SubscriptionActionDialog } from "@/components/admin/subscription-action-dialog";
 import { format, formatDistanceToNow } from "date-fns";
 import { EnquiriesPage } from "@/components/enquiries-page";
@@ -55,7 +55,7 @@ export type PayoutRequest = {
         branchCode: string;
     }
 };
-export type Assignment = { id: string; assignmentTitle: string; course: string; studentName: string; instructor: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; deletedByStudent?: boolean; };
+export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; deletedByStudent?: boolean; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
 export type Transaction = { id: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
@@ -130,6 +130,7 @@ function AdminPage() {
     const [isReceiptDialogOpen, setIsReceiptDialogOpen] = React.useState(false);
     const [isAssignmentReviewDialogOpen, setIsAssignmentReviewDialogOpen] = React.useState(false);
     const [isDeleteAssignmentDialogOpen, setIsDeleteAssignmentDialogOpen] = React.useState(false);
+    const [isMarkAsPaidDialogOpen, setIsMarkAsPaidDialogOpen] = React.useState(false);
     const [isCancelSubscriptionDialogOpen, setIsCancelSubscriptionDialogOpen] = React.useState(false);
     const [isTutorProfileDialogOpen, setIsTutorProfileDialogOpen] = React.useState(false);
     const [isClearAllPayoutsDialogOpen, setIsClearAllPayoutsDialogOpen] = React.useState(false);
@@ -383,15 +384,80 @@ function AdminPage() {
     const handleUpdateAssignmentPrice = async (assignmentId: string, newPrice: number | null) => {
         const assignmentRef = doc(firestore, 'assignments', assignmentId);
         try {
-            await updateDoc(assignmentRef, { price: newPrice });
+            const currentAssignment = assignments.find(a => a.id === assignmentId);
+            let statusToUpdate = currentAssignment?.status;
+
+            if (currentAssignment?.status === 'Pending Review' && newPrice !== null) {
+                statusToUpdate = newPrice === 0 ? 'Paid' : 'Awaiting Payment';
+            } else if (newPrice === 0) {
+                statusToUpdate = 'Paid';
+            }
+
+            await updateDoc(assignmentRef, { 
+                price: newPrice,
+                status: statusToUpdate
+            });
+            
             setAssignments(prev => 
-                prev.map(a => a.id === assignmentId ? { ...a, price: newPrice } : a)
+                prev.map(a => a.id === assignmentId ? { ...a, price: newPrice, status: statusToUpdate as any } : a)
             );
-            toast({ title: "Assignment Price Updated", description: "The price has been successfully updated." });
+
+            toast({ title: "Assignment Price Updated", description: "The price and status have been successfully updated." });
             setIsAssignmentReviewDialogOpen(false);
         } catch (error) {
             console.error("Error updating assignment price:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not update the assignment price.' });
+        }
+    };
+
+    const confirmMarkAsPaid = async () => {
+        if (!selectedAssignment) return;
+
+        try {
+            const batch = writeBatch(firestore);
+
+            const assignmentRef = doc(firestore, 'assignments', selectedAssignment.id);
+            batch.update(assignmentRef, { status: 'Paid' });
+
+            const transactionRef = doc(collection(firestore, 'transactions'));
+            const instructorId = selectedAssignment.markerId || null;
+
+            batch.set(transactionRef, {
+                studentId: selectedAssignment.studentId,
+                instructorId: instructorId,
+                itemId: selectedAssignment.id,
+                itemType: 'assignment',
+                itemTitle: selectedAssignment.assignmentTitle,
+                amount: selectedAssignment.price,
+                status: 'Completed',
+                currency: 'ZAR',
+                createdAt: Timestamp.now(),
+                notes: 'Manually marked as paid by admin.'
+            });
+
+            await batch.commit();
+
+            setAssignments(prev => prev.map(a => 
+                a.id === selectedAssignment.id ? { ...a, status: 'Paid' } : a
+            ));
+            
+            const newTransaction: Transaction = {
+                id: transactionRef.id,
+                itemTitle: selectedAssignment.assignmentTitle,
+                itemType: 'assignment',
+                status: 'Completed',
+                amount: selectedAssignment.price || 0,
+                createdAt: Timestamp.now(),
+            };
+            setTransactions(prev => [newTransaction, ...prev]);
+
+            toast({ title: 'Assignment Marked as Paid', description: `A transaction record has been created for ${selectedAssignment.studentName}.` });
+            
+        } catch (error) {
+            console.error("Error marking assignment as paid:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update the assignment status.' });
+        } finally {
+          setIsMarkAsPaidDialogOpen(false);
         }
     };
     
@@ -431,6 +497,40 @@ function AdminPage() {
         } catch (error) {
             console.error("Error saving promotion:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not save the promotion.' });
+        }
+    };
+
+    const handleAddOrUpdateEvent = async () => {
+        if (!manualEvent.title || !manualEvent.start) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
+            return;
+        }
+
+        // Sanitize data for Firestore by removing undefined properties
+        const sanitizedEventData = Object.fromEntries(
+            Object.entries(manualEvent).filter(([, value]) => value !== undefined)
+        );
+        
+        try {
+            if (manualEvent.id) {
+                // Update existing event
+                const eventRef = doc(firestore, 'events', manualEvent.id);
+                await updateDoc(eventRef, sanitizedEventData);
+                setEvents(prev => prev.map(e => e.id === manualEvent.id ? { ...e, ...sanitizedEventData } as CalendarEvent : e));
+                toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
+            } else {
+                // Create new event
+                const docRef = await addDoc(collection(firestore, 'events'), sanitizedEventData);
+                const newEvent = { ...sanitizedEventData, id: docRef.id } as CalendarEvent;
+                setEvents(prev => [...prev, newEvent]);
+                toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
+            }
+            
+            setIsManualDialogOpen(false);
+            setManualEvent({});
+        } catch(error) {
+            console.error("Error saving event:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
         }
     };
 
@@ -494,6 +594,10 @@ function AdminPage() {
                     onDeleteAssignment={(assignment) => {
                         setSelectedAssignment(assignment);
                         setIsDeleteAssignmentDialogOpen(true);
+                    }}
+                    onMarkAsPaid={(assignment) => {
+                        setSelectedAssignment(assignment);
+                        setIsMarkAsPaidDialogOpen(true);
                     }}
                 />
             )}
@@ -579,6 +683,12 @@ function AdminPage() {
                 setIsOpen={setIsDeleteAssignmentDialogOpen}
                 selectedAssignment={selectedAssignment}
                 onConfirm={confirmDeleteAssignment}
+            />
+            <MarkAsPaidDialog
+                isOpen={isMarkAsPaidDialogOpen}
+                setIsOpen={setIsMarkAsPaidDialogOpen}
+                selectedAssignment={selectedAssignment}
+                onConfirm={confirmMarkAsPaid}
             />
             <SubscriptionActionDialog
                 isOpen={isCancelSubscriptionDialogOpen}
