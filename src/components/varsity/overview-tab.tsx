@@ -36,8 +36,8 @@ export function VarsityOverviewTab({ user, submittedAssignments, loading }: Vars
     return (
         <div className="space-y-8">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Welcome back, {user?.displayName?.split(' ')[0] || 'Student'}!</h1>
-                <p className="text-muted-foreground">Here's a quick look at your academic progress.</p>
+                <h1 className="text-2xl font-bold tracking-tight">Welcome back, {user?.displayName?.split(' ')[0] || 'Student'}!</h1>
+                <p className="text-sm text-muted-foreground">Here's a quick look at your academic progress.</p>
             </div>
 
              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -51,7 +51,7 @@ export function VarsityOverviewTab({ user, submittedAssignments, loading }: Vars
                                 <stat.icon className="h-5 w-5 text-muted-foreground" />
                             </CardHeader>
                             <CardContent>
-                                <div className="text-4xl font-bold">{stat.value}</div>
+                                <div className="text-3xl font-bold">{stat.value}</div>
                                 <p className="text-xs text-muted-foreground">Total assignments</p>
                             </CardContent>
                         </Card>
@@ -61,7 +61,7 @@ export function VarsityOverviewTab({ user, submittedAssignments, loading }: Vars
 
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 <div className="lg:col-span-2">
-                    <h2 className="text-xl font-semibold mb-4">Your Active Assignments</h2>
+                    <h2 className="text-lg font-semibold mb-4">Your Active Assignments</h2>
                      {loading ? (
                         <Skeleton className="h-64 rounded-xl" />
                     ) : recentPendingAssignments.length > 0 ? (
@@ -106,7 +106,7 @@ export function VarsityOverviewTab({ user, submittedAssignments, loading }: Vars
                 </div>
 
                 <div className="space-y-4">
-                    <h2 className="text-xl font-semibold">Quick Access</h2>
+                    <h2 className="text-lg font-semibold">Quick Access</h2>
                     <Card className="hover:bg-muted/50 transition-colors">
                         <Link href="/varsity-dashboard?tab=assignments">
                             <CardContent className="p-4 flex items-center gap-4">
@@ -151,3 +151,5 @@ export function VarsityOverviewTab({ user, submittedAssignments, loading }: Vars
         </div>
     );
 }
+
+    

@@ -86,8 +86,8 @@ function ReferralsPage() {
     }, []);
 
     const referralLink = useMemo(() => {
-        if (!user || typeof window === 'undefined') return '';
-        return `${window.location.origin}/register?ref=${user.uid}`;
+        if (!user) return '';
+        return `https://www.edumate.co.za/register?ref=${user.uid}`;
     }, [user]);
 
     const handleCopyToClipboard = () => {
@@ -282,3 +282,5 @@ function ReferralsPage() {
 }
 
 export default withAuth(ReferralsPage, ['student', 'varsity-student']);
+
+    
