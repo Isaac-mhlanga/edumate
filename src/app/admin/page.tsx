@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -6,7 +5,7 @@ import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useToast } from "@/hooks/use-toast";
 import { getFirestore, doc, getDocs, collection, updateDoc, deleteDoc, Timestamp, addDoc, orderBy, query, getDoc, onSnapshot, setDoc, writeBatch } from "firebase/firestore";
-import { getStorage, ref, deleteObject } from "firebase/storage";
+import { getStorage, ref, deleteObject, uploadBytes, getDownloadURL } from "firebase/storage";
 import { getApp, getApps, initializeApp } from "firebase/app";
 
 import { AdminOverviewTab } from "@/components/admin/overview-tab";
@@ -55,7 +54,7 @@ export type PayoutRequest = {
         branchCode: string;
     }
 };
-export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; deletedByStudent?: boolean; };
+export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; solutionUrl?: string; deletedByStudent?: boolean; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
 export type Transaction = { id: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
@@ -381,11 +380,18 @@ function AdminPage() {
         }
     };
 
-    const handleUpdateAssignmentPrice = async (assignmentId: string, newPrice: number | null) => {
+    const handleUpdateAssignment = async (assignmentId: string, newPrice: number | null, solutionFile: File | null) => {
         const assignmentRef = doc(firestore, 'assignments', assignmentId);
         try {
             const currentAssignment = assignments.find(a => a.id === assignmentId);
             let statusToUpdate = currentAssignment?.status;
+            let solutionUrl = currentAssignment?.solutionUrl;
+
+            if (solutionFile) {
+                const solutionStorageRef = ref(storage, `assignments/${assignmentId}/solutions/${solutionFile.name}`);
+                await uploadBytes(solutionStorageRef, solutionFile);
+                solutionUrl = await getDownloadURL(solutionStorageRef);
+            }
 
             if (currentAssignment?.status === 'Pending Review' && newPrice !== null) {
                 statusToUpdate = newPrice === 0 ? 'Paid' : 'Awaiting Payment';
@@ -393,20 +399,25 @@ function AdminPage() {
                 statusToUpdate = 'Paid';
             }
 
-            await updateDoc(assignmentRef, { 
+            const updateData: any = {
                 price: newPrice,
-                status: statusToUpdate
-            });
+                status: statusToUpdate,
+            };
+            if(solutionUrl) {
+                updateData.solutionUrl = solutionUrl;
+            }
+
+            await updateDoc(assignmentRef, updateData);
             
             setAssignments(prev => 
-                prev.map(a => a.id === assignmentId ? { ...a, price: newPrice, status: statusToUpdate as any } : a)
+                prev.map(a => a.id === assignmentId ? { ...a, ...updateData } : a)
             );
 
-            toast({ title: "Assignment Price Updated", description: "The price and status have been successfully updated." });
+            toast({ title: "Assignment Updated", description: "The assignment has been successfully updated." });
             setIsAssignmentReviewDialogOpen(false);
         } catch (error) {
             console.error("Error updating assignment price:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not update the assignment price.' });
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update the assignment.' });
         }
     };
 
@@ -497,40 +508,6 @@ function AdminPage() {
         } catch (error) {
             console.error("Error saving promotion:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not save the promotion.' });
-        }
-    };
-
-    const handleAddOrUpdateEvent = async () => {
-        if (!manualEvent.title || !manualEvent.start) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
-            return;
-        }
-
-        // Sanitize data for Firestore by removing undefined properties
-        const sanitizedEventData = Object.fromEntries(
-            Object.entries(manualEvent).filter(([, value]) => value !== undefined)
-        );
-        
-        try {
-            if (manualEvent.id) {
-                // Update existing event
-                const eventRef = doc(firestore, 'events', manualEvent.id);
-                await updateDoc(eventRef, sanitizedEventData);
-                setEvents(prev => prev.map(e => e.id === manualEvent.id ? { ...e, ...sanitizedEventData } as CalendarEvent : e));
-                toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
-            } else {
-                // Create new event
-                const docRef = await addDoc(collection(firestore, 'events'), sanitizedEventData);
-                const newEvent = { ...sanitizedEventData, id: docRef.id } as CalendarEvent;
-                setEvents(prev => [...prev, newEvent]);
-                toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
-            }
-            
-            setIsManualDialogOpen(false);
-            setManualEvent({});
-        } catch(error) {
-            console.error("Error saving event:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
         }
     };
 
@@ -676,7 +653,7 @@ function AdminPage() {
                 isOpen={isAssignmentReviewDialogOpen}
                 setIsOpen={setIsAssignmentReviewDialogOpen}
                 selectedAssignment={selectedAssignment}
-                onSave={handleUpdateAssignmentPrice}
+                onSave={handleUpdateAssignment}
             />
             <DeleteAssignmentDialog
                 isOpen={isDeleteAssignmentDialogOpen}
@@ -706,7 +683,3 @@ function AdminPage() {
 }
 
 export default withAuth(AdminPage, ['admin']);
-
-    
-
-    

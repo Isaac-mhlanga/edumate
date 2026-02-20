@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -17,12 +16,13 @@ interface AssignmentReviewDialogProps {
     isOpen: boolean;
     setIsOpen: (open: boolean) => void;
     selectedAssignment: Assignment | null;
-    onSave: (assignmentId: string, newPrice: number | null) => void;
+    onSave: (assignmentId: string, newPrice: number | null, solutionFile: File | null) => void;
 }
 
 export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, onSave }: AssignmentReviewDialogProps) {
     const { toast } = useToast();
     const [price, setPrice] = React.useState<number | string>('');
+    const [solutionFile, setSolutionFile] = React.useState<File | null>(null);
 
     React.useEffect(() => {
         if (selectedAssignment) {
@@ -30,7 +30,8 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
         } else {
             setPrice('');
         }
-    }, [selectedAssignment]);
+        setSolutionFile(null);
+    }, [selectedAssignment, isOpen]);
 
     const handleSaveChanges = () => {
         if (!selectedAssignment) return;
@@ -43,7 +44,7 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
             return;
         }
         const newPrice = Number(price);
-        onSave(selectedAssignment.id, newPrice);
+        onSave(selectedAssignment.id, newPrice, solutionFile);
     };
 
     return (
@@ -52,7 +53,7 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
                 <DialogHeader>
                     <DialogTitle className="text-xl">Review Assignment</DialogTitle>
                     <DialogDescription>
-                        Review submission details and adjust the price if necessary.
+                        Review submission, set a price, and upload the solution file.
                     </DialogDescription>
                 </DialogHeader>
                 {selectedAssignment && (
@@ -77,7 +78,7 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
                                 <Separator />
                                 <div className="flex justify-between text-base">
                                     <span className="text-muted-foreground">Current Price:</span>
-                                    <span className="font-semibold">R {selectedAssignment.price?.toFixed(2) ?? 'N/A'}</span>
+                                    <span className="font-semibold">{selectedAssignment.price !== null ? (selectedAssignment.price > 0 ? `R ${selectedAssignment.price.toFixed(2)}` : 'Free') : 'N/A'}</span>
                                 </div>
                             </CardContent>
                             <CardFooter>
@@ -86,18 +87,34 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
                                 </Button>
                             </CardFooter>
                         </Card>
-                        <div className="space-y-2">
-                            <Label htmlFor="assignment-price">Set/Adjust Price (R)</Label>
-                            <Input
-                                id="assignment-price"
-                                type="number"
-                                placeholder="e.g., 150 or 0 for free"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value)}
-                            />
-                            <p className="text-xs text-muted-foreground">
-                                Setting a price will move the assignment to 'Awaiting Payment'. Setting it to 0 will mark it as 'Paid'.
-                            </p>
+                        <div className="space-y-4">
+                            <div className="space-y-2">
+                                <Label htmlFor="assignment-price">Set/Adjust Price (R)</Label>
+                                <Input
+                                    id="assignment-price"
+                                    type="number"
+                                    placeholder="e.g., 150 or 0 for free"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value)}
+                                />
+                                <p className="text-xs text-muted-foreground">
+                                    Setting a price will move the assignment to 'Awaiting Payment'. Setting it to 0 will mark it as 'Paid'.
+                                </p>
+                            </div>
+                             <div className="space-y-2">
+                                <Label htmlFor="solution-file">Upload Solution (PDF)</Label>
+                                <Input
+                                    id="solution-file"
+                                    type="file"
+                                    accept=".pdf"
+                                    onChange={(e) => setSolutionFile(e.target.files?.[0] || null)}
+                                />
+                                {(selectedAssignment?.solutionUrl && !solutionFile) && (
+                                    <p className="text-xs text-muted-foreground">
+                                        A solution file already exists. Uploading a new file will replace it.
+                                    </p>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
