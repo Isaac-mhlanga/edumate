@@ -233,7 +233,7 @@ function InstructorPage() {
         );
         const assignmentsSnapshot = await getDocs(assignmentsQuery);
         const fetchedAssignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
-        setSubmittedAssignments(fetchedAssignments);
+        setSubmittedAssignments(fetchedAssignments.filter(a => !a.deletedByStudent));
         setLoadingAssignments(false);
         
         const transactionsQuery = query(collection(firestore, 'transactions'), where('instructorId', '==', currentUser.uid));
@@ -619,20 +619,38 @@ function InstructorPage() {
   }
 
 
-  async function handleSaveSolution(assignmentId: string, price: number | null) {
+  async function handleSaveSolution(assignmentId: string, price: number | null, solutionFile: File | null) {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
+    const storage = getStorage(app);
     const assignmentRef = doc(firestore, 'assignments', assignmentId);
 
     try {
         const isFree = price === 0;
+        let solutionUrl = submittedAssignments.find(a => a.id === assignmentId)?.solutionUrl || null;
+
+        if (solutionFile) {
+            if (solutionUrl) {
+                try {
+                    const oldSolutionRef = ref(storage, solutionUrl);
+                    await deleteObject(oldSolutionRef);
+                } catch (e) {
+                    console.warn("Old solution file could not be deleted or did not exist:", e);
+                }
+            }
+            const solutionStorageRef = ref(storage, `assignments/${assignmentId}/solutions/${solutionFile.name}`);
+            await uploadBytes(solutionStorageRef, solutionFile);
+            solutionUrl = await getDownloadURL(solutionStorageRef);
+        }
+        
         await updateDoc(assignmentRef, {
             price: price,
-            status: isFree ? 'Paid' : 'Awaiting Payment'
+            status: isFree ? 'Paid' : 'Awaiting Payment',
+            solutionUrl: solutionUrl,
         });
         
         setSubmittedAssignments(assignments => assignments.map(a => 
-            a.id === assignmentId ? { ...a, status: isFree ? 'Paid' : 'Awaiting Payment', price: price } : a
+            a.id === assignmentId ? { ...a, status: isFree ? 'Paid' : 'Awaiting Payment', price: price, solutionUrl: solutionUrl } : a
         ));
         
         if (isFree) {
@@ -726,7 +744,7 @@ function InstructorPage() {
   };
 
   const handleDateClick = (arg: any) => {
-      setManualEvent({ start: arg.dateStr, allDay: arg.allDay, instructor: user?.displayName || 'Instructor' });
+      setManualEvent({ start: arg.dateStr, allDay: arg.allDay, instructor: user?.displayName || 'Instructor', instructorId: user?.uid });
       setIsManualDialogOpen(true);
   };
   
@@ -741,6 +759,7 @@ function InstructorPage() {
           allDay: event.allDay,
           description: event.extendedProps.description,
           instructor: extendedProps.instructor,
+          instructorId: extendedProps.instructorId,
           grade: extendedProps.grade,
           subject: extendedProps.subject,
           module: extendedProps.module,

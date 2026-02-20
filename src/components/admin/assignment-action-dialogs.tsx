@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -102,11 +103,11 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
                                 </p>
                             </div>
                              <div className="space-y-2">
-                                <Label htmlFor="solution-file">Upload Solution (PDF)</Label>
+                                <Label htmlFor="solution-file">Upload Solution (.zip)</Label>
                                 <Input
                                     id="solution-file"
                                     type="file"
-                                    accept=".pdf"
+                                    accept=".zip"
                                     onChange={(e) => setSolutionFile(e.target.files?.[0] || null)}
                                 />
                                 {(selectedAssignment?.solutionUrl && !solutionFile) && (

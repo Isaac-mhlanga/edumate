@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from 'react';
@@ -30,7 +31,7 @@ interface AssignmentReviewDialogProps {
   setIsOpen: (open: boolean) => void;
   selectedAssignment: SubmittedAssignment | null;
   onAcceptAssignment: (assignment: SubmittedAssignment) => void;
-  onSaveSolution: (assignmentId: string, price: number) => void;
+  onSaveSolution: (assignmentId: string, price: number | null, solutionFile: File | null) => void;
   user: User | null;
 }
 
@@ -43,14 +44,16 @@ export function AssignmentReviewDialog({
   user,
 }: AssignmentReviewDialogProps) {
   const [price, setPrice] = React.useState<number | ''>('');
+  const [solutionFile, setSolutionFile] = React.useState<File | null>(null);
 
   React.useEffect(() => {
-    if (selectedAssignment?.price) {
-      setPrice(selectedAssignment.price);
+    if (selectedAssignment) {
+        setPrice(selectedAssignment.price ?? '');
     } else {
-      setPrice('');
+        setPrice('');
     }
-  }, [selectedAssignment]);
+    setSolutionFile(null);
+  }, [selectedAssignment, isOpen]);
 
   const canAccept = selectedAssignment?.status === 'Pending Review';
   const isMarking =
@@ -115,20 +118,36 @@ export function AssignmentReviewDialog({
                {isMarking && (
                  <Card>
                     <CardHeader>
-                        <CardTitle className="text-lg">Set Solution Price</CardTitle>
+                        <CardTitle className="text-lg">Set Solution Price & Upload</CardTitle>
                     </CardHeader>
-                    <CardContent>
-                         <Label htmlFor="solution-price">Price (R)</Label>
-                         <div className="relative">
-                            <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
-                            <Input 
-                                id="solution-price"
-                                type="number"
-                                placeholder="e.g. 150"
-                                className="pl-8"
-                                value={price}
-                                onChange={(e) => setPrice(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                    <CardContent className="space-y-4">
+                         <div>
+                            <Label htmlFor="solution-price">Price (R)</Label>
+                            <div className="relative">
+                                <DollarSign className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground"/>
+                                <Input 
+                                    id="solution-price"
+                                    type="number"
+                                    placeholder="e.g. 150"
+                                    className="pl-8"
+                                    value={price}
+                                    onChange={(e) => setPrice(e.target.value === '' ? '' : parseFloat(e.target.value))}
+                                />
+                            </div>
+                         </div>
+                         <div>
+                            <Label htmlFor="solution-file">Solution File (.zip)</Label>
+                             <Input 
+                                id="solution-file"
+                                type="file"
+                                accept=".zip"
+                                onChange={(e) => setSolutionFile(e.target.files?.[0] || null)}
                             />
+                             {(selectedAssignment?.solutionUrl && !solutionFile) && (
+                                <p className="text-xs text-muted-foreground">
+                                    A solution file already exists. Uploading a new file will replace it.
+                                </p>
+                            )}
                          </div>
                     </CardContent>
                  </Card>
@@ -141,7 +160,7 @@ export function AssignmentReviewDialog({
             Close
           </Button>
           {isMarking && (
-             <Button onClick={() => onSaveSolution(selectedAssignment!.id, Number(price))} disabled={!price || price <= 0}>
+             <Button onClick={() => onSaveSolution(selectedAssignment!.id, Number(price), solutionFile)} disabled={(!price && price !== 0) || (price < 0)}>
                 <Save className="mr-2"/> Save and Notify Student
              </Button>
           )}
