@@ -1,3 +1,4 @@
+
 rules_version = '2';
 
 service cloud.firestore {
@@ -69,9 +70,10 @@ service cloud.firestore {
         
         allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
 
-        // Students can update their own submissions (if not yet priced)
+        // Students can update their own submissions (if not yet priced OR if only hiding the assignment)
         // Instructors can update any assignment (to add price/solution)
-        allow update: if (isSignedIn() && isOwner(resource.data.studentId) && resource.data.price == null) || isInstructor() || isAdmin();
+        // Admins can update any assignment
+        allow update: if (isSignedIn() && isOwner(resource.data.studentId) && (resource.data.price == null || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedByStudent']))) || isInstructor() || isAdmin();
     }
 
     // Rules for the 'transactions' collection
@@ -199,3 +201,5 @@ service cloud.firestore {
     }
   }
 }
+
+    

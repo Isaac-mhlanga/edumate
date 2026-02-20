@@ -91,6 +91,7 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
                             <TableCell>
                                 <div className="font-medium">{assignment.assignmentTitle}</div>
                                 <div className="text-xs text-muted-foreground">{assignment.course}</div>
+                                {assignment.deletedByStudent && <Badge variant="destructive" className="mt-1">Hidden by student</Badge>}
                             </TableCell>
                             <TableCell className="hidden sm:table-cell">{assignment.studentName}</TableCell>
                             <TableCell className="hidden md:table-cell">{assignment.instructor}</TableCell>
@@ -144,6 +145,8 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
         </Card>
     );
 }
+
+    
 
     
 

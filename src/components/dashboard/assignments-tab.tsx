@@ -6,21 +6,22 @@ import Link from 'next/link';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger, DropdownMenuItem } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { Search, ListFilter, UploadCloud, ChevronLeft, ChevronRight, Edit, CreditCard, Download, CheckCircle, CircleDollarSign, Hourglass, FilePenLine } from "lucide-react";
+import { Search, ListFilter, UploadCloud, ChevronLeft, ChevronRight, Edit, CreditCard, Download, CheckCircle, CircleDollarSign, Hourglass, FilePenLine, MoreVertical, Trash2 } from "lucide-react";
 import { type SubmittedAssignment } from '@/app/dashboard/page';
 
 interface AssignmentsTabProps {
     submittedAssignments: SubmittedAssignment[];
     loadingAssignments: boolean;
     onOpenAssignmentDialog: (assignment: SubmittedAssignment | null) => void;
+    onSoftDelete: (assignmentId: string) => void;
 }
 
-export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpenAssignmentDialog }: AssignmentsTabProps) {
+export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpenAssignmentDialog, onSoftDelete }: AssignmentsTabProps) {
     const [assignmentFilters, setAssignmentFilters] = React.useState({ search: '', status: 'All' });
     const [currentAssignmentPage, setCurrentAssignmentPage] = React.useState(1);
     const assignmentsPerPage = 5;
@@ -145,10 +146,34 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell font-semibold">{assignment.price ? `R ${assignment.price.toFixed(2)}` : 'N/A'}</TableCell>
                                 <TableCell className="text-right">
-                                    {assignment.status === 'Pending Review' && <Button variant="secondary" size="sm" onClick={() => onOpenAssignmentDialog(assignment)}><Edit className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Edit</span></Button>}
-                                    {assignment.status === 'Submitted' && <span className="text-sm text-muted-foreground">Awaiting Review</span>}
-                                    {assignment.status === 'Awaiting Payment' && <Button asChild size="sm"><Link href={`/payment?type=assignment&id=${assignment.id}&title=${encodeURIComponent(assignment.title)}&price=${assignment.price}`}><CreditCard className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Pay Now</span></Link></Button>}
-                                    {assignment.status === 'Paid' && <Button asChild variant="secondary" size="sm"><a href={assignment.solutionUrl!} download><Download className="mr-0 sm:mr-2 h-3.5 w-3.5" /><span className="hidden sm:inline">Download</span></a></Button>}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            {assignment.status === 'Awaiting Payment' && (
+                                                <DropdownMenuItem asChild>
+                                                    <Link href={`/payment?type=assignment&id=${assignment.id}&title=${encodeURIComponent(assignment.title)}&price=${assignment.price}`}>
+                                                        <CreditCard className="mr-2 h-4 w-4" /> Pay Now
+                                                    </Link>
+                                                </DropdownMenuItem>
+                                            )}
+                                            {assignment.status === 'Paid' && assignment.solutionUrl && (
+                                                <DropdownMenuItem asChild>
+                                                    <a href={assignment.solutionUrl!} download>
+                                                        <Download className="mr-2 h-4 w-4" /> Download
+                                                    </a>
+                                                </DropdownMenuItem>
+                                            )}
+                                             <DropdownMenuItem onClick={() => onOpenAssignmentDialog(assignment)}>
+                                                <Edit className="mr-2 h-4 w-4" /> Edit
+                                            </DropdownMenuItem>
+                                            <DropdownMenuSeparator />
+                                            <DropdownMenuItem onClick={() => onSoftDelete(assignment.id)} className="text-destructive focus:text-destructive">
+                                                <Trash2 className="mr-2 h-4 w-4" /> Hide
+                                            </DropdownMenuItem>
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </TableCell>
                             </TableRow>
                         ))
@@ -184,3 +209,5 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
         </Card>
     );
 }
+
+    

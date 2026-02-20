@@ -7,10 +7,11 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle, Clock, Eye, UserCheck } from 'lucide-react';
+import { CheckCircle, Clock, Eye, UserCheck, Filter } from 'lucide-react';
 import { type SubmittedAssignment } from '@/app/instructor/page';
 import { type User } from 'firebase/auth';
 import { format } from 'date-fns';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from '../ui/dropdown-menu';
 
 interface InstructorAssignmentsTabProps {
     assignments: SubmittedAssignment[];
@@ -20,6 +21,18 @@ interface InstructorAssignmentsTabProps {
 }
 
 export function InstructorAssignmentsTab({ assignments, loading, onReviewAssignment, user }: InstructorAssignmentsTabProps) {
+    const [filter, setFilter] = React.useState('All');
+
+    const filteredAssignments = React.useMemo(() => {
+        if (filter === 'Available') {
+            return assignments.filter(a => a.status === 'Pending Review');
+        }
+        if (filter === 'My Assignments') {
+            return assignments.filter(a => a.markerId === user?.uid && a.status === 'In Progress');
+        }
+        return assignments;
+    }, [assignments, filter, user]);
+    
     const getStatusInfo = (assignment: SubmittedAssignment) => {
         switch (assignment.status) {
             case 'Pending Review':
@@ -52,9 +65,28 @@ export function InstructorAssignmentsTab({ assignments, loading, onReviewAssignm
 
     return (
         <Card>
-            <CardHeader>
-                <CardTitle>Assignment Queue</CardTitle>
-                <CardDescription>Review and mark student submissions.</CardDescription>
+            <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                    <CardTitle>Assignment Queue</CardTitle>
+                    <CardDescription>Review and mark student submissions.</CardDescription>
+                </div>
+                 <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                        <Button variant="outline" className="gap-1">
+                            <Filter className="h-3.5 w-3.5" />
+                            <span>Filter</span>
+                        </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Filter Assignments</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup value={filter} onValueChange={setFilter}>
+                            <DropdownMenuRadioItem value="All">All</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="Available">Available for Review</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="My Assignments">Accepted by Me</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
             </CardHeader>
             <CardContent>
                 <Table>
@@ -78,16 +110,17 @@ export function InstructorAssignmentsTab({ assignments, loading, onReviewAssignm
                                     <TableCell className="text-right"><Skeleton className="h-8 w-20 ml-auto" /></TableCell>
                                 </TableRow>
                             ))
-                        ) : assignments.length > 0 ? (
-                            assignments.map((assignment) => {
+                        ) : filteredAssignments.length > 0 ? (
+                            filteredAssignments.map((assignment) => {
                                 const statusInfo = getStatusInfo(assignment);
                                 return (
                                     <TableRow key={assignment.id}>
                                         <TableCell>
                                             <div className="font-medium">{assignment.studentName}</div>
-                                            <div className="text-xs text-muted-foreground sm:hidden">{assignment.assignmentTitle}</div>
+                                            {assignment.deletedByStudent && <Badge variant="destructive" className="mt-1">Hidden by student</Badge>}
+                                            <div className="text-xs text-muted-foreground sm:hidden">{assignment.title}</div>
                                         </TableCell>
-                                        <TableCell className="hidden sm:table-cell">{assignment.assignmentTitle}</TableCell>
+                                        <TableCell className="hidden sm:table-cell">{assignment.title}</TableCell>
                                         <TableCell className="hidden md:table-cell">
                                             {assignment.submittedAt ? format(assignment.submittedAt.toDate(), 'PPP') : 'N/A'}
                                         </TableCell>
@@ -108,20 +141,22 @@ export function InstructorAssignmentsTab({ assignments, loading, onReviewAssignm
                         ) : (
                             <TableRow>
                                 <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                    There are no assignments to review at this time.
+                                    There are no assignments in this category.
                                 </TableCell>
                             </TableRow>
                         )}
                     </TableBody>
                 </Table>
             </CardContent>
-            {assignments.length > 0 && (
+            {filteredAssignments.length > 0 && (
                 <CardFooter>
                     <div className="text-xs text-muted-foreground">
-                        Showing <strong>{assignments.length}</strong> assignments.
+                        Showing <strong>{filteredAssignments.length}</strong> assignments.
                     </div>
                 </CardFooter>
             )}
         </Card>
     );
 }
+
+    

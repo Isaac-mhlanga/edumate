@@ -91,6 +91,7 @@ export type SubmittedAssignment = {
     dueDate?: Timestamp;
     markerId?: string;
     markerName?: string;
+    deletedByStudent?: boolean;
 };
 
 export type EnrolledStudent = {
@@ -617,25 +618,33 @@ function InstructorPage() {
   }
 
 
-  async function handleSaveSolution(assignmentId: string, price: number) {
+  async function handleSaveSolution(assignmentId: string, price: number | null) {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
     const firestore = getFirestore(app);
     const assignmentRef = doc(firestore, 'assignments', assignmentId);
 
     try {
+        const isFree = price === 0;
         await updateDoc(assignmentRef, {
             price: price,
-            status: 'Awaiting Payment'
+            status: isFree ? 'Paid' : 'Awaiting Payment'
         });
         
         setSubmittedAssignments(assignments => assignments.map(a => 
-            a.id === assignmentId ? { ...a, status: 'Awaiting Payment', price: price } : a
+            a.id === assignmentId ? { ...a, status: isFree ? 'Paid' : 'Awaiting Payment', price: price } : a
         ));
-
-        toast({
-            title: "Solution Uploaded!",
-            description: `The solution has been priced and is now awaiting student payment.`
-        });
+        
+        if (isFree) {
+             toast({
+                title: "Solution Marked as Free!",
+                description: `The solution is now available for the student to download.`
+            });
+        } else {
+            toast({
+                title: "Solution Uploaded!",
+                description: `The solution has been priced and is now awaiting student payment.`
+            });
+        }
         handleReviewDialogOpenChange(false);
     } catch (error) {
         console.error("Error updating assignment: ", error);
@@ -964,5 +973,7 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
+
+    
 
     

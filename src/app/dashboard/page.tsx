@@ -59,6 +59,7 @@ export type SubmittedAssignment = {
     instructions?: string;
     submittedAt: Timestamp;
     dueDate?: Timestamp;
+    deletedByStudent?: boolean;
 };
 
 export type Transaction = {
@@ -109,7 +110,7 @@ function DashboardPage() {
                 const assignmentsQuery = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
                 const assignmentsSnapshot = await getDocs(assignmentsQuery);
                 const assignments = assignmentsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })) as SubmittedAssignment[];
-                setSubmittedAssignments(assignments);
+                setSubmittedAssignments(assignments.filter(a => !a.deletedByStudent));
 
                 // Fetch transactions
                 const transactionsQuery = query(collection(firestore, 'transactions'), where('studentId', '==', user.uid), orderBy('createdAt', 'desc'));
@@ -167,6 +168,24 @@ function DashboardPage() {
 
         return () => unsubscribe();
     }, [toast]);
+    
+    const handleSoftDeleteAssignment = async (assignmentId: string) => {
+        const firestore = getFirestore();
+        const assignmentRef = doc(firestore, 'assignments', assignmentId);
+        try {
+            await updateDoc(assignmentRef, {
+                deletedByStudent: true,
+            });
+            setSubmittedAssignments(prev => prev.filter(a => a.id !== assignmentId));
+            toast({
+                title: "Assignment Hidden",
+                description: "The assignment has been removed from your view.",
+            });
+        } catch (error) {
+            console.error("Error hiding assignment:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not hide the assignment.' });
+        }
+    };
 
     const handleFreeEnrollment = async (course: Course) => {
         if (!user) {
@@ -252,6 +271,7 @@ function DashboardPage() {
                         setSelectedAssignment(assignment);
                         setIsAssignmentDialogOpen(true);
                     }}
+                    onSoftDelete={handleSoftDeleteAssignment}
                 />
             )}
 
@@ -289,3 +309,6 @@ function DashboardPage() {
 }
 
 export default withAuth(DashboardPage, ['student']);
+
+
+    
