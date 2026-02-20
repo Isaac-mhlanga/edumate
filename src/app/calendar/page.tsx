@@ -51,6 +51,8 @@ const platforms = [
     { value: 'youtube', label: 'YouTube' },
     { value: 'tiktok', label: 'TikTok' },
     { value: 'zoom', label: 'Zoom' },
+    { value: 'whatsapp', label: 'WhatsApp' },
+    { value: 'phone', label: 'Phone Call' },
 ]
 
 export default function CalendarPage() {

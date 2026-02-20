@@ -33,6 +33,8 @@ const platforms = [
     { value: 'youtube', label: 'YouTube' },
     { value: 'tiktok', label: 'TikTok' },
     { value: 'zoom', label: 'Zoom' },
+    { value: 'whatsapp', label: 'WhatsApp' },
+    { value: 'phone', label: 'Phone Call' },
 ]
 
 export function CalendarDialogs({
@@ -89,7 +91,8 @@ export function CalendarDialogs({
                                             <SelectItem value="11">Grade 11</SelectItem>
                                             <SelectItem value="12">Grade 12</SelectItem>
                                             <SelectItem value="10-12">All Grades</SelectItem>
-                                            <SelectItem value="Varsity">Varsity/College</SelectItem>
+                                            <SelectItem value="Varsity">Varsity Students</SelectItem>
+                                            <SelectItem value="One-on-One">One-on-One Session</SelectItem>
                                         </SelectContent>
                                     </Select>
                                 </div>
