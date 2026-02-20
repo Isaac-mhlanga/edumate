@@ -229,6 +229,37 @@ export default function Home() {
                             <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-card/50 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook className="h-5 w-5" /></a>
                         </div>
                     </div>
+                    <div className="mt-16 max-w-4xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-left">
+                            <div className="flex items-center gap-4">
+                                <div className="bg-primary/10 text-primary p-3 rounded-lg border border-primary/20">
+                                    <Video className="h-6 w-6" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold">On-demand Videos</h3>
+                                    <p className="text-sm text-muted-foreground">Learn anytime, anywhere.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="bg-primary/10 text-primary p-3 rounded-lg border border-primary/20">
+                                    <Users className="h-6 w-6" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold">Expert Tutors</h3>
+                                    <p className="text-sm text-muted-foreground">Guidance from the best.</p>
+                                </div>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <div className="bg-primary/10 text-primary p-3 rounded-lg border border-primary/20">
+                                    <FilePenLine className="h-6 w-6" />
+                                </div>
+                                <div>
+                                    <h3 className="font-semibold">Assignment Help</h3>
+                                    <p className="text-sm text-muted-foreground">Ace your assignments.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </section>
