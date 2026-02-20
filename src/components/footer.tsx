@@ -42,13 +42,13 @@ export function Footer() {
                 <h4 className="font-semibold text-base text-foreground mb-4">Follow Us</h4>
                 <div className="flex space-x-2">
                     <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
-                    <a href="https://www.youtube.com/@EdumatePro" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                    <a href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
                     <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
                 </div>
             </div>
         </div>
         <div className="mt-8 pt-8 border-t text-center text-base text-muted-foreground">
-            <p>&copy; {new Date().getFullYear()} Edumate Pro. All rights reserved.</p>
+            <p>&copy; {new Date().getFullYear()} Edumate. All rights reserved.</p>
         </div>
       </div>
     </footer>

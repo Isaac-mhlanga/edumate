@@ -305,7 +305,7 @@ export default function Home() {
                                 <h4 className="font-semibold text-base text-foreground mb-4">Share on Social Media</h4>
                                 <div className="flex justify-center space-x-4">
                                     <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
-                                    <a href="https://www.youtube.com/@Edumate" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
+                                    <a href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
                                     <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
                                 </div>
                             </div>
