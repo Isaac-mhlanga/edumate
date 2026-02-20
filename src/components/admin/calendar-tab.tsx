@@ -70,18 +70,23 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
 
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const firestore = getFirestore(app);
+
+        // Sanitize data for Firestore by removing undefined properties
+        const sanitizedEventData = Object.fromEntries(
+            Object.entries(manualEvent).filter(([, value]) => value !== undefined)
+        );
         
         try {
             if (manualEvent.id) {
                 // Update existing event
                 const eventRef = doc(firestore, 'events', manualEvent.id);
-                await updateDoc(eventRef, manualEvent);
-                setEvents(prev => prev.map(e => e.id === manualEvent.id ? { ...e, ...manualEvent } : e));
+                await updateDoc(eventRef, sanitizedEventData);
+                setEvents(prev => prev.map(e => e.id === manualEvent.id ? { ...e, ...sanitizedEventData } as CalendarEvent : e));
                 toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
             } else {
                 // Create new event
-                const docRef = await addDoc(collection(firestore, 'events'), manualEvent);
-                const newEvent = { ...manualEvent, id: docRef.id } as CalendarEvent;
+                const docRef = await addDoc(collection(firestore, 'events'), sanitizedEventData);
+                const newEvent = { ...sanitizedEventData, id: docRef.id } as CalendarEvent;
                 setEvents(prev => [...prev, newEvent]);
                 toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
             }
@@ -144,5 +149,3 @@ export function AdminCalendarTab({ events, setEvents }: AdminCalendarTabProps) {
         </>
     );
 }
-
-    
