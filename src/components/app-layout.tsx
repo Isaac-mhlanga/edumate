@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -136,6 +137,7 @@ const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=users', label: 'Users', icon: Users, basePath: '/admin', tab: 'users' },
   { href: '/admin?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/admin', tab: 'courses' },
   { href: '/admin?tab=payouts', label: 'Payouts', icon: Banknote, basePath: '/admin', tab: 'payouts' },
+  { href: '/admin?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/admin', tab: 'transactions' },
   { href: '/admin?tab=promotions', label: 'Promotions', icon: Sparkles, basePath: '/admin', tab: 'promotions' },
   { href: '/admin?tab=tutors', label: 'Tutors', icon: UserCog, basePath: '/admin', tab: 'tutors' },
   { href: '/admin?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/admin', tab: 'enquiries' },

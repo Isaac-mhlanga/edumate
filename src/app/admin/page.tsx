@@ -1,3 +1,4 @@
+
 'use client';
 
 import React from "react";
@@ -25,6 +26,8 @@ import { format, formatDistanceToNow } from "date-fns";
 import { EnquiriesPage } from "@/components/enquiries-page";
 import { ChangeRoleDialog } from "@/components/admin/change-role-dialog";
 import { AdminPromotionsTab } from "@/components/admin/promotions-tab";
+import { AdminTransactionsTab } from "@/components/admin/transactions-tab";
+import { DeleteTransactionDialog, TransactionReceiptDialog } from "@/components/admin/transaction-action-dialogs";
 
 
 const firebaseConfig = {
@@ -54,10 +57,10 @@ export type PayoutRequest = {
         branchCode: string;
     }
 };
-export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; solutionUrl?: string; deletedByStudent?: boolean; };
+export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; markerName?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; solutionUrl?: string; deletedByStudent?: boolean; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
-export type Transaction = { id: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
+export type Transaction = { id: string; studentId?: string; studentName?: string; instructorId?: string; instructorName?: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
 export type RecentActivity = {
     id: string;
     type: 'New User' | 'New Course' | 'Payout' | 'Transaction';
@@ -119,6 +122,7 @@ function AdminPage() {
     const [selectedAssignment, setSelectedAssignment] = React.useState<Assignment | null>(null);
     const [selectedSubscription, setSelectedSubscription] = React.useState<Subscription | null>(null);
     const [selectedTutorProfile, setSelectedTutorProfile] = React.useState<TutorProfile | null>(null);
+    const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
 
     const [isUserDetailsDialogOpen, setIsUserDetailsDialogOpen] = React.useState(false);
     const [isSuspendUserDialogOpen, setIsSuspendUserDialogOpen] = React.useState(false);
@@ -133,6 +137,8 @@ function AdminPage() {
     const [isCancelSubscriptionDialogOpen, setIsCancelSubscriptionDialogOpen] = React.useState(false);
     const [isTutorProfileDialogOpen, setIsTutorProfileDialogOpen] = React.useState(false);
     const [isClearAllPayoutsDialogOpen, setIsClearAllPayoutsDialogOpen] = React.useState(false);
+    const [isDeleteTransactionDialogOpen, setIsDeleteTransactionDialogOpen] = React.useState(false);
+    const [isTransactionReceiptDialogOpen, setIsTransactionReceiptDialogOpen] = React.useState(false);
 
 
     React.useEffect(() => {
@@ -187,7 +193,14 @@ function AdminPage() {
                 setAssignments(fetchedAssignments);
                 
                 const transactionsSnapshot = await getDocs(query(collection(firestore, "transactions"), orderBy('createdAt', 'desc')));
-                const fetchedTransactions = transactionsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Transaction));
+                const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    return {
+                        id: doc.id,
+                        ...data,
+                        studentName: data.studentId ? userMap.get(data.studentId) || 'N/A' : 'N/A',
+                    } as Transaction;
+                });
                 setTransactions(fetchedTransactions);
 
                 const payoutsQuery = query(collection(firestore, 'payouts'), orderBy('requestedAt', 'desc'));
@@ -510,6 +523,22 @@ function AdminPage() {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not save the promotion.' });
         }
     };
+    
+    const confirmDeleteTransaction = async () => {
+        if (!selectedTransaction) return;
+        try {
+            await deleteDoc(doc(firestore, "transactions", selectedTransaction.id));
+            setTransactions(transactions.filter(t => t.id !== selectedTransaction.id));
+            toast({ title: "Transaction Deleted", description: `The transaction has been permanently deleted.` });
+        } catch (error) {
+            console.error("Error deleting transaction:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not delete the transaction.' });
+        } finally {
+            setIsDeleteTransactionDialogOpen(false);
+            setSelectedTransaction(null);
+        }
+    };
+
 
     return (
         <div className="space-y-8">
@@ -595,6 +624,20 @@ function AdminPage() {
                     onClearAllPayouts={() => setIsClearAllPayoutsDialogOpen(true)}
                 />
             )}
+            {currentTab === 'transactions' && (
+                <AdminTransactionsTab
+                    transactions={transactions}
+                    loading={loading}
+                    onDeleteTransaction={(transaction) => {
+                        setSelectedTransaction(transaction);
+                        setIsDeleteTransactionDialogOpen(true);
+                    }}
+                    onViewReceipt={(transaction) => {
+                        setSelectedTransaction(transaction);
+                        setIsTransactionReceiptDialogOpen(true);
+                    }}
+                />
+            )}
             {currentTab === 'subscriptions' && (
                 <AdminSubscriptionsTab 
                     subscriptions={subscriptions}
@@ -677,6 +720,17 @@ function AdminPage() {
                 isOpen={isTutorProfileDialogOpen}
                 setIsOpen={setIsTutorProfileDialogOpen}
                 tutor={selectedTutorProfile}
+            />
+            <DeleteTransactionDialog
+                isOpen={isDeleteTransactionDialogOpen}
+                setIsOpen={setIsDeleteTransactionDialogOpen}
+                selectedTransaction={selectedTransaction}
+                onConfirm={confirmDeleteTransaction}
+            />
+            <TransactionReceiptDialog
+                isOpen={isTransactionReceiptDialogOpen}
+                setIsOpen={setIsTransactionReceiptDialogOpen}
+                selectedTransaction={selectedTransaction}
             />
         </div>
     );
