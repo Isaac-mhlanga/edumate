@@ -101,6 +101,7 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/dashboard/tutors', label: 'Tutors', icon: Users, basePath: '/dashboard/tutors' },
+  { href: '/dashboard/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/dashboard/whiteboard' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },

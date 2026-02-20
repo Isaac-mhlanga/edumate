@@ -9,4 +9,4 @@ function StudentLiveWhiteboardPage() {
   return <Whiteboard whiteboardId={whiteboardId} userRole="student" />;
 }
 
-export default withAuth(StudentLiveWhiteboardPage, ['student', 'varsity-student']);
+export default withAuth(StudentLiveWhiteboardPage, ['student']);
