@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -104,15 +105,8 @@ function TutorPage() {
             { day: "Thursday", slots: [] }, { day: "Friday", slots: [] }, { day: "Saturday", slots: [] }, { day: "Sunday", slots: [] },
         ];
 
-        let unsubscribeMessages: Unsubscribe | null = null;
-
         const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
-            if (unsubscribeMessages) {
-                unsubscribeMessages();
-                unsubscribeMessages = null;
-            }
-
             if (currentUser) {
                 setLoading(true);
                 // Fetch Profile
@@ -135,15 +129,6 @@ function TutorPage() {
                 const bookingsQuery = query(collection(firestore, 'bookings'), where('tutorId', '==', currentUser.uid));
                 const bookingsSnap = await getDocs(bookingsQuery);
                 setBookings(bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}) as Booking));
-
-                // Subscribe to Message Threads
-                const messagesQuery = query(collection(firestore, 'messages'), where('tutorId', '==', currentUser.uid));
-                unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
-                    const threads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MessageThread));
-                    // Sort on the client side to avoid needing a composite index
-                    threads.sort((a, b) => (b.lastMessageTimestamp?.toMillis() || 0) - (a.lastMessageTimestamp?.toMillis() || 0));
-                    setMessageThreads(threads);
-                });
                 
                 setLoading(false);
             } else {
@@ -153,12 +138,21 @@ function TutorPage() {
         
         return () => {
             unsubscribeAuth();
-            if (unsubscribeMessages) {
-                unsubscribeMessages();
-            }
         };
-    }, [toast]);
-    
+    }, []);
+
+    useEffect(() => {
+        if (!user) return;
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        const messagesQuery = query(collection(firestore, 'messages'), where('tutorId', '==', user.uid), orderBy('lastMessageTimestamp', 'desc'));
+        const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
+            const threads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MessageThread));
+            setMessageThreads(threads);
+        });
+        return () => unsubscribeMessages();
+    }, [user]);
+
      useEffect(() => {
         if (!selectedThread) return;
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -754,7 +748,7 @@ function TutorPage() {
                                 ))}
                             </TableBody>
                         </Table>
-                    </CardFooter>
+                    </CardContent>
                     <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
                         <div className="text-xs text-muted-foreground">
                             Showing <strong>{(currentBookingPage - 1) * bookingsPerPage + 1}-{Math.min(currentBookingPage * bookingsPerPage, filteredBookings.length)}</strong> of <strong>{filteredBookings.length}</strong> bookings.
