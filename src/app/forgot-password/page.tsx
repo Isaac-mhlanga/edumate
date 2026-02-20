@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Icons } from "@/components/icons";
@@ -12,6 +11,7 @@ import { useToast } from "@/hooks/use-toast";
 import React from "react";
 import { getAuth, sendPasswordResetEmail, type Auth } from "firebase/auth";
 import { getApp, getApps, initializeApp, FirebaseError } from "firebase/app";
+import Image from "next/image";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -67,14 +67,22 @@ export default function ForgotPasswordPage() {
     }
     
     return (
-        <div className="flex min-h-screen items-center justify-center bg-background p-4">
-            <div className="w-full max-w-md">
+        <div className="relative flex min-h-screen items-center justify-center overflow-hidden p-4">
+             <Image
+                src="https://picsum.photos/seed/loginbg/1920/1080"
+                alt="Background"
+                fill
+                className="object-cover z-0"
+                data-ai-hint="modern campus building"
+            />
+            <div className="absolute inset-0 bg-black/60 z-0" />
+            <div className="relative z-10 w-full max-w-md">
                 <form onSubmit={handleSendLink}>
-                    <Card>
+                    <Card className="bg-card/80 backdrop-blur-lg border-white/20">
                         <CardHeader className="text-center">
                             <div className="mb-4 flex justify-center">
                                 <Link href="/">
-                                    <Icons.logo className="w-auto h-12 text-primary" />
+                                    <Icons.logo className="w-auto h-12" />
                                 </Link>
                             </div>
                             <CardTitle className="text-2xl">Forgot Password?</CardTitle>
@@ -83,7 +91,7 @@ export default function ForgotPasswordPage() {
                         <CardContent className="space-y-4">
                             <div className="space-y-2">
                                 <Label htmlFor="email">Email</Label>
-                                <Input id="email" type="email" placeholder="name@example.com" required />
+                                <Input id="email" type="email" placeholder="name@example.com" required className="bg-background/70"/>
                             </div>
                         </CardContent>
                         <CardFooter className="flex flex-col gap-4">
