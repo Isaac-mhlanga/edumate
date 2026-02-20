@@ -105,7 +105,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     const isEditing = editingComment?.id === comment.id;
     const isCollapsed = collapsedComments.includes(comment.id);
     const canEdit = userRole === 'admin' || user?.uid === comment.studentId;
-    const canDelete = userRole === 'admin' || user?.uid === comment.studentId;
+    const canDelete = userRole === 'admin';
 
     return (
         <div key={comment.id} className="flex items-start gap-3">
@@ -337,11 +337,8 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
     const storage = getStorage();
     if (!question) return;
 
-    const itemToDelete = type === 'question' ? question : comments.find(c => c.id === id);
-    if (!itemToDelete) return;
-    const isOwner = user?.uid === itemToDelete.studentId;
-    if (userRole !== 'admin' && !isOwner) {
-        toast({ variant: 'destructive', title: 'Permission Denied', description: 'You cannot delete this item.' });
+    if (userRole !== 'admin') {
+        toast({ variant: 'destructive', title: 'Permission Denied', description: 'You do not have permission to delete this item.' });
         return;
     }
 
@@ -496,7 +493,7 @@ export function CommentSection({ question, onUpdateQuestion, onDeleteQuestion, d
   }
 
   const topLevelComments = comments.filter(comment => !comment.parentId);
-  const canModerateQuestion = userRole === 'admin' || user?.uid === question.studentId;
+  const canModerateQuestion = userRole === 'admin';
 
 
   return (

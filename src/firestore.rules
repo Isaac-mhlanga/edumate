@@ -70,9 +70,10 @@ service cloud.firestore {
         
         allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
 
-        // Students can update their own submissions (if not yet priced)
+        // Students can update their own submissions (if not yet priced OR if only hiding the assignment)
         // Instructors can update any assignment (to add price/solution)
-        allow update: if (isSignedIn() && isOwner(resource.data.studentId) && resource.data.price == null) || isInstructor() || isAdmin();
+        // Admins can update any assignment
+        allow update: if (isSignedIn() && isOwner(resource.data.studentId) && (resource.data.price == null || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['deletedByStudent']))) || isInstructor() || isAdmin();
     }
 
     // Rules for the 'transactions' collection
@@ -135,8 +136,8 @@ service cloud.firestore {
       allow create: if (isSignedIn() && isOwner(request.resource.data.studentId)) || (request.auth == null && request.resource.data.studentId == 'anonymous');
       // Users can only update their own question, or update likes, or if they are an admin
       allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy', 'commentCount', 'commentsDisabled']) || isAdmin());
-       // Users can only delete their own questions, or if they are an admin
-      allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
+       // Only admins can delete
+      allow delete: if isAdmin();
 
       // Rules for comments on questions
       match /comments/{commentId} {
@@ -149,8 +150,8 @@ service cloud.firestore {
             (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy'])) ||
             ((isOwner(resource.data.studentId) || isAdmin()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content']))
         );
-        // Users can only delete their own comments or admins can delete any
-        allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
+        // Only admins can delete
+        allow delete: if isAdmin();
       }
     }
     
@@ -176,6 +177,27 @@ service cloud.firestore {
       allow read: if isInstructor() || isTutor() || isAdmin();
       // Only the assigned user or an admin can update the enquiry
       allow update: if (isSignedIn() && resource.data.assigneeId == request.auth.uid) || isAdmin();
+    }
+     // Rules for events
+    match /events/{eventId} {
+      // Anyone can read events
+      allow get, list: if true;
+      // Only instructors and admins can create, update, delete events
+      allow write: if isInstructor() || isAdmin();
+    }
+    
+    // Rules for whiteboards
+    match /whiteboards/{whiteboardId} {
+      // Any signed-in user can read or write to a whiteboard session
+      allow read, write: if isSignedIn();
+    }
+
+    // Rules for promotions
+    match /promotions/{promotionId} {
+      // Anyone can read promotions
+      allow get: if true;
+      // Only admins can write promotions
+      allow write: if isAdmin();
     }
   }
 }
