@@ -339,28 +339,36 @@ export default function Home() {
 
         {promotion && (
             <section id="promotion" className="py-24 bg-background">
-                <div className="max-w-4xl mx-auto px-6">
-                    <Card className="bg-card/50 backdrop-blur-lg border-border/20 shadow-xl shadow-primary/10 overflow-hidden">
-                        <div className="md:grid md:grid-cols-2 items-center">
-                            <div className="p-8">
-                                <div className="bg-primary/10 text-primary p-4 rounded-full inline-block mb-6 border border-primary/20">
-                                    {promotion.icon === 'tiktok' ? <FaTiktok className="h-8 w-8" /> : <SparklesIcon className="h-8 w-8" />}
+                <div className="max-w-5xl mx-auto px-6">
+                    <div className="relative rounded-2xl overflow-hidden p-8 sm:p-12 bg-gradient-to-br from-primary via-primary/80 to-primary/70 text-primary-foreground shadow-2xl shadow-primary/20">
+                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full filter blur-xl opacity-50"></div>
+                        <div className="absolute -bottom-16 -left-10 w-40 h-40 bg-white/10 rounded-full filter blur-2xl opacity-50"></div>
+                        
+                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
+                            <div className="flex-shrink-0 hidden md:block">
+                                <div className="bg-white/20 p-5 rounded-full inline-block animate-float-1">
+                                    {promotion.icon === 'tiktok' ? <FaTiktok className="h-12 w-12" /> : <SparklesIcon className="h-12 w-12" />}
                                 </div>
-                                <h3 className="text-2xl font-headline font-bold">{promotion.title}</h3>
-                                <p className="text-muted-foreground mt-2">
+                            </div>
+                            <div className="flex-1">
+                                <h3 className="text-3xl font-headline font-bold">{promotion.title}</h3>
+                                <p className="mt-2 text-lg opacity-90 max-w-lg mx-auto md:mx-0">
                                     {promotion.description}
                                 </p>
-                                <Button size="lg" asChild className="mt-6">
+                            </div>
+                            <div className="flex-shrink-0 mt-6 md:mt-0">
+                                <Button 
+                                    size="lg" 
+                                    asChild 
+                                    className="bg-white text-primary font-bold hover:bg-white/90 shadow-lg transform hover:scale-105 transition-transform px-8 py-6 text-base"
+                                >
                                     <a href={promotion.buttonLink} target="_blank" rel="noopener noreferrer">
                                         {promotion.buttonText} <ArrowRight className="ml-2" />
                                     </a>
                                 </Button>
                             </div>
-                            <div className="bg-muted/50 p-8 h-full flex items-center justify-center">
-                                <SparklesIcon className="h-24 w-24 text-primary/30" />
-                            </div>
                         </div>
-                    </Card>
+                    </div>
                 </div>
             </section>
         )}
