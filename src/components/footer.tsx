@@ -1,7 +1,7 @@
 
 import Link from "next/link";
 import { Icons } from "./icons";
-import { FaWhatsapp, FaTiktok, FaYoutube, FaFacebook, FaTwitter } from "react-icons/fa";
+import { FaWhatsapp, FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
 
 export function Footer() {
   return (
@@ -46,7 +46,6 @@ export function Footer() {
                     <a href="https://www.tiktok.com/@edumate.pro" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
                     <a href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
                     <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
-                    <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Twitter"><FaTwitter /></a>
                 </div>
             </div>
         </div>
