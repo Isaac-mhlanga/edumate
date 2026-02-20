@@ -11,36 +11,9 @@ export const Icons = {
       className={className}
       {...props}
     >
-      {/* Icon: Circle with 'E' */}
-      <g>
-          <circle cx="21" cy="21" r="19.5" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
-          <circle cx="21" cy="21" r="16" stroke="hsl(var(--primary))" strokeWidth="1.5"/>
-          <text x="21" y="23" textAnchor="middle" dominantBaseline="central" fontFamily="Inter, sans-serif" fontSize="22" fontWeight="bold" fill="hsl(var(--primary))">E</text>
-      </g>
-
-      {/* Edumate text */}
-      <text
-        x="50"
-        y="23"
-        fontFamily="Inter, sans-serif"
-        fontSize="22"
-        fontWeight="500"
-        fill="hsl(var(--foreground))"
-      >
-        Edumate
-      </text>
-
-      {/* Slogan */}
-      <text
-        x="50"
-        y="37"
-        fontFamily="Inter, sans-serif"
-        fontSize="9"
-        fill="hsl(var(--muted-foreground))"
-        letterSpacing="0.05em"
-      >
-        LEARN SMARTER
-      </text>
+        <path d="M29.6 5.25H12.4C8.3 5.25 5.25 8.3 5.25 12.4V29.6C5.25 33.7 8.3 36.75 12.4 36.75H29.6C33.7 36.75 36.75 33.7 36.75 29.6V25.5H17.25V21.75H36.75V16.5H17.25V12.75H36.75V12.4C36.75 8.3 33.7 5.25 29.6 5.25Z" fill="hsl(var(--primary))"/>
+        <text x="48" y="23" fontFamily="Montserrat, sans-serif" fontSize="20" fontWeight="600" fill="hsl(var(--foreground))">Edumate</text>
+        <text x="48" y="37" fontFamily="Montserrat, sans-serif" fontSize="9" fill="hsl(var(--primary))" letterSpacing="0.05em" fontWeight="700">LEARN SMARTER</text>
     </svg>
   ),
   tiktok: ({ className, ...props }: SVGProps<SVGSVGElement>) => (
