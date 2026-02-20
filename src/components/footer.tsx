@@ -1,6 +1,7 @@
+
 import Link from "next/link";
 import { Icons } from "./icons";
-import { FaTiktok, FaYoutube, FaFacebook } from "react-icons/fa";
+import { FaWhatsapp, FaTiktok, FaYoutube, FaFacebook, FaTwitter } from "react-icons/fa";
 
 export function Footer() {
   return (
@@ -41,9 +42,11 @@ export function Footer() {
             <div>
                 <h4 className="font-semibold text-base text-foreground mb-4">Follow Us</h4>
                 <div className="flex space-x-2">
+                    <a href="https://chat.whatsapp.com/CdRg24RV7ozFs052jfpGi9" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="WhatsApp"><FaWhatsapp /></a>
                     <a href="https://www.tiktok.com/@edumate.pro" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
                     <a href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
                     <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
+                    <a href="#" className="flex h-8 w-8 items-center justify-center rounded-md border bg-muted text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Twitter"><FaTwitter /></a>
                 </div>
             </div>
         </div>

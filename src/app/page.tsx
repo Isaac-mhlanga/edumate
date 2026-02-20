@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FaTiktok, FaYoutube, FaFacebook, FaTwitter } from "react-icons/fa";
+import { FaTiktok, FaYoutube, FaFacebook, FaTwitter, FaWhatsapp } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 
 const firebaseConfig = {
@@ -243,6 +243,16 @@ export default function Home() {
                            <Link href="/courses">Explore Courses</Link>
                         </Button>
                     </div>
+                    <div className="mt-12 text-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
+                        <p className="text-sm font-medium text-muted-foreground mb-4">Follow us for updates and free content</p>
+                        <div className="flex justify-center space-x-4">
+                            <a href="https://chat.whatsapp.com/CdRg24RV7ozFs052jfpGi9" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-full border bg-card/50 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="WhatsApp"><FaWhatsapp className="h-6 w-6" /></a>
+                            <a href="https://www.tiktok.com/@edumate.pro" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-full border bg-card/50 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok className="h-5 w-5" /></a>
+                            <a href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-full border bg-card/50 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube className="h-5 w-5" /></a>
+                            <a href="#" className="flex h-12 w-12 items-center justify-center rounded-full border bg-card/50 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook className="h-5 w-5" /></a>
+                            <a href="#" className="flex h-12 w-12 items-center justify-center rounded-full border bg-card/50 text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Twitter"><FaTwitter className="h-5 w-5" /></a>
+                        </div>
+                    </div>
                      {promotion && (
                         <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
                             <Link href={promotion.buttonLink} target="_blank" rel="noopener noreferrer"
@@ -393,6 +403,7 @@ export default function Home() {
                             <div className="bg-muted/50 p-8 text-center">
                                 <h4 className="font-semibold text-base text-foreground mb-4">Share on Social Media</h4>
                                 <div className="flex justify-center space-x-4">
+                                    <a href="https://chat.whatsapp.com/CdRg24RV7ozFs052jfpGi9" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="WhatsApp"><FaWhatsapp /></a>
                                     <a href="https://www.tiktok.com/@edumate.pro" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="TikTok"><FaTiktok /></a>
                                     <a href="https://www.youtube.com/channel/UCG91mxIVykFs-0L5FZNk01g" target="_blank" rel="noopener noreferrer" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="YouTube"><FaYoutube /></a>
                                     <a href="#" className="flex h-12 w-12 items-center justify-center rounded-lg border bg-background text-muted-foreground transition-colors hover:bg-primary hover:text-primary-foreground" aria-label="Facebook"><FaFacebook /></a>
