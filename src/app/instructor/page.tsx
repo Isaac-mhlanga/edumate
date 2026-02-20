@@ -752,38 +752,43 @@ function InstructorPage() {
   };
   
   const handleAddOrUpdateEvent = async () => {
-        if (!manualEvent.title || !manualEvent.start || !user) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
-            return;
-        }
+    if (!manualEvent.title || !manualEvent.start || !user) {
+        toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
+        return;
+    }
 
-        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
-        const firestore = getFirestore(app);
+    const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+    const firestore = getFirestore(app);
+    
+    const eventData = { ...manualEvent, instructorId: user.uid, instructor: user.displayName };
+
+    // Sanitize data for Firestore by removing undefined properties
+    const sanitizedEventData = Object.fromEntries(
+        Object.entries(eventData).filter(([, value]) => value !== undefined)
+    );
+
+    try {
+        if (manualEvent.id) {
+            // Update existing event
+            const eventRef = doc(firestore, 'events', manualEvent.id);
+            await updateDoc(eventRef, sanitizedEventData);
+            setEvents(prev => prev.map(e => e.id === manualEvent.id ? { ...e, ...sanitizedEventData } as CalendarEvent : e));
+            toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
+        } else {
+            // Create new event
+            const docRef = await addDoc(collection(firestore, 'events'), sanitizedEventData);
+            const newEvent = { ...sanitizedEventData, id: docRef.id } as CalendarEvent;
+            setEvents(prev => [...prev, newEvent]);
+            toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
+        }
         
-        const eventData = { ...manualEvent, instructorId: user.uid, instructor: user.displayName };
-
-        try {
-            if (manualEvent.id) {
-                // Update existing event
-                const eventRef = doc(firestore, 'events', manualEvent.id);
-                await updateDoc(eventRef, eventData);
-                setEvents(prev => prev.map(e => e.id === manualEvent.id ? { ...e, ...eventData } : e));
-                toast({ title: 'Event Updated!', description: `"${manualEvent.title}" has been updated.` });
-            } else {
-                // Create new event
-                const docRef = await addDoc(collection(firestore, 'events'), eventData);
-                const newEvent = { ...eventData, id: docRef.id } as CalendarEvent;
-                setEvents(prev => [...prev, newEvent]);
-                toast({ title: 'Event Created!', description: `"${newEvent.title}" has been added.` });
-            }
-            
-            setIsManualDialogOpen(false);
-            setManualEvent({});
-        } catch(error) {
-            console.error("Error saving event:", error);
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
-        }
-    };
+        setIsManualDialogOpen(false);
+        setManualEvent({});
+    } catch(error) {
+        console.error("Error saving event:", error);
+        toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
+    }
+};
 
   return (
     <div className="space-y-8">
@@ -974,7 +979,3 @@ function InstructorPage() {
 }
 
 export default withAuth(InstructorPage, ['instructor']);
-
-    
-
-    
