@@ -22,7 +22,7 @@ import { Separator } from "@/components/ui/separator";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import Autoplay from "embla-carousel-autoplay";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { FaTiktok, FaYoutube, FaFacebook, FaTwitter, FaWhatsapp } from "react-icons/fa";
+import { FaTiktok, FaYoutube, FaFacebook, FaWhatsapp } from "react-icons/fa";
 import { cn } from "@/lib/utils";
 
 const firebaseConfig = {
@@ -82,15 +82,6 @@ type CalendarEvent = {
   platforms?: ('tiktok' | 'youtube' | 'zoom')[];
 };
 
-type Promotion = {
-    title: string;
-    description: string;
-    buttonText: string;
-    buttonLink: string;
-    icon?: string;
-};
-
-
 const testimonials = [
   {
     quote: "I was really struggling to keep up with my Master's in Data Science. The concepts were tough and the assignments felt overwhelming. Edumate was a lifesaver. The tutors didn't just give me answers; they walked me through the problems and helped me actually understand the material.",
@@ -112,7 +103,6 @@ export default function Home() {
   const [upcomingEvents, setUpcomingEvents] = useState<CalendarEvent[]>([]);
   const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
   const [isEventDialogOpen, setIsEventDialogOpen] = useState(false);
-  const [promotion, setPromotion] = useState<Promotion | null>(null);
 
   useEffect(() => {
     const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -154,21 +144,8 @@ export default function Home() {
         }
     };
 
-    const fetchPromotion = async () => {
-        try {
-            const promoRef = doc(firestore, 'promotions', 'homepage-banner');
-            const docSnap = await getDoc(promoRef);
-            if (docSnap.exists()) {
-                setPromotion(docSnap.data() as Promotion);
-            }
-        } catch (error) {
-            console.error("Error fetching promotion:", error);
-        }
-    };
-    
     fetchCoursesAndUsers();
     fetchUpcomingEvents();
-    fetchPromotion();
   }, []);
   
   const handleEventClick = (event: CalendarEvent) => {
@@ -243,32 +220,6 @@ export default function Home() {
                            <Link href="/courses">Explore Courses</Link>
                         </Button>
                     </div>
-                     {promotion && (
-                        <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
-                            <Link href={promotion.buttonLink} target="_blank" rel="noopener noreferrer"
-                                className="group relative block rounded-lg bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/10 transition-shadow duration-300 overflow-hidden p-4">
-                                <div className="flex items-center space-x-4">
-                                    <div className="flex-shrink-0 bg-primary/10 text-primary p-3 rounded-full">
-                                        {promotion.icon === 'tiktok' ? <FaTiktok className="h-6 w-6" /> : <SparklesIcon className="h-6 w-6" />}
-                                    </div>
-                                    <div className="flex-1 min-w-0 overflow-hidden">
-                                        <div className="flex animate-marquee whitespace-nowrap">
-                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
-                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
-                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
-                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
-                                        </div>
-                                    </div>
-                                    <div className="hidden sm:block">
-                                        <Button variant="ghost" size="sm" className="group-hover:text-primary">
-                                            {promotion.buttonText}
-                                            <ArrowRight className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1" />
-                                        </Button>
-                                    </div>
-                                </div>
-                            </Link>
-                        </div>
-                    )}
                     <div className="mt-12 text-center animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
                         <p className="text-sm font-medium text-muted-foreground mb-4">Follow us for updates and free content</p>
                         <div className="flex justify-center space-x-4">

@@ -9,6 +9,7 @@ import { Menu } from 'lucide-react';
 import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { PromotionBanner } from './promotion-banner';
 
 export const PublicHeader = () => {
   const pathname = usePathname();
@@ -105,6 +106,7 @@ export const PublicHeader = () => {
           </div>
         </div>
       </header>
+      <PromotionBanner />
     </>
   );
 };
