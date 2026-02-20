@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from "react";
@@ -47,7 +46,7 @@ export function AdminSubscriptionsTab({ subscriptions, onCancelSubscription }: A
                     <CardTitle>Available Subscription Plans</CardTitle>
                     <CardDescription>A reference of all subscription plans configured for the platform.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {subscriptionPlans.map(plan => (
                         <Card key={plan.id} className="flex flex-col">
                             <CardHeader>

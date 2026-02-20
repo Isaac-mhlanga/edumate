@@ -1,4 +1,3 @@
-
 'use client';
 
 import React from 'react';
@@ -37,7 +36,7 @@ export function SubscriptionsTab() {
                     <CardTitle>Available Plans</CardTitle>
                     <CardDescription>Choose a plan that best fits your learning needs.</CardDescription>
                 </CardHeader>
-                <CardContent className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
+                <CardContent className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {subscriptionPlans.map(plan => (
                         <Card key={plan.id} className="flex flex-col">
                             <CardHeader>
