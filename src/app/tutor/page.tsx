@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -105,9 +104,15 @@ function TutorPage() {
             { day: "Thursday", slots: [] }, { day: "Friday", slots: [] }, { day: "Saturday", slots: [] }, { day: "Sunday", slots: [] },
         ];
 
+        let unsubscribeMessages: Unsubscribe | null = null;
 
-        const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
+        const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+                unsubscribeMessages = null;
+            }
+
             if (currentUser) {
                 setLoading(true);
                 // Fetch Profile
@@ -133,7 +138,7 @@ function TutorPage() {
 
                 // Subscribe to Message Threads
                 const messagesQuery = query(collection(firestore, 'messages'), where('tutorId', '==', currentUser.uid));
-                const unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
+                unsubscribeMessages = onSnapshot(messagesQuery, (snapshot) => {
                     const threads = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as MessageThread));
                     // Sort on the client side to avoid needing a composite index
                     threads.sort((a, b) => (b.lastMessageTimestamp?.toMillis() || 0) - (a.lastMessageTimestamp?.toMillis() || 0));
@@ -141,13 +146,17 @@ function TutorPage() {
                 });
                 
                 setLoading(false);
-                return () => unsubscribeMessages();
             } else {
                 setLoading(false);
             }
         });
         
-        return () => unsubscribe();
+        return () => {
+            unsubscribeAuth();
+            if (unsubscribeMessages) {
+                unsubscribeMessages();
+            }
+        };
     }, [toast]);
     
      useEffect(() => {
@@ -769,7 +778,7 @@ function TutorPage() {
                                 <button key={thread.id} onClick={() => handleSelectThread(thread)} className={cn("block w-full text-left p-4 border-b hover:bg-muted", selectedThread?.id === thread.id && "bg-muted")}>
                                     <div className="flex justify-between">
                                         <h4 className="font-semibold">{thread.studentName}</h4>
-                                        {!thread.isReadByTutor && <Badge className="h-2 w-2 p-0"></Badge>}
+                                        {!thread.isReadByTutor && <Badge>New</Badge>}
                                     </div>
                                     <p className="text-sm text-muted-foreground truncate">{thread.lastMessage}</p>
                                     <p className="text-sm text-muted-foreground mt-1">
