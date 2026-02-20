@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuSepar
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Search, ListFilter, Eye, CheckCircle, DollarSign, Hourglass, ChevronLeft, ChevronRight, MoreVertical, Trash2 } from "lucide-react";
+import { Search, ListFilter, Eye, CheckCircle, DollarSign, Hourglass, ChevronLeft, ChevronRight, MoreVertical, Trash2, PenSquare } from "lucide-react";
 import { type Assignment } from "@/app/admin/page";
 
 interface AdminAssignmentsTabProps {
@@ -101,12 +101,14 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
                                     className={
                                         assignment.status === 'Paid' ? 'bg-green-500/20 text-green-700'
                                         : assignment.status === 'Awaiting Payment' ? 'bg-blue-500/20 text-blue-700'
+                                        : assignment.status === 'In Progress' ? 'bg-purple-500/20 text-purple-700'
                                         : 'bg-yellow-500/20 text-yellow-700'
                                     }
                                 >
                                     {assignment.status === 'Paid' && <CheckCircle className="mr-1 h-3 w-3" />}
                                     {assignment.status === 'Awaiting Payment' && <DollarSign className="mr-1 h-3 w-3" />}
                                     {assignment.status === 'Pending Review' && <Hourglass className="mr-1 h-3 w-3" />}
+                                    {assignment.status === 'In Progress' && <PenSquare className="mr-1 h-3 w-3" />}
                                     {assignment.status}
                                 </Badge>
                             </TableCell>
@@ -142,5 +144,7 @@ export function AdminAssignmentsTab({ assignments, onOpenAssignmentReview, onDel
         </Card>
     );
 }
+
+    
 
     
