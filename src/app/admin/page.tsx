@@ -60,7 +60,7 @@ export type PayoutRequest = {
 export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; markerName?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; solutionUrl?: string; deletedByStudent?: boolean; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
-export type Transaction = { id: string; studentId?: string; studentName?: string; instructorId?: string; instructorName?: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
+export type Transaction = { id: string; studentId?: string; studentName?: string; studentEmail?: string; studentPhoneNumber?: string; instructorId?: string; instructorName?: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
 export type RecentActivity = {
     id: string;
     type: 'New User' | 'New Course' | 'Payout' | 'Transaction';
@@ -150,12 +150,12 @@ function AdminPage() {
                 const fetchedEvents = eventsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as CalendarEvent));
                 setEvents(fetchedEvents);
 
-                // Fetch Users and create a map for instructor lookup
+                // Fetch Users and create a map for lookups
                 const usersSnapshot = await getDocs(query(collection(firestore, "users"), orderBy('createdAt', 'desc')));
-                const userMap = new Map<string, string>();
+                const userDetailsMap = new Map<string, { fullName: string; email: string; phoneNumber?: string }>();
                 const fetchedUsers = usersSnapshot.docs.map(doc => {
                     const data = doc.data();
-                    userMap.set(doc.id, data.fullName); // Populate map
+                    userDetailsMap.set(doc.id, { fullName: data.fullName, email: data.email, phoneNumber: data.phoneNumber });
                     const joinedDate = data.createdAt.toDate();
                     return { 
                         id: doc.id, 
@@ -183,7 +183,7 @@ function AdminPage() {
                     const courseData = { id: doc.id, ...doc.data() } as Course;
                     return {
                         ...courseData,
-                        instructor: userMap.get(courseData.instructorId) || 'Unknown Instructor'
+                        instructor: userDetailsMap.get(courseData.instructorId)?.fullName || 'Unknown Instructor'
                     };
                 });
                 setCourses(fetchedCourses);
@@ -195,10 +195,13 @@ function AdminPage() {
                 const transactionsSnapshot = await getDocs(query(collection(firestore, "transactions"), orderBy('createdAt', 'desc')));
                 const fetchedTransactions = transactionsSnapshot.docs.map(doc => {
                     const data = doc.data();
+                    const userDetails = userDetailsMap.get(data.studentId);
                     return {
                         id: doc.id,
                         ...data,
-                        studentName: data.studentId ? userMap.get(data.studentId) || 'N/A' : 'N/A',
+                        studentName: userDetails?.fullName || 'N/A',
+                        studentEmail: userDetails?.email,
+                        studentPhoneNumber: userDetails?.phoneNumber,
                     } as Transaction;
                 });
                 setTransactions(fetchedTransactions);

@@ -6,7 +6,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Separator } from "@/components/ui/separator";
 import { Badge } from "@/components/ui/badge";
 import { Icons } from "./icons";
-import { CheckCircle, Clock, XCircle, User, GraduationCap, FilePenLine, CreditCard } from "lucide-react";
+import { CheckCircle, Clock, XCircle, User, GraduationCap, FilePenLine, CreditCard, Mail, Phone } from "lucide-react";
 import { Transaction } from "@/app/admin/page";
 import { format } from 'date-fns';
 
@@ -59,7 +59,8 @@ export const TransactionReceipt = React.forwardRef<HTMLDivElement, TransactionRe
                              <div>
                                 <h2 className="text-sm font-semibold text-muted-foreground mb-2 tracking-wider uppercase">Billed To</h2>
                                 <p className="text-lg font-bold">{transaction.studentName}</p>
-                                <p className="text-sm text-muted-foreground">User ID: {transaction.studentId}</p>
+                                {transaction.studentEmail && <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1"><Mail className="h-3 w-3" /> {transaction.studentEmail}</div>}
+                                {transaction.studentPhoneNumber && <div className="text-sm text-muted-foreground flex items-center gap-2 mt-1"><Phone className="h-3 w-3" /> {transaction.studentPhoneNumber}</div>}
                             </div>
                         </div>
                         
