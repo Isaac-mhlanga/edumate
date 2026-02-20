@@ -140,8 +140,12 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
                                 <TableCell className="hidden sm:table-cell">{assignment.dueDate ? format(assignment.dueDate.toDate(), 'PPP') : 'N/A'}</TableCell>
                                 <TableCell>
                                     <Badge variant={"outline"} className={getStatusBadgeVariant(assignment.status)}>
-                                        {getStatusIcon(assignment.status)}
-                                        {assignment.status}
+                                        {assignment.status === 'Paid' && assignment.solutionUrl
+                                            ? <Download className="mr-1 h-3 w-3" />
+                                            : getStatusIcon(assignment.status)}
+                                        {assignment.status === 'Paid' && assignment.solutionUrl 
+                                            ? 'Solution Ready' 
+                                            : assignment.status}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="hidden md:table-cell font-semibold">{assignment.price !== null ? (assignment.price > 0 ? `R ${assignment.price.toFixed(2)}` : 'Free') : 'N/A'}</TableCell>
@@ -209,5 +213,3 @@ export function AssignmentsTab({ submittedAssignments, loadingAssignments, onOpe
         </Card>
     );
 }
-
-    
