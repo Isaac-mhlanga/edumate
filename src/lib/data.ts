@@ -162,36 +162,25 @@ export const subscriptionPlans = [
     {
         id: 'basic',
         name: 'Basic',
-        price: 99,
+        price: 120,
         features: [
             'Access to all courses for ONE subject',
-            'Community forum access',
             'Downloadable course notes',
+            'Community forum access',
         ],
     },
     {
         id: 'pro',
         name: 'Pro',
-        price: 180,
+        price: 250,
         features: [
-            'Access to ALL courses for ALL subjects',
+            'Access to ALL courses across ALL subjects',
+            '3 assignment solution credits per month',
             '2 private tutor sessions per month',
-            '5 assignment solution credits per month',
+            'Personalized study plan',
             'Exclusive access to live revision workshops'
         ],
     },
-    {
-        id: 'premium',
-        name: 'Premium',
-        price: 250,
-        features: [
-            'Access to ALL courses & subjects',
-            '4 private tutor sessions per month',
-            '2 assignment solution credits per month',
-            'Personalized study plan',
-            'On-demand exam prep sessions'
-        ],
-    }
 ];
 
 export const studentData = {
