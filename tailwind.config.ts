@@ -140,6 +140,10 @@ export default {
           '0%, 100%': { transform: 'translateY(0) scale(1)' },
           '50%': { transform: 'translateY(-20px) scale(1.03)' },
         },
+        marquee: {
+          from: { transform: 'translateX(0)' },
+          to: { transform: 'translateX(-50%)' },
+        },
       },
       animation: {
         'accordion-down': 'accordion-down 0.2s ease-out',
@@ -153,6 +157,7 @@ export default {
         'blob': 'blob 20s cubic-bezier(0.76, 0, 0.24, 1) infinite',
         'blob-2': 'blob 20s cubic-bezier(0.76, 0, 0.24, 1) 4s infinite',
         'float-student': 'float-student 10s ease-in-out infinite',
+        'marquee': 'marquee 40s linear infinite',
       },
        boxShadow: {
         'card-glow': '0 0 20px -5px hsl(var(--primary) / 0.3)',

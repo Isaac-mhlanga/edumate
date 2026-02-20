@@ -1,3 +1,4 @@
+
 'use client';
 
 import { EventDialog } from "@/components/event-dialog";
@@ -8,10 +9,10 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { faqData } from "@/lib/data";
+import { faqData, subscriptionPlans } from "@/lib/data";
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { collection, getDocs, getFirestore, orderBy, query, Timestamp, where, limit, getDoc, doc } from "firebase/firestore";
-import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock, User, Gift, Sparkles as SparklesIcon } from "lucide-react";
+import { Award, BookOpen, ChevronRight, GraduationCap, Handshake, Sparkle, Star, Video, Clapperboard, Calendar, HelpCircle, Rocket, ArrowRight, Users, FilePenLine, Banknote, School, Clock, User, Gift, Sparkles as SparklesIcon, CheckCircle } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
@@ -22,6 +23,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import Autoplay from "embla-carousel-autoplay";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { FaTiktok, FaYoutube, FaFacebook, FaTwitter } from "react-icons/fa";
+import { cn } from "@/lib/utils";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -241,6 +243,32 @@ export default function Home() {
                            <Link href="/courses">Explore Courses</Link>
                         </Button>
                     </div>
+                     {promotion && (
+                        <div className="mt-12 animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
+                            <Link href={promotion.buttonLink} target="_blank" rel="noopener noreferrer"
+                                className="group relative block rounded-lg bg-card/50 backdrop-blur-lg border-border/20 shadow-lg hover:shadow-primary/10 transition-shadow duration-300 overflow-hidden p-4">
+                                <div className="flex items-center space-x-4">
+                                    <div className="flex-shrink-0 bg-primary/10 text-primary p-3 rounded-full">
+                                        {promotion.icon === 'tiktok' ? <FaTiktok className="h-6 w-6" /> : <SparklesIcon className="h-6 w-6" />}
+                                    </div>
+                                    <div className="flex-1 min-w-0 overflow-hidden">
+                                        <div className="flex animate-marquee whitespace-nowrap">
+                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
+                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
+                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
+                                            <span className="font-semibold mx-4">{promotion.title}: {promotion.description}</span>
+                                        </div>
+                                    </div>
+                                    <div className="hidden sm:block">
+                                        <Button variant="ghost" size="sm" className="group-hover:text-primary">
+                                            {promotion.buttonText}
+                                            <ArrowRight className="ml-2 h-4 w-4 transform transition-transform group-hover:translate-x-1" />
+                                        </Button>
+                                    </div>
+                                </div>
+                            </Link>
+                        </div>
+                    )}
                 </div>
             </div>
         </section>
@@ -295,8 +323,48 @@ export default function Home() {
             </div>
           </div>
         </section>
+        
+        <section id="pricing" className="py-24 bg-muted">
+            <div className="max-w-7xl mx-auto px-6">
+                <div className="text-center mb-12 animate-fade-in-up">
+                    <Badge>Pricing</Badge>
+                    <h2 className="text-3xl md:text-4xl font-headline font-bold my-4">Choose Your Plan</h2>
+                    <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
+                        Select the perfect plan to kickstart your learning journey and unlock your full potential.
+                    </p>
+                </div>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
+                    {subscriptionPlans.map((plan, index) => (
+                        <Card key={plan.id} className={cn("flex flex-col animate-fade-in-up", plan.name === 'Pro' ? 'border-2 border-primary shadow-card-glow' : 'bg-card/50 backdrop-blur-lg border-border/20 shadow-lg')} style={{ animationDelay: `${0.2 + index * 0.1}s` }}>
+                            <CardHeader>
+                                <div className="flex justify-between items-center">
+                                    <CardTitle className="text-2xl">{plan.name}</CardTitle>
+                                    {plan.name === 'Pro' && <Badge>Most Popular</Badge>}
+                                </div>
+                                <p className="text-4xl font-bold pt-4">R{plan.price}<span className="text-sm font-normal text-muted-foreground">/month</span></p>
+                            </CardHeader>
+                            <CardContent className="flex-grow">
+                                <ul className="space-y-3 text-sm text-muted-foreground">
+                                    {plan.features.map((feature, i) => (
+                                        <li key={i} className="flex items-start gap-3">
+                                            <CheckCircle className="h-5 w-5 text-green-500 mt-0.5 shrink-0"/>
+                                            <span>{feature}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </CardContent>
+                            <CardFooter>
+                                <Button asChild size="lg" className="w-full" variant={plan.name === 'Pro' ? 'default' : 'outline'}>
+                                    <Link href="/register">Choose Plan</Link>
+                                </Button>
+                            </CardFooter>
+                        </Card>
+                    ))}
+                </div>
+            </div>
+        </section>
 
-        <section id="refer-earn" className="py-24 bg-muted">
+        <section id="refer-earn" className="py-24 bg-background">
             <div className="max-w-7xl mx-auto px-6">
                 <div className="text-center mb-12 animate-fade-in-up">
                     <Badge>Get Rewarded</Badge>
@@ -336,42 +404,6 @@ export default function Home() {
                 </div>
             </div>
         </section>
-
-        {promotion && (
-            <section id="promotion" className="py-24 bg-background">
-                <div className="max-w-5xl mx-auto px-6">
-                    <div className="relative rounded-2xl overflow-hidden p-8 sm:p-12 bg-gradient-to-br from-primary via-primary/80 to-primary/70 text-primary-foreground shadow-2xl shadow-primary/20">
-                        <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/10 rounded-full filter blur-xl opacity-50"></div>
-                        <div className="absolute -bottom-16 -left-10 w-40 h-40 bg-white/10 rounded-full filter blur-2xl opacity-50"></div>
-                        
-                        <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-8 text-center md:text-left">
-                            <div className="flex-shrink-0 hidden md:block">
-                                <div className="bg-white/20 p-5 rounded-full inline-block animate-float-1">
-                                    {promotion.icon === 'tiktok' ? <FaTiktok className="h-12 w-12" /> : <SparklesIcon className="h-12 w-12" />}
-                                </div>
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="text-3xl font-headline font-bold">{promotion.title}</h3>
-                                <p className="mt-2 text-lg opacity-90 max-w-lg mx-auto md:mx-0">
-                                    {promotion.description}
-                                </p>
-                            </div>
-                            <div className="flex-shrink-0 mt-6 md:mt-0">
-                                <Button 
-                                    size="lg" 
-                                    asChild 
-                                    className="bg-white text-primary font-bold hover:bg-white/90 shadow-lg transform hover:scale-105 transition-transform px-8 py-6 text-base"
-                                >
-                                    <a href={promotion.buttonLink} target="_blank" rel="noopener noreferrer">
-                                        {promotion.buttonText} <ArrowRight className="ml-2" />
-                                    </a>
-                                </Button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        )}
 
         <section id="featured-courses" className="py-24 bg-muted">
             <div className="max-w-7xl mx-auto px-6">
