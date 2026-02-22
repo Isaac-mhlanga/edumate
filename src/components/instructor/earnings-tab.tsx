@@ -20,7 +20,7 @@ interface InstructorEarningsTabProps {
 
 export function InstructorEarningsTab({ transactions, loading, onTransactionAction, onPayoutRequest }: InstructorEarningsTabProps) {
     const availableForPayout = transactions.reduce((acc, t) => {
-        if (t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale') {
+        if (t.itemType === 'Course Sale' || t.itemType === 'Assignment Sale' || t.itemType === 'course' || t.itemType === 'assignment') {
             return acc + t.amount;
         }
         return acc;
@@ -83,7 +83,7 @@ export function InstructorEarningsTab({ transactions, loading, onTransactionActi
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem onClick={() => onTransactionAction(transaction, 'view')}><ReceiptText className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
-                                                        {transaction.status === 'Completed' && transaction.itemType.includes('Sale') &&
+                                                        {transaction.status === 'Completed' && (transaction.itemType.includes('Sale') || transaction.itemType === 'course' || transaction.itemType === 'assignment') &&
                                                             <DropdownMenuItem onClick={() => onTransactionAction(transaction, 'refund')}><Undo2 className="mr-2 h-4 w-4"/>Process Refund</DropdownMenuItem>
                                                         }
                                                     </DropdownMenuContent>

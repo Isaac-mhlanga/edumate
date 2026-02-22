@@ -110,7 +110,7 @@ export type Transaction = {
     studentName?: string;
     studentId?: string;
     instructorId?: string;
-    itemType: 'Course Sale' | 'Assignment Sale' | 'Subscription' | 'Refund' | 'Payout';
+    itemType: 'course' | 'assignment' | 'subscription' | 'refund' | 'payout' | 'Course Sale' | 'Assignment Sale';
     status: 'Completed' | 'Pending' | 'Refunded';
     amount: number;
     createdAt: Timestamp;
@@ -626,8 +626,12 @@ function InstructorPage() {
     const assignmentRef = doc(firestore, 'assignments', assignmentId);
 
     try {
+        const batch = writeBatch(firestore);
+        const currentAssignment = submittedAssignments.find(a => a.id === assignmentId);
+        if (!currentAssignment) throw new Error("Assignment not found");
+
         const isFree = price === 0;
-        let solutionUrl = submittedAssignments.find(a => a.id === assignmentId)?.solutionUrl || null;
+        let solutionUrl = currentAssignment.solutionUrl || null;
 
         if (solutionFile) {
             if (solutionUrl) {
@@ -643,20 +647,56 @@ function InstructorPage() {
             solutionUrl = await getDownloadURL(solutionStorageRef);
         }
         
-        await updateDoc(assignmentRef, {
+        const updateData = {
             price: price,
             status: isFree ? 'Paid' : 'Awaiting Payment',
             solutionUrl: solutionUrl,
-        });
+        };
         
+        batch.update(assignmentRef, updateData);
+
+        // If the solution is free, create a transaction record
+        if (isFree) {
+            const transactionRef = doc(collection(firestore, 'transactions'));
+            batch.set(transactionRef, {
+                studentId: currentAssignment.studentId,
+                instructorId: user?.uid,
+                itemId: currentAssignment.id,
+                itemType: 'assignment',
+                itemTitle: currentAssignment.title,
+                amount: 0,
+                status: 'Completed',
+                currency: 'ZAR',
+                createdAt: Timestamp.now(),
+                notes: 'Marked as free by instructor.'
+            });
+
+            // Optimistically update local transaction state
+            const newTransaction: Transaction = {
+                id: transactionRef.id,
+                studentId: currentAssignment.studentId,
+                studentName: currentAssignment.studentName,
+                instructorId: user?.uid,
+                itemTitle: currentAssignment.title,
+                itemType: 'assignment',
+                status: 'Completed',
+                amount: 0,
+                createdAt: Timestamp.now(),
+                date: format(new Date(), 'PPP'),
+            };
+            setTransactions(prev => [newTransaction, ...prev]);
+        }
+        
+        await batch.commit();
+
         setSubmittedAssignments(assignments => assignments.map(a => 
-            a.id === assignmentId ? { ...a, status: isFree ? 'Paid' : 'Awaiting Payment', price: price, solutionUrl: solutionUrl } : a
+            a.id === assignmentId ? { ...a, ...updateData } : a
         ));
         
         if (isFree) {
              toast({
                 title: "Solution Marked as Free!",
-                description: `The solution is now available for the student to download.`
+                description: `The solution is now available and a R0.00 transaction has been recorded.`
             });
         } else {
             toast({

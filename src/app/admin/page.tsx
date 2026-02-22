@@ -399,22 +399,25 @@ function AdminPage() {
     const handleUpdateAssignment = async (assignmentId: string, newPrice: number | null, solutionFile: File | null) => {
         const assignmentRef = doc(firestore, 'assignments', assignmentId);
         try {
+            const batch = writeBatch(firestore);
             const currentAssignment = assignments.find(a => a.id === assignmentId);
-            let statusToUpdate = currentAssignment?.status;
-            let solutionUrl = currentAssignment?.solutionUrl;
-
+            if (!currentAssignment) throw new Error("Assignment not found");
+    
+            let statusToUpdate = currentAssignment.status;
+            let solutionUrl = currentAssignment.solutionUrl;
+    
             if (solutionFile) {
                 const solutionStorageRef = ref(storage, `assignments/${assignmentId}/solutions/${solutionFile.name}`);
                 await uploadBytes(solutionStorageRef, solutionFile);
                 solutionUrl = await getDownloadURL(solutionStorageRef);
             }
-
-            if (currentAssignment?.status === 'Pending Review' && newPrice !== null) {
-                statusToUpdate = newPrice === 0 ? 'Paid' : 'Awaiting Payment';
-            } else if (newPrice === 0) {
+    
+            if (newPrice === 0) {
                 statusToUpdate = 'Paid';
+            } else if (currentAssignment.status === 'Pending Review' && newPrice !== null) {
+                statusToUpdate = 'Awaiting Payment';
             }
-
+    
             const updateData: any = {
                 price: newPrice,
                 status: statusToUpdate,
@@ -422,13 +425,47 @@ function AdminPage() {
             if(solutionUrl) {
                 updateData.solutionUrl = solutionUrl;
             }
-
-            await updateDoc(assignmentRef, updateData);
+    
+            batch.update(assignmentRef, updateData);
+    
+            // Create a transaction if the assignment is now free and paid
+            if (newPrice === 0) {
+                const transactionRef = doc(collection(firestore, 'transactions'));
+                const instructorId = currentAssignment.markerId || currentAssignment.instructorId || null;
+    
+                batch.set(transactionRef, {
+                    studentId: currentAssignment.studentId,
+                    instructorId: instructorId,
+                    itemId: currentAssignment.id,
+                    itemType: 'assignment',
+                    itemTitle: currentAssignment.assignmentTitle,
+                    amount: 0,
+                    status: 'Completed',
+                    currency: 'ZAR',
+                    createdAt: Timestamp.now(),
+                    notes: 'Marked as free by admin.'
+                });
+    
+                // Optimistically add to local state
+                const newTransaction: Transaction = {
+                    id: transactionRef.id,
+                    studentId: currentAssignment.studentId,
+                    studentName: currentAssignment.studentName,
+                    itemTitle: currentAssignment.assignmentTitle,
+                    itemType: 'assignment',
+                    status: 'Completed',
+                    amount: 0,
+                    createdAt: Timestamp.now(),
+                };
+                setTransactions(prev => [newTransaction, ...prev]);
+            }
+    
+            await batch.commit();
             
             setAssignments(prev => 
                 prev.map(a => a.id === assignmentId ? { ...a, ...updateData } : a)
             );
-
+    
             toast({ title: "Assignment Updated", description: "The assignment has been successfully updated." });
             setIsAssignmentReviewDialogOpen(false);
         } catch (error) {

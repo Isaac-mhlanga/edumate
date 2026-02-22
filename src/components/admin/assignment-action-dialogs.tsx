@@ -9,7 +9,7 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { Download, Save } from "lucide-react";
+import { Download, Save, CheckCircle } from "lucide-react";
 import { type Assignment } from "@/app/admin/page";
 import { useToast } from "@/hooks/use-toast";
 
@@ -104,17 +104,18 @@ export function AssignmentReviewDialog({ isOpen, setIsOpen, selectedAssignment, 
                             </div>
                              <div className="space-y-2">
                                 <Label htmlFor="solution-file">Upload Solution (.zip)</Label>
+                                {selectedAssignment?.solutionUrl && !solutionFile && (
+                                    <div className="text-xs text-green-600 dark:text-green-400 flex items-center gap-2 p-2 bg-green-50 dark:bg-green-900/30 border border-green-200 dark:border-green-800 rounded-md">
+                                        <CheckCircle className="h-4 w-4" />
+                                        <span>A solution file is already attached. Uploading a new file will replace it.</span>
+                                    </div>
+                                )}
                                 <Input
                                     id="solution-file"
                                     type="file"
                                     accept=".zip"
                                     onChange={(e) => setSolutionFile(e.target.files?.[0] || null)}
                                 />
-                                {(selectedAssignment?.solutionUrl && !solutionFile) && (
-                                    <p className="text-xs text-muted-foreground">
-                                        A solution file already exists. Uploading a new file will replace it.
-                                    </p>
-                                )}
                             </div>
                         </div>
                     </div>
