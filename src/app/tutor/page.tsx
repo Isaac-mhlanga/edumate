@@ -421,7 +421,7 @@ function TutorPage() {
                     itemId: booking.id,
                     itemType: 'Tutoring Session',
                     itemTitle: `Session with ${booking.studentName}`,
-                    amount: profile?.hourlyRate || 0,
+                    amount: booking.price || 0,
                     status: 'Completed',
                     currency: 'ZAR',
                     createdAt: serverTimestamp(),
@@ -1141,3 +1141,6 @@ type Transaction = {
     createdAt: Timestamp;
     date: string; // for display
 };
+
+
+    
