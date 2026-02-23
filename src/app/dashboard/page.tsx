@@ -19,6 +19,7 @@ import { SubscriptionsTab } from "@/components/dashboard/subscriptions-tab";
 import { AssignmentDialog } from "@/components/dashboard/assignment-dialog";
 import { RefundDialog } from "@/components/dashboard/refund-dialog";
 import { StudentCalendarTab } from "@/components/dashboard/calendar-tab";
+import { BookingsTab } from "@/components/dashboard/bookings-tab";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -75,6 +76,21 @@ export type Transaction = {
     date: string; // for display
 };
 
+export type Booking = {
+    id: string;
+    studentName: string;
+    studentId: string;
+    tutorId: string;
+    tutorName: string;
+    date: string;
+    time: string;
+    subject: string;
+    status: 'Confirmed' | 'Completed' | 'Pending Confirmation' | 'Declined';
+    createdAt: Timestamp;
+    price?: number;
+};
+
+
 function DashboardPage() {
     const searchParams = useSearchParams();
     const { toast } = useToast();
@@ -86,10 +102,13 @@ function DashboardPage() {
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [allCourses, setAllCourses] = React.useState<Course[]>([]);
     const [purchasedCourses, setPurchasedCourses] = React.useState<Course[]>([]);
+    const [bookings, setBookings] = React.useState<Booking[]>([]);
+
 
     const [loadingAssignments, setLoadingAssignments] = React.useState(true);
     const [loadingTransactions, setLoadingTransactions] = React.useState(true);
     const [loadingCourses, setLoadingCourses] = React.useState(true);
+    const [loadingBookings, setLoadingBookings] = React.useState(true);
     
     const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
@@ -106,6 +125,7 @@ function DashboardPage() {
             setLoadingAssignments(true);
             setLoadingTransactions(true);
             setLoadingCourses(true);
+            setLoadingBookings(true);
             try {
                 // Fetch assignments
                 const assignmentsQuery = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
@@ -139,6 +159,13 @@ function DashboardPage() {
                         progress: Math.floor(Math.random() * 80) + 10,
                     }));
                 setPurchasedCourses(studentPurchasedCourses);
+                
+                // Fetch bookings
+                const bookingsQuery = query(collection(firestore, 'bookings'), where('studentId', '==', user.uid), orderBy('createdAt', 'desc'));
+                const bookingsSnapshot = await getDocs(bookingsQuery);
+                const userBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
+                setBookings(userBookings);
+
 
             } catch (error: any) {
                 console.error("Error fetching student data: ", error);
@@ -149,6 +176,7 @@ function DashboardPage() {
                 setLoadingAssignments(false);
                 setLoadingTransactions(false);
                 setLoadingCourses(false);
+                setLoadingBookings(false);
             }
         };
 
@@ -161,9 +189,11 @@ function DashboardPage() {
                 setTransactions([]);
                 setAllCourses([]);
                 setPurchasedCourses([]);
+                setBookings([]);
                 setLoadingAssignments(false);
                 setLoadingTransactions(false);
                 setLoadingCourses(false);
+                setLoadingBookings(false);
             }
         });
 
@@ -278,6 +308,13 @@ function DashboardPage() {
             
             {currentTab === 'calendar' && (
                 <StudentCalendarTab />
+            )}
+
+            {currentTab === 'bookings' && (
+                <BookingsTab 
+                    bookings={bookings}
+                    loadingBookings={loadingBookings}
+                />
             )}
 
             {currentTab === 'transactions' && (
