@@ -158,6 +158,7 @@ const adminMenuItems: MenuItem[] = [
   { href: '/admin?tab=tutors', label: 'Tutors', icon: UserCog, basePath: '/admin', tab: 'tutors' },
   { href: '/admin?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/admin', tab: 'enquiries' },
   { href: '/admin?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/admin', tab: 'assignments' },
+  { href: '/admin?tab=bookings', label: 'Bookings', icon: CalendarCheck, basePath: '/admin', tab: 'bookings' },
   { href: '/admin?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/admin', tab: 'calendar' },
   { href: '/admin?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/admin', tab: 'subscriptions' },
 ];

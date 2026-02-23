@@ -28,6 +28,7 @@ import { ChangeRoleDialog } from "@/components/admin/change-role-dialog";
 import { AdminPromotionsTab } from "@/components/admin/promotions-tab";
 import { AdminTransactionsTab } from "@/components/admin/transactions-tab";
 import { DeleteTransactionDialog, TransactionReceiptDialog } from "@/components/admin/transaction-action-dialogs";
+import { AdminBookingsTab } from "@/components/admin/bookings-tab";
 
 
 const firebaseConfig = {
@@ -232,10 +233,6 @@ function AdminPage() {
                     } as PayoutRequest;
                 });
                 setPayoutRequests(fetchedPayouts);
-
-                const bookingsSnapshot = await getDocs(query(collection(firestore, "bookings"), orderBy('createdAt', 'desc')));
-                const fetchedBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
-                setBookings(fetchedBookings);
                 
                 // Fetch Promotion
                 const promoRef = doc(firestore, 'promotions', 'homepage-banner');
@@ -251,6 +248,18 @@ function AdminPage() {
             setLoading(false);
         };
         fetchData();
+        
+        // Real-time listener for bookings
+        const bookingsQuery = query(collection(firestore, "bookings"), orderBy('createdAt', 'desc'));
+        const unsubscribe = onSnapshot(bookingsQuery, (snapshot) => {
+            const fetchedBookings = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
+            setBookings(fetchedBookings);
+        }, (error) => {
+            console.error("Error fetching bookings:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not fetch bookings in real-time.' });
+        });
+
+        return () => unsubscribe();
     }, [firestore, toast]);
 
     const recentActivity = React.useMemo(() => {
@@ -651,6 +660,9 @@ function AdminPage() {
                         setIsMarkAsPaidDialogOpen(true);
                     }}
                 />
+            )}
+             {currentTab === 'bookings' && (
+                <AdminBookingsTab bookings={bookings} loading={loading} />
             )}
             {currentTab === 'calendar' && <AdminCalendarTab events={events} setEvents={setEvents} />}
             {currentTab === 'payouts' && (
