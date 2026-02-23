@@ -88,6 +88,7 @@ export type Booking = {
     status: 'Confirmed' | 'Completed' | 'Pending Confirmation' | 'Declined';
     createdAt: Timestamp;
     price?: number;
+    meetingLink?: string;
 };
 
 
@@ -356,3 +357,4 @@ export default withAuth(DashboardPage, ['student']);
     
 
     
+

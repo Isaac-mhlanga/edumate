@@ -8,8 +8,9 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
-import { ChevronLeft, ChevronRight, CheckCircle, Clock, XCircle } from "lucide-react";
+import { ChevronLeft, ChevronRight, CheckCircle, Clock, XCircle, Video } from "lucide-react";
 import { type Booking } from '@/app/admin/page';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 interface BookingsTabProps {
     bookings: Booking[];
@@ -22,6 +23,13 @@ export function BookingsTab({ bookings, loadingBookings }: BookingsTabProps) {
 
     const totalPages = Math.ceil(bookings.length / bookingsPerPage);
     const paginatedBookings = bookings.slice((currentPage - 1) * bookingsPerPage, currentPage * bookingsPerPage);
+
+    const upcomingSessions = React.useMemo(() => 
+        bookings
+            .filter(b => b.status === 'Confirmed' && new Date(b.date) >= new Date())
+            .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+    , [bookings]);
+    const nextSession = upcomingSessions.length > 0 ? upcomingSessions[0] : null;
 
     const getStatusIcon = (status: Booking['status']) => {
         switch (status) {
@@ -49,53 +57,75 @@ export function BookingsTab({ bookings, loadingBookings }: BookingsTabProps) {
                 <CardTitle>My Bookings</CardTitle>
                 <CardDescription>Track your pending, confirmed, and completed tutoring sessions.</CardDescription>
             </CardHeader>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Tutor</TableHead>
-                        <TableHead className="hidden sm:table-cell">Subject</TableHead>
-                        <TableHead className="hidden md:table-cell">Date & Time</TableHead>
-                        <TableHead>Price</TableHead>
-                        <TableHead className="text-right">Status</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {loadingBookings ? (
-                        Array.from({ length: 3 }).map((_, i) => (
-                            <TableRow key={i}>
-                                <TableCell><Skeleton className="h-5 w-24" /></TableCell>
-                                <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-20" /></TableCell>
-                                <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
-                                <TableCell><Skeleton className="h-5 w-16" /></TableCell>
-                                <TableCell className="text-right"><Skeleton className="h-6 w-28 ml-auto" /></TableCell>
-                            </TableRow>
-                        ))
-                    ) : paginatedBookings.length > 0 ? (
-                        paginatedBookings.map((booking) => (
-                            <TableRow key={booking.id}>
-                                <TableCell className="font-medium">{booking.tutorName}</TableCell>
-                                <TableCell className="hidden sm:table-cell">{booking.subject}</TableCell>
-                                <TableCell className="hidden md:table-cell">{booking.date} @ {booking.time}</TableCell>
-                                <TableCell className="font-semibold">
-                                    {booking.price ? `R ${booking.price.toFixed(2)}` : 'N/A'}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <Badge variant={"outline"} className={getStatusBadgeVariant(booking.status)}>
-                                        {getStatusIcon(booking.status)}
-                                        {booking.status}
-                                    </Badge>
-                                </TableCell>
-                            </TableRow>
-                        ))
-                    ) : (
+            <CardContent>
+                {nextSession && (
+                    <Alert className="mb-6">
+                        <Video className="h-4 w-4" />
+                        <AlertTitle>Upcoming Session!</AlertTitle>
+                        <AlertDescription className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                            <span>Your session with <strong>{nextSession.tutorName}</strong> is on {nextSession.date} at {nextSession.time}.</span>
+                            {nextSession.meetingLink && (
+                                <Button asChild size="sm" className="mt-2 sm:mt-0">
+                                    <a href={nextSession.meetingLink} target="_blank" rel="noopener noreferrer">Join Session</a>
+                                </Button>
+                            )}
+                        </AlertDescription>
+                    </Alert>
+                )}
+                <Table>
+                    <TableHeader>
                         <TableRow>
-                            <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
-                                You haven't booked any sessions yet.
-                            </TableCell>
+                            <TableHead>Tutor</TableHead>
+                            <TableHead className="hidden sm:table-cell">Subject</TableHead>
+                            <TableHead className="hidden md:table-cell">Date & Time</TableHead>
+                            <TableHead>Price</TableHead>
+                            <TableHead className="text-right">Action</TableHead>
                         </TableRow>
-                    )}
-                </TableBody>
-            </Table>
+                    </TableHeader>
+                    <TableBody>
+                        {loadingBookings ? (
+                            Array.from({ length: 3 }).map((_, i) => (
+                                <TableRow key={i}>
+                                    <TableCell><Skeleton className="h-5 w-24" /></TableCell>
+                                    <TableCell className="hidden sm:table-cell"><Skeleton className="h-5 w-20" /></TableCell>
+                                    <TableCell className="hidden md:table-cell"><Skeleton className="h-5 w-28" /></TableCell>
+                                    <TableCell><Skeleton className="h-5 w-16" /></TableCell>
+                                    <TableCell className="text-right"><Skeleton className="h-6 w-28 ml-auto" /></TableCell>
+                                </TableRow>
+                            ))
+                        ) : paginatedBookings.length > 0 ? (
+                            paginatedBookings.map((booking) => (
+                                <TableRow key={booking.id}>
+                                    <TableCell className="font-medium">{booking.tutorName}</TableCell>
+                                    <TableCell className="hidden sm:table-cell">{booking.subject}</TableCell>
+                                    <TableCell className="hidden md:table-cell">{booking.date} @ {booking.time}</TableCell>
+                                    <TableCell className="font-semibold">
+                                        {booking.price ? `R ${booking.price.toFixed(2)}` : 'N/A'}
+                                    </TableCell>
+                                    <TableCell className="text-right">
+                                        {booking.status === 'Confirmed' && booking.meetingLink ? (
+                                            <Button asChild size="sm">
+                                                <a href={booking.meetingLink} target="_blank" rel="noopener noreferrer">Join Session</a>
+                                            </Button>
+                                        ) : (
+                                            <Badge variant={"outline"} className={getStatusBadgeVariant(booking.status)}>
+                                                {getStatusIcon(booking.status)}
+                                                {booking.status}
+                                            </Badge>
+                                        )}
+                                    </TableCell>
+                                </TableRow>
+                            ))
+                        ) : (
+                            <TableRow>
+                                <TableCell colSpan={5} className="text-center h-24 text-muted-foreground">
+                                    You haven't booked any sessions yet.
+                                </TableCell>
+                            </TableRow>
+                        )}
+                    </TableBody>
+                </Table>
+            </CardContent>
             {bookings.length > 0 && (
                  <CardFooter className="flex flex-col sm:flex-row items-center justify-between py-4 gap-4">
                     <div className="text-sm text-muted-foreground">
