@@ -113,6 +113,7 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/dashboard/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/dashboard/whiteboard' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
+  { href: '/dashboard?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/dashboard', tab: 'calendar' },
   { href: '/dashboard/referrals', label: 'Referrals', icon: Gift, basePath: '/dashboard/referrals' },
   { href: '/dashboard?tab=transactions', label: 'Transactions', icon: ReceiptText, basePath: '/dashboard', tab: 'transactions' },
   { href: '/dashboard?tab=subscriptions', label: 'Subscriptions', icon: CreditCard, basePath: '/dashboard', tab: 'subscriptions' },
@@ -162,9 +163,10 @@ const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/tutor', tab: 'overview' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
-  { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
+  { href: '/tutor?tab=bookings', label: 'Bookings', icon: Users, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
   { href: '/tutor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/tutor', tab: 'earnings' },
+  { href: '/tutor?tab=calendar', label: 'Calendar', icon: Calendar, basePath: '/tutor', tab: 'calendar' },
   { href: '/tutor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/tutor', tab: 'enquiries' },
 ];
 

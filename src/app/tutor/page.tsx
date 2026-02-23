@@ -22,12 +22,14 @@ import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from "firebase/app";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type MessageThread, type ThreadMessage } from "@/lib/types";
-import { formatDistanceToNow } from "date-fns";
+import { format, formatDistanceToNow } from "date-fns";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { cn } from "@/lib/utils";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadioGroup, DropdownMenuRadioItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { EnquiriesPage } from "@/components/enquiries-page";
+import { TutorCalendarTab } from "@/components/tutor/calendar-tab";
+import { CalendarDialogs } from "@/components/tutor/calendar-dialogs";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -36,6 +38,25 @@ const firebaseConfig = {
     storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
     messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
     appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+};
+
+export type CalendarEvent = {
+  id: string;
+  title: string;
+  start: string;
+  end?: string;
+  allDay: boolean;
+  color?: string;
+  description?: string;
+  instructor?: string;
+  instructorId?: string;
+  tutorId?: string;
+  studentId?: string;
+  grade?: string;
+  subject?: string;
+  module?: string;
+  scope?: string;
+  platforms?: string[];
 };
 
 type Booking = {
@@ -80,6 +101,7 @@ function TutorPage() {
     const [user, setUser] = useState<User | null>(null);
     const [profile, setProfile] = useState<TutorProfile | null>(null);
     const [bookings, setBookings] = useState<Booking[]>([]);
+    const [transactions, setTransactions] = React.useState<Transaction[]>([]);
     const [messageThreads, setMessageThreads] = useState<MessageThread[]>([]);
     const [selectedThread, setSelectedThread] = useState<MessageThread | null>(null);
     const [currentThreadMessages, setCurrentThreadMessages] = useState<ThreadMessage[]>([]);
@@ -100,6 +122,13 @@ function TutorPage() {
     const [currentBookingPage, setCurrentBookingPage] = useState(1);
     const bookingsPerPage = 7;
     
+    // Calendar state
+    const [events, setEvents] = useState<CalendarEvent[]>([]);
+    const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
+    const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+    const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
+    const [manualEvent, setManualEvent] = useState<Partial<CalendarEvent>>({});
+    
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -108,6 +137,10 @@ function TutorPage() {
             { day: "Monday", slots: [] }, { day: "Tuesday", slots: [] }, { day: "Wednesday", slots: [] },
             { day: "Thursday", slots: [] }, { day: "Friday", slots: [] }, { day: "Saturday", slots: [] }, { day: "Sunday", slots: [] },
         ];
+
+        let unsubscribeBookings: Unsubscribe | undefined;
+        let unsubscribeEvents: Unsubscribe | undefined;
+        let unsubscribeTransactions: Unsubscribe | undefined;
 
         const unsubscribeAuth = onAuthStateChanged(auth, async (currentUser) => {
             setUser(currentUser);
@@ -129,19 +162,38 @@ function TutorPage() {
                     setProfile(defaultProfile);
                 }
                 
-                // Fetch Bookings
+                // Fetch Bookings (real-time)
                 const bookingsQuery = query(collection(firestore, 'bookings'), where('tutorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
-                const bookingsSnap = await getDocs(bookingsQuery);
-                setBookings(bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}) as Booking));
+                unsubscribeBookings = onSnapshot(bookingsQuery, (snapshot) => {
+                    setBookings(snapshot.docs.map(d => ({id: d.id, ...d.data()}) as Booking));
+                });
+
+                // Fetch Transactions (real-time)
+                const transactionsQuery = query(collection(firestore, 'transactions'), where('tutorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
+                unsubscribeTransactions = onSnapshot(transactionsQuery, (snapshot) => {
+                     setTransactions(snapshot.docs.map(d => ({id: d.id, ...d.data()}) as Transaction));
+                });
                 
+                // Fetch Events (real-time)
+                const eventsQuery = query(collection(firestore, "events"), where('tutorId', '==', currentUser.uid));
+                unsubscribeEvents = onSnapshot(eventsQuery, (snapshot) => {
+                    setEvents(snapshot.docs.map(d => ({id: d.id, ...d.data()}) as CalendarEvent));
+                });
+
                 setLoading(false);
             } else {
                 setLoading(false);
+                 if (unsubscribeBookings) unsubscribeBookings();
+                 if (unsubscribeEvents) unsubscribeEvents();
+                 if (unsubscribeTransactions) unsubscribeTransactions();
             }
         });
         
         return () => {
             unsubscribeAuth();
+            if (unsubscribeBookings) unsubscribeBookings();
+            if (unsubscribeEvents) unsubscribeEvents();
+            if (unsubscribeTransactions) unsubscribeTransactions();
         };
     }, []);
 
@@ -323,7 +375,7 @@ function TutorPage() {
         handleProfileChange('varsityModules', newModules);
     };
 
-    const handleBookingAction = async (booking: Booking, newStatus: 'Confirmed' | 'Declined') => {
+    const handleBookingAction = async (booking: Booking, newStatus: 'Confirmed' | 'Declined' | 'Completed') => {
         const originalStatus = booking.status;
         setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b));
 
@@ -348,13 +400,28 @@ function TutorPage() {
                     tutorId: booking.tutorId,
                     studentId: booking.studentId,
                     bookingId: booking.id,
-                    instructor: booking.tutorName,
+                    instructor: booking.tutorName, // Keep 'instructor' for calendar display consistency
                     description: `Online tutoring session for ${booking.subject}.`,
                     platforms: ["zoom"] 
                 };
 
                 await addDoc(collection(firestore, 'events'), eventData);
                 toast({ title: 'Booking Confirmed!', description: 'The session has been added to your calendar.' });
+            } else if (newStatus === 'Completed') {
+                // Create a transaction when a session is completed
+                 await addDoc(collection(firestore, 'transactions'), {
+                    studentId: booking.studentId,
+                    tutorId: booking.tutorId,
+                    itemId: booking.id,
+                    itemType: 'Tutoring Session',
+                    itemTitle: `Session with ${booking.studentName}`,
+                    amount: profile?.hourlyRate || 0,
+                    status: 'Completed',
+                    currency: 'ZAR',
+                    createdAt: serverTimestamp(),
+                    notes: `Completed session on ${booking.date}`
+                });
+                toast({ title: 'Session Completed!', description: 'Earnings for this session have been recorded.' });
             } else {
                 toast({ title: 'Booking Declined' });
             }
@@ -439,6 +506,68 @@ function TutorPage() {
 
 
     const isProfileIncomplete = !profile?.bio || !profile?.qualifications;
+    
+    // Calendar handlers
+    const handleDateClick = (arg: any) => {
+      setManualEvent({ start: arg.dateStr, allDay: arg.allDay, instructor: user?.displayName || 'Tutor', tutorId: user?.uid });
+      setIsManualDialogOpen(true);
+    };
+
+    const handleEventClick = (clickInfo: any) => {
+        const event = clickInfo.event;
+        const extendedProps = event.extendedProps;
+        setSelectedEvent({
+            id: event.id,
+            title: event.title,
+            start: event.startStr,
+            end: event.endStr,
+            allDay: event.allDay,
+            description: event.extendedProps.description,
+            instructor: extendedProps.instructor,
+            tutorId: extendedProps.tutorId,
+            grade: extendedProps.grade,
+            subject: extendedProps.subject,
+            module: extendedProps.module,
+            scope: extendedProps.scope,
+            platforms: extendedProps.platforms,
+            color: event.backgroundColor,
+        });
+        setIsDetailDialogOpen(true);
+    };
+
+    const handleAddOrUpdateEvent = async () => {
+        if (!manualEvent.title || !manualEvent.start || !user) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Event title and start date are required.' });
+            return;
+        }
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+        
+        const eventData = { ...manualEvent, tutorId: user.uid, instructor: user.displayName };
+
+        // Sanitize data for Firestore by removing undefined properties
+        const sanitizedEventData = Object.fromEntries(
+            Object.entries(eventData).filter(([, value]) => value !== undefined)
+        );
+
+        try {
+            if (manualEvent.id) {
+                const eventRef = doc(firestore, 'events', manualEvent.id);
+                await updateDoc(eventRef, sanitizedEventData);
+            } else {
+                await addDoc(collection(firestore, 'events'), sanitizedEventData);
+            }
+            toast({ title: 'Event Saved!', description: `"${manualEvent.title}" has been saved.` });
+            
+            setIsManualDialogOpen(false);
+            setManualEvent({});
+        } catch(error) {
+            console.error("Error saving event:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
+        }
+    };
+
 
     if (loading) {
         return <div className="space-y-4"><Skeleton className="h-32 w-full" /><Skeleton className="h-64 w-full" /></div>
@@ -836,7 +965,7 @@ function TutorPage() {
                                                     <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleBookingAction(booking, 'Confirmed')}><CheckCircle className="h-4 w-4" /></Button>
                                                 </div>
                                             ) : booking.status === 'Confirmed' ? (
-                                                <Button size="sm" variant="outline">Reschedule</Button>
+                                                <Button size="sm" variant="outline" onClick={() => handleBookingAction(booking, 'Completed')}>Mark Completed</Button>
                                             ) : (
                                                 <span className="text-sm text-muted-foreground">No actions</span>
                                             )}
@@ -924,6 +1053,23 @@ function TutorPage() {
                     </div>
                  </Card>
             )}
+             {currentTab === 'calendar' && (
+                <TutorCalendarTab 
+                    events={events}
+                    onDateClick={handleDateClick}
+                    onEventClick={handleEventClick}
+                />
+            )}
+            <CalendarDialogs
+                isManualDialogOpen={isManualDialogOpen}
+                setIsManualDialogOpen={setIsManualDialogOpen}
+                isDetailDialogOpen={isDetailDialogOpen}
+                setIsDetailDialogOpen={setIsDetailDialogOpen}
+                selectedEvent={selectedEvent}
+                manualEvent={manualEvent}
+                setManualEvent={setManualEvent}
+                onManualCreate={handleAddOrUpdateEvent}
+            />
         </div>
     );
 }
@@ -931,3 +1077,16 @@ function TutorPage() {
 
 export default withAuth(TutorPage, ['tutor']);
 
+type Transaction = {
+    id: string;
+    itemTitle: string;
+    studentName?: string;
+    studentId?: string;
+    instructorId?: string;
+    tutorId?: string;
+    itemType: 'course' | 'assignment' | 'subscription' | 'refund' | 'payout' | 'Course Sale' | 'Assignment Sale' | 'Tutoring Session';
+    status: 'Completed' | 'Pending' | 'Refunded';
+    amount: number;
+    createdAt: Timestamp;
+    date: string; // for display
+};

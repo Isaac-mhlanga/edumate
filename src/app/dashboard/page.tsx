@@ -18,6 +18,7 @@ import { TransactionsTab } from "@/components/dashboard/transactions-tab";
 import { SubscriptionsTab } from "@/components/dashboard/subscriptions-tab";
 import { AssignmentDialog } from "@/components/dashboard/assignment-dialog";
 import { RefundDialog } from "@/components/dashboard/refund-dialog";
+import { StudentCalendarTab } from "@/components/dashboard/calendar-tab";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -273,6 +274,10 @@ function DashboardPage() {
                     }}
                     onSoftDelete={handleSoftDeleteAssignment}
                 />
+            )}
+            
+            {currentTab === 'calendar' && (
+                <StudentCalendarTab />
             )}
 
             {currentTab === 'transactions' && (
