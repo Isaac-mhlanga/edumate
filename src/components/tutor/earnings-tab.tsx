@@ -8,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { Banknote, MoreVertical, ReceiptText, Undo2 } from 'lucide-react';
+import { Banknote, MoreVertical, ReceiptText, Undo2, Hourglass } from 'lucide-react';
 import { type Transaction } from '@/app/tutor/page';
 
 interface TutorEarningsTabProps {
@@ -21,6 +21,13 @@ interface TutorEarningsTabProps {
 export function TutorEarningsTab({ transactions, loading, onTransactionAction, onPayoutRequest }: TutorEarningsTabProps) {
     const availableForPayout = transactions.reduce((acc, t) => {
         if (t.itemType === 'Tutoring Session' && t.status === 'Completed') {
+            return acc + t.amount;
+        }
+        return acc;
+    }, 0);
+    
+    const pendingEarnings = transactions.reduce((acc, t) => {
+        if (t.itemType === 'Tutoring Session' && t.status === 'Pending') {
             return acc + t.amount;
         }
         return acc;
@@ -83,6 +90,9 @@ export function TutorEarningsTab({ transactions, loading, onTransactionAction, o
                                                     </DropdownMenuTrigger>
                                                     <DropdownMenuContent align="end">
                                                         <DropdownMenuItem onClick={() => onTransactionAction(transaction, 'view')}><ReceiptText className="mr-2 h-4 w-4"/>View Details</DropdownMenuItem>
+                                                        {transaction.status === 'Completed' && (transaction.itemType.includes('Sale') || transaction.itemType === 'course' || transaction.itemType === 'assignment') &&
+                                                            <DropdownMenuItem onClick={() => onTransactionAction(transaction, 'refund')}><Undo2 className="mr-2 h-4 w-4"/>Process Refund</DropdownMenuItem>
+                                                        }
                                                     </DropdownMenuContent>
                                                 </DropdownMenu>
                                             </TableCell>
@@ -119,9 +129,21 @@ export function TutorEarningsTab({ transactions, loading, onTransactionAction, o
                          <p className="text-sm text-muted-foreground">Payouts are processed within 3-5 business days. A small processing fee may apply.</p>
                     </CardFooter>
                 </Card>
+                 <Card>
+                    <CardHeader>
+                        <CardTitle>Pending Earnings</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                         <div className="flex justify-between items-center p-4 bg-muted rounded-lg">
+                            <div>
+                                <p className="text-sm text-muted-foreground">From monthly payments</p>
+                                <p className="text-3xl font-bold">R {pendingEarnings.toFixed(2)}</p>
+                            </div>
+                            <Hourglass className="h-10 w-10 text-yellow-500"/>
+                        </div>
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );
 }
-
-    

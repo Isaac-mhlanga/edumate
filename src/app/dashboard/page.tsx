@@ -71,10 +71,11 @@ export type Transaction = {
     itemTitle: string;
     type: string;
     itemType: 'course' | 'assignment' | 'subscription' | 'Tutoring Session';
-    status: 'Completed' | 'Refunded';
+    status: string;
     amount: number;
     createdAt: Timestamp;
     date: string; // for display
+    paymentMethod?: 'Upfront' | 'Monthly';
 };
 
 export type Booking = {
@@ -371,5 +372,6 @@ export default withAuth(DashboardPage, ['student']);
     
 
     
+
 
 

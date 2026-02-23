@@ -61,7 +61,7 @@ export type PayoutRequest = {
 export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; markerName?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; solutionUrl?: string; deletedByStudent?: boolean; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
 export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; studentId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; meetingLink?: string; };
-export type Transaction = { id: string; studentId?: string; studentName?: string; studentEmail?: string; studentPhoneNumber?: string; instructorId?: string; instructorName?: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
+export type Transaction = { id: string; studentId?: string; studentName?: string; studentEmail?: string; studentPhoneNumber?: string; instructorId?: string; instructorName?: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; paymentMethod?: 'Upfront' | 'Monthly'; };
 export type RecentActivity = {
     id: string;
     type: 'New User' | 'New Course' | 'Payout' | 'Transaction';

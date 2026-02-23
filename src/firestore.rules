@@ -79,10 +79,10 @@ service cloud.firestore {
     // Rules for the 'transactions' collection
     match /transactions/{transactionId} {
         // Users can read their own transactions
-        allow get, list: if isSignedIn() && (isOwner(resource.data.studentId) || isOwner(resource.data.instructorId));
+        allow get, list: if isSignedIn() && (isOwner(resource.data.studentId) || isOwner(resource.data.instructorId) || isOwner(resource.data.tutorId));
         
-        // Creation is handled by secure backend webhook
-        allow create: if false; 
+        // Tutors can create transactions for completed sessions. Other creations are handled by a webhook.
+        allow create: if (isTutor() && request.resource.data.tutorId == request.auth.uid && request.resource.data.itemType == 'Tutoring Session');
         allow update, delete: if false;
     }
     
@@ -114,8 +114,8 @@ service cloud.firestore {
        allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
        // Tutors and Students can read bookings associated with them.
        allow get, list: if isSignedIn() && (isOwner(resource.data.studentId) || isOwner(resource.data.tutorId));
-       // Tutors can update booking status.
-       allow update: if isSignedIn() && isOwner(resource.data.tutorId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
+       // Tutors can update booking status and add a meeting link.
+       allow update: if isSignedIn() && isOwner(resource.data.tutorId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status', 'meetingLink']);
     }
 
     // Rules for payouts
