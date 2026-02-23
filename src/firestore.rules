@@ -111,11 +111,11 @@ service cloud.firestore {
     // Rules for bookings
     match /bookings/{bookingId} {
        // Students can create their own bookings.
-       // Tutors can read bookings associated with them.
        allow create: if isSignedIn() && isOwner(request.resource.data.studentId);
+       // Tutors and Students can read bookings associated with them.
        allow get, list: if isSignedIn() && (isOwner(resource.data.studentId) || isOwner(resource.data.tutorId));
        // Tutors can update booking status.
-       allow update: if isSignedIn() && isOwner(resource.data.tutorId);
+       allow update: if isSignedIn() && isOwner(resource.data.tutorId) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['status']);
     }
 
     // Rules for payouts
@@ -136,8 +136,8 @@ service cloud.firestore {
       allow create: if (isSignedIn() && isOwner(request.resource.data.studentId)) || (request.auth == null && request.resource.data.studentId == 'anonymous');
       // Users can only update their own question, or update likes, or if they are an admin
       allow update: if isSignedIn() && (isOwner(resource.data.studentId) || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy', 'commentCount', 'commentsDisabled']) || isAdmin());
-       // Only admins can delete
-      allow delete: if isAdmin();
+       // Users can only delete their own questions, or if they are an admin
+      allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
 
       // Rules for comments on questions
       match /comments/{commentId} {
@@ -150,8 +150,8 @@ service cloud.firestore {
             (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likeCount', 'likedBy'])) ||
             ((isOwner(resource.data.studentId) || isAdmin()) && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['content']))
         );
-        // Only admins can delete
-        allow delete: if isAdmin();
+        // Users can only delete their own comments or admins can delete any
+        allow delete: if (isSignedIn() && isOwner(resource.data.studentId)) || isAdmin();
       }
     }
     
@@ -180,10 +180,16 @@ service cloud.firestore {
     }
      // Rules for events
     match /events/{eventId} {
-      // Anyone can read events
-      allow get, list: if true;
-      // Only instructors and admins can create, update, delete events
-      allow write: if isInstructor() || isAdmin();
+      // Allow read if it's a public event (no student/tutor IDs), if the user is part of the booking, or if the user is an admin.
+      allow get, list: if (!resource.data.keys().hasAll(['studentId', 'tutorId'])) || 
+                         (isSignedIn() && (isOwner(resource.data.studentId) || isOwner(resource.data.tutorId))) || 
+                         isAdmin();
+      // Tutors can create events for their bookings. Instructors and Admins can create public events.
+      allow create: if (isTutor() && isOwner(request.resource.data.tutorId)) || isInstructor() || isAdmin();
+      // Admins or the event's instructor/tutor can modify/delete.
+      allow update, delete: if (isSignedIn() && isOwner(resource.data.instructorId)) || 
+                              (isSignedIn() && isOwner(resource.data.tutorId)) || 
+                              isAdmin();
     }
     
     // Rules for whiteboards

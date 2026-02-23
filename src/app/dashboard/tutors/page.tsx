@@ -20,6 +20,8 @@ import { getApp, getApps, initializeApp } from 'firebase/app';
 import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import withAuth from "@/components/with-auth";
 import { Skeleton } from "@/components/ui/skeleton";
+import { type Booking } from "@/app/admin/page";
+
 
 type Mode = "Online" | "In-person";
 
@@ -75,6 +77,9 @@ function TutorsDashboardPage() {
 
     const [currentPage, setCurrentPage] = React.useState(1);
     const tutorsPerPage = 6;
+    
+    const [confirmedBookings, setConfirmedBookings] = useState<Booking[]>([]);
+
 
      useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -139,9 +144,15 @@ function TutorsDashboardPage() {
     const totalPages = Math.ceil(filteredTutors.length / tutorsPerPage);
     const paginatedTutors = filteredTutors.slice((currentPage - 1) * tutorsPerPage, currentPage * tutorsPerPage);
 
-    const handleBookTutor = (tutor: Tutor) => {
+    const handleBookTutor = async (tutor: Tutor) => {
         setSelectedTutor(tutor);
         setBookingSubject(subject !== 'All' ? subject : tutor.subjects[0]);
+        
+        const firestore = getFirestore();
+        const bookingsQuery = query(collection(firestore, 'bookings'), where('tutorId', '==', tutor.id), where('status', '==', 'Confirmed'));
+        const snapshot = await getDocs(bookingsQuery);
+        setConfirmedBookings(snapshot.docs.map(d => d.data() as Booking));
+        
         setIsBookingDialogOpen(true);
     };
     
@@ -164,14 +175,15 @@ function TutorsDashboardPage() {
         const firestore = getFirestore(app);
 
         try {
+            const [date, time] = selectedTimeSlot.split('|');
             await addDoc(collection(firestore, 'bookings'), {
                 studentId: user.uid,
                 studentName: user.displayName,
                 tutorId: selectedTutor.id,
                 tutorName: selectedTutor.name,
                 subject: bookingSubject,
-                date: selectedTimeSlot.split(' @ ')[0],
-                time: selectedTimeSlot.split(' @ ')[1],
+                date: date,
+                time: time,
                 status: 'Pending Confirmation',
                 createdAt: serverTimestamp()
             });
@@ -223,6 +235,12 @@ function TutorsDashboardPage() {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not send message.' });
         }
     };
+
+    const upcomingDates = Array.from({ length: 14 }).map((_, i) => {
+        const date = new Date();
+        date.setDate(date.getDate() + i);
+        return date;
+    });
 
     return (
         <div className="space-y-6">
@@ -338,7 +356,7 @@ function TutorsDashboardPage() {
                 )}
             </Card>
 
-            <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
+             <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
                 <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Book a Session with {selectedTutor?.name}</DialogTitle>
@@ -356,22 +374,33 @@ function TutorsDashboardPage() {
                         </div>
                         <div>
                             <h3 className="font-semibold text-sm mb-2">Select a Time</h3>
-                            {selectedTutor?.availability && selectedTutor.availability.filter(d => d.slots.length > 0).length > 0 ? (
+                            {selectedTutor?.availability ? (
                             <RadioGroup onValueChange={setSelectedTimeSlot} className="max-h-60 overflow-y-auto pr-2">
                                 <div className="space-y-4">
-                                {selectedTutor?.availability.filter(d => d.slots.length > 0).map(day => (
-                                    <div key={day.day}>
-                                        <h4 className="font-medium text-sm mb-2">{day.day}</h4>
-                                        <div className="grid grid-cols-2 gap-2">
-                                            {day.slots.map(slot => (
-                                                <Label key={`${day.day}-${slot}`} className="flex items-center justify-center rounded-md border-2 border-muted bg-popover p-2 font-normal hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary">
-                                                    <RadioGroupItem value={`${day.day} @ ${slot}`} id={`${day.day}-${slot}`} className="sr-only"/>
-                                                    {slot}
-                                                </Label>
-                                            ))}
+                                {upcomingDates.map(date => {
+                                    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+                                    const tutorDayAvailability = selectedTutor.availability.find(d => d.day === dayOfWeek);
+                                    if (!tutorDayAvailability || tutorDayAvailability.slots.length === 0) return null;
+                                    
+                                    const formattedDate = date.toISOString().split('T')[0];
+
+                                    return (
+                                        <div key={formattedDate}>
+                                            <h4 className="font-medium text-sm mb-2">{date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</h4>
+                                            <div className="grid grid-cols-2 gap-2">
+                                                {tutorDayAvailability.slots.map(slot => {
+                                                    const isBooked = confirmedBookings.some(b => b.date === formattedDate && b.time.startsWith(slot.split(' - ')[0]));
+                                                    return (
+                                                        <Label key={`${formattedDate}-${slot}`} className={`flex items-center justify-center rounded-md border-2 p-2 font-normal ${isBooked ? 'cursor-not-allowed bg-muted/50 text-muted-foreground' : 'cursor-pointer border-muted bg-popover hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary'}`}>
+                                                            <RadioGroupItem value={`${formattedDate}|${slot}`} id={`${formattedDate}-${slot}`} className="sr-only" disabled={isBooked}/>
+                                                            {slot}
+                                                        </Label>
+                                                    )
+                                                })}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
+                                    )
+                                })}
                                 </div>
                             </RadioGroup>
                             ) : (
@@ -381,7 +410,7 @@ function TutorsDashboardPage() {
                     </div>
                     <DialogFooter>
                         <Button variant="ghost" onClick={() => setIsBookingDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={confirmBooking}>Request Booking</Button>
+                        <Button onClick={confirmBooking} disabled={!selectedTimeSlot}>Request Booking</Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

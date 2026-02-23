@@ -42,10 +42,12 @@ type Booking = {
     id: string;
     studentName: string;
     studentId: string;
+    tutorId: string;
+    tutorName: string;
     date: string;
     time: string;
     subject: string;
-    status: 'Confirmed' | 'Completed' | 'Pending Confirmation';
+    status: 'Confirmed' | 'Completed' | 'Pending Confirmation' | 'Declined';
     createdAt: Timestamp;
 };
 
@@ -126,7 +128,7 @@ function TutorPage() {
                 }
                 
                 // Fetch Bookings
-                const bookingsQuery = query(collection(firestore, 'bookings'), where('tutorId', '==', currentUser.uid));
+                const bookingsQuery = query(collection(firestore, 'bookings'), where('tutorId', '==', currentUser.uid), orderBy('createdAt', 'desc'));
                 const bookingsSnap = await getDocs(bookingsQuery);
                 setBookings(bookingsSnap.docs.map(d => ({id: d.id, ...d.data()}) as Booking));
                 
@@ -290,11 +292,56 @@ function TutorPage() {
         handleProfileChange('varsityModules', newModules);
     };
 
+    const handleBookingAction = async (booking: Booking, newStatus: 'Confirmed' | 'Declined') => {
+        const originalStatus = booking.status;
+        setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b));
+
+        const firestore = getFirestore();
+        const bookingRef = doc(firestore, 'bookings', booking.id);
+        
+        try {
+            await updateDoc(bookingRef, { status: newStatus });
+            
+            if (newStatus === 'Confirmed') {
+                const startTime = booking.time.split(' - ')[0];
+                const endTime = booking.time.split(' - ')[1];
+
+                const startDateTime = new Date(`${booking.date}T${startTime}:00`);
+                const endDateTime = new Date(`${booking.date}T${endTime}:00`);
+                
+                const eventData = {
+                    title: `Tutoring: ${booking.subject} with ${booking.studentName}`,
+                    start: startDateTime.toISOString(),
+                    end: endDateTime.toISOString(),
+                    allDay: false,
+                    tutorId: booking.tutorId,
+                    studentId: booking.studentId,
+                    bookingId: booking.id,
+                    instructor: booking.tutorName,
+                    description: `Online tutoring session for ${booking.subject}.`,
+                    platforms: ["zoom"] 
+                };
+
+                await addDoc(collection(firestore, 'events'), eventData);
+                toast({ title: 'Booking Confirmed!', description: 'The session has been added to your calendar.' });
+            } else {
+                toast({ title: 'Booking Declined' });
+            }
+
+        } catch (error) {
+            console.error("Error updating booking:", error);
+            setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: originalStatus } : b));
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not update the booking status.' });
+        }
+    };
+
+
     const getStatusIcon = (status: Booking['status']) => {
         switch (status) {
             case 'Confirmed': return <CheckCircle className="text-green-500" />;
             case 'Completed': return <CheckCircle className="text-blue-500" />;
             case 'Pending Confirmation': return <Clock className="text-yellow-500" />;
+            case 'Declined': return <XCircle className="text-red-500" />;
             default: return null;
         }
     };
@@ -702,6 +749,7 @@ function TutorPage() {
                                     <DropdownMenuRadioItem value="Pending Confirmation">Pending Confirmation</DropdownMenuRadioItem>
                                     <DropdownMenuRadioItem value="Confirmed">Confirmed</DropdownMenuRadioItem>
                                     <DropdownMenuRadioItem value="Completed">Completed</DropdownMenuRadioItem>
+                                    <DropdownMenuRadioItem value="Declined">Declined</DropdownMenuRadioItem>
                                 </DropdownMenuRadioGroup>
                             </DropdownMenuContent>
                         </DropdownMenu>
@@ -735,8 +783,8 @@ function TutorPage() {
                                         <TableCell className="text-right">
                                             {booking.status === 'Pending Confirmation' ? (
                                                 <div className="flex gap-2 justify-end">
-                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-500/50 hover:bg-red-50"><XCircle className="h-4 w-4" /></Button>
-                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700"><CheckCircle className="h-4 w-4" /></Button>
+                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-500/50 hover:bg-red-50" onClick={() => handleBookingAction(booking, 'Declined')}><XCircle className="h-4 w-4" /></Button>
+                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleBookingAction(booking, 'Confirmed')}><CheckCircle className="h-4 w-4" /></Button>
                                                 </div>
                                             ) : booking.status === 'Confirmed' ? (
                                                 <Button size="sm" variant="outline">Reschedule</Button>

@@ -59,7 +59,7 @@ export type PayoutRequest = {
 };
 export type Assignment = { id: string; studentId: string; assignmentTitle: string; course: string; studentName: string; instructor: string; instructorId?: string; markerId?: string; markerName?: string; price: number | null; status: 'Paid' | 'Awaiting Payment' | 'Pending Review' | 'In Progress' | 'Submitted'; fileUrl: string; solutionUrl?: string; deletedByStudent?: boolean; };
 export type Subscription = { id: string; studentId: string; studentName: string; studentEmail: string; planName: string; status: 'Active' | 'Canceled'; nextBillingDate: string; };
-export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
+export type CalendarEvent = { id: string; title: string; start: string; end?: string; allDay: boolean; color?: string; description?: string; instructor?: string; instructorId?: string; studentId?: string; grade?: string; subject?: string; module?: string; scope?: string; platforms?: string[]; };
 export type Transaction = { id: string; studentId?: string; studentName?: string; studentEmail?: string; studentPhoneNumber?: string; instructorId?: string; instructorName?: string; itemType: string; itemTitle: string; status: string; amount: number; createdAt: Timestamp; };
 export type RecentActivity = {
     id: string;
@@ -92,6 +92,18 @@ export type Promotion = {
     buttonLink: string;
     icon: string;
 };
+export type Booking = {
+    id: string;
+    studentName: string;
+    studentId: string;
+    tutorId: string;
+    tutorName: string;
+    date: string;
+    time: string;
+    subject: string;
+    status: 'Confirmed' | 'Completed' | 'Pending Confirmation' | 'Declined';
+    createdAt: Timestamp;
+};
 
 
 function AdminPage() {
@@ -111,6 +123,7 @@ function AdminPage() {
     const [events, setEvents] = React.useState<CalendarEvent[]>([]);
     const [tutors, setTutors] = React.useState<TutorProfile[]>([]);
     const [promotion, setPromotion] = React.useState<Promotion | null>(null);
+    const [bookings, setBookings] = React.useState<Booking[]>([]);
     
     const [loading, setLoading] = React.useState(true);
     
@@ -217,6 +230,10 @@ function AdminPage() {
                     } as PayoutRequest;
                 });
                 setPayoutRequests(fetchedPayouts);
+
+                const bookingsSnapshot = await getDocs(query(collection(firestore, "bookings"), orderBy('createdAt', 'desc')));
+                const fetchedBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
+                setBookings(fetchedBookings);
                 
                 // Fetch Promotion
                 const promoRef = doc(firestore, 'promotions', 'homepage-banner');
