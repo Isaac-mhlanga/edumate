@@ -21,6 +21,14 @@ import {
 } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
   LayoutDashboard,
   Users,
   Settings,
@@ -240,8 +248,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     return pathname.startsWith(item.basePath);
   }
   
-  const isSettingsPage = pathname === '/settings';
-
   return (
     <SidebarProvider>
       <Sidebar>
@@ -281,50 +287,56 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         </SidebarContent>
         <SidebarFooter>
           {loading ? (
-             <div className='flex items-center gap-3 w-full p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'>
-                 <SidebarMenuSkeleton showIcon={true} />
-             </div>
-          ) : user ? (
             <div className='flex items-center gap-3 w-full p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'>
-                <Avatar className="h-9 w-9">
+              <SidebarMenuSkeleton showIcon={true} />
+            </div>
+          ) : user ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  className="flex h-auto w-full items-center justify-start gap-3 p-2 group-data-[collapsible=icon]:size-9 group-data-[collapsible=icon]:justify-center group-data-[collapsible=icon]:p-0"
+                >
+                  <Avatar className="h-9 w-9">
                     <AvatarImage src={user.photoURL ?? ''} alt={user.displayName ?? 'User'} />
                     <AvatarFallback>{user.displayName?.charAt(0) ?? user.email?.charAt(0)}</AvatarFallback>
-                </Avatar>
-                <div className='flex flex-col overflow-hidden group-data-[collapsible=icon]:hidden'>
-                    <span className='font-medium text-sm truncate'>{user.displayName ?? 'User'}</span>
-                    <span className='text-sm text-muted-foreground truncate'>{user.email}</span>
-                </div>
-            </div>
-          ) : (
-             <div className='flex items-center gap-3 w-full p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'>
-                <Button asChild className="w-full group-data-[collapsible=icon]:w-auto">
-                  <Link href="/login">Login</Link>
+                  </Avatar>
+                  <div className='flex flex-col overflow-hidden text-left group-data-[collapsible=icon]:hidden'>
+                    <span className='truncate text-sm font-medium'>{user.displayName ?? 'User'}</span>
+                    <span className='truncate text-sm text-muted-foreground'>{user.email}</span>
+                  </div>
                 </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent side="right" align="start" className="w-56 mb-2">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">{user.displayName}</p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {user.email}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/settings">
+                    <Settings className="mr-2 h-4 w-4" />
+                    <span>Settings</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <div className='flex items-center gap-3 w-full p-2 group-data-[collapsible=icon]:p-0 group-data-[collapsible=icon]:justify-center'>
+              <Button asChild className="w-full group-data-[collapsible=icon]:w-auto">
+                <Link href="/login">Login</Link>
+              </Button>
             </div>
           )}
-            <SidebarMenu>
-                 <SidebarMenuItem>
-                    <SidebarMenuButton
-                        asChild
-                        isActive={isSettingsPage}
-                        tooltip={{ children: 'Settings', side: 'right' }}
-                        >
-                        <Link href="/settings">
-                            <Settings />
-                            <span>Settings</span>
-                        </Link>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-                <SidebarMenuItem>
-                    <SidebarMenuButton
-                        onClick={handleLogout}
-                        tooltip={{ children: 'Logout', side: 'right' }}
-                        >
-                        <LogOut />
-                        <span>Logout</span>
-                    </SidebarMenuButton>
-                </SidebarMenuItem>
-            </SidebarMenu>
         </SidebarFooter>
       </Sidebar>
       <SidebarInset>
