@@ -12,11 +12,11 @@ import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight, Book, GraduationCap, ArrowUpRight, X } from "lucide-react";
+import { Calendar, CheckCircle, Clock, Computer, DollarSign, Edit, Mail, MapPin, MessageSquare, Phone, Save, Users, Video, XCircle, Send, Loader2, Paperclip, Upload, Info, MoreVertical, Search, ListFilter, ChevronLeft, ChevronRight, Book, GraduationCap, ArrowUpRight, X, Trash2 } from "lucide-react";
 import React, { useEffect, useState, useMemo } from "react";
 import withAuth from "@/components/with-auth";
 import { useRouter, useSearchParams } from "next/navigation";
-import { getAuth, onAuthStateChanged, type User } from 'firebase/auth';
+import { getAuth, onAuthStateChanged, type User, updateProfile } from 'firebase/auth';
 import { getFirestore, doc, getDoc, setDoc, updateDoc, collection, query, where, getDocs, Timestamp, onSnapshot, Unsubscribe, addDoc, serverTimestamp, arrayUnion, orderBy } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 import { getApp, getApps, initializeApp } from "firebase/app";
@@ -89,6 +89,8 @@ function TutorPage() {
     const [loading, setLoading] = useState(true);
     const [isSaving, setIsSaving] = useState(false);
     const [qualificationFile, setQualificationFile] = useState<File | null>(null);
+    const [avatarFile, setAvatarFile] = useState<File | null>(null);
+    const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
 
     const currentTab = searchParams.get('tab') || 'overview';
     const [isEditingProfile, setIsEditingProfile] = useState(false);
@@ -219,31 +221,60 @@ function TutorPage() {
         setProfile({ ...profile, [field]: value });
     };
 
+    const handleRemovePhoto = () => {
+        if (!profile) return;
+        setProfile({ ...profile, avatar: 'https://placehold.co/100x100.png' });
+        setAvatarFile(null);
+        setAvatarPreview(null);
+        toast({ title: 'Photo Marked for Removal', description: 'Click "Save All Profile Changes" to confirm.' });
+    };
+    
     const handleSaveProfile = async () => {
         if (!user || !profile) return;
         setIsSaving(true);
         const firestore = getFirestore();
         const storage = getStorage();
-        const profileRef = doc(firestore, 'tutors', user.uid);
+        const auth = getAuth();
+        const currentUser = auth.currentUser;
 
+        let finalAvatarUrl = profile.avatar;
         let newQualificationUrl = profile.qualificationUrl;
 
         try {
+            if (avatarFile && currentUser) {
+                const avatarRef = ref(storage, `tutors/${user.uid}/avatar/${Date.now()}-${avatarFile.name}`);
+                await uploadBytes(avatarRef, avatarFile);
+                finalAvatarUrl = await getDownloadURL(avatarRef);
+            }
+
+            if (currentUser && finalAvatarUrl !== currentUser.photoURL) {
+                await updateProfile(currentUser, { photoURL: finalAvatarUrl });
+            }
+
             if (qualificationFile) {
                 const fileRef = ref(storage, `tutors/${user.uid}/qualifications/${qualificationFile.name}`);
                 await uploadBytes(fileRef, qualificationFile);
                 newQualificationUrl = await getDownloadURL(fileRef);
             }
 
-            await updateDoc(profileRef, { 
+            const profileDataToSave = {
                 ...profile,
+                avatar: finalAvatarUrl,
                 qualificationUrl: newQualificationUrl,
-                approvalStatus: 'Pending' // Resubmit for approval on changes
-            });
-            setProfile({ ...profile, qualificationUrl: newQualificationUrl, approvalStatus: 'Pending' });
+                approvalStatus: 'Pending' as const
+            };
+
+            const profileRef = doc(firestore, 'tutors', user.uid);
+            await updateDoc(profileRef, profileDataToSave);
+
+            setProfile(profileDataToSave);
             setQualificationFile(null);
+            setAvatarFile(null);
+            setAvatarPreview(null);
+
             toast({ title: 'Profile Updated', description: 'Your changes have been saved and submitted for review.' });
         } catch (error) {
+            console.error("Error saving profile:", error);
             toast({ variant: 'destructive', title: 'Error', description: 'Could not save your profile.' });
         } finally {
             setIsSaving(false);
@@ -548,16 +579,34 @@ function TutorPage() {
                         </CardHeader>
                         <CardContent className="space-y-6">
                             <div className="flex items-center gap-6">
-                                <Avatar className="w-24 h-24 border-2 border-primary">
-                                    <AvatarImage src={profile.avatar} alt={profile.name} />
-                                    <AvatarFallback className="text-3xl">{profile.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                                </Avatar>
-                                <div className="space-y-2 flex-1">
-                                    <div className="space-y-1">
-                                        <Label htmlFor="tutor-name">Full Name</Label>
-                                        <Input id="tutor-name" value={profile.name} onChange={(e) => handleProfileChange('name', e.target.value)} />
+                                <div className="relative group/avatar">
+                                    <Avatar className="w-24 h-24 border-2 border-primary">
+                                        <AvatarImage src={avatarPreview || profile.avatar} alt={profile.name} data-ai-hint="person profile" />
+                                        <AvatarFallback className="text-3xl">{profile.name.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center gap-2 opacity-0 group-hover/avatar:opacity-100 transition-opacity">
+                                        <label htmlFor="avatar-upload" className="cursor-pointer text-white p-2">
+                                            <Upload className="h-6 w-6" />
+                                            <span className="sr-only">Upload photo</span>
+                                        </label>
+                                        <input id="avatar-upload" type="file" className="hidden" accept="image/*" onChange={(e) => {
+                                            const file = e.target.files?.[0];
+                                            if (file) {
+                                                setAvatarFile(file);
+                                                setAvatarPreview(URL.createObjectURL(file));
+                                            }
+                                        }} />
+                                        {profile.avatar && !profile.avatar.includes('placehold.co') && (
+                                            <button onClick={handleRemovePhoto} className="text-white p-2">
+                                                <Trash2 className="h-6 w-6" />
+                                                <span className="sr-only">Remove photo</span>
+                                            </button>
+                                        )}
                                     </div>
-                                    <Button size="sm" variant="outline">Upload New Photo</Button>
+                                </div>
+                                <div className="space-y-1 flex-1">
+                                    <Label htmlFor="tutor-name">Full Name</Label>
+                                    <Input id="tutor-name" value={profile.name} onChange={(e) => handleProfileChange('name', e.target.value)} />
                                 </div>
                             </div>
                             <div className="space-y-1">
@@ -881,3 +930,4 @@ function TutorPage() {
 
 
 export default withAuth(TutorPage, ['tutor']);
+
