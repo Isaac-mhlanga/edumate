@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import { format } from "date-fns";
 import { ChevronLeft, ChevronRight, CheckCircle, Clock, XCircle } from "lucide-react";
-import { type Booking } from '@/app/dashboard/page';
+import { type Booking } from '@/app/admin/page';
 
 interface BookingsTabProps {
     bookings: Booking[];

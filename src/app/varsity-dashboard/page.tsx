@@ -1,4 +1,3 @@
-
 'use client';
 import withAuth from "@/components/with-auth";
 import React from "react";
@@ -15,9 +14,11 @@ import { TransactionsTab } from "@/components/dashboard/transactions-tab";
 import { SubscriptionsTab } from "@/components/dashboard/subscriptions-tab";
 import { AssignmentDialog } from "@/components/dashboard/assignment-dialog";
 import { RefundDialog } from "@/components/dashboard/refund-dialog";
+import { BookingsTab } from "@/components/dashboard/bookings-tab";
 
 // New component for varsity overview
 import { VarsityOverviewTab } from "@/components/varsity/overview-tab";
+import { type Booking } from "@/app/admin/page";
 
 export type SubmittedAssignment = {
     id: string;
@@ -65,9 +66,11 @@ function VarsityDashboardPage() {
 
     const [submittedAssignments, setSubmittedAssignments] = React.useState<SubmittedAssignment[]>([]);
     const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+    const [bookings, setBookings] = React.useState<Booking[]>([]);
 
     const [loadingAssignments, setLoadingAssignments] = React.useState(true);
     const [loadingTransactions, setLoadingTransactions] = React.useState(true);
+    const [loadingBookings, setLoadingBookings] = React.useState(true);
     
     const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
@@ -83,6 +86,7 @@ function VarsityDashboardPage() {
         const fetchVarsityData = async (user: User) => {
             setLoadingAssignments(true);
             setLoadingTransactions(true);
+            setLoadingBookings(true);
             try {
                 // Fetch assignments
                 const assignmentsQuery = query(collection(firestore, 'assignments'), where('studentId', '==', user.uid), orderBy('submittedAt', 'desc'));
@@ -101,6 +105,13 @@ function VarsityDashboardPage() {
                 }) as Transaction[];
                 setTransactions(fetchedTransactions);
 
+                // Fetch bookings
+                const bookingsQuery = query(collection(firestore, 'bookings'), where('studentId', '==', user.uid), orderBy('createdAt', 'desc'));
+                const bookingsSnapshot = await getDocs(bookingsQuery);
+                const userBookings = bookingsSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Booking));
+                setBookings(userBookings);
+
+
             } catch (error: any) {
                 console.error("Error fetching varsity data: ", error);
                 let errorMessage = 'Could not fetch your data. This can happen if the required database index is not set up.';
@@ -109,6 +120,7 @@ function VarsityDashboardPage() {
             } finally {
                 setLoadingAssignments(false);
                 setLoadingTransactions(false);
+                setLoadingBookings(false);
             }
         };
 
@@ -119,8 +131,10 @@ function VarsityDashboardPage() {
             } else {
                 setSubmittedAssignments([]);
                 setTransactions([]);
+                setBookings([]);
                 setLoadingAssignments(false);
                 setLoadingTransactions(false);
+                setLoadingBookings(false);
             }
         });
 
@@ -160,6 +174,13 @@ function VarsityDashboardPage() {
                         setSelectedAssignment(assignment);
                         setIsAssignmentDialogOpen(true);
                     }}
+                />
+            )}
+
+            {currentTab === 'bookings' && (
+                <BookingsTab 
+                    bookings={bookings} 
+                    loadingBookings={loadingBookings}
                 />
             )}
 

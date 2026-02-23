@@ -53,6 +53,7 @@ import {
   Gift,
   Brush,
   Sparkles,
+  CalendarCheck,
 } from 'lucide-react';
 import { Icons } from './icons';
 import Link from 'next/link';
@@ -110,6 +111,7 @@ const studentMenuItems: MenuItem[] = [
   { href: '/dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/dashboard', tab: 'overview' },
   { href: '/dashboard?tab=courses', label: 'Courses', icon: BookOpen, basePath: '/dashboard', tab: 'courses' },
   { href: '/dashboard/tutors', label: 'Tutors', icon: Users, basePath: '/dashboard/tutors' },
+  { href: '/dashboard?tab=bookings', label: 'Bookings', icon: CalendarCheck, basePath: '/dashboard', tab: 'bookings' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/dashboard/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/dashboard/whiteboard' },
   { href: '/dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/dashboard', tab: 'assignments' },
@@ -121,6 +123,7 @@ const studentMenuItems: MenuItem[] = [
 
 const varsityStudentMenuItems: MenuItem[] = [
   { href: '/varsity-dashboard?tab=overview', label: 'Overview', icon: LayoutDashboard, basePath: '/varsity-dashboard', tab: 'overview' },
+  { href: '/varsity-dashboard?tab=bookings', label: 'Bookings', icon: CalendarCheck, basePath: '/varsity-dashboard', tab: 'bookings' },
   { href: '/dashboard/community', label: 'Community', icon: MessageSquare, basePath: '/dashboard/community' },
   { href: '/varsity-dashboard/whiteboard', label: 'Whiteboard', icon: Brush, basePath: '/varsity-dashboard/whiteboard' },
   { href: '/varsity-dashboard?tab=assignments', label: 'Assignments', icon: FilePenLine, basePath: '/varsity-dashboard', tab: 'assignments' },
@@ -363,5 +366,3 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
-
-    
