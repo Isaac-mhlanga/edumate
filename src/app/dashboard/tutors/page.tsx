@@ -1,4 +1,3 @@
-
 'use client';
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -11,7 +10,7 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-import { BookOpen, Calendar, ChevronLeft, ChevronRight, Loader2, MapPin, MessageSquare, Search, Star } from "lucide-react";
+import { BookOpen, Calendar, ChevronLeft, ChevronRight, Loader2, MapPin, MessageSquare, Search, Star, DollarSign } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Textarea } from "@/components/ui/textarea";
@@ -21,6 +20,7 @@ import { getAuth, onAuthStateChanged, type User } from "firebase/auth";
 import withAuth from "@/components/with-auth";
 import { Skeleton } from "@/components/ui/skeleton";
 import { type Booking } from "@/app/admin/page";
+import { Separator } from "@/components/ui/separator";
 
 
 type Mode = "Online" | "In-person";
@@ -74,6 +74,7 @@ function TutorsDashboardPage() {
 
     const [isBookingDialogOpen, setIsBookingDialogOpen] = React.useState(false);
     const [isMessageDialogOpen, setIsMessageDialogOpen] = React.useState(false);
+    const [bookingConfirmation, setBookingConfirmation] = React.useState(false);
 
     const [currentPage, setCurrentPage] = React.useState(1);
     const tutorsPerPage = 6;
@@ -191,6 +192,7 @@ function TutorsDashboardPage() {
 
             toast({ title: 'Booking Request Sent!', description: `Your request for a session with ${selectedTutor.name} has been sent.` });
             setIsBookingDialogOpen(false);
+            setBookingConfirmation(false);
             setSelectedTutor(null);
             setSelectedTimeSlot(null);
         } catch (error) {
@@ -242,6 +244,9 @@ function TutorsDashboardPage() {
         date.setDate(date.getDate() + i);
         return date;
     });
+
+    const parsedDate = selectedTimeSlot ? new Date(selectedTimeSlot.split('|')[0]).toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' }) : '';
+    const parsedTime = selectedTimeSlot ? selectedTimeSlot.split('|')[1] : '';
 
     return (
         <div className="space-y-6">
@@ -357,61 +362,100 @@ function TutorsDashboardPage() {
                 )}
             </Card>
 
-             <Dialog open={isBookingDialogOpen} onOpenChange={setIsBookingDialogOpen}>
-                <DialogContent className="sm:max-w-md">
+             <Dialog open={isBookingDialogOpen} onOpenChange={(open) => {
+                setIsBookingDialogOpen(open);
+                if (!open) {
+                    setBookingConfirmation(false);
+                    setSelectedTimeSlot(null);
+                }
+             }}>
+                <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Book a Session with {selectedTutor?.name}</DialogTitle>
-                        <DialogDescription>Select a subject and an available time slot.</DialogDescription>
+                        <DialogTitle>{!bookingConfirmation ? 'Book a Session' : 'Confirm Your Booking'}</DialogTitle>
+                        <DialogDescription>
+                             {!bookingConfirmation
+                                ? `Select a subject and available time with ${selectedTutor?.name}.`
+                                : 'Please review the details below before confirming.'}
+                        </DialogDescription>
                     </DialogHeader>
-                    <div className="py-4 grid grid-cols-1 gap-6">
-                        <div className="space-y-2">
-                            <Label>Subject</Label>
-                            <Select value={bookingSubject} onValueChange={setBookingSubject}>
-                                <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
-                                <SelectContent>
-                                    {selectedTutor?.subjects.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <h3 className="font-semibold text-sm mb-2">Select a Time</h3>
-                            {selectedTutor?.availability ? (
-                            <RadioGroup onValueChange={setSelectedTimeSlot} className="max-h-60 overflow-y-auto pr-2">
-                                <div className="space-y-4">
-                                {upcomingDates.map(date => {
-                                    const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
-                                    const tutorDayAvailability = selectedTutor.availability.find(d => d.day === dayOfWeek);
-                                    if (!tutorDayAvailability || tutorDayAvailability.slots.length === 0) return null;
-                                    
-                                    const formattedDate = date.toISOString().split('T')[0];
+                    {!bookingConfirmation ? (
+                        <div className="py-4 grid grid-cols-1 gap-6">
+                            <div className="space-y-2">
+                                <Label>Subject</Label>
+                                <Select value={bookingSubject} onValueChange={setBookingSubject}>
+                                    <SelectTrigger><SelectValue placeholder="Select subject" /></SelectTrigger>
+                                    <SelectContent>
+                                        {selectedTutor?.subjects.map(s => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                                    </SelectContent>
+                                </Select>
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-sm mb-2">Select a Time</h3>
+                                {selectedTutor?.availability ? (
+                                <RadioGroup onValueChange={setSelectedTimeSlot} className="max-h-60 overflow-y-auto pr-2">
+                                    <div className="space-y-4">
+                                    {upcomingDates.map(date => {
+                                        const dayOfWeek = date.toLocaleDateString('en-US', { weekday: 'long' });
+                                        const tutorDayAvailability = selectedTutor.availability.find(d => d.day === dayOfWeek);
+                                        if (!tutorDayAvailability || tutorDayAvailability.slots.length === 0) return null;
+                                        
+                                        const formattedDate = date.toISOString().split('T')[0];
 
-                                    return (
-                                        <div key={formattedDate}>
-                                            <h4 className="font-medium text-sm mb-2">{date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</h4>
-                                            <div className="grid grid-cols-2 gap-2">
-                                                {tutorDayAvailability.slots.map(slot => {
-                                                    const isBooked = confirmedBookings.some(b => b.date === formattedDate && b.time.startsWith(slot.split(' - ')[0]));
-                                                    return (
-                                                        <Label key={`${formattedDate}-${slot}`} className={`flex items-center justify-center rounded-md border-2 p-2 font-normal ${isBooked ? 'cursor-not-allowed bg-muted/50 text-muted-foreground' : 'cursor-pointer border-muted bg-popover hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary'}`}>
-                                                            <RadioGroupItem value={`${formattedDate}|${slot}`} id={`${formattedDate}-${slot}`} className="sr-only" disabled={isBooked}/>
-                                                            {slot}
-                                                        </Label>
-                                                    )
-                                                })}
+                                        return (
+                                            <div key={formattedDate}>
+                                                <h4 className="font-medium text-sm mb-2">{date.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</h4>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {tutorDayAvailability.slots.map(slot => {
+                                                        const isBooked = confirmedBookings.some(b => b.date === formattedDate && b.time.startsWith(slot.split(' - ')[0]));
+                                                        return (
+                                                            <Label key={`${formattedDate}-${slot}`} className={`flex items-center justify-center rounded-md border-2 p-2 font-normal text-sm ${isBooked ? 'cursor-not-allowed bg-muted/50 text-muted-foreground' : 'cursor-pointer border-muted bg-popover hover:bg-accent hover:text-accent-foreground has-[:checked]:border-primary'}`}>
+                                                                <RadioGroupItem value={`${formattedDate}|${slot}`} id={`${formattedDate}-${slot}`} className="sr-only" disabled={isBooked}/>
+                                                                {slot}
+                                                            </Label>
+                                                        )
+                                                    })}
+                                                </div>
                                             </div>
-                                        </div>
-                                    )
-                                })}
-                                </div>
-                            </RadioGroup>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">This tutor has not set their availability yet.</p>
-                            )}
+                                        )
+                                    })}
+                                    </div>
+                                </RadioGroup>
+                                ) : (
+                                    <p className="text-sm text-muted-foreground">This tutor has not set their availability yet.</p>
+                                )}
+                            </div>
                         </div>
-                    </div>
+                    ) : (
+                         <div className="py-4 space-y-4">
+                            <h3 className="font-semibold text-lg">Booking Summary</h3>
+                            <div className="p-4 rounded-lg border bg-muted/50 space-y-3">
+                                <div className="flex justify-between"><span className="text-muted-foreground">Tutor:</span> <span className="font-semibold">{selectedTutor?.name}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Subject:</span> <span className="font-semibold">{bookingSubject}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Date:</span> <span className="font-semibold">{parsedDate}</span></div>
+                                <div className="flex justify-between"><span className="text-muted-foreground">Time:</span> <span className="font-semibold">{parsedTime}</span></div>
+                                <Separator />
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground">Session Price:</span> 
+                                    <span className="font-bold text-lg text-primary">R{selectedTutor?.hourlyRate.toFixed(2)}</span>
+                                </div>
+                            </div>
+                            <p className="text-xs text-muted-foreground">You will be charged after the session is marked as complete by the tutor.</p>
+                        </div>
+                    )}
                     <DialogFooter>
-                        <Button variant="ghost" onClick={() => setIsBookingDialogOpen(false)}>Cancel</Button>
-                        <Button onClick={confirmBooking} disabled={!selectedTimeSlot}>Request Booking</Button>
+                        {!bookingConfirmation ? (
+                            <>
+                                <Button variant="ghost" onClick={() => setIsBookingDialogOpen(false)}>Cancel</Button>
+                                <Button onClick={() => setBookingConfirmation(true)} disabled={!selectedTimeSlot}>
+                                    Proceed
+                                </Button>
+                            </>
+                        ) : (
+                            <>
+                                <Button variant="ghost" onClick={() => setBookingConfirmation(false)}>Back</Button>
+                                <Button onClick={confirmBooking}>Confirm & Request</Button>
+                            </>
+                        )}
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
@@ -441,5 +485,3 @@ function TutorsDashboardPage() {
 }
 
 export default withAuth(TutorsDashboardPage, ['student']);
-
-    
