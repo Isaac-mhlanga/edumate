@@ -32,6 +32,8 @@ import { TutorCalendarTab } from "@/components/tutor/calendar-tab";
 import { CalendarDialogs } from "@/components/tutor/calendar-dialogs";
 import { TutorEarningsTab } from "@/components/tutor/earnings-tab";
 import { PayoutDialog } from "@/components/tutor/payout-dialog";
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogFooter, DialogContent } from "@/components/ui/dialog";
+
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -59,6 +61,7 @@ export type CalendarEvent = {
   module?: string;
   scope?: string;
   platforms?: string[];
+  meetingLink?: string;
 };
 
 type Booking = {
@@ -73,6 +76,7 @@ type Booking = {
     status: 'Confirmed' | 'Completed' | 'Pending Confirmation' | 'Declined';
     createdAt: Timestamp;
     price?: number;
+    meetingLink?: string;
 };
 
 type Mode = "Online" | "In-person";
@@ -134,6 +138,11 @@ function TutorPage() {
     
     // Payout state
     const [isPayoutDialogOpen, setIsPayoutDialogOpen] = useState(false);
+    
+    // Confirmation Dialog State
+    const [isConfirming, setIsConfirming] = useState(false);
+    const [bookingToConfirm, setBookingToConfirm] = useState<Booking | null>(null);
+    const [meetingLink, setMeetingLink] = useState('');
 
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
@@ -381,61 +390,78 @@ function TutorPage() {
         handleProfileChange('varsityModules', newModules);
     };
 
-    const handleBookingAction = async (booking: Booking, newStatus: 'Confirmed' | 'Declined' | 'Completed') => {
-        const originalStatus = booking.status;
-        setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: newStatus } : b));
-
+    const handleConfirmBooking = async (booking: Booking, link: string) => {
         const firestore = getFirestore();
         const bookingRef = doc(firestore, 'bookings', booking.id);
         
         try {
-            await updateDoc(bookingRef, { status: newStatus });
+            await updateDoc(bookingRef, { status: 'Confirmed', meetingLink: link });
             
-            if (newStatus === 'Confirmed') {
-                const startTime = booking.time.split(' - ')[0];
-                const endTime = booking.time.split(' - ')[1];
+            const startTime = booking.time.split(' - ')[0];
+            const endTime = booking.time.split(' - ')[1];
+            const startDateTime = new Date(`${booking.date}T${startTime}:00`);
+            const endDateTime = new Date(`${booking.date}T${endTime}:00`);
+            
+            const eventData = {
+                title: `Tutoring: ${booking.subject} with ${booking.studentName}`,
+                start: startDateTime.toISOString(),
+                end: endDateTime.toISOString(),
+                allDay: false,
+                tutorId: booking.tutorId,
+                studentId: booking.studentId,
+                bookingId: booking.id,
+                instructor: booking.tutorName,
+                description: `Online tutoring session for ${booking.subject}.`,
+                platforms: ["zoom"],
+                meetingLink: link,
+            };
 
-                const startDateTime = new Date(`${booking.date}T${startTime}:00`);
-                const endDateTime = new Date(`${booking.date}T${endTime}:00`);
-                
-                const eventData = {
-                    title: `Tutoring: ${booking.subject} with ${booking.studentName}`,
-                    start: startDateTime.toISOString(),
-                    end: endDateTime.toISOString(),
-                    allDay: false,
-                    tutorId: booking.tutorId,
-                    studentId: booking.studentId,
-                    bookingId: booking.id,
-                    instructor: booking.tutorName, // Keep 'instructor' for calendar display consistency
-                    description: `Online tutoring session for ${booking.subject}.`,
-                    platforms: ["zoom"] 
-                };
-
-                await addDoc(collection(firestore, 'events'), eventData);
-                toast({ title: 'Booking Confirmed!', description: 'The session has been added to your calendar.' });
-            } else if (newStatus === 'Completed') {
-                // Create a transaction when a session is completed
-                 await addDoc(collection(firestore, 'transactions'), {
-                    studentId: booking.studentId,
-                    tutorId: booking.tutorId,
-                    itemId: booking.id,
-                    itemType: 'Tutoring Session',
-                    itemTitle: `Session with ${booking.studentName}`,
-                    amount: booking.price || 0,
-                    status: 'Completed',
-                    currency: 'ZAR',
-                    createdAt: serverTimestamp(),
-                    notes: `Completed session on ${booking.date}`
-                });
-                toast({ title: 'Session Completed!', description: 'Earnings for this session have been recorded.' });
-            } else {
-                toast({ title: 'Booking Declined' });
-            }
-
+            await addDoc(collection(firestore, 'events'), eventData);
+            toast({ title: 'Booking Confirmed!', description: 'The session has been added to your calendar.' });
         } catch (error) {
-            console.error("Error updating booking:", error);
-            setBookings(prev => prev.map(b => b.id === booking.id ? { ...b, status: originalStatus } : b));
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not update the booking status.' });
+            console.error("Error confirming booking:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not confirm the booking.' });
+        } finally {
+            setIsConfirming(false);
+            setBookingToConfirm(null);
+            setMeetingLink('');
+        }
+    };
+    
+    const handleDeclineBooking = async (booking: Booking) => {
+        const firestore = getFirestore();
+        const bookingRef = doc(firestore, 'bookings', booking.id);
+        try {
+            await updateDoc(bookingRef, { status: 'Declined' });
+            toast({ title: 'Booking Declined' });
+        } catch (error) {
+            console.error("Error declining booking:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not decline the booking.' });
+        }
+    };
+    
+    const handleCompleteBooking = async (booking: Booking) => {
+        const firestore = getFirestore();
+        const bookingRef = doc(firestore, 'bookings', booking.id);
+        try {
+            await updateDoc(bookingRef, { status: 'Completed' });
+
+            await addDoc(collection(firestore, 'transactions'), {
+                studentId: booking.studentId,
+                tutorId: booking.tutorId,
+                itemId: booking.id,
+                itemType: 'Tutoring Session',
+                itemTitle: `Session with ${booking.tutorName}`,
+                amount: booking.price || 0,
+                status: 'Completed',
+                currency: 'ZAR',
+                createdAt: serverTimestamp(),
+                notes: `Completed session on ${booking.date}`
+            });
+            toast({ title: 'Session Completed!', description: 'Earnings for this session have been recorded.' });
+        } catch (error) {
+            console.error("Error completing booking:", error);
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not mark the session as complete.' });
         }
     };
 
@@ -537,6 +563,7 @@ function TutorPage() {
             scope: extendedProps.scope,
             platforms: extendedProps.platforms,
             color: event.backgroundColor,
+            meetingLink: extendedProps.meetingLink,
         });
         setIsDetailDialogOpen(true);
     };
@@ -998,11 +1025,11 @@ function TutorPage() {
                                         <TableCell className="text-right">
                                             {booking.status === 'Pending Confirmation' ? (
                                                 <div className="flex gap-2 justify-end">
-                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-500/50 hover:bg-red-50" onClick={() => handleBookingAction(booking, 'Declined')}><XCircle className="h-4 w-4" /></Button>
-                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => handleBookingAction(booking, 'Confirmed')}><CheckCircle className="h-4 w-4" /></Button>
+                                                    <Button size="sm" variant="outline" className="text-red-600 border-red-500/50 hover:bg-red-50" onClick={() => handleDeclineBooking(booking)}><XCircle className="h-4 w-4" /></Button>
+                                                    <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => { setBookingToConfirm(booking); setIsConfirming(true); }}><CheckCircle className="h-4 w-4" /></Button>
                                                 </div>
                                             ) : booking.status === 'Confirmed' ? (
-                                                <Button size="sm" variant="outline" onClick={() => handleBookingAction(booking, 'Completed')}>Mark Completed</Button>
+                                                <Button size="sm" variant="outline" onClick={() => handleCompleteBooking(booking)}>Mark Completed</Button>
                                             ) : (
                                                 <span className="text-sm text-muted-foreground">No actions</span>
                                             )}
@@ -1121,6 +1148,27 @@ function TutorPage() {
                 onPayoutRequest={handlePayoutRequest}
                 availableForPayout={transactions.reduce((acc, t) => t.itemType === 'Tutoring Session' && t.status === 'Completed' ? acc + t.amount : acc, 0)}
             />
+            <Dialog open={isConfirming} onOpenChange={setIsConfirming}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Confirm Booking & Add Link</DialogTitle>
+                        <DialogDescription>Please provide the meeting link for this session.</DialogDescription>
+                    </DialogHeader>
+                    <div className="py-4 space-y-2">
+                        <Label htmlFor="meeting-link">Meeting Link</Label>
+                        <Input 
+                            id="meeting-link" 
+                            placeholder="https://zoom.us/j/..." 
+                            value={meetingLink}
+                            onChange={(e) => setMeetingLink(e.target.value)}
+                        />
+                    </div>
+                    <DialogFooter>
+                        <Button variant="ghost" onClick={() => setIsConfirming(false)}>Cancel</Button>
+                        <Button onClick={() => handleConfirmBooking(bookingToConfirm!, meetingLink)}>Confirm</Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

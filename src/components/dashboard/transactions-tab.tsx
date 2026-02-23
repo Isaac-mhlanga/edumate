@@ -9,16 +9,17 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Search, ListFilter, ChevronLeft, ChevronRight, MoreVertical, ReceiptText, Undo2, GraduationCap, Banknote } from "lucide-react";
+import { Search, ListFilter, ChevronLeft, ChevronRight, MoreVertical, ReceiptText, Undo2, GraduationCap, Banknote, FilePenLine } from "lucide-react";
 import { type Transaction } from '@/app/dashboard/page';
 
 interface TransactionsTabProps {
     transactions: Transaction[];
     loadingTransactions: boolean;
     onRefundRequest: (transaction: Transaction) => void;
+    onViewReceipt: (transaction: Transaction) => void;
 }
 
-export function TransactionsTab({ transactions, loadingTransactions, onRefundRequest }: TransactionsTabProps) {
+export function TransactionsTab({ transactions, loadingTransactions, onRefundRequest, onViewReceipt }: TransactionsTabProps) {
     const [transactionFilters, setTransactionFilters] = React.useState({ search: '', type: 'All' });
     const [currentTransactionPage, setCurrentTransactionPage] = React.useState(1);
     const transactionsPerPage = 5;
@@ -73,6 +74,7 @@ export function TransactionsTab({ transactions, loadingTransactions, onRefundReq
                             <DropdownMenuRadioItem value="course">Course</DropdownMenuRadioItem>
                             <DropdownMenuRadioItem value="assignment">Assignment</DropdownMenuRadioItem>
                             <DropdownMenuRadioItem value="subscription">Subscription</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="Tutoring Session">Tutoring Session</DropdownMenuRadioItem>
                         </DropdownMenuRadioGroup>
                     </DropdownMenuContent>
                 </DropdownMenu>
@@ -105,7 +107,7 @@ export function TransactionsTab({ transactions, loadingTransactions, onRefundReq
                                 <TableCell className="hidden sm:table-cell">
                                     <Badge variant="outline" className="gap-1.5 capitalize">
                                         {transaction.itemType === 'course' && <GraduationCap className="h-3 w-3" />}
-                                        {transaction.itemType === 'assignment' && <ReceiptText className="h-3 w-3" />}
+                                        {transaction.itemType === 'assignment' && <FilePenLine className="h-3 w-3" />}
                                         {transaction.itemType === 'subscription' && <Banknote className="h-3 w-3" />}
                                         {transaction.itemType}
                                     </Badge>
@@ -115,21 +117,24 @@ export function TransactionsTab({ transactions, loadingTransactions, onRefundReq
                                     R {transaction.amount.toFixed(2)}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    {transaction.status !== 'Refunded' && transaction.amount > 0 && (
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <ReceiptText className="mr-2 h-4 w-4"/>View Receipt
-                                                </DropdownMenuItem>
-                                                <DropdownMenuItem onClick={() => onRefundRequest(transaction)} className="text-destructive focus:text-destructive">
-                                                    <Undo2 className="mr-2 h-4 w-4"/>Request Refund
-                                                </DropdownMenuItem>
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    )}
+                                    <DropdownMenu>
+                                        <DropdownMenuTrigger asChild>
+                                            <Button variant="ghost" size="icon"><MoreVertical className="h-4 w-4"/></Button>
+                                        </DropdownMenuTrigger>
+                                        <DropdownMenuContent align="end">
+                                            <DropdownMenuItem onClick={() => onViewReceipt(transaction)}>
+                                                <ReceiptText className="mr-2 h-4 w-4"/>View Receipt
+                                            </DropdownMenuItem>
+                                            {transaction.status !== 'Refunded' && transaction.amount > 0 && (
+                                                <>
+                                                    <DropdownMenuSeparator />
+                                                    <DropdownMenuItem onClick={() => onRefundRequest(transaction)} className="text-destructive focus:text-destructive">
+                                                        <Undo2 className="mr-2 h-4 w-4"/>Request Refund
+                                                    </DropdownMenuItem>
+                                                </>
+                                            )}
+                                        </DropdownMenuContent>
+                                    </DropdownMenu>
                                 </TableCell>
                             </TableRow>
                         ))

@@ -20,6 +20,7 @@ import { AssignmentDialog } from "@/components/dashboard/assignment-dialog";
 import { RefundDialog } from "@/components/dashboard/refund-dialog";
 import { StudentCalendarTab } from "@/components/dashboard/calendar-tab";
 import { BookingsTab } from "@/components/dashboard/bookings-tab";
+import { TransactionReceiptDialog } from "@/components/admin/transaction-action-dialogs";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -112,6 +113,7 @@ function DashboardPage() {
     const [loadingBookings, setLoadingBookings] = React.useState(true);
     
     const [isRefundDialogOpen, setIsRefundDialogOpen] = React.useState(false);
+    const [isTransactionReceiptDialogOpen, setIsTransactionReceiptDialogOpen] = React.useState(false);
     const [selectedTransaction, setSelectedTransaction] = React.useState<Transaction | null>(null);
     const [isAssignmentDialogOpen, setIsAssignmentDialogOpen] = React.useState(false);
     const [selectedAssignment, setSelectedAssignment] = React.useState<SubmittedAssignment | null>(null);
@@ -265,6 +267,11 @@ function DashboardPage() {
         setIsRefundDialogOpen(true);
     };
 
+    const handleViewReceipt = (transaction: Transaction) => {
+        setSelectedTransaction(transaction);
+        setIsTransactionReceiptDialogOpen(true);
+    };
+
     const confirmRefundRequest = () => {
         if (!selectedTransaction) return;
         toast({
@@ -323,6 +330,7 @@ function DashboardPage() {
                     transactions={transactions} 
                     loadingTransactions={loadingTransactions}
                     onRefundRequest={handleRefundRequest}
+                    onViewReceipt={handleViewReceipt}
                 />
             )}
             
@@ -347,6 +355,12 @@ function DashboardPage() {
                 selectedTransaction={selectedTransaction}
                 onConfirm={confirmRefundRequest}
             />
+            
+            <TransactionReceiptDialog
+                isOpen={isTransactionReceiptDialogOpen}
+                setIsOpen={setIsTransactionReceiptDialogOpen}
+                selectedTransaction={selectedTransaction as any}
+            />
         </div>
     );
 }
@@ -357,4 +371,5 @@ export default withAuth(DashboardPage, ['student']);
     
 
     
+
 
