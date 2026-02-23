@@ -185,7 +185,8 @@ function TutorsDashboardPage() {
                 date: date,
                 time: time,
                 status: 'Pending Confirmation',
-                createdAt: serverTimestamp()
+                createdAt: serverTimestamp(),
+                price: selectedTutor.hourlyRate
             });
 
             toast({ title: 'Booking Request Sent!', description: `Your request for a session with ${selectedTutor.name} has been sent.` });

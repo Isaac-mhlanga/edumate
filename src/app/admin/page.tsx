@@ -103,6 +103,7 @@ export type Booking = {
     subject: string;
     status: 'Confirmed' | 'Completed' | 'Pending Confirmation' | 'Declined';
     createdAt: Timestamp;
+    price?: number;
 };
 
 

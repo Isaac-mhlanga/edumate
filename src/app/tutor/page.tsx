@@ -30,6 +30,8 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuRadio
 import { EnquiriesPage } from "@/components/enquiries-page";
 import { TutorCalendarTab } from "@/components/tutor/calendar-tab";
 import { CalendarDialogs } from "@/components/tutor/calendar-dialogs";
+import { TutorEarningsTab } from "@/components/tutor/earnings-tab";
+import { PayoutDialog } from "@/components/tutor/payout-dialog";
 
 const firebaseConfig = {
     apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -70,6 +72,7 @@ type Booking = {
     subject: string;
     status: 'Confirmed' | 'Completed' | 'Pending Confirmation' | 'Declined';
     createdAt: Timestamp;
+    price?: number;
 };
 
 type Mode = "Online" | "In-person";
@@ -129,6 +132,9 @@ function TutorPage() {
     const [selectedEvent, setSelectedEvent] = useState<CalendarEvent | null>(null);
     const [manualEvent, setManualEvent] = useState<Partial<CalendarEvent>>({});
     
+    // Payout state
+    const [isPayoutDialogOpen, setIsPayoutDialogOpen] = useState(false);
+
     useEffect(() => {
         const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
         const auth = getAuth(app);
@@ -567,6 +573,37 @@ function TutorPage() {
             toast({ variant: 'destructive', title: 'Error', description: 'Could not save the event.' });
         }
     };
+    
+    const handlePayoutRequest = async (amount: number, bankDetails: any) => {
+        if (!user || amount <= 0) {
+            toast({ variant: 'destructive', title: 'Invalid Amount', description: 'Payout amount must be greater than zero.'});
+            return;
+        }
+        if (!bankDetails.bankName || !bankDetails.accountHolder || !bankDetails.accountNumber || !bankDetails.branchCode) {
+            toast({ variant: 'destructive', title: 'Bank Details Incomplete', description: 'Please fill out all bank details.'});
+            return;
+        }
+
+        const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
+        const firestore = getFirestore(app);
+
+        try {
+            await addDoc(collection(firestore, 'payouts'), {
+                userId: user.uid,
+                userName: user.displayName,
+                amount: amount,
+                status: 'Pending',
+                type: 'Tutor',
+                bankDetails,
+                requestedAt: serverTimestamp()
+            });
+            toast({ title: "Payout Requested", description: `Your request to withdraw R ${amount.toFixed(2)} has been submitted.` });
+            setIsPayoutDialogOpen(false);
+        } catch (error) {
+            console.error("Error requesting payout: ", error);
+            toast({ variant: 'destructive', title: 'Request Failed', description: 'Could not submit your payout request.' });
+        }
+  };
 
 
     if (loading) {
@@ -1060,6 +1097,14 @@ function TutorPage() {
                     onEventClick={handleEventClick}
                 />
             )}
+            {currentTab === 'earnings' && (
+                <TutorEarningsTab
+                    transactions={transactions}
+                    loading={loading}
+                    onTransactionAction={() => {}}
+                    onPayoutRequest={() => setIsPayoutDialogOpen(true)}
+                />
+            )}
             <CalendarDialogs
                 isManualDialogOpen={isManualDialogOpen}
                 setIsManualDialogOpen={setIsManualDialogOpen}
@@ -1069,6 +1114,12 @@ function TutorPage() {
                 manualEvent={manualEvent}
                 setManualEvent={setManualEvent}
                 onManualCreate={handleAddOrUpdateEvent}
+            />
+            <PayoutDialog
+                isOpen={isPayoutDialogOpen}
+                setIsOpen={setIsPayoutDialogOpen}
+                onPayoutRequest={handlePayoutRequest}
+                availableForPayout={transactions.reduce((acc, t) => t.itemType === 'Tutoring Session' && t.status === 'Completed' ? acc + t.amount : acc, 0)}
             />
         </div>
     );
