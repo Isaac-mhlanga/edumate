@@ -67,7 +67,7 @@ export type Transaction = {
     itemId: string;
     itemTitle: string;
     type: string;
-    itemType: 'course' | 'assignment' | 'subscription';
+    itemType: 'course' | 'assignment' | 'subscription' | 'Tutoring Session';
     status: 'Completed' | 'Refunded';
     amount: number;
     createdAt: Timestamp;
@@ -310,5 +310,7 @@ function DashboardPage() {
 
 export default withAuth(DashboardPage, ['student']);
 
+
+    
 
     

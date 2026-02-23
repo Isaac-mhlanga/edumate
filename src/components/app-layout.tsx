@@ -164,6 +164,7 @@ const tutorMenuItems: MenuItem[] = [
   { href: '/tutor?tab=profile', label: 'Profile', icon: UserCircle, basePath: '/tutor', tab: 'profile' },
   { href: '/tutor?tab=bookings', label: 'Bookings', icon: Calendar, basePath: '/tutor', tab: 'bookings' },
   { href: '/tutor?tab=messages', label: 'Messages', icon: MessageSquare, basePath: '/tutor', tab: 'messages' },
+  { href: '/tutor?tab=earnings', label: 'Earnings', icon: Banknote, basePath: '/tutor', tab: 'earnings' },
   { href: '/tutor?tab=enquiries', label: 'Enquiries', icon: HelpCircle, basePath: '/tutor', tab: 'enquiries' },
 ];
 
@@ -360,3 +361,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
     </SidebarProvider>
   );
 }
+
+    
