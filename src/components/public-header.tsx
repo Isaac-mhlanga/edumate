@@ -6,7 +6,15 @@ import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { Menu } from 'lucide-react';
-import { Sheet, SheetContent, SheetTrigger, SheetClose } from '@/components/ui/sheet';
+import {
+  Sheet,
+  SheetContent,
+  SheetTrigger,
+  SheetClose,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { PromotionBanner } from './promotion-banner';
@@ -66,6 +74,12 @@ export const PublicHeader = () => {
                   </Button>
                 </SheetTrigger>
                 <SheetContent side="right" className="w-[300px] sm:w-[400px]">
+                   <SheetHeader className="sr-only">
+                    <SheetTitle>Menu</SheetTitle>
+                    <SheetDescription>
+                      Main navigation for the website.
+                    </SheetDescription>
+                  </SheetHeader>
                   <nav className="flex flex-col h-full">
                     <div className="flex items-center justify-between border-b pb-4">
                        <Link href="/" className="flex items-center gap-2">
